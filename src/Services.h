@@ -28,8 +28,8 @@
 #include "RefinementInputSurfaceRegion.h"
 #include "RefinementAllRegion.h"
 #include "MeshPoint.h"
-#include "Octant.h"
-#include "OctreeEdge.h"
+#include "Quadrant.h"
+#include "QuadEdge.h"
 #include "Visitors/EdgeVisitor.h"
 #include <stdlib.h>
 #include <iostream>
@@ -40,8 +40,8 @@
 using Clobscode::Point3D;
 using Clobscode::TriMesh;
 using Clobscode::MeshPoint;
-using Clobscode::Octant;
-using Clobscode::OctreeEdge;
+using Clobscode::Quadrant;
+using Clobscode::QuadEdge;
 using std::vector;
 using std::string;
 using std::set;
@@ -314,7 +314,7 @@ namespace Clobscode
         
         //-------------------------------------------------------------------
         //-------------------------------------------------------------------
-        static bool ReadOctantList(std::string name, list<unsigned int> &olist,
+        static bool ReadQuadrantList(std::string name, list<unsigned int> &olist,
                                    vector<unsigned int> &ele_oct_ref) {
             FILE *file = fopen(name.c_str(),"r");
             int idx = 0;
@@ -350,8 +350,8 @@ namespace Clobscode
         //-------------------------------------------------------------------
         //-------------------------------------------------------------------
         static bool ReadOctreeMesh(std::string name, vector<MeshPoint> &points,
-                                   vector<Octant> &octants,
-                                   set<OctreeEdge> &edges,
+                                   vector<Quadrant> &Quadrants,
+                                   set<QuadEdge> &edges,
                                    vector<unsigned int> &ele_oct_ref,
                                    GeometricTransform &gt,
                                    unsigned short &minrl,
@@ -394,13 +394,13 @@ namespace Clobscode
                 std::fscanf(file,"%i",&e1);
                 std::fscanf(file,"%i",&e2);
                 std::fscanf(file,"%i",&e3);
-                OctreeEdge oe(e1,e2);
+                QuadEdge oe(e1,e2);
                 unsigned int mid = (unsigned int)e3;
                 oe.setMidPoint(mid);
                 edges.insert(oe);
             }
             
-            //read the element octant link
+            //read the element Quadrant link
             ele_oct_ref.reserve(nl);
             unsigned int checksum = 0;
             for (unsigned int i=0; i<no; i++) {
@@ -410,9 +410,9 @@ namespace Clobscode
                 }
             }
             
-            //read the octants, its refinement level and
+            //read the Quadrants, its refinement level and
             //the input faces intersected by it.
-            octants.reserve(no);
+            Quadrants.reserve(no);
             int nop = 0, nof = 0, orl = 0, ni=0;
             
             minrl = 100;
@@ -428,8 +428,8 @@ namespace Clobscode
                 
                 if (nop!=8) {
                     cerr << "warning at Services::ReadOctreeMesh\n";
-                    cerr << "         Octant hasn't 8 nodes: " << nop << "\n";
-                    cout << "octant index " << i << "\n";
+                    cerr << "         Quadrant hasn't 8 nodes: " << nop << "\n";
+                    cout << "Quadrant index " << i << "\n";
                     continue;
                 }
                 
@@ -443,9 +443,9 @@ namespace Clobscode
                     std::fscanf(file,"%i",&ni);
                     ofcs.push_back(ni);
                 }
-                Octant octant (opts,orl);
-                octant.setIntersectedFaces(ofcs);
-                octants.push_back(octant);
+                Quadrant Quadrant (opts,orl);
+                Quadrant.setIntersectedFaces(ofcs);
+                Quadrants.push_back(Quadrant);
                 
                 if (orl<minrl) {
                     minrl = short(orl);
@@ -489,20 +489,20 @@ namespace Clobscode
         //-------------------------------------------------------------------
         //-------------------------------------------------------------------
         static bool WriteOctreeMesh(std::string name, vector<MeshPoint> &points,
-                                    vector<Octant> &octants,
-                                    set<OctreeEdge> &edges,
+                                    vector<Quadrant> &Quadrants,
+                                    set<QuadEdge> &edges,
                                     const unsigned int &nels,
                                     GeometricTransform &gt){
             
-            OctreeEdge oe;
-            set<OctreeEdge>::iterator my_edge;
+            QuadEdge oe;
+            set<QuadEdge>::iterator my_edge;
             
             string vol_name = name+".oct";
             
             //write the volume mesh
             FILE *f = fopen(vol_name.c_str(),"wt");
             unsigned int np = points.size();
-            unsigned int no = octants.size();
+            unsigned int no = Quadrants.size();
             unsigned int ne = edges.size();
             
             fprintf(f,"%u %u %u %u\n\n", np, ne, no, nels);
@@ -516,27 +516,27 @@ namespace Clobscode
             
             //write edeges
             for(my_edge=edges.begin();my_edge!=edges.end();my_edge++){
-                OctreeEdge me = *my_edge;
+                QuadEdge me = *my_edge;
                 fprintf(f,"%i %i %i\n",me[0],me[1],me[2]);
             }
             fprintf(f,"\n");
             
-            //pair sub-elements with octant index.
-            //this info is printed per octant and the elements are
+            //pair sub-elements with Quadrant index.
+            //this info is printed per Quadrant and the elements are
             //printed in order in the mesh file so we can compute
-            //for each element to which octant it belongs.
-            for (unsigned int i=0; i<octants.size(); i++) {
-                unsigned int nse = octants[i].getSubElements().size();
+            //for each element to which Quadrant it belongs.
+            for (unsigned int i=0; i<Quadrants.size(); i++) {
+                unsigned int nse = Quadrants[i].getSubElements().size();
                 fprintf(f,"%u ",nse);
             }
             fprintf(f,"\n\n");
             
-            for (unsigned int i=0; i<octants.size(); i++) {
-                vector<unsigned int> opts = octants[i].getPoints();
+            for (unsigned int i=0; i<Quadrants.size(); i++) {
+                vector<unsigned int> opts = Quadrants[i].getPoints();
                 unsigned int nopts = opts.size();
                 if (nopts<8) {
                     cerr << "warning at Services::WriteOctreeMesh\n";
-                    cerr << "        Octant has less than 8 nodes\n";
+                    cerr << "        Quadrant has less than 8 nodes\n";
                     fprintf(f,"%u ",nopts);
                 }
                 else {
@@ -546,8 +546,8 @@ namespace Clobscode
                 for (unsigned int j=0; j<nopts; j++) {
                     fprintf(f,"%u ",opts[j]);
                 }
-                fprintf(f,"%u\n",octants[i].getRefinementLevel());
-                list<unsigned int> ofcs = octants[i].getIntersectedFaces();
+                fprintf(f,"%u\n",Quadrants[i].getRefinementLevel());
+                list<unsigned int> ofcs = Quadrants[i].getIntersectedFaces();
                 list<unsigned int>::iterator fiter;
                 nopts = ofcs.size();
                 fprintf(f,"%u",nopts);

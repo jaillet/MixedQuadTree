@@ -18,7 +18,7 @@
  */
 
 #include "PointMovedVisitor.h"
-#include "../Octant.h"
+#include "../Quadrant.h"
 
 namespace Clobscode
 {
@@ -35,7 +35,7 @@ namespace Clobscode
     }
 
 
-    void PointMovedVisitor::setEdges(const set<OctreeEdge> &edges) {
+    void PointMovedVisitor::setEdges(const set<QuadEdge> &edges) {
         this->edges = &edges;
     }
 
@@ -43,14 +43,14 @@ namespace Clobscode
         this->max_ref_level = &max_ref_level;
     }
 
-    bool PointMovedVisitor::visit(Octant *o) {
+    bool PointMovedVisitor::visit(Quadrant *o) {
         unsigned short ref_level = o->ref_level;
         vector<unsigned int> pointindex = o->pointindex;
 
-        //when the octant has at least one point that has been
+        //when the Quadrant has at least one point that has been
         //projected into the input surface, the transition
         //patterns may cause some topology and quality problems.
-        //For these reasons, an octant under these conditions
+        //For these reasons, an Quadrant under these conditions
         //should be refined one more level.
 
         if (*max_ref_level==ref_level) {
@@ -69,13 +69,13 @@ namespace Clobscode
         //check if any of the mid edge nodes been moved.
         EdgeVisitor ev;
         for (unsigned int i=0; i<12; i++) {
-            OctreeEdge ee;
+            QuadEdge ee;
             ev.getEdge(o,i,ee);
-            set<OctreeEdge>::iterator my_edge = edges->find(ee);
+            set<QuadEdge>::iterator my_edge = edges->find(ee);
             //if the edge doesn't exist return false,
             //but this should be considered as an error.
             if (my_edge==edges->end()) {
-                cout << "Octant::isOneIrregular wtf!!!\n";
+                cout << "Quadrant::isOneIrregular wtf!!!\n";
                 cout.flush();
                 return false;
             }
@@ -97,8 +97,8 @@ namespace Clobscode
         //check if any of the mid face nodes been moved.
         if (tmp_nodes[0]!=0 && tmp_nodes[2]!=0) {
             //search for node 20
-            OctreeEdge e(tmp_nodes[0],tmp_nodes[2]);
-            set<OctreeEdge>::iterator my_edge = edges->find(e);
+            QuadEdge e(tmp_nodes[0],tmp_nodes[2]);
+            set<QuadEdge>::iterator my_edge = edges->find(e);
             if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                 if ((*my_edge)[2]<points->size()) {
                     if (points->at((*my_edge)[2]).isOutside()) {
@@ -109,8 +109,8 @@ namespace Clobscode
         }
         if (tmp_nodes[0]!=0 && tmp_nodes[8]!=0) {
             //search for node 21
-            OctreeEdge e(tmp_nodes[0],tmp_nodes[8]);
-            set<OctreeEdge>::iterator my_edge = edges->find(e);
+            QuadEdge e(tmp_nodes[0],tmp_nodes[8]);
+            set<QuadEdge>::iterator my_edge = edges->find(e);
             if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                 if ((*my_edge)[2]<points->size()) {
                     if (points->at((*my_edge)[2]).isOutside()) {
@@ -121,8 +121,8 @@ namespace Clobscode
         }
         if (tmp_nodes[1]!=0 && tmp_nodes[9]!=0) {
             //search for node 22
-            OctreeEdge e(tmp_nodes[1],tmp_nodes[9]);
-            set<OctreeEdge>::iterator my_edge = edges->find(e);
+            QuadEdge e(tmp_nodes[1],tmp_nodes[9]);
+            set<QuadEdge>::iterator my_edge = edges->find(e);
             if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                 if ((*my_edge)[2]<points->size()) {
                     if (points->at((*my_edge)[2]).isOutside()) {
@@ -133,8 +133,8 @@ namespace Clobscode
         }
         if (tmp_nodes[2]!=0 && tmp_nodes[10]!=0) {
             //search for node 23
-            OctreeEdge e(tmp_nodes[2],tmp_nodes[10]);
-            set<OctreeEdge>::iterator my_edge = edges->find(e);
+            QuadEdge e(tmp_nodes[2],tmp_nodes[10]);
+            set<QuadEdge>::iterator my_edge = edges->find(e);
             if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                 if ((*my_edge)[2]<points->size()) {
                     if (points->at((*my_edge)[2]).isOutside()) {
@@ -145,8 +145,8 @@ namespace Clobscode
         }
         if (tmp_nodes[3]!=0 && tmp_nodes[11]!=0) {
             //search for node 24
-            OctreeEdge e(tmp_nodes[3],tmp_nodes[11]);
-            set<OctreeEdge>::iterator my_edge = edges->find(e);
+            QuadEdge e(tmp_nodes[3],tmp_nodes[11]);
+            set<QuadEdge>::iterator my_edge = edges->find(e);
             if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                 if ((*my_edge)[2]<points->size()) {
                     if (points->at((*my_edge)[2]).isOutside()) {
@@ -157,8 +157,8 @@ namespace Clobscode
         }
         if (tmp_nodes[9]!=0 && tmp_nodes[11]!=0) {
             //search for node 25
-            OctreeEdge e(tmp_nodes[9],tmp_nodes[11]);
-            set<OctreeEdge>::iterator my_edge = edges->find(e);
+            QuadEdge e(tmp_nodes[9],tmp_nodes[11]);
+            set<QuadEdge>::iterator my_edge = edges->find(e);
             if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                 if ((*my_edge)[2]<points->size()) {
                     if (points->at((*my_edge)[2]).isOutside()) {

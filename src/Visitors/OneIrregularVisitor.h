@@ -21,7 +21,7 @@
 #define OneIrregularVisitor_h 1
 
 #include "../MeshPoint.h"
-#include "../OctreeEdge.h"
+#include "../QuadEdge.h"
 #include "../Point3D.h"
 #include "../SurfTriangle.h"
 #include "../TriMesh.h"
@@ -39,13 +39,13 @@ namespace Clobscode
     public:
         OneIrregularVisitor();
 
-        bool visit(Octant *o);
+        bool visit(Quadrant *o);
 
-        void setEdges(set<OctreeEdge> &edges);
+        void setEdges(set<QuadEdge> &edges);
         void setMaxRefLevel(const unsigned short &max_ref_level);
 
     protected:
-        set<OctreeEdge> *edges;
+        set<QuadEdge> *edges;
         const unsigned short *max_ref_level;
     };
 

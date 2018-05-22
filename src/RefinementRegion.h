@@ -23,7 +23,7 @@
 #include "SurfTriangle.h"
 #include "MeshPoint.h"
 #include "GeometricTransform.h"
-#include "Octant.h"
+#include "Quadrant.h"
 #include <vector>
 #include <iostream>
 
@@ -31,7 +31,7 @@ using SurfMesh::SurfTriangle;
 using Clobscode::Point3D;
 using std::vector;
 using std::cout;
-using Clobscode::Octant;
+using Clobscode::Quadrant;
 using Clobscode::GeometricTransform;
 
 namespace Clobscode
@@ -56,7 +56,7 @@ namespace Clobscode
         
         virtual GeometricTransform rotateWithinYou(TriMesh &input)=0;
         
-        virtual bool intersectsOctant(vector<MeshPoint> &points, Octant &oct)=0;
+        virtual bool intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)=0;
         
         virtual bool needsLocalRotation();
         

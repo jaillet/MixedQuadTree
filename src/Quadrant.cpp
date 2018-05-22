@@ -17,7 +17,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.txt>
  */
 
-#include "Octant.h"
+#include "Quadrant.h"
 
 
 namespace Clobscode
@@ -26,7 +26,7 @@ namespace Clobscode
 	
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-	Octant::Octant(vector<unsigned int> &epts, 
+	Quadrant::Quadrant(vector<unsigned int> &epts, 
 				   const unsigned short &ref_level){
 		
         pointindex.assign(8,0);
@@ -45,7 +45,7 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 	
-	Octant::~Octant(){
+	Quadrant::~Quadrant(){
 		
 	}
 	
@@ -53,7 +53,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 
 
-    bool Octant::accept(Visitor *v)
+    bool Quadrant::accept(Visitor *v)
     {
         return v->visit(this);
     }
@@ -61,7 +61,7 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 	
-	std::ostream& operator<<(std::ostream& o,Octant &e){
+	std::ostream& operator<<(std::ostream& o,Quadrant &e){
 		std::vector<unsigned int> points = e.getPoints();
 		for (unsigned int i=0; i<points.size(); i++)
 			o << " " << points[i];

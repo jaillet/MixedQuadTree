@@ -20,7 +20,7 @@
 #ifndef SurfaceTemplatesVisitor_h
 #define SurfaceTemplatesVisitor_h 1
 
-#include "../OctreeEdge.h"
+#include "../QuadEdge.h"
 #include "../MeshPoint.h"
 #include "../TriMesh.h"
 
@@ -46,7 +46,7 @@
 #include <vector>
 
 using Clobscode::MeshPoint;
-using Clobscode::OctreeEdge;
+using Clobscode::QuadEdge;
 using Clobscode::TriMesh;
 using std::list;
 using std::set;
@@ -58,7 +58,7 @@ namespace Clobscode
     public:
         SurfaceTemplatesVisitor();
 
-        bool visit(Octant *o);
+        bool visit(Quadrant *o);
 
         void setPoints(vector<MeshPoint> &meshpts);
         void setNewPoints(list<MeshPoint> &newpts);
@@ -71,7 +71,7 @@ namespace Clobscode
         TriMesh *input;
         unsigned int *e_idx;
 
-        bool applyHexSurfaceTemplates(Octant *o,
+        bool applyHexSurfaceTemplates(Quadrant *o,
                                       vector<unsigned int> &inpts,
                                       vector<unsigned int> &outpts);
     };

@@ -80,7 +80,7 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
 
-	bool RefinementSurfaceRegion::intersectsOctant(vector<MeshPoint> &points, Octant &oct)
+	bool RefinementSurfaceRegion::intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)
     {
         
         //(Point3D &p1, Point3D &p2)
@@ -88,7 +88,7 @@ namespace Clobscode
         Point3D p1 = points[oct.getPoints()[0]].getPoint();
         Point3D p2 = points[oct.getPoints()[6]].getPoint();
         
-        //test if any node of the octant is Inside the Mesh.
+        //test if any node of the Quadrant is Inside the Mesh.
         if (tm.pointIsInMesh(p1)) {
             return true;
         }
@@ -137,7 +137,7 @@ namespace Clobscode
         }
         
         
-        //test if any node of the mesh is inside the octant
+        //test if any node of the mesh is inside the Quadrant
         vector<Point3D> tmpts = tm.getPoints();
         for (unsigned int i=0; i<tmpts.size(); i++) {
             if (tmpts[i][0]<p1[0] || p2[0]<tmpts[i][0]) {
@@ -152,8 +152,8 @@ namespace Clobscode
             return true;
         }
         
-        //to implement: adapt from Octant - triangle intersection test in order to
-        //test if an edge (of Region Surface Mesh) intersects the octant.
+        //to implement: adapt from Quadrant - triangle intersection test in order to
+        //test if an edge (of Region Surface Mesh) intersects the Quadrant.
         /*set<SurfaceEdge> r_edges = tm.getEdges();
         set<SurfaceEdge>::iterator editer;
         for (editer = r_edges.begin(); editer!=r_edges.end(); editer++) {
@@ -174,7 +174,7 @@ namespace Clobscode
 	{
         //This code is based on the Cohen-Sutherland algorithm
 		//for image clipping over a given window. In this case
-		//the "window" is the octant (cube), and the "line"
+		//the "window" is the Quadrant (cube), and the "line"
 		//to be clipped is the segment seg_p1 - seg_p2.
 		vector<unsigned int> sides(2,0);
 		
@@ -229,7 +229,7 @@ namespace Clobscode
 		}
 		
 		//General case of clipping a triangle's edge against
-		//the octant.
+		//the Quadrant.
 		/*for (unsigned int i=0; i<n_pts; i++) {
 			//cout << pts[face_pts_idx[i]] << " code is ";
 			Point3D p1 = input_pts[face[i]];
@@ -262,7 +262,7 @@ namespace Clobscode
 		
 		////////////////////////////////////////////////////
 		// Important note: if tangent segment should be   //
-		// considered as intersecting the octant, replace //
+		// considered as intersecting the Quadrant, replace //
 		// each < by a <= from this point to the end of   //
 		// this method.                                   //
 		////////////////////////////////////////////////////
@@ -356,7 +356,7 @@ namespace Clobscode
 		}
 
 		//If the above test didn't succeed, the segment
-		//is not intersected by this octant
+		//is not intersected by this Quadrant
 		return false;
 
     }

@@ -20,7 +20,7 @@
 #ifndef RemoveSubElementsVisitor_h
 #define RemoveSubElementsVisitor_h 1
 
-#include "../OctreeEdge.h"
+#include "../QuadEdge.h"
 #include "../MeshPoint.h"
 #include "../TriMesh.h"
 
@@ -31,7 +31,7 @@
 #include <vector>
 
 using Clobscode::MeshPoint;
-using Clobscode::OctreeEdge;
+using Clobscode::QuadEdge;
 using Clobscode::TriMesh;
 using std::list;
 using std::set;
@@ -44,7 +44,7 @@ namespace Clobscode
     public:
         RemoveSubElementsVisitor();
 
-        bool visit(Octant *o);
+        bool visit(Quadrant *o);
 
         void setPoints(vector<MeshPoint> &points);
 

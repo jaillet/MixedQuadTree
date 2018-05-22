@@ -18,21 +18,21 @@
  */
 
 #include "EdgeVisitor.h"
-#include "../Octant.h"
+#include "../Quadrant.h"
 
 
 namespace Clobscode
 {
 
-    void EdgeVisitor::insertEdges(Octant *o, set<OctreeEdge> &edges) {
-        for (unsigned int i=0; i<12; i++) {
-            OctreeEdge ee;
+    void EdgeVisitor::insertEdges(Quadrant *o, set<QuadEdge> &edges) {
+        for (unsigned int i=0; i<4; i++) {
+            QuadEdge ee;
             getEdge(o,i,ee);
             edges.insert(ee);
         }
     }
 
-    void EdgeVisitor::getEdge(Octant *o, const unsigned int &idx, OctreeEdge &e) {
+    void EdgeVisitor::getEdge(Quadrant *o, const unsigned int &idx, QuadEdge &e) {
         vector<unsigned int> pointindex = o->pointindex;
         unsigned int e0,e1;
         switch (idx) {
@@ -51,38 +51,6 @@ namespace Clobscode
             case 3:
                 e0 = pointindex[3];
                 e1 = pointindex[0];
-                break;
-            case 4:
-                e0 = pointindex[0];
-                e1 = pointindex[4];
-                break;
-            case 5:
-                e0 = pointindex[1];
-                e1 = pointindex[5];
-                break;
-            case 6:
-                e0 = pointindex[2];
-                e1 = pointindex[6];
-                break;
-            case 7:
-                e0 = pointindex[3];
-                e1 = pointindex[7];
-                break;
-            case 8:
-                e0 = pointindex[4];
-                e1 = pointindex[5];
-                break;
-            case 9:
-                e0 = pointindex[5];
-                e1 = pointindex[6];
-                break;
-            case 10:
-                e0 = pointindex[6];
-                e1 = pointindex[7];
-                break;
-            case 11:
-                e0 = pointindex[7];
-                e1 = pointindex[4];
                 break;
             default:
                 break;

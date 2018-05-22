@@ -29,14 +29,14 @@
 namespace Clobscode {
 
     //forward declarations
-    class Octant;
+    class Quadrant;
 
     class Visitor {
 
     public:
         Visitor() { }
 
-        virtual bool visit(Octant *o) { return false; }
+        virtual bool visit(Quadrant *o) { return false; }
     };
 
 

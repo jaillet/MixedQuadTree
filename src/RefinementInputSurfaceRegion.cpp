@@ -60,7 +60,7 @@ namespace Clobscode
 	
 	//--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-	bool RefinementInputSurfaceRegion::intersectsOctant(vector<MeshPoint> &points, Octant &oct)
+	bool RefinementInputSurfaceRegion::intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)
     {
         return !oct.getIntersectedFaces().empty();
 	}

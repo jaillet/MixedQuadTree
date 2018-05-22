@@ -20,7 +20,7 @@
 #ifndef TransitionPatternVisitor_h
 #define TransitionPatternVisitor_h 1
 
-#include "../OctreeEdge.h"
+#include "../QuadEdge.h"
 #include "../MeshPoint.h"
 #include "../TriMesh.h"
 
@@ -46,7 +46,7 @@
 #include <vector>
 
 using Clobscode::MeshPoint;
-using Clobscode::OctreeEdge;
+using Clobscode::QuadEdge;
 using Clobscode::TriMesh;
 using std::list;
 using std::set;
@@ -59,18 +59,18 @@ namespace Clobscode
         TransitionPatternVisitor();
         TransitionPatternVisitor(bool apply_pattern);
 
-        bool visit(Octant *o);
+        bool visit(Quadrant *o);
 
         void setPoints(vector<MeshPoint> &points);
         void setNewPoints(list<Point3D> &new_pts);
-        void setEdges(const set<OctreeEdge> &edges);
+        void setEdges(const set<QuadEdge> &edges);
         void setMaxRefLevel(const unsigned short &max_ref_level);
         void setApplyMode(bool apply_pattern);
 
     private:
         vector<MeshPoint> *points;
         list<Point3D> *new_pts;
-        const set<OctreeEdge> *edges;
+        const set<QuadEdge> *edges;
         const unsigned short *max_ref_level;
         bool apply_pattern;
 

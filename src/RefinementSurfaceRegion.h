@@ -25,7 +25,7 @@
 #include <iostream>
 #include "RefinementRegion.h"
 #include "TriMesh.h"
-#include "Octant.h"
+#include "Quadrant.h"
 
 using Clobscode::Point3D;
 using std::vector;
@@ -33,7 +33,7 @@ using std::cout;
 using std::set;
 using Clobscode::RefinementRegion;
 using Clobscode::TriMesh;
-using Clobscode::Octant;
+using Clobscode::Quadrant;
 using Clobscode::GeometricTransform;
 
 
@@ -54,7 +54,7 @@ namespace Clobscode
         
         virtual vector<Point3D> &getPoints();
 		
-        virtual bool intersectsOctant(vector<MeshPoint> &points, Octant &oct);
+        virtual bool intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct);
         
     protected:
         

@@ -26,13 +26,13 @@
 
 #include "../MeshPoint.h"
 #include "../Point3D.h"
-#include "../OctreeEdge.h"
+#include "../QuadEdge.h"
 
 #include "Visitor.h"
 
 
 using Clobscode::MeshPoint;
-using Clobscode::OctreeEdge;
+using Clobscode::QuadEdge;
 using Clobscode::Point3D;
 using std::vector;
 using std::list;
@@ -45,18 +45,18 @@ namespace Clobscode
 
     public:
         SplitVisitor();
-        /*void VisitOctant(Octant *o,
+        /*void VisitQuadrant(Quadrant *o,
                          vector<MeshPoint> &points,
                          list<Point3D> &new_pts,
-                         set<OctreeEdge> &edges,
+                         set<QuadEdge> &edges,
                          vector< vector<unsigned int> > &new_eles,
                          vector<vector<Point3D> > &clipping);*/
 
-        bool visit(Octant *o);
+        bool visit(Quadrant *o);
 
         void setPoints(vector<MeshPoint> &points);
         void setNewPts(list<Point3D> &new_pts);
-        void setEdges(set<OctreeEdge> &edges);
+        void setEdges(set<QuadEdge> &edges);
         void setNewEles(vector<vector<unsigned int> > &new_eles);
         void setClipping(vector<vector<Point3D> > &clipping);
 
@@ -64,7 +64,7 @@ namespace Clobscode
         //references
         vector<MeshPoint> *points;
         list<Point3D> *new_pts;
-        set<OctreeEdge> *edges;
+        set<QuadEdge> *edges;
         vector<vector<unsigned int> > *new_eles;
         vector<vector<Point3D> > *clipping;
 

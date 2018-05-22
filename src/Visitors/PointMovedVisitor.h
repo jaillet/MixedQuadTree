@@ -21,7 +21,7 @@
 #define PointMovedVisitor_h 1
 
 #include "../MeshPoint.h"
-#include "../OctreeEdge.h"
+#include "../QuadEdge.h"
 #include "../Point3D.h"
 #include "../SurfTriangle.h"
 #include "../TriMesh.h"
@@ -36,7 +36,7 @@
 using Clobscode::TriMesh;
 using Clobscode::Point3D;
 using Clobscode::MeshPoint;
-using Clobscode::OctreeEdge;
+using Clobscode::QuadEdge;
 using SurfMesh::SurfTriangle;
 using std::list;
 using std::vector;
@@ -48,15 +48,15 @@ namespace Clobscode
     public:
         PointMovedVisitor();
 
-        bool visit(Octant *o);
+        bool visit(Quadrant *o);
 
         void setPoints(vector<MeshPoint> &points);
-        void setEdges(const set<OctreeEdge> &edges);
+        void setEdges(const set<QuadEdge> &edges);
         void setMaxRefLevel(const unsigned short &max_ref_level);
 
     private:
         vector<MeshPoint> *points;
-        const set<OctreeEdge> *edges;
+        const set<QuadEdge> *edges;
         const unsigned short *max_ref_level;
     };
 }

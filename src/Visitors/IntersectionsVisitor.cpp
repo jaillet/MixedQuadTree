@@ -24,7 +24,7 @@
 #include "IntersectionsVisitor.h"
 
 #include <stdexcept>
-#include "../Octant.h"
+#include "../Quadrant.h"
 
 namespace Clobscode
 {
@@ -59,7 +59,7 @@ namespace Clobscode
     }
 
 
-    bool IntersectionsVisitor::visit(Octant *o) {
+    bool IntersectionsVisitor::visit(Quadrant *o) {
         //cout << "IntersectionsVisitor" << endl;
         //check intersections with selected input faces
         if (select_faces) //checkIntersections(TriMesh &mesh,list<unsigned int> &faces,vector<Point3D> &coords);
@@ -110,13 +110,13 @@ namespace Clobscode
                                              const Point3D &pmax) {
 
         //pmin and pmax describe the bounding box of the
-        //octant. They are used to detect intersections
-        //between input faces and the octant by a clipping
+        //Quadrant. They are used to detect intersections
+        //between input faces and the Quadrant by a clipping
         //method.
 
         //This code is based on the Cohen-Sutherland algorithm
         //for image clipping over a given window. In this case
-        //the "window" is the octant (cube), and the "lines"
+        //the "window" is the Quadrant (cube), and the "lines"
         //to be clipped are the triangles.
 
         vector<unsigned int> face = st.getPoints();
@@ -179,7 +179,7 @@ namespace Clobscode
         }
 
         //General case of clipping a triangle's edge against
-        //the octant.
+        //the Quadrant.
         for (unsigned int i=0; i<n_pts; i++) {
             //cout << pts[face_pts_idx[i]] << " code is ";
             Point3D p1 = input_pts[face[i]];
@@ -191,12 +191,12 @@ namespace Clobscode
         }
 
         //Last "hard" test: Apply Ray Tracing to detect
-        //intersection between every edge of the octant
+        //intersection between every edge of the Quadrant
         //(hexahedron) and the triangle. If at least one
         //of them instersects, then this triangle
-        //intersects the octant.
+        //intersects the Quadrant.
         //If the test didn't succeed, the triangle
-        //is not intersected by this octant
+        //is not intersected by this Quadrant
 
         return edgeTriangleIntersection(st,input_pts,pmin,pmax);
     }
@@ -227,7 +227,7 @@ namespace Clobscode
 
         ////////////////////////////////////////////////////
         // Important note: if tangent segment should be   //
-        // considered as intersecting the octant, replace //
+        // considered as intersecting the Quadrant, replace //
         // each < by a <= from this point to the end of   //
         // this method.                                   //
         ////////////////////////////////////////////////////
@@ -352,7 +352,7 @@ namespace Clobscode
                                                    const Point3D &pmin,
                                                    const Point3D &pmax) {
 
-        //compute the coords of all octant edges
+        //compute the coords of all Quadrant edges
         vector<vector<Point3D> > oct_edges = getEdges(pmin,pmax);
 
         //test each edge against the triangle
@@ -375,7 +375,7 @@ namespace Clobscode
         vector<vector<Point3D> > edges;
         edges.reserve(12);
 
-        //creat the 8 nodes of the octant
+        //creat the 8 nodes of the Quadrant
         Point3D p0 (pmin[0],pmin[1],pmin[2]);
         Point3D p1 (pmin[0],pmin[1],pmax[2]);
         Point3D p2 (pmax[0],pmin[1],pmax[2]);

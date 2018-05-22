@@ -23,8 +23,8 @@
 #include "TriMesh.h"
 #include "FEMesh.h"
 #include "GridMesher.h"
-#include "Octant.h"
-#include "OctreeEdge.h"
+#include "Quadrant.h"
+#include "QuadEdge.h"
 #include "Services.h"
 #include "RefinementRegion.h"
 #include "RefinementCubeRegion.h"
@@ -47,7 +47,7 @@
 using std::vector;
 using std::list;
 using std::set;
-using Clobscode::OctreeEdge;
+using Clobscode::QuadEdge;
 using Clobscode::TriMesh;
 using Clobscode::RefinementRegion;
 
@@ -72,12 +72,12 @@ namespace Clobscode
                                   const unsigned short &omaxrl);
 
         
-        virtual void setInitialState(vector<MeshPoint> &epts, vector<Octant> &eocts,
-                                     set<OctreeEdge> &eedgs);
+        virtual void setInitialState(vector<MeshPoint> &epts, vector<Quadrant> &eocts,
+                                     set<QuadEdge> &eedgs);
         
 	protected:
         
-        virtual void splitOctants(const unsigned short &rl, TriMesh &input,
+        virtual void splitQuadrants(const unsigned short &rl, TriMesh &input,
                                   list<unsigned int> &roctli,
                                   list<RefinementRegion *> &all_reg, const string &name,
                                   const unsigned short &minrl, const unsigned short &omaxrl);
@@ -111,7 +111,7 @@ namespace Clobscode
 		
 		virtual unsigned int saveOutputMesh(FEMesh &mesh,
 									vector<MeshPoint> &points, 
-									list<Octant> &elements);
+									list<Quadrant> &elements);
         
         virtual void projectCloseToBoundaryNodes(TriMesh &input);
 
@@ -120,19 +120,19 @@ namespace Clobscode
 	protected:
 		
 		vector<MeshPoint> points;
-		vector<Octant> octants;
-		set<OctreeEdge> octreeEdges;
+		vector<Quadrant> Quadrants;
+		set<QuadEdge> QuadEdges;
 		list<RefinementRegion *> regions;
 
 
 
 	};
     
-    inline void Mesher::setInitialState(vector<MeshPoint> &epts, vector<Octant> &eocts,
-                                        set<OctreeEdge> &eedgs) {
-        octants = eocts;
+    inline void Mesher::setInitialState(vector<MeshPoint> &epts, vector<Quadrant> &eocts,
+                                        set<QuadEdge> &eedgs) {
+        Quadrants = eocts;
         points = epts;
-        octreeEdges = eedgs;
+        QuadEdges = eedgs;
     }
 	
 	

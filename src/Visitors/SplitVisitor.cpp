@@ -18,7 +18,7 @@
  */
 
 #include "SplitVisitor.h"
-#include "../Octant.h"
+#include "../Quadrant.h"
 
 namespace Clobscode
 {
@@ -39,7 +39,7 @@ namespace Clobscode
         this->new_pts = &new_pts;
     }
     
-    void SplitVisitor::setEdges(set<OctreeEdge> &edges) {
+    void SplitVisitor::setEdges(set<QuadEdge> &edges) {
         this->edges = &edges;
     }
     
@@ -51,7 +51,7 @@ namespace Clobscode
         this->clipping = &clipping;
     }
 
-    bool SplitVisitor::visit(Octant *o)
+    bool SplitVisitor::visit(Quadrant *o)
     {
         //getting variables for modification
         //preferably by reference, to avoid unnecesary copying
@@ -64,7 +64,7 @@ namespace Clobscode
         new_eles->reserve(8);
 
         unsigned int n_pts = points->size() + new_pts->size();
-        //the vector containing all nodes of this octant (and sons)
+        //the vector containing all nodes of this Quadrant (and sons)
         vector<unsigned int> all_pts(27,0);
 
         //save the eight nodes of this cube first
@@ -202,22 +202,22 @@ namespace Clobscode
         new_pts->push_back(Point3D (avg[0],avg[1],avg[2]));
         all_pts[26] = n_pts;
 
-        OctreeEdge intern_edge1 (all_pts[20],all_pts[25]);
+        QuadEdge intern_edge1 (all_pts[20],all_pts[25]);
         intern_edge1.updateMidPoint(all_pts[26]);
-        OctreeEdge intern_edge2 (all_pts[21],all_pts[23]);
+        QuadEdge intern_edge2 (all_pts[21],all_pts[23]);
         intern_edge2.updateMidPoint(all_pts[26]);
-        OctreeEdge intern_edge3 (all_pts[22],all_pts[24]);
+        QuadEdge intern_edge3 (all_pts[22],all_pts[24]);
         intern_edge3.updateMidPoint(all_pts[26]);
         edges->insert(intern_edge1);
         edges->insert(intern_edge2);
         edges->insert(intern_edge3);
 
-        edges->insert(OctreeEdge (all_pts[20],all_pts[26]));
-        edges->insert(OctreeEdge (all_pts[25],all_pts[26]));
-        edges->insert(OctreeEdge (all_pts[21],all_pts[26]));
-        edges->insert(OctreeEdge (all_pts[23],all_pts[26]));
-        edges->insert(OctreeEdge (all_pts[22],all_pts[26]));
-        edges->insert(OctreeEdge (all_pts[24],all_pts[26]));
+        edges->insert(QuadEdge (all_pts[20],all_pts[26]));
+        edges->insert(QuadEdge (all_pts[25],all_pts[26]));
+        edges->insert(QuadEdge (all_pts[21],all_pts[26]));
+        edges->insert(QuadEdge (all_pts[23],all_pts[26]));
+        edges->insert(QuadEdge (all_pts[22],all_pts[26]));
+        edges->insert(QuadEdge (all_pts[24],all_pts[26]));
 
         //now that all edges were inserted, the elements can be easily built
         vector<unsigned int> son_element (8,0);
@@ -364,10 +364,10 @@ namespace Clobscode
     }
 
 
-    /*void SplitVisitor::VisitOctant(Octant *o,
+    /*void SplitVisitor::VisitQuadrant(Quadrant *o,
                                    vector<MeshPoint> &points,
                                    list<Point3D> &new_pts,
-                                   set<OctreeEdge> &edges,
+                                   set<QuadEdge> &edges,
                                    vector<vector<unsigned int> > &new_eles,
                                    vector<vector<Point3D> > &clipping) {
 
@@ -382,7 +382,7 @@ namespace Clobscode
         new_eles.reserve(8);
 
         unsigned int n_pts = points.size() + new_pts.size();
-        //the vector containing all nodes of this octant (and sons)
+        //the vector containing all nodes of this Quadrant (and sons)
         vector<unsigned int> all_pts(27,0);
 
         //save the eight nodes of this cube first
@@ -520,22 +520,22 @@ namespace Clobscode
         new_pts.push_back(Point3D (avg[0],avg[1],avg[2]));
         all_pts[26] = n_pts;
 
-        OctreeEdge intern_edge1 (all_pts[20],all_pts[25]);
+        QuadEdge intern_edge1 (all_pts[20],all_pts[25]);
         intern_edge1.updateMidPoint(all_pts[26]);
-        OctreeEdge intern_edge2 (all_pts[21],all_pts[23]);
+        QuadEdge intern_edge2 (all_pts[21],all_pts[23]);
         intern_edge2.updateMidPoint(all_pts[26]);
-        OctreeEdge intern_edge3 (all_pts[22],all_pts[24]);
+        QuadEdge intern_edge3 (all_pts[22],all_pts[24]);
         intern_edge3.updateMidPoint(all_pts[26]);
         edges.insert(intern_edge1);
         edges.insert(intern_edge2);
         edges.insert(intern_edge3);
 
-        edges.insert(OctreeEdge (all_pts[20],all_pts[26]));
-        edges.insert(OctreeEdge (all_pts[25],all_pts[26]));
-        edges.insert(OctreeEdge (all_pts[21],all_pts[26]));
-        edges.insert(OctreeEdge (all_pts[23],all_pts[26]));
-        edges.insert(OctreeEdge (all_pts[22],all_pts[26]));
-        edges.insert(OctreeEdge (all_pts[24],all_pts[26]));
+        edges.insert(QuadEdge (all_pts[20],all_pts[26]));
+        edges.insert(QuadEdge (all_pts[25],all_pts[26]));
+        edges.insert(QuadEdge (all_pts[21],all_pts[26]));
+        edges.insert(QuadEdge (all_pts[23],all_pts[26]));
+        edges.insert(QuadEdge (all_pts[22],all_pts[26]));
+        edges.insert(QuadEdge (all_pts[24],all_pts[26]));
 
         //now that all edges were inserted, the elements can be easily built
         vector<unsigned int> son_element (8,0);
@@ -687,11 +687,11 @@ namespace Clobscode
 
     bool SplitVisitor::splitEdge(const unsigned int &idx1, const unsigned int &idx2,
                                  unsigned int &c_n_pts, unsigned int &mid_idx){
-        OctreeEdge this_edge (idx1,idx2);
-        set<OctreeEdge>::iterator found = edges->find(this_edge);
+        QuadEdge this_edge (idx1,idx2);
+        set<QuadEdge>::iterator found = edges->find(this_edge);
 
         /*if (found==edges.end()) {
-            cout << "edge not found at Octant::splitEdge\n";
+            cout << "edge not found at Quadrant::splitEdge\n";
             cout << this_edge << "\n";
             cout << *this << "\n";
             abort();
@@ -706,7 +706,7 @@ namespace Clobscode
 
         //this edge is about to be split. Note that no edge can have point index
         //0 as its mid_point. For this reason, we know that the edge was not
-        //split by other octant before. The current edge must be replaced in the
+        //split by other Quadrant before. The current edge must be replaced in the
         //set by the same one plus a mid_point equal to c_n_pts (current number
         //of points). The coordinates of this new point will be inserted by the
         //split method above. The splitEdge method will only compute the index
@@ -716,7 +716,7 @@ namespace Clobscode
 
         this_edge.updateMidPoint(c_n_pts++);
         edges->erase(found);
-        OctreeEdge e1(this_edge[0],this_edge[2]), e2 (this_edge[2],this_edge[1]);
+        QuadEdge e1(this_edge[0],this_edge[2]), e2 (this_edge[2],this_edge[1]);
         edges->insert(this_edge);
         edges->insert(e1);
         edges->insert(e2);
@@ -730,24 +730,24 @@ namespace Clobscode
     bool SplitVisitor::splitFace(const unsigned int &idx1, const unsigned int &idx2,
                                  const unsigned int &idx3, const unsigned int &idx4,
                                  unsigned int &c_n_pts, unsigned int &mid_idx){
-        OctreeEdge e1 (idx1,idx3);
-        set<OctreeEdge>::iterator found = edges->find(e1);
+        QuadEdge e1 (idx1,idx3);
+        set<QuadEdge>::iterator found = edges->find(e1);
 
         if (found==edges->end()) {
             //this face wasn't split before->
             e1.updateMidPoint(c_n_pts);
             edges->insert(e1);
 
-            OctreeEdge e2 (idx2, idx4);
+            QuadEdge e2 (idx2, idx4);
             e2.updateMidPoint(c_n_pts);
             edges->insert(e2);
 
             //splitting edge e1
-            edges->insert(OctreeEdge (idx1,c_n_pts));
-            edges->insert(OctreeEdge (idx3,c_n_pts));
+            edges->insert(QuadEdge (idx1,c_n_pts));
+            edges->insert(QuadEdge (idx3,c_n_pts));
             //splitting edge e2
-            edges->insert(OctreeEdge (idx2,c_n_pts));
-            edges->insert(OctreeEdge (idx4,c_n_pts));
+            edges->insert(QuadEdge (idx2,c_n_pts));
+            edges->insert(QuadEdge (idx4,c_n_pts));
 
             //increase the number fo total points
             mid_idx = c_n_pts++;

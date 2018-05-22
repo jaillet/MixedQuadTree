@@ -18,7 +18,7 @@
  */
 
 #include "TransitionPatternVisitor.h"
-#include "../Octant.h"
+#include "../Quadrant.h"
 
 namespace Clobscode
 {
@@ -47,7 +47,7 @@ namespace Clobscode
         this->new_pts = &new_pts;
     }
 
-    void TransitionPatternVisitor::setEdges(const set<OctreeEdge> &edges) {
+    void TransitionPatternVisitor::setEdges(const set<QuadEdge> &edges) {
         this->edges = &edges;
     }
 
@@ -60,14 +60,14 @@ namespace Clobscode
     }
 
 
-    bool TransitionPatternVisitor::visit(Octant *o) {
+    bool TransitionPatternVisitor::visit(Quadrant *o) {
         //cout << "TransitionPatternVisitor" << endl;
         //applyTransitionPattern
         if (apply_pattern)
         {
             if (new_pts == NULL)
                 throw std::runtime_error(std::string("TransitionPatternVisitor: need new_pts (calling apply instead of check?)"));
-            //if this octant is refined to the maximum level, return it immediately
+            //if this Quadrant is refined to the maximum level, return it immediately
             if (*max_ref_level == o->ref_level) {
                 return true;
             }
@@ -83,9 +83,9 @@ namespace Clobscode
             }
             //search for nodes inserted in edges
             for (unsigned int i=0; i<12; i++) {
-                OctreeEdge e;
+                QuadEdge e;
                 ev.getEdge(o,i,e);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge==edges->end()) {
                     cout << "  edge " << e << " not found at applyTransitionPattern\n";
                 }
@@ -110,8 +110,8 @@ namespace Clobscode
 
             if (tmp_nodes[0]!=0 && tmp_nodes[2]!=0) {
                 //search for node 20
-                OctreeEdge e(tmp_nodes[0],tmp_nodes[2]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[0],tmp_nodes[2]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(20);
@@ -119,8 +119,8 @@ namespace Clobscode
             }
             if (tmp_nodes[0]!=0 && tmp_nodes[8]!=0) {
                 //search for node 21
-                OctreeEdge e(tmp_nodes[0],tmp_nodes[8]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[0],tmp_nodes[8]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(21);
@@ -128,8 +128,8 @@ namespace Clobscode
             }
             if (tmp_nodes[1]!=0 && tmp_nodes[9]!=0) {
                 //search for node 22
-                OctreeEdge e(tmp_nodes[1],tmp_nodes[9]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[1],tmp_nodes[9]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(22);
@@ -137,8 +137,8 @@ namespace Clobscode
             }
             if (tmp_nodes[2]!=0 && tmp_nodes[10]!=0) {
                 //search for node 23
-                OctreeEdge e(tmp_nodes[2],tmp_nodes[10]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[2],tmp_nodes[10]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(23);
@@ -146,8 +146,8 @@ namespace Clobscode
             }
             if (tmp_nodes[3]!=0 && tmp_nodes[11]!=0) {
                 //search for node 24
-                OctreeEdge e(tmp_nodes[3],tmp_nodes[11]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[3],tmp_nodes[11]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(24);
@@ -155,16 +155,16 @@ namespace Clobscode
             }
             if (tmp_nodes[9]!=0 && tmp_nodes[11]!=0) {
                 //search for node 25
-                OctreeEdge e(tmp_nodes[9],tmp_nodes[11]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[9],tmp_nodes[11]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(25);
                 }
             }
             //The middle node of the hexahedron can never be inserted
-            //otherwise this octant was already removed from the list
-            //of elements and replaced with the new 8 octants
+            //otherwise this Quadrant was already removed from the list
+            //of elements and replaced with the new 8 Quadrants
 
             //------------------------------------------------------
             //Finally, apply the transition pattern
@@ -186,7 +186,7 @@ namespace Clobscode
             //new points goes to new_pts (if any new node is inserted) and
             //the new elements to new_eles
 
-            //the subelements of this octant will no longer be the points
+            //the subelements of this Quadrant will no longer be the points
             //of the original cube. It will now contain mixed-elements.
             vector<vector<unsigned int>> &sub_elements = o->sub_elements;
             sub_elements.clear();
@@ -228,9 +228,9 @@ namespace Clobscode
             //cout << "\nInserted edges:\n";
             //search for nodes inserted in edges
             for (unsigned int i=0; i<12; i++) {
-                OctreeEdge e;
+                QuadEdge e;
                 EdgeVisitor::getEdge(o,i,e);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge==edges->end()) {
                     cout << "  edge " << e << " not found at applyTransitionPattern\n";
                     return false;
@@ -260,8 +260,8 @@ namespace Clobscode
             //cout << "looking for nodes inserted in faces:\n";
             if (tmp_nodes[0]!=0 && tmp_nodes[2]!=0) {
                 //search for node 20
-                OctreeEdge e(tmp_nodes[0],tmp_nodes[2]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[0],tmp_nodes[2]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(20);
@@ -270,8 +270,8 @@ namespace Clobscode
             }
             if (tmp_nodes[0]!=0 && tmp_nodes[8]!=0) {
                 //search for node 21
-                OctreeEdge e(tmp_nodes[0],tmp_nodes[8]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[0],tmp_nodes[8]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(21);
@@ -280,8 +280,8 @@ namespace Clobscode
             }
             if (tmp_nodes[1]!=0 && tmp_nodes[9]!=0) {
                 //search for node 22
-                OctreeEdge e(tmp_nodes[1],tmp_nodes[9]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[1],tmp_nodes[9]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(22);
@@ -290,8 +290,8 @@ namespace Clobscode
             }
             if (tmp_nodes[2]!=0 && tmp_nodes[10]!=0) {
                 //search for node 23
-                OctreeEdge e(tmp_nodes[2],tmp_nodes[10]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[2],tmp_nodes[10]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(23);
@@ -300,8 +300,8 @@ namespace Clobscode
             }
             if (tmp_nodes[3]!=0 && tmp_nodes[11]!=0) {
                 //search for node 24
-                OctreeEdge e(tmp_nodes[3],tmp_nodes[11]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[3],tmp_nodes[11]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(24);
@@ -310,8 +310,8 @@ namespace Clobscode
             }
             if (tmp_nodes[9]!=0 && tmp_nodes[11]!=0) {
                 //search for node 25
-                OctreeEdge e(tmp_nodes[9],tmp_nodes[11]);
-                set<OctreeEdge>::iterator my_edge = edges->find(e);
+                QuadEdge e(tmp_nodes[9],tmp_nodes[11]);
+                set<QuadEdge>::iterator my_edge = edges->find(e);
                 if (my_edge != edges->end() && (*my_edge)[2]!=0) {
                     l_nodes.push_back((*my_edge)[2]);
                     l_mid_nodes.push_back(25);
@@ -319,8 +319,8 @@ namespace Clobscode
                 }
             }
             //The middle node of the hexahedron can never be inserted
-            //otherwise this octant was already removed from the list
-            //of elements and replaced with the new 8 octants
+            //otherwise this Quadrant was already removed from the list
+            //of elements and replaced with the new 8 Quadrants
 
             //------------------------------------------------------
             //Finally, apply the transition pattern

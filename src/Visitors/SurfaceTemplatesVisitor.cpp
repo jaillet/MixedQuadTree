@@ -18,7 +18,7 @@
  */
 
 #include "SurfaceTemplatesVisitor.h"
-#include "../Octant.h"
+#include "../Quadrant.h"
 
 namespace Clobscode
 {
@@ -47,7 +47,7 @@ namespace Clobscode
         this->e_idx = &e_idx;
     }
 
-    bool SurfaceTemplatesVisitor::visit(Octant *o) {
+    bool SurfaceTemplatesVisitor::visit(Quadrant *o) {
         //cout << "SurfaceTemplates" << endl;
         //A surface template should be applyed only over elements
         //that intersect one surface or all of them. In both cases
@@ -86,7 +86,7 @@ namespace Clobscode
             //outside nodes.
             return applyHexSurfaceTemplates(o, inpts, outpts);
         }
-        //if we are here, the octant contains mixed elements (either from a previous
+        //if we are here, the Quadrant contains mixed elements (either from a previous
         //surface pattern or a transition pattern).
 
         list<vector<unsigned int> > new_eles_lst;
@@ -164,7 +164,7 @@ namespace Clobscode
                 }
 
                 //check inside state for each of its nodes
-                //cout << "warning: sub element type hexahedron not implemented in Octant::applySurfaceTemplates\n";
+                //cout << "warning: sub element type hexahedron not implemented in Quadrant::applySurfaceTemplates\n";
                 //new_eles_lst.push_back(sub_elements[i]);
             }
         }
@@ -180,20 +180,20 @@ namespace Clobscode
 
     }
 
-    bool SurfaceTemplatesVisitor::applyHexSurfaceTemplates(Octant *o,
+    bool SurfaceTemplatesVisitor::applyHexSurfaceTemplates(Quadrant *o,
                                                            vector<unsigned int> &inpts,
                                                            vector<unsigned int> &outpts) {
         vector<unsigned int> &pointindex = o->pointindex;
         vector<vector<unsigned int>> &sub_elements = o->sub_elements;
 
-        //if the octant has more the 8 nodes, it was split by surface or
+        //if the Quadrant has more the 8 nodes, it was split by surface or
         //transition patterns. In either case, this method is not able
         //to split it again.
         if (pointindex.size()!=8) {
             return true;
         }
 
-        //The sub-elements of this octant will be now the ones
+        //The sub-elements of this Quadrant will be now the ones
         //given by the surface pattern that is employed.
         sub_elements.clear();
 

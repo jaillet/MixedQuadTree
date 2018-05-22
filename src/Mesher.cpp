@@ -58,11 +58,11 @@ namespace Clobscode
             gt.rotateSurfaceMesh(input);
         }
         
-        //split octants until the refinement level (rl) is achieved.
+        //split Quadrants until the refinement level (rl) is achieved.
         //The output will be a one-irregular mesh.
-        splitOctants(rl,input,roctli,all_reg,name,minrl,omaxrl);
+        splitQuadrants(rl,input,roctli,all_reg,name,minrl,omaxrl);
         
-        //The points of the octant mesh must be saved at this point, otherwise node are
+        //The points of the Quadrant mesh must be saved at this point, otherwise node are
         //projected onto the surface and causes further problems with knowing if nodes
         //are inside, outside or projected.
         vector<MeshPoint> oct_points = points;
@@ -78,9 +78,9 @@ namespace Clobscode
         applySurfacePatterns(input);
         removeOnSurface();*/
         
-        //Now that we have all the elements, we can save the octant mesh.
-        unsigned int nels = octants.size();
-        Services::WriteOctreeMesh(name,oct_points,octants,octreeEdges,nels,gt);
+        //Now that we have all the elements, we can save the Quadrant mesh.
+        unsigned int nels = Quadrants.size();
+        Services::WriteOctreeMesh(name,oct_points,Quadrants,QuadEdges,nels,gt);
         
         /*detectInsideNodes(input);
         
@@ -124,14 +124,14 @@ namespace Clobscode
         //it causes conflicts when the input is a cube. Must be checked.
 		bool rotated = rotateGridMesh(input, all_reg, gt);
         
-		//generate root octants
+		//generate root Quadrants
 		generateGridMesh(input);
         
-		//split octants until the refinement level (rl) is achieved.
+		//split Quadrants until the refinement level (rl) is achieved.
 		//The output will be a one-irregular mesh.
 		generateOctreeMesh(rl,input,all_reg,name);
 		
-        //The points of the octant mesh must be saved at this point, otherwise node are
+        //The points of the Quadrant mesh must be saved at this point, otherwise node are
         //projected onto the surface and causes further problems with knowing if nodes
         //are inside, outside or projected.
         vector<MeshPoint> oct_points = points;
@@ -147,9 +147,9 @@ namespace Clobscode
 		applySurfacePatterns(input);
         removeOnSurface();
         
-        //Now that we have all the elements, we can save the octant mesh.
-        unsigned int nels = octants.size();
-        Services::WriteOctreeMesh(name,points,octants,octreeEdges,nels,gt);
+        //Now that we have all the elements, we can save the Quadrant mesh.
+        unsigned int nels = Quadrants.size();
+        Services::WriteOctreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
 
         
         //projectCloseToBoundaryNodes(input);
@@ -222,14 +222,14 @@ namespace Clobscode
         gm.generatePoints(input.getBounds(),all_x,all_y,all_z);
         gm.generateMesh(all_x,all_y,all_z,points,elements);
         
-        octants.reserve(elements.size());
+        Quadrants.reserve(elements.size());
         
-        //create the root octants
+        //create the root Quadrants
         for (unsigned int i=0; i<elements.size(); i++) {
-            Octant o (elements[i], 0);
-            //Only when the octant intersects the input
-            //add it to the list of current octants. As
-            //This is the first time octants are checked
+            Quadrant o (elements[i], 0);
+            //Only when the Quadrant intersects the input
+            //add it to the list of current Quadrants. As
+            //This is the first time Quadrants are checked
             //for intersections they must be made w.r.t.
             //all input faces.
             IntersectionsVisitor iv(false);
@@ -237,8 +237,8 @@ namespace Clobscode
             iv.setTriMesh(input);
             iv.setPoints(points);
             if (o.accept(&iv)) {
-                EdgeVisitor::insertEdges(&o, octreeEdges);
-                octants.push_back(o);
+                EdgeVisitor::insertEdges(&o, QuadEdges);
+                Quadrants.push_back(o);
             }
         }
     }
@@ -246,7 +246,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     
-    void Mesher::splitOctants(const unsigned short &rl, TriMesh &input,
+    void Mesher::splitQuadrants(const unsigned short &rl, TriMesh &input,
                               list<unsigned int> &roctli,
                               list<RefinementRegion *> &all_reg, const string &name,
                               const unsigned short &minrl, const unsigned short &omaxrl){
@@ -254,30 +254,30 @@ namespace Clobscode
         //to save m3d files per stage
         Clobscode::Services io;
         
-        //list of temp octants
-        list<Octant> tmp_octants, new_octants;
+        //list of temp Quadrants
+        list<Quadrant> tmp_Quadrants, new_Quadrants;
         //list of the points added at this refinement iteration:
         list<Point3D> new_pts;
         
-        list<Octant>::iterator iter;
+        list<Quadrant>::iterator iter;
         
-        for (unsigned int i=0; i<octants.size(); i++) {
-            tmp_octants.push_back(octants[i]);
+        for (unsigned int i=0; i<Quadrants.size(); i++) {
+            tmp_Quadrants.push_back(Quadrants[i]);
         }
         
         //create visitors and give them variables
         SplitVisitor sv;
         sv.setPoints(points);
-        sv.setEdges(octreeEdges);
+        sv.setEdges(QuadEdges);
         sv.setNewPts(new_pts);
         
         //----------------------------------------------------------
-        //refine once each octant in the list
+        //refine once each Quadrant in the list
         //----------------------------------------------------------
         unsigned int cindex = 0;
         list<unsigned int>::iterator octidx = roctli.begin();
         
-        for (iter=tmp_octants.begin(); iter!=tmp_octants.end(); iter++) {
+        for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
             if (octidx!=roctli.end() && cindex==(*octidx)) {
                 
                 octidx++;
@@ -296,13 +296,13 @@ namespace Clobscode
                 if (inter_faces.empty()) {
                     for (unsigned int j=0; j<split_elements.size(); j++) {
                         
-                        Octant o (split_elements[j],orl+1);
-                        new_octants.push_back(o);
+                        Quadrant o (split_elements[j],orl+1);
+                        new_Quadrants.push_back(o);
                     }
                 }
                 else {
                     for (unsigned int j=0; j<split_elements.size(); j++) {
-                        Octant o (split_elements[j],orl+1);
+                        Quadrant o (split_elements[j],orl+1);
 
                         //the new points are inserted in bash at the end of this
                         //iteration. For this reason, the coordinates must be passed
@@ -314,39 +314,39 @@ namespace Clobscode
                         iv.setCoords(clipping_coords[j]);
                         
                         if (o.accept(&iv)) {
-                            new_octants.push_back(o);
+                            new_Quadrants.push_back(o);
                         }
                         else {
                             //The element doesn't intersect any input face.
                             //It must be checked if it's inside or outside.
-                            //Only in the first case add it to new_octants.
-                            //Test this with parent octant faces only.
+                            //Only in the first case add it to new_Quadrants.
+                            //Test this with parent Quadrant faces only.
                             
                             //Comment the following lines of this 'else' if
-                            //only intersecting octants are meant to be
+                            //only intersecting Quadrants are meant to be
                             //displayed.
                             
                             //note: inter_faces is quite enough to check if
-                            //element is inside input, no octant needed,
+                            //element is inside input, no Quadrant needed,
                             //so i moved the method to mesher  --setriva
                             
                             if (isItIn(input,inter_faces,clipping_coords[j])) {
-                                new_octants.push_back(o);
+                                new_Quadrants.push_back(o);
                             }
                         }
                     }
                 }
             }
             else {
-                new_octants.push_back(*iter);
+                new_Quadrants.push_back(*iter);
             }
             cindex++;
         }
         
         if (!roctli.empty()) {
-            tmp_octants.clear();
-            tmp_octants = new_octants;
-            new_octants.clear();
+            tmp_Quadrants.clear();
+            tmp_Quadrants = new_Quadrants;
+            new_Quadrants.clear();
             
             //add the new points to the vector
             list<Point3D>::iterator piter;
@@ -360,7 +360,7 @@ namespace Clobscode
         unsigned int oldnpts = points.size();
         
         //----------------------------------------------------------
-        //refine each octant until the Refinement Level is reached
+        //refine each Quadrant until the Refinement Level is reached
         //----------------------------------------------------------
         
         for (unsigned short i=minrl; i<rl; i++) {
@@ -368,7 +368,7 @@ namespace Clobscode
             
             unsigned int refoct_int = 0, refoct_ext = 0;
             
-            //cout << "initial octants in round" << i << " " << tmp_octants.size() << "\n";
+            //cout << "initial Quadrants in round" << i << " " << tmp_Quadrants.size() << "\n";
             
             
             
@@ -379,8 +379,8 @@ namespace Clobscode
             
             list<RefinementRegion *>::iterator reg_iter;
             
-            //split the octants as needed
-            for (iter=tmp_octants.begin(); iter!=tmp_octants.end(); iter++) {
+            //split the Quadrants as needed
+            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
                 
                 bool to_refine = false;
                 
@@ -391,24 +391,24 @@ namespace Clobscode
                         continue;
                     }
                     
-                    //If the octant has a greater RL than the region needs, continue
+                    //If the Quadrant has a greater RL than the region needs, continue
                     if (region_rl<=(*iter).getRefinementLevel()) {
                         continue;
                     }
                     
-                    //Get the two extreme nodes of the octant to test intersection with
+                    //Get the two extreme nodes of the Quadrant to test intersection with
                     //this RefinementRegion. If not, conserve it as it is.
                     //unsigned int n_idx1 = (*iter).getPoints()[0];
                     //unsigned int n_idx2 = (*iter).getPoints()[6];
                     
-                    if ((*reg_iter)->intersectsOctant(points,*iter)) {
+                    if ((*reg_iter)->intersectsQuadrant(points,*iter)) {
                         to_refine = true;
                     }
                 }
                 
-                //now if refinement is not needed, we add the octant as it was.
+                //now if refinement is not needed, we add the Quadrant as it was.
                 if (!to_refine) {
-                    new_octants.push_back(*iter);
+                    new_Quadrants.push_back(*iter);
                     continue;
                 }
                 else {
@@ -434,8 +434,8 @@ namespace Clobscode
                         
                         for (unsigned int j=0; j<split_elements.size(); j++) {
                             
-                            Octant o (split_elements[j],orl+1);
-                            new_octants.push_back(o);
+                            Quadrant o (split_elements[j],orl+1);
+                            new_Quadrants.push_back(o);
                         }
                         //break;
                     }
@@ -444,7 +444,7 @@ namespace Clobscode
                         refoct_ext++;
                         
                         for (unsigned int j=0; j<split_elements.size(); j++) {
-                            Octant o (split_elements[j],orl+1);
+                            Quadrant o (split_elements[j],orl+1);
                             //the new points are inserted in bash at the end of this
                             //iteration. For this reason, the coordinates must be passed
                             //"manually" at this point (clipping_coords).
@@ -455,24 +455,24 @@ namespace Clobscode
                             iv.setCoords(clipping_coords[j]);
                             
                             if (o.accept(&iv)) {
-                                new_octants.push_back(o);
+                                new_Quadrants.push_back(o);
                             }
                             else {
                                 //The element doesn't intersect any input face.
                                 //It must be checked if it's inside or outside.
-                                //Only in the first case add it to new_octants.
-                                //Test this with parent octant faces only.
+                                //Only in the first case add it to new_Quadrants.
+                                //Test this with parent Quadrant faces only.
                                 
                                 //Comment the following lines of this 'else' if
-                                //only intersecting octants are meant to be
+                                //only intersecting Quadrants are meant to be
                                 //displayed.
                                 
                                 //note: inter_faces is quite enough to check if
-                                //element is inside input, no octant needed,
+                                //element is inside input, no Quadrant needed,
                                 //so i moved the method to mesher  --setriva
                                 
                                 if (isItIn(input,inter_faces,clipping_coords[j])) {
-                                    new_octants.push_back(o);
+                                    new_Quadrants.push_back(o);
                                 }
                             }
                         }
@@ -483,15 +483,15 @@ namespace Clobscode
             //cout << "internal refined " << refoct_int << "\n";
             //cout << "external refined " << refoct_ext << "\n";
             
-            //cout << "tmp octants " << tmp_octants.size() << "\n";
-            //cout << "refined octants " << nor << " and not " << maxr << "\n";
+            //cout << "tmp Quadrants " << tmp_Quadrants.size() << "\n";
+            //cout << "refined Quadrants " << nor << " and not " << maxr << "\n";
             
-            //remove the old octants
-            tmp_octants.clear();
-            tmp_octants = new_octants;
-            new_octants.clear();
+            //remove the old Quadrants
+            tmp_Quadrants.clear();
+            tmp_Quadrants = new_Quadrants;
+            new_Quadrants.clear();
             
-            //cout << "octants at the end of round" << i << " " << tmp_octants.size() << "\n";
+            //cout << "Quadrants at the end of round" << i << " " << tmp_Quadrants.size() << "\n";
             //cout << "new points " << new_pts.size() << "\n";
             
             //if no points were added at this iteration, it is no longer
@@ -512,32 +512,32 @@ namespace Clobscode
         //----------------------------------------------------------
         
         bool one_irregular = false;
-        new_octants.clear();
+        new_Quadrants.clear();
         
         //visitante oneIrregular
         OneIrregularVisitor oiv;
-        oiv.setEdges(octreeEdges);
+        oiv.setEdges(QuadEdges);
         oiv.setMaxRefLevel(omaxrl);
         
         //visitante TransitionPattern in check mode
         //(we'll reuse it in apply mode later)
         TransitionPatternVisitor tpv(false);
         tpv.setPoints(points);
-        tpv.setEdges(octreeEdges);
+        tpv.setEdges(QuadEdges);
         tpv.setMaxRefLevel(omaxrl);
         
         
         unsigned int irroct = 0;
-        //cout << "number of regular octants ";
+        //cout << "number of regular Quadrants ";
         
         
         while (!one_irregular) {
             one_irregular = true;
             new_pts.clear();
             //refine until the mesh is one-irregular
-            for (iter=tmp_octants.begin(); iter!=tmp_octants.end(); iter++) {
+            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
                 if (!(*iter).accept(&oiv) || !(*iter).accept(&tpv)) {
-                    //split this octant
+                    //split this Quadrant
                     vector<vector<Point3D> > clipping_coords;
                     sv.setClipping(clipping_coords);
                     vector< vector <unsigned int> > split_elements;
@@ -545,18 +545,18 @@ namespace Clobscode
                     
                     list<unsigned int> inter_faces = (*iter).getIntersectedFaces();
                     
-                    //(*iter).split(points,new_pts,octreeEdges,split_elements,clipping_coords);
-                    //split the octant
+                    //(*iter).split(points,new_pts,QuadEdges,split_elements,clipping_coords);
+                    //split the Quadrant
                     iter->accept(&sv);
                     
                     
                     unsigned short prl = (*iter).getRefinementLevel();
                     //insert the new elements
                     for (unsigned int j=0; j<split_elements.size(); j++) {
-                        Octant o (split_elements[j],prl+1);
+                        Quadrant o (split_elements[j],prl+1);
                         
                         if (inter_faces.empty()) {
-                            new_octants.push_back(o);
+                            new_Quadrants.push_back(o);
                             continue;
                         }
                         
@@ -568,11 +568,11 @@ namespace Clobscode
                         iv.setCoords(clipping_coords[j]);
                         
                         if (o.accept(&iv)) {
-                            new_octants.push_back(o);
+                            new_Quadrants.push_back(o);
                         }
                         else {
                             if (isItIn(input,inter_faces,clipping_coords[j])) {
-                                new_octants.push_back(o);
+                                new_Quadrants.push_back(o);
                             }
                         }
                     }
@@ -580,7 +580,7 @@ namespace Clobscode
                 }
                 else {
                     irroct++;
-                    new_octants.push_back(*iter);
+                    new_Quadrants.push_back(*iter);
                 }
             }
             
@@ -588,10 +588,10 @@ namespace Clobscode
                 break;
             }
             
-            //remove the old octants
-            tmp_octants.clear();
-            tmp_octants = new_octants;
-            new_octants.clear();
+            //remove the old Quadrants
+            tmp_Quadrants.clear();
+            tmp_Quadrants = new_Quadrants;
+            new_Quadrants.clear();
             
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
@@ -615,16 +615,16 @@ namespace Clobscode
         
         //clean tmp point list
         new_pts.clear();
-        //new_octants.clear();
+        //new_Quadrants.clear();
         
         //change TransitionPatternVisitor mode to apply pattern
         tpv.setApplyMode(true);
         tpv.setNewPoints(new_pts);
         
-        //cout << tmp_octants.size() << "\n";
+        //cout << tmp_Quadrants.size() << "\n";
         unsigned int cl3=0;
         
-        for (iter = tmp_octants.begin(); iter!=tmp_octants.end(); iter++) {
+        for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
             
             if (!(*iter).accept(&tpv)) {
                 std::cerr << "Error at Mesher::generateOctreeMesh";
@@ -635,7 +635,7 @@ namespace Clobscode
             }
         }
         
-        //cout << "number of rl 3 octants: " << cl3 << endl;
+        //cout << "number of rl 3 Quadrants: " << cl3 << endl;
         
         //if no points were added at this iteration, it is no longer
         //necessary to continue the refinement.
@@ -651,17 +651,17 @@ namespace Clobscode
         /*{
             //save pure octree mesh
             FEMesh pure_octree;
-            saveOutputMesh(pure_octree,points,tmp_octants);
+            saveOutputMesh(pure_octree,points,tmp_Quadrants);
             string tmp_name = name + "_alloct";
             Services::WriteVTK(tmp_name,pure_octree);
             Services::WriteMixedVolumeMesh(tmp_name,pure_octree);
         }*/
         
-        //put the octants in a vector
-        octants.clear();
-        octants.reserve(tmp_octants.size());
-        for (iter=tmp_octants.begin(); iter!=tmp_octants.end(); iter++) {
-            octants.push_back(*iter);
+        //put the Quadrants in a vector
+        Quadrants.clear();
+        Quadrants.reserve(tmp_Quadrants.size());
+        for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
+            Quadrants.push_back(*iter);
         }
         
         //cout << "refinement finished\n";
@@ -678,25 +678,25 @@ namespace Clobscode
 		//to save m3d files per stage
 		Clobscode::Services io;
 
-		//list of temp octants
-		list<Octant> tmp_octants, new_octants;
+		//list of temp Quadrants
+		list<Quadrant> tmp_Quadrants, new_Quadrants;
 		//list of the points added at this refinement iteration:
 		list<Point3D> new_pts;
-		list<Octant>::iterator iter;
+		list<Quadrant>::iterator iter;
 		
         
-		for (unsigned int i=0; i<octants.size(); i++) {
-			tmp_octants.push_back(octants[i]);
+		for (unsigned int i=0; i<Quadrants.size(); i++) {
+			tmp_Quadrants.push_back(Quadrants[i]);
 		}
 
         //create visitors and give them variables
         SplitVisitor sv;
         sv.setPoints(points);
-        sv.setEdges(octreeEdges);
+        sv.setEdges(QuadEdges);
         sv.setNewPts(new_pts);
         
 		//----------------------------------------------------------
-		//refine each octant until the Refinement Level is reached
+		//refine each Quadrant until the Refinement Level is reached
 		//----------------------------------------------------------
 		
 		for (unsigned short i=0; i<rl; i++) {
@@ -708,8 +708,8 @@ namespace Clobscode
 			
 			list<RefinementRegion *>::iterator reg_iter;
             
-			//split the octants as needed
-			for (iter=tmp_octants.begin(); iter!=tmp_octants.end(); iter++) {
+			//split the Quadrants as needed
+			for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
                 
 				bool to_refine = false;
                 
@@ -720,24 +720,24 @@ namespace Clobscode
                         continue;
                     }
                     
-                    //If the octant has a greater RL than the region needs, continue
+                    //If the Quadrant has a greater RL than the region needs, continue
                     if (region_rl<=(*iter).getRefinementLevel()) {
                         continue;
                     }
                     
-                    //Get the two extreme nodes of the octant to test intersection with
+                    //Get the two extreme nodes of the Quadrant to test intersection with
                     //this RefinementRegion. If not, conserve it as it is.
                     //unsigned int n_idx1 = (*iter).getPoints()[0];
                     //unsigned int n_idx2 = (*iter).getPoints()[6];
                     
-                    if ((*reg_iter)->intersectsOctant(points,*iter)) {
+                    if ((*reg_iter)->intersectsQuadrant(points,*iter)) {
                         to_refine = true;
                     }
                 }
                 
-                //now if refinement is not needed, we add the octant as it was.
+                //now if refinement is not needed, we add the Quadrant as it was.
 				if (!to_refine) {
-					new_octants.push_back(*iter);
+					new_Quadrants.push_back(*iter);
 					continue;
 				}
 				else {
@@ -749,19 +749,19 @@ namespace Clobscode
                     vector<vector<unsigned int> > split_elements;
                     sv.setNewEles(split_elements);
 
-                    //iter->split(points,new_pts,octreeEdges,split_elements,clipping_coords);
+                    //iter->split(points,new_pts,QuadEdges,split_elements,clipping_coords);
                     //cout << "Accept" << endl;
                     iter->accept(&sv);
 
 					if (inter_faces.empty()) {
 						for (unsigned int j=0; j<split_elements.size(); j++) {
-							Octant o (split_elements[j],i+1);
-							new_octants.push_back(o);
+							Quadrant o (split_elements[j],i+1);
+							new_Quadrants.push_back(o);
 						}
 					}
 					else {
 						for (unsigned int j=0; j<split_elements.size(); j++) {
-							Octant o (split_elements[j],i+1);
+							Quadrant o (split_elements[j],i+1);
 							//the new points are inserted in bash at the end of this
 							//iteration. For this reason, the coordinates must be passed
 							//"manually" at this point (clipping_coords).
@@ -774,24 +774,24 @@ namespace Clobscode
                             iv.setCoords(clipping_coords[j]);
 
                             if (o.accept(&iv)) {
-							    new_octants.push_back(o);
+							    new_Quadrants.push_back(o);
 							}
 							else {
 								//The element doesn't intersect any input face.
 								//It must be checked if it's inside or outside.
-								//Only in the first case add it to new_octants.
-								//Test this with parent octant faces only.
+								//Only in the first case add it to new_Quadrants.
+								//Test this with parent Quadrant faces only.
                                 
 								//Comment the following lines of this 'else' if
-								//only intersecting octants are meant to be
+								//only intersecting Quadrants are meant to be
 								//displayed.
 
                                 //note: inter_faces is quite enough to check if
-                                //element is inside input, no octant needed,
+                                //element is inside input, no Quadrant needed,
                                 //so i moved the method to mesher  --setriva
 
 								if (isItIn(input,inter_faces,clipping_coords[j])) {
-									new_octants.push_back(o);
+									new_Quadrants.push_back(o);
 								}
 							}
 						}
@@ -799,10 +799,10 @@ namespace Clobscode
 				}
 			}
             
-			//remove the old octants
-			tmp_octants.clear();
-			tmp_octants = new_octants;
-			new_octants.clear();
+			//remove the old Quadrants
+			tmp_Quadrants.clear();
+			tmp_Quadrants = new_Quadrants;
+			new_Quadrants.clear();
 			
 			//if no points were added at this iteration, it is no longer
 			//necessary to continue the refinement.
@@ -826,24 +826,24 @@ namespace Clobscode
 		//cout.flush();
 		
 		bool one_irregular = false;
-		new_octants.clear();
+		new_Quadrants.clear();
 
         //visitante oneIrregular
         OneIrregularVisitor oiv;
-        oiv.setEdges(octreeEdges);
+        oiv.setEdges(QuadEdges);
         oiv.setMaxRefLevel(rl);
 
         //visitante TransitionPattern in check mode
         //(we'll reuse it in apply mode later)
         TransitionPatternVisitor tpv(false);
         tpv.setPoints(points);
-        tpv.setEdges(octreeEdges);
+        tpv.setEdges(QuadEdges);
         tpv.setMaxRefLevel(rl);
 
         /* //if pointMoved is ever needed, uncomment this:
          * PointMovedVisitor pmv;
          * pmv.setPoints(points);
-         * pmv.setEdges(octreeEdges);
+         * pmv.setEdges(QuadEdges);
          * pmv.setMaxRefLevel(rl);
          * //haven't tested it, but if it's like the others,
          * //it should work right out of the box
@@ -852,11 +852,11 @@ namespace Clobscode
 			one_irregular = true;
 			new_pts.clear();
 			//refine until the mesh is one-irregular
-			for (iter=tmp_octants.begin(); iter!=tmp_octants.end(); iter++) {
-				if (//(*iter).accept(&pmv)  || //(*iter).pointMoved(points,octreeEdges,rl) ||
-					!(*iter).accept(&oiv) || //!(*iter).isOneIrregular(octreeEdges,rl) ||
-                    !(*iter).accept(&tpv)) {//!(*iter).checkTransitionPattern(points,octreeEdges,rl)) {
-					//split this octant
+			for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
+				if (//(*iter).accept(&pmv)  || //(*iter).pointMoved(points,QuadEdges,rl) ||
+					!(*iter).accept(&oiv) || //!(*iter).isOneIrregular(QuadEdges,rl) ||
+                    !(*iter).accept(&tpv)) {//!(*iter).checkTransitionPattern(points,QuadEdges,rl)) {
+					//split this Quadrant
 					vector<vector<Point3D> > clipping_coords;
                     sv.setClipping(clipping_coords);
 					vector< vector <unsigned int> > split_elements;
@@ -864,18 +864,18 @@ namespace Clobscode
 					
 					list<unsigned int> inter_faces = (*iter).getIntersectedFaces();
 					
-					//(*iter).split(points,new_pts,octreeEdges,split_elements,clipping_coords);
-                    //split the octant
+					//(*iter).split(points,new_pts,QuadEdges,split_elements,clipping_coords);
+                    //split the Quadrant
                     iter->accept(&sv);
 
 
 					unsigned short prl = (*iter).getRefinementLevel();
 					//insert the new elements
 					for (unsigned int j=0; j<split_elements.size(); j++) {
-						Octant o (split_elements[j],prl+1);
+						Quadrant o (split_elements[j],prl+1);
 						
 						if (inter_faces.empty()) {
-							new_octants.push_back(o);
+							new_Quadrants.push_back(o);
 							continue;
 						}
 
@@ -887,18 +887,18 @@ namespace Clobscode
                         iv.setCoords(clipping_coords[j]);
 
                         if (o.accept(&iv)) {
-                        	new_octants.push_back(o);
+                        	new_Quadrants.push_back(o);
 						}
 						else {
 							if (isItIn(input,inter_faces,clipping_coords[j])) {
-								new_octants.push_back(o);
+								new_Quadrants.push_back(o);
 							}
 						}
 					}
 					one_irregular = false;
 				}
 				else {
-					new_octants.push_back(*iter);
+					new_Quadrants.push_back(*iter);
 				}
 			}
 			
@@ -906,10 +906,10 @@ namespace Clobscode
 				break;
 			}
 			
-			//remove the old octants
-			tmp_octants.clear();
-			tmp_octants = new_octants;
-			new_octants.clear();
+			//remove the old Quadrants
+			tmp_Quadrants.clear();
+			tmp_Quadrants = new_Quadrants;
+			new_Quadrants.clear();
 			
 			//if no points were added at this iteration, it is no longer
 			//necessary to continue the refinement.
@@ -928,7 +928,7 @@ namespace Clobscode
 		/*{
          //save pure octree mesh
          FEMesh one_ir_mesh;
-         saveOutputMesh(one_ir_mesh,points,tmp_octants);
+         saveOutputMesh(one_ir_mesh,points,tmp_Quadrants);
          string tmp_name = name + "_oneIrreg";
          Services::WriteOutputMesh(tmp_name,one_ir_mesh);
          }*/
@@ -943,14 +943,14 @@ namespace Clobscode
 		
 		//clean tmp point list
 		new_pts.clear();
-		//new_octants.clear();
+		//new_Quadrants.clear();
 
 		//change TransitionPatternVisitor mode to apply pattern
         tpv.setApplyMode(true);
         tpv.setNewPoints(new_pts);
-		for (iter = tmp_octants.begin(); iter!=tmp_octants.end(); iter++) {
+		for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
 			//vector<vector <unsigned int> > trs_ele;
-            //if (!(*iter).applyTransitionPattern(points,new_pts,octreeEdges,rl)) {
+            //if (!(*iter).applyTransitionPattern(points,new_pts,QuadEdges,rl)) {
             if (!(*iter).accept(&tpv)) {
                 std::cerr << "Error at Mesher::generateOctreeMesh";
                 std::cerr << " Transition Pattern not found\n";
@@ -968,11 +968,11 @@ namespace Clobscode
 			}
 		}
         
-		//put the octants in a vector
-		octants.clear();
-		octants.reserve(tmp_octants.size());
-		for (iter=tmp_octants.begin(); iter!=tmp_octants.end(); iter++) {
-			octants.push_back(*iter);
+		//put the Quadrants in a vector
+		Quadrants.clear();
+		Quadrants.reserve(tmp_Quadrants.size());
+		for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
+			Quadrants.push_back(*iter);
 		}
 		
 		//cout << " done\n";
@@ -980,7 +980,7 @@ namespace Clobscode
         /*{
             //save pure octree mesh
             FEMesh one_ir_mesh;
-            saveOutputMesh(one_ir_mesh,points,tmp_octants);
+            saveOutputMesh(one_ir_mesh,points,tmp_Quadrants);
             string tmp_name = name + "_transPatt";
             marek.WriteOutputMesh(tmp_name,one_ir_mesh);
         }*/
@@ -988,7 +988,7 @@ namespace Clobscode
 	}
 
     bool Mesher::isItIn(TriMesh &mesh, list<unsigned int> &faces, vector<Point3D> &coords) {
-        //this method is meant to be used by octants that don't
+        //this method is meant to be used by Quadrants that don't
         //intersect input domains. If they are inside of at least
         //one input mesh, then they must remain in the output mesh.
         bool first = mesh.pointIsInMesh(coords[0],faces);
@@ -1020,8 +1020,8 @@ namespace Clobscode
         list<Point3D> out_points_tmp;
         
         //recompute node indexes and update elements with them.
-        for (unsigned int i=0; i<octants.size(); i++) {
-            vector<vector<unsigned int> > sub_els= octants[i].getSubElements();
+        for (unsigned int i=0; i<Quadrants.size(); i++) {
+            vector<vector<unsigned int> > sub_els= Quadrants[i].getSubElements();
             for (unsigned int j=0; j<sub_els.size(); j++) {
                 
                 vector<unsigned int> sub_ele_new_idxs = sub_els[j];
@@ -1065,7 +1065,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 	
 	unsigned int Mesher::saveOutputMesh(FEMesh &mesh,vector<MeshPoint> &tmp_points,
-								list<Octant> &tmp_octants){
+								list<Quadrant> &tmp_Quadrants){
 		
 		vector<Point3D> out_pts;
         list<vector<unsigned int> > tmp_elements;
@@ -1077,9 +1077,9 @@ namespace Clobscode
 			out_pts.push_back(points[i].getPoint());
 		}
         
-		list<Octant>::iterator o_iter;
+		list<Quadrant>::iterator o_iter;
 		
-		for (o_iter=tmp_octants.begin(); o_iter!=tmp_octants.end(); o_iter++) {
+		for (o_iter=tmp_Quadrants.begin(); o_iter!=tmp_Quadrants.end(); o_iter++) {
             
             vector<vector<unsigned int> > sub_els= o_iter->getSubElements();
             for (unsigned int j=0; j<sub_els.size(); j++) {
@@ -1109,8 +1109,8 @@ namespace Clobscode
 		}
 		
 		//link element info to nodes
-		for (unsigned int i=0; i<octants.size(); i++) {
-			vector <unsigned int> o_pts = octants[i].getPoints();
+		for (unsigned int i=0; i<Quadrants.size(); i++) {
+			vector <unsigned int> o_pts = Quadrants[i].getPoints();
 			
 			for (unsigned int j=0; j<o_pts.size(); j++) {
 				points.at(o_pts[j]).addElement(i);
@@ -1134,7 +1134,7 @@ namespace Clobscode
 			}
 			list<unsigned int>::iterator iter;
 			for (iter=p_eles.begin(); iter!=p_eles.end(); iter++) {
-				list<unsigned int> o_faces= octants[*iter].getIntersectedFaces();
+				list<unsigned int> o_faces= Quadrants[*iter].getIntersectedFaces();
 				list<unsigned int>::iterator of_iter;
 				if (o_faces.empty()) {
 					continue;
@@ -1158,27 +1158,27 @@ namespace Clobscode
 	
 	void Mesher::removeOnSurface(){
 		
-		list<Octant> newele,removed;
-		list<Octant>::iterator eiter;
+		list<Quadrant> newele,removed;
+		list<Quadrant>::iterator eiter;
         RemoveSubElementsVisitor rsv;
         rsv.setPoints(points);
 		//remove elements without an inside node.
-		for (unsigned int i=0; i<octants.size(); i++) {
-			if (octants[i].isInside()) {
-				newele.push_back(octants[i]);
+		for (unsigned int i=0; i<Quadrants.size(); i++) {
+			if (Quadrants[i].isInside()) {
+				newele.push_back(Quadrants[i]);
 				continue;
 			}
 
-            //if (octants[i].removeOutsideSubElements(points)) {
-            if (octants[i].accept(&rsv)) {
-                removed.push_back(octants[i]);
+            //if (Quadrants[i].removeOutsideSubElements(points)) {
+            if (Quadrants[i].accept(&rsv)) {
+                removed.push_back(Quadrants[i]);
             }
             else {
-                newele.push_back(octants[i]);
+                newele.push_back(Quadrants[i]);
             }
             
 			/*bool onein = false;
-             vector<unsigned int> epts = octants[i].getPoints();
+             vector<unsigned int> epts = Quadrants[i].getPoints();
              
              for (unsigned int j=0; j< epts.size(); j++) {
              if (points.at(epts[j]).isInside()) {// &&
@@ -1189,10 +1189,10 @@ namespace Clobscode
              }
              
              if (onein) {
-             newele.push_back(octants[i]);
+             newele.push_back(Quadrants[i]);
              }
              else {
-             removed.push_back(octants[i]);
+             removed.push_back(Quadrants[i]);
              }*/
 		}
 		
@@ -1204,9 +1204,9 @@ namespace Clobscode
 		removed.clear();
 		//now element std::list from Vomule mesh can be cleared, as all remaining
 		//elements are still in use and attached to newele std::list.
-		octants.clear();
+		Quadrants.clear();
 		for (eiter = newele.begin(); eiter!=newele.end(); eiter++) {
-			octants.push_back(*eiter);
+			Quadrants.push_back(*eiter);
 		}
 	}
     
@@ -1223,15 +1223,15 @@ namespace Clobscode
         stv.setPoints(points);
         stv.setInput(input);
 
-		for (unsigned int i=0; i<octants.size(); i++) {
+		for (unsigned int i=0; i<Quadrants.size(); i++) {
 			
-			if (octants[i].isSurface()) {
+			if (Quadrants[i].isSurface()) {
                 stv.setNewPoints(tmppts);
                 stv.setIdx(i);
-				if (!octants[i].accept(&stv)) {
+				if (!Quadrants[i].accept(&stv)) {
 					cout << "Error in Mesher::applySurfacePatterns: coultd't apply";
 					cout << " a surface pattern\n";
-					cout << octants[i] << "\n";
+					cout << Quadrants[i] << "\n";
 					continue;
 				}
 			}
@@ -1260,16 +1260,16 @@ namespace Clobscode
 		//surface. If after all is done, if an element counts only with "on
 		//surface" and "outside" nodes, remove it.
 		list<unsigned int> out_nodes;
-		list<Octant>::iterator oiter;
+		list<Quadrant>::iterator oiter;
         
-		for (unsigned int i=0; i<octants.size(); i++) {
-			if (octants[i].isInside()) {
+		for (unsigned int i=0; i<Quadrants.size(); i++) {
+			if (Quadrants[i].isInside()) {
 				continue;
 			}
 			
 			//Put in a std::list inside nodes of boundary elements that
 			//may be projected to the input domain.
-			vector<unsigned int> epts = octants[i].getPoints();
+			vector<unsigned int> epts = Quadrants[i].getPoints();
 			for (unsigned int j=0; j < epts.size(); j++) {
 				
 				if (!points[epts[j]].wasOutsideChecked()) {
@@ -1279,7 +1279,7 @@ namespace Clobscode
 					
 					points[epts[j]].outsideChecked();
 					Point3D oct_p = points.at(epts[j]).getPoint();
-					if (input.pointIsInMesh(oct_p,octants[i].getIntersectedFaces())) {
+					if (input.pointIsInMesh(oct_p,Quadrants[i].getIntersectedFaces())) {
 						points[epts[j]].setInside();
 					}
 				}
@@ -1302,12 +1302,12 @@ namespace Clobscode
 		
 		for (piter=out_nodes.begin(); piter!=out_nodes.end(); piter++) {
             
-			//get the faces of octants sharing this node
+			//get the faces of Quadrants sharing this node
 			list<unsigned int> p_faces, p_eles = points.at(*piter).getElements();
 			list<unsigned int>::iterator p_eiter;
 			
 			for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); p_eiter++) {
-				list<unsigned int> o_faces = octants[*p_eiter].getIntersectedFaces();
+				list<unsigned int> o_faces = Quadrants[*p_eiter].getIntersectedFaces();
 				list<unsigned int>::iterator oct_fcs;
 				for (oct_fcs=o_faces.begin(); oct_fcs!=o_faces.end(); oct_fcs++) {
 					p_faces.push_back(*oct_fcs);
@@ -1332,7 +1332,7 @@ namespace Clobscode
 			Point3D projected = input.getProjection(current,p_faces);
 			
 			/*for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); p_eiter++) {
-				octants[*p_eiter].addProjectionInfluence(projected-current);
+				Quadrants[*p_eiter].addProjectionInfluence(projected-current);
 			}*/
 			
 			points.at(*piter).setPoint(projected);
@@ -1346,11 +1346,11 @@ namespace Clobscode
          //detect all internal nodes to be displaced in this iteration.
          list<unsigned int> to_move, to_reset;
          list<unsigned int>::iterator o_iter, p_iter;
-         for (unsigned int j=0; j<octants.size(); j++) {
-         if (octants[j].wasShrink()) {
-         octants[j].noMoreProjectionInfluences();
+         for (unsigned int j=0; j<Quadrants.size(); j++) {
+         if (Quadrants[j].wasShrink()) {
+         Quadrants[j].noMoreProjectionInfluences();
          to_reset.push_back(j);
-         vector<unsigned int> o_pts = octants[j].getPoints();
+         vector<unsigned int> o_pts = Quadrants[j].getPoints();
          for (unsigned int k=0; k<o_pts.size(); k++) {
          if (!points.at(o_pts[k]).wasProjected()) {
          to_move.push_back(o_pts[k]);
@@ -1375,10 +1375,10 @@ namespace Clobscode
          Point3D p_to_add;
          unsigned short qty = 0;
          for (o_iter=p_eles.begin(); o_iter!=p_eles.end(); o_iter++) {
-         if (!octants[*o_iter].wasConsideredInProjection()) {
+         if (!Quadrants[*o_iter].wasConsideredInProjection()) {
          continue;
          }
-         p_to_add += octants[*o_iter].getProjectionInfluence();
+         p_to_add += Quadrants[*o_iter].getProjectionInfluence();
          qty++;
          }
          
@@ -1387,19 +1387,19 @@ namespace Clobscode
          //p_to_add = p_to_add * (factor/(2*qty));
          
          for (o_iter=p_eles.begin(); o_iter!=p_eles.end(); o_iter++) {
-         if (octants[*o_iter].wasConsideredInProjection()) {
+         if (Quadrants[*o_iter].wasConsideredInProjection()) {
          continue;
          }
-         octants[*o_iter].addProjectionInfluence(p_to_add);
+         Quadrants[*o_iter].addProjectionInfluence(p_to_add);
          }
          p_to_add += points[*p_iter].getPoint();
          points.at(*p_iter).setPoint(p_to_add);
          points.at(*p_iter).setProjected();
          }
          
-         //clear information over already shrunk octants
+         //clear information over already shrunk Quadrants
          for (o_iter=to_reset.begin(); o_iter!=to_reset.end(); o_iter++) {
-         octants[*o_iter].resetProjectionInfluence();
+         Quadrants[*o_iter].resetProjectionInfluence();
          }
          
          factor -= 0.25;
@@ -1419,23 +1419,23 @@ namespace Clobscode
         //surface. If after all is done, if an element counts only with "on
         //surface" and "outside" nodes, remove it.
         list<unsigned int> in_nodes;
-        list<Octant>::iterator oiter;
+        list<Quadrant>::iterator oiter;
         
-        for (unsigned int i=0; i<octants.size(); i++) {
-            if (!octants[i].isSurface()) {
+        for (unsigned int i=0; i<Quadrants.size(); i++) {
+            if (!Quadrants[i].isSurface()) {
                 continue;
             }
-            octants[i].computeMaxDistance(points);
+            Quadrants[i].computeMaxDistance(points);
         }
         
-        for (unsigned int i=0; i<octants.size(); i++) {
-            if (octants[i].isInside()) {
+        for (unsigned int i=0; i<Quadrants.size(); i++) {
+            if (Quadrants[i].isInside()) {
                 continue;
             }
             
             //Put in a std::list inside nodes of boundary elements that
             //may be projected to the input domain.
-            vector<unsigned int> epts = octants[i].getPoints();
+            vector<unsigned int> epts = Quadrants[i].getPoints();
             for (unsigned int j=0; j < epts.size(); j++) {
                 
                 if (!points[epts[j]].wasOutsideChecked()) {
@@ -1445,13 +1445,13 @@ namespace Clobscode
                     points[epts[j]].outsideChecked();
                     Point3D oct_p = points.at(epts[j]).getPoint();
                     
-                    if (input.pointIsInMesh(oct_p,octants[i].getIntersectedFaces())) {
+                    if (input.pointIsInMesh(oct_p,Quadrants[i].getIntersectedFaces())) {
                         points[epts[j]].setInside();
                     }
                 }
                 if (points[epts[j]].isInside()) {
                     in_nodes.push_back(epts[j]);
-                    double md = octants[i].getMaxDistance();
+                    double md = Quadrants[i].getMaxDistance();
                     if (j>7) {
                         md*=0.5;
                     }
@@ -1469,19 +1469,19 @@ namespace Clobscode
         
         for (piter=in_nodes.begin(); piter!=in_nodes.end(); piter++) {
             
-            //if this node is attached to an octant which was split in
+            //if this node is attached to an Quadrant which was split in
             //mixed-elements due to transition patterns, avoid the
             //displacement.
             
             
-            //get the faces of octants sharing this node
+            //get the faces of Quadrants sharing this node
             list<unsigned int> o_faces,p_faces, p_eles = points.at(*piter).getElements();
             list<unsigned int>::iterator peiter,oct_fcs;
             
             //bool trans_pattern = false;
             
             for (peiter=p_eles.begin(); peiter!=p_eles.end(); peiter++) {
-                o_faces = octants[*peiter].getIntersectedFaces();
+                o_faces = Quadrants[*peiter].getIntersectedFaces();
                 for (oct_fcs=o_faces.begin(); oct_fcs!=o_faces.end(); oct_fcs++) {
                     p_faces.push_back(*oct_fcs);
                 }
@@ -1502,7 +1502,7 @@ namespace Clobscode
                 points.at(*piter).setProjected();
                 points.at(*piter).setPoint(projected);
                 for (peiter=p_eles.begin(); peiter!=p_eles.end(); peiter++) {
-                    octants[*peiter].setSurface();
+                    Quadrants[*peiter].setSurface();
                 }
             }
         }

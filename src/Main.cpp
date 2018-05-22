@@ -46,14 +46,14 @@ using Clobscode::Point3D;
 
 void endMsg(){
 	cout << "use: ./mesher [-d] input.mdl [-o] input.off [-u] output\n";
-    cout << "              [-c] volume_mesh.oct (octant mesh to start from)\n";
+    cout << "              [-c] volume_mesh.oct (Quadrant mesh to start from)\n";
     cout << "              [-s] ref_level [-a] ref_level [-b] file.reg\n";
     cout << "              [-r] input_surface rl [-g] [-v]\n";
 	cout << "where:\n";
 	cout << "  one of the parameters must be an input surface mesh in\n";
     cout << "  mdl or off format. If output name is not provided it\n";
 	cout << "  will be saved in input_name.m3d. Options:\n";
-	cout << "    -s Refine octants intersecting the input surface.\n";
+	cout << "    -s Refine Quadrants intersecting the input surface.\n";
     cout << "       Parameter ref_level is the refinement level\n";
     cout << "    -a Refine all elements in the input domain.\n";
     cout << "       Parameter ref_level is the refinement level\n";
@@ -83,7 +83,7 @@ int main(int argc,char** argv){
     //cminrl: current min refinement level (used when starting from an Octree mesh)
     //omaxrl: old max refinement level (used when starting from an Octree mesh)
     list<unsigned int> roctli;
-    //this list contains the index of the octants previously generated that need
+    //this list contains the index of the Quadrants previously generated that need
     //one extra level of refinement.
     
 	list<RefinementRegion *> all_regions;
@@ -96,12 +96,12 @@ int main(int argc,char** argv){
     inputs.reserve(4);
     //Clobscode::Services io;
     
-    bool getfem = false, vtkformat = false, octant_start = false, m3dfor = false;
+    bool getfem = false, vtkformat = false, Quadrant_start = false, m3dfor = false;
     
-    //for reading an octant mesh as starting point.
+    //for reading an Quadrant mesh as starting point.
     vector<MeshPoint> oct_points;
-    vector<Octant> oct_octants;
-    set<OctreeEdge> oct_edges;
+    vector<Quadrant> oct_Quadrants;
+    set<QuadEdge> oct_edges;
     vector<unsigned int> oct_ele_link;
     GeometricTransform gt;
     
@@ -202,8 +202,8 @@ int main(int argc,char** argv){
                 i+=2;
                 break;
             case 'c':
-                octant_start = true;
-                Services::ReadOctreeMesh(argv[i+1], oct_points, oct_octants,
+                Quadrant_start = true;
+                Services::ReadOctreeMesh(argv[i+1], oct_points, oct_Quadrants,
                                          oct_edges,oct_ele_link,gt,cminrl,omaxrl);
                 if (ref_level<omaxrl) {
                     ref_level = omaxrl;
@@ -211,18 +211,18 @@ int main(int argc,char** argv){
                 i++;
                 break;
             case 'l':
-                if (octant_start) {
-                    Services::ReadOctantList(argv[i+1],roctli,oct_ele_link);
+                if (Quadrant_start) {
+                    Services::ReadQuadrantList(argv[i+1],roctli,oct_ele_link);
                     list<unsigned int>::iterator oeiter;
                     for (oeiter=roctli.begin(); oeiter!=roctli.end(); oeiter++) {
-                        rl = oct_octants[*oeiter].getRefinementLevel();
+                        rl = oct_Quadrants[*oeiter].getRefinementLevel();
                         if (ref_level<=rl) {
                             ref_level = rl+1;
                         }
                     }
                 }
                 else {
-                    cerr << "Warning: option -l needs a previously provided Octant";
+                    cerr << "Warning: option -l needs a previously provided Quadrant";
                     cerr << " mesh (option -o) skipping\n";
                 }
                 i++;
@@ -256,11 +256,11 @@ int main(int argc,char** argv){
 	Clobscode::Mesher mesher;
     Clobscode::FEMesh output;
     
-    if (!octant_start) {
+    if (!Quadrant_start) {
         output = mesher.generateMesh(inputs.at(0),ref_level,out_name,all_regions);
     }
     else {
-        mesher.setInitialState(oct_points,oct_octants,oct_edges);
+        mesher.setInitialState(oct_points,oct_Quadrants,oct_edges);
         if (omaxrl<ref_level) {
             omaxrl = ref_level;
         }

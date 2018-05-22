@@ -19,7 +19,7 @@
 
 #include "OneIrregularVisitor.h"
 
-#include "../Octant.h"
+#include "../Quadrant.h"
 
 namespace Clobscode
 {
@@ -29,7 +29,7 @@ namespace Clobscode
         max_ref_level = NULL;
     }
 
-    void OneIrregularVisitor::setEdges(set<OctreeEdge> &edges) {
+    void OneIrregularVisitor::setEdges(set<QuadEdge> &edges) {
         this->edges = &edges;
     }
 
@@ -37,7 +37,7 @@ namespace Clobscode
         this->max_ref_level = &max_ref_level;
     }
 
-    bool OneIrregularVisitor::visit(Octant *o) {
+    bool OneIrregularVisitor::visit(Quadrant *o) {
         //cout << "OneIrregular visit" << endl;
         if (*max_ref_level==o->ref_level) {
             return true;
@@ -45,12 +45,12 @@ namespace Clobscode
 
         //EdgeVisitor ev;
         for (unsigned int i=0; i<12; i++) {
-            OctreeEdge ee;
+            QuadEdge ee;
             EdgeVisitor::getEdge(o,i,ee);
-            set<OctreeEdge>::iterator my_edge, sub_edge;
+            set<QuadEdge>::iterator my_edge, sub_edge;
             my_edge = edges->find(ee);
             if (my_edge==edges->end()) {
-                cout << "Octant::isOneIrregular wtf!!!\n";
+                cout << "Quadrant::isOneIrregular wtf!!!\n";
                 return false;
             }
 
@@ -65,12 +65,12 @@ namespace Clobscode
             //them is also split, then this element is not
             //one-irregular
 
-            OctreeEdge sub1(ee[0],mid_idx);
+            QuadEdge sub1(ee[0],mid_idx);
             sub_edge = edges->find(sub1);
             if ((*sub_edge)[2]!=0) {
                 return false;
             }
-            OctreeEdge sub2(ee[1],mid_idx);
+            QuadEdge sub2(ee[1],mid_idx);
             sub_edge = edges->find(sub2);
             if ((*sub_edge)[2]!=0) {
                 return false;

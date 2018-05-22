@@ -21,7 +21,7 @@
 #define IntersectionsVisitor_h 1
 
 #include "../MeshPoint.h"
-#include "../OctreeEdge.h"
+#include "../QuadEdge.h"
 #include "../Point3D.h"
 #include "../SurfTriangle.h"
 #include "../TriMesh.h"
@@ -54,7 +54,7 @@ namespace Clobscode
         IntersectionsVisitor();
         IntersectionsVisitor(bool select_faces);
 
-        bool visit(Octant *o);
+        bool visit(Quadrant *o);
 
         void setTriMesh(TriMesh &mesh);
         void setPoints(vector<MeshPoint> &points);

@@ -18,7 +18,7 @@
  */
 
 #include "RemoveSubElementsVisitor.h"
-#include "../Octant.h"
+#include "../Quadrant.h"
 
 namespace Clobscode
 {
@@ -31,7 +31,7 @@ namespace Clobscode
         this->points = &points;
     }
 
-    bool RemoveSubElementsVisitor::visit(Octant *o) {
+    bool RemoveSubElementsVisitor::visit(Quadrant *o) {
         //cout << "RemoveElements" << endl;
         vector<vector<unsigned int>> &sub_elements = o->sub_elements;
 
