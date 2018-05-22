@@ -1,21 +1,27 @@
 /*
- <Mix-mesher: region type. This program generates a mixed-elements mesh>
+ <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
  
- Copyright (C) <2013,2017>  <Claudio Lobos>
+ Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
  
  This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
+ it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
  
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+ GNU Lesser General Public License for more details.
  
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/gpl.txt>
+ along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
  */
+/**
+* @file Point3D.h
+* @author Claudio Lobos, Fabrice Jaillet
+* @version 0.1
+* @brief
+**/
 
 #ifndef Point3D_h
 #define Point3D_h 1
@@ -33,11 +39,11 @@ namespace Clobscode
 	class Point3D{
 		
 	public:
-		Point3D();
+        Point3D() : x(0.0),y(0.0),z(0.0) {}
 		
-		Point3D(double x, double y, double z);
+        Point3D(double x, double y, double z) : x(x),y(y),z(z) {}
 		
-		virtual ~Point3D();
+        virtual ~Point3D() {}
 		
 		virtual double X() const;
 		
@@ -51,39 +57,29 @@ namespace Clobscode
 		
 		virtual double &Z();
 		
-		virtual void normalize();
+        virtual Point3D& normalize();
 		
-		virtual double Norm();
+        virtual double Norm() const;
 		
-		virtual Point3D cross(Point3D p);
+        virtual Point3D cross(const Point3D &p) const;
 		
 		//cross product operator
-		virtual Point3D operator^(Point3D p);
-		
 		virtual Point3D operator^(const Point3D &p) const;
 		
-		virtual double dot(Point3D p);
+        virtual double dot(const Point3D &p) const;
 		
 		//dot product operator
-		virtual double operator*(Point3D p);
+//        virtual double operator*(Point3D p);
 		
 		virtual double operator*(const Point3D &p) const;
 		
-		virtual double distance(Point3D p);
-		
-		virtual double DistanceTo(const Point3D &p);
+        virtual double distance(const Point3D &p) const;
 		
 		virtual double DistanceTo(const Point3D &p) const;
-		
-		virtual Point3D operator-(Point3D p2);
-		
+				
 		virtual Point3D operator-(const Point3D &p) const;
 		
-		virtual Point3D operator-();
-		
 		virtual Point3D operator-() const;
-		
-		virtual Point3D operator+(Point3D p);
 		
 		virtual Point3D operator+(const Point3D &p) const;
 		
@@ -95,25 +91,24 @@ namespace Clobscode
 		
 		virtual const Point3D &operator*=(double mul);
 		
-		virtual void operator/=(double div);
+        virtual const Point3D &operator/=(double div);
 		
 		virtual Point3D operator/(double div) const;
 		
 		virtual Point3D operator*(double mul) const;
 		
+        //modification
 		virtual double &operator[](int pos);
-		
+        //only access
 		virtual double operator[](int pos) const;
 		
-		virtual void operator=(Point3D p);
-		
-		virtual Point3D operator*(double escalar);
-		
+        virtual Point3D& operator=(const Point3D& p);
+				
 		virtual void update(Point3D *Point3D);
 		
 		virtual void update(Point3D Point3D);
 		
-		virtual string print();
+        virtual string print() const;
 		
 		virtual void xAxisRotation(double angle);
 		
@@ -127,7 +122,7 @@ namespace Clobscode
         virtual void rotateTranslate(const Point3D &t, double xangle,
                                      double yangle, double zangle);
 		
-		friend std::ostream& operator<<(std::ostream& o,Point3D &p);
+        friend std::ostream& operator<<(std::ostream& o,const Point3D &p);
 		
 		friend bool operator==(Point3D &p1,Point3D &p2);
 		
@@ -166,7 +161,41 @@ namespace Clobscode
 	inline double &Point3D::Z() {
 		return z;
 	}
-	
+
+    inline Point3D& Point3D::normalize(){
+        double nor=Norm();
+        if(nor!=0){
+            x/=nor;
+            y/=nor;
+            z/=nor;
+        }
+        else
+            x=y=z=0;
+        return *this;
+    }
+
+    inline double Point3D::Norm() const {
+        return sqrt(x*x + y*y + z*z);
+    }
+
+    // why 2 distance/DistanceTo
+    inline double Point3D::distance(const Point3D &p) const {
+        return ((*this)-p).Norm();
+    }
+
+    inline double Point3D::DistanceTo(const Point3D &p) const{
+        return ((*this)-p).Norm();
+    }
+
+
+    inline Point3D Point3D::cross(const Point3D &p) const {
+        Point3D ret;
+        ret[0]=y*p[2] - z*p[1];
+        ret[1]=z*p[0] - x*p[2];
+        ret[2]=x*p[1] - y*p[0];
+        return ret;
+    }
+
 	inline Point3D Point3D::operator^(const Point3D &p) const {
 		Point3D ret;
 		ret[0]=y*p[2] - z*p[1];
@@ -174,7 +203,11 @@ namespace Clobscode
 		ret[2]=x*p[1] - y*p[0];
 		return ret;
 	}
-	
+
+    inline double Point3D::dot(const Point3D &p) const{
+        return x*p[0] + y*p[1] + z*p[2];
+    }
+
 	inline double Point3D::operator*(const Point3D &p) const {
 		return x*p[0]+y*p[1]+z*p[2];
 	}
@@ -213,7 +246,14 @@ namespace Clobscode
 		x*=mul; y*=mul; z*=mul;
 		return *this;
 	}
-	
+
+    inline const Point3D &Point3D::operator/=(double div){
+        x/=div;
+        y/=div;
+        z/=div;
+        return *this;
+    }
+
 	inline Point3D Point3D::operator*(double mul) const {
 		return Point3D (x*mul,y*mul,z*mul);
 	}
@@ -233,7 +273,15 @@ namespace Clobscode
 		y = Point3D[1];
 		z = Point3D[2]; 
 	}
-	
+
+    inline double &Point3D::operator[](int pos){
+        if(pos==0)
+            return x;
+        if(pos==1)
+            return y;
+        return z;
+    }
+
 	inline double Point3D::operator[](int pos) const{
 		if(pos==0)
 			return x;
@@ -241,7 +289,14 @@ namespace Clobscode
 			return y;
 		return z;
 	}
-	
+
+    inline Point3D& Point3D::operator=(const Point3D& p) {
+        x=p[0];
+        y=p[1];
+        z=p[2];
+        return *this;
+    }
+
 	inline void Point3D::xAxisRotation(double angle){
         double oy = y, oz = z;
         double can = cos(angle), san = sin(angle);
