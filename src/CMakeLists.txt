@@ -7,11 +7,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
-set(SOURCE_FILES Main MeshPoint Point3D TriMesh Quadrant QuadEdge HexRotation
+set(SOURCE_FILES Main MeshPoint Point3D Polyline PolyEdge Quadrant QuadEdge HexRotation
         SurfTemplate1 SurfTemplate2 SurfTemplate3 SurfTemplate4
         SurfTemplate5 SurfTemplate6 SurfTemplate7
         Mesher GridMesher TransitionPoint PatternFactory TransitionTemplate
-        TransitionCube SurfPair SurfEdge SurfEdgeContainer SurfTriangle
+        TransitionCube SurfPair SurfEdgeContainer
         RefinementRegion RefinementCubeRegion RefinementSurfaceRegion
         RefinementInputSurfaceRegion RefinementAllRegion
         FaceDiagonal SurfPrism SurfPyramid SurfHexahedron SurfTetrahedron 
@@ -20,7 +20,9 @@ set(SOURCE_FILES Main MeshPoint Point3D TriMesh Quadrant QuadEdge HexRotation
 	Visitors/IntersectionsVisitor
         Visitors/OneIrregularVisitor Visitors/PointMovedVisitor
         Visitors/TransitionPatternVisitor Visitors/SurfaceTemplatesVisitor
-        Visitors/RemoveSubElementsVisitor)
+        Visitors/RemoveSubElementsVisitor
+
+        SurfEdge SurfTriangle )
 
 
 add_executable(mesher_roi ${SOURCE_FILES})
