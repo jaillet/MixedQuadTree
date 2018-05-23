@@ -521,7 +521,7 @@ namespace Clobscode
         
         //visitante TransitionPattern in check mode
         //(we'll reuse it in apply mode later)
-        TransitionPatternVisitor tpv(false);
+        TransitionPatternVisitor tpv;
         tpv.setPoints(points);
         tpv.setEdges(QuadEdges);
         tpv.setMaxRefLevel(omaxrl);
@@ -615,13 +615,7 @@ namespace Clobscode
         
         //clean tmp point list
         new_pts.clear();
-        //new_Quadrants.clear();
         
-        //change TransitionPatternVisitor mode to apply pattern
-        tpv.setApplyMode(true);
-        tpv.setNewPoints(new_pts);
-        
-        //cout << tmp_Quadrants.size() << "\n";
         unsigned int cl3=0;
         
         for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
@@ -835,7 +829,7 @@ namespace Clobscode
 
         //visitante TransitionPattern in check mode
         //(we'll reuse it in apply mode later)
-        TransitionPatternVisitor tpv(false);
+        TransitionPatternVisitor tpv;
         tpv.setPoints(points);
         tpv.setEdges(QuadEdges);
         tpv.setMaxRefLevel(rl);
@@ -941,13 +935,8 @@ namespace Clobscode
          //cout.flush();
 		 //*/
 		
-		//clean tmp point list
 		new_pts.clear();
-		//new_Quadrants.clear();
 
-		//change TransitionPatternVisitor mode to apply pattern
-        tpv.setApplyMode(true);
-        tpv.setNewPoints(new_pts);
 		for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
 			//vector<vector <unsigned int> > trs_ele;
             //if (!(*iter).applyTransitionPattern(points,new_pts,QuadEdges,rl)) {

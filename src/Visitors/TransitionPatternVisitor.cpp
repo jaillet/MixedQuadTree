@@ -25,26 +25,12 @@ namespace Clobscode
 
     TransitionPatternVisitor::TransitionPatternVisitor() {
         points = NULL;
-        new_pts = NULL;
         edges = NULL;
         max_ref_level = NULL;
-        apply_pattern = false;
-    }
-
-    TransitionPatternVisitor::TransitionPatternVisitor(bool apply_pattern) {
-        points = NULL;
-        new_pts = NULL;
-        edges = NULL;
-        max_ref_level = NULL;
-        this->apply_pattern = apply_pattern;
     }
 
     void TransitionPatternVisitor::setPoints(vector<MeshPoint> &points) {
         this->points = &points;
-    }
-
-    void TransitionPatternVisitor::setNewPoints(list<Point3D> &new_pts) {
-        this->new_pts = &new_pts;
     }
 
     void TransitionPatternVisitor::setEdges(const set<QuadEdge> &edges) {
@@ -55,297 +41,61 @@ namespace Clobscode
         this->max_ref_level = &max_ref_level;
     }
 
-    void TransitionPatternVisitor::setApplyMode(bool apply_pattern){
-        this->apply_pattern = apply_pattern;
-    }
-
-
     bool TransitionPatternVisitor::visit(Quadrant *o) {
-        //cout << "TransitionPatternVisitor" << endl;
-        //applyTransitionPattern
-        if (apply_pattern)
-        {
-            if (new_pts == NULL)
-                throw std::runtime_error(std::string("TransitionPatternVisitor: need new_pts (calling apply instead of check?)"));
-            //if this Quadrant is refined to the maximum level, return it immediately
-            if (*max_ref_level == o->ref_level) {
-                return true;
-            }
 
-            vector<unsigned int> &pointindex = o->pointindex;
-            EdgeVisitor ev;
-
-            vector<unsigned int> nodes, mid_nodes, tmp_nodes(12,0);
-            list<unsigned int> l_nodes, l_mid_nodes;
-            //insert the 8 nodes of the cube.
-            for (unsigned int i=0; i<8; i++) {
-                l_nodes.push_back(pointindex[i]);
-            }
-            //search for nodes inserted in edges
-            for (unsigned int i=0; i<12; i++) {
-                QuadEdge e;
-                ev.getEdge(o,i,e);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge==edges->end()) {
-                    cout << "  edge " << e << " not found at applyTransitionPattern\n";
-                }
-                else {
-                    if ((*my_edge)[2]!=0) {
-                        l_nodes.push_back((*my_edge)[2]);
-                        l_mid_nodes.push_back(i+8);
-                        tmp_nodes[i]=(*my_edge)[2];
-                    }
-                }
-            }
-            //if this elements do not present nodes inserted in its edges
-            //then return true (meaning this case is already considered in
-            //the transition patterns) and add this element to the vector
-            //of "new elements"
-            if (l_mid_nodes.empty()) {
-                return true;
-            }
-            //at this point the element has at least one node inserted in
-            //an edge and we need to search for nodes inserted as middle
-            //nodes of their faces
-
-            if (tmp_nodes[0]!=0 && tmp_nodes[2]!=0) {
-                //search for node 20
-                QuadEdge e(tmp_nodes[0],tmp_nodes[2]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(20);
-                }
-            }
-            if (tmp_nodes[0]!=0 && tmp_nodes[8]!=0) {
-                //search for node 21
-                QuadEdge e(tmp_nodes[0],tmp_nodes[8]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(21);
-                }
-            }
-            if (tmp_nodes[1]!=0 && tmp_nodes[9]!=0) {
-                //search for node 22
-                QuadEdge e(tmp_nodes[1],tmp_nodes[9]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(22);
-                }
-            }
-            if (tmp_nodes[2]!=0 && tmp_nodes[10]!=0) {
-                //search for node 23
-                QuadEdge e(tmp_nodes[2],tmp_nodes[10]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(23);
-                }
-            }
-            if (tmp_nodes[3]!=0 && tmp_nodes[11]!=0) {
-                //search for node 24
-                QuadEdge e(tmp_nodes[3],tmp_nodes[11]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(24);
-                }
-            }
-            if (tmp_nodes[9]!=0 && tmp_nodes[11]!=0) {
-                //search for node 25
-                QuadEdge e(tmp_nodes[9],tmp_nodes[11]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(25);
-                }
-            }
-            //The middle node of the hexahedron can never be inserted
-            //otherwise this Quadrant was already removed from the list
-            //of elements and replaced with the new 8 Quadrants
-
-            //------------------------------------------------------
-            //Finally, apply the transition pattern
-            //------------------------------------------------------
-
-            //add the indexes to the vectors
-            list<unsigned int>::iterator ui_iter;
-            nodes.reserve(l_nodes.size());
-            for (ui_iter = l_nodes.begin(); ui_iter!=l_nodes.end(); ui_iter++) {
-                nodes.push_back(*ui_iter);
-            }
-            mid_nodes.reserve(l_mid_nodes.size());
-            for (ui_iter=l_mid_nodes.begin(); ui_iter!=l_mid_nodes.end(); ui_iter++) {
-                mid_nodes.push_back(*ui_iter);
-            }
-
-            //creat the pattern
-            patterns::TransitionTemplate tt (nodes,mid_nodes);
-            //new points goes to new_pts (if any new node is inserted) and
-            //the new elements to new_eles
-
-            //the subelements of this Quadrant will no longer be the points
-            //of the original cube. It will now contain mixed-elements.
-            vector<vector<unsigned int>> &sub_elements = o->sub_elements;
-            sub_elements.clear();
-
-            unsigned int old_size = new_pts->size();
-
-            bool succeed = tt.getNewElements(nodes,mid_nodes,*points,*new_pts,sub_elements);
-
-            if (succeed) {
-                pointindex.clear();
-                pointindex.reserve(l_nodes.size());
-                for (ui_iter = l_nodes.begin(); ui_iter!=l_nodes.end(); ui_iter++) {
-                    pointindex.push_back(*ui_iter);
-                }
-
-                if (new_pts->size()!=old_size) {
-                    pointindex.push_back(points->size() + old_size);
-                }
-            }
-
-            return succeed;
+        //if this Quadrant is refined to the maximum level, return it immediately
+        if (*max_ref_level == o->ref_level) {
+            return true;
         }
-        //checkTransitionPattern
-        else
-        {
-            if (*max_ref_level==o->ref_level) {
-                return true;
+        
+        vector<unsigned int> &pointindex = o->pointindex;
+        EdgeVisitor ev;
+        
+        vector<unsigned int> nodes (8,0);
+        bool splitted = false;
+        //update the 4 nodes of the Quadrant.
+        for (unsigned int i=0; i<4; i++) {
+            nodes[i] = pointindex[i];
+        }
+        //search for nodes inserted in edges
+        for (unsigned int i=0; i<4; i++) {
+            QuadEdge e;
+            ev.getEdge(o,i,e);
+            set<QuadEdge>::iterator my_edge = edges->find(e);
+            if (my_edge==edges->end()) {
+                cout << "  edge " << e << " not found at applyTransitionPattern\n";
             }
-            vector<unsigned int> &pointindex = o->pointindex;
-
-            vector<unsigned int> nodes, mid_nodes, tmp_nodes(12,0);
-            list<unsigned int> l_nodes, l_mid_nodes;
-            //insert the 8 nodes of the cube.
-            //cout << "checking element";
-            for (unsigned int i=0; i<8; i++) {
-                //cout << " " << pointindex[i];
-                l_nodes.push_back(pointindex[i]);
-            }
-            //cout << "\nInserted edges:\n";
-            //search for nodes inserted in edges
-            for (unsigned int i=0; i<12; i++) {
-                QuadEdge e;
-                EdgeVisitor::getEdge(o,i,e);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge==edges->end()) {
-                    cout << "  edge " << e << " not found at applyTransitionPattern\n";
-                    return false;
-                }
+            else {
                 if ((*my_edge)[2]!=0) {
-                    //cout << (*my_edge)[2] << "(" << i << ") [";
-                    //cout << *my_edge << "]\n";
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(i+8);
-                    tmp_nodes[i]=(*my_edge)[2];
+                    nodes[i+4] = (*my_edge)[2];
+                    splitted = true;
                 }
             }
-            //if this elements do not present nodes inserted in its edges
-            //then return true (meaning this case is already considered in
-            //the transition patterns) and add this element to the vector
-            //of "new elements"
-            if (l_mid_nodes.empty()) {
-                //cout << "element without mid nodes\n";
-                //new_eles.push_back(pointindex);
-                return true;
-            }
-
-            //at this point the element has at least one node inserted in
-            //an edge and we need to search for nodes inserted as middle
-            //nodes of their faces
-
-            //cout << "looking for nodes inserted in faces:\n";
-            if (tmp_nodes[0]!=0 && tmp_nodes[2]!=0) {
-                //search for node 20
-                QuadEdge e(tmp_nodes[0],tmp_nodes[2]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(20);
-                    //cout << *my_edge << "\n";
-                }
-            }
-            if (tmp_nodes[0]!=0 && tmp_nodes[8]!=0) {
-                //search for node 21
-                QuadEdge e(tmp_nodes[0],tmp_nodes[8]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(21);
-                    //cout << *my_edge << "\n";
-                }
-            }
-            if (tmp_nodes[1]!=0 && tmp_nodes[9]!=0) {
-                //search for node 22
-                QuadEdge e(tmp_nodes[1],tmp_nodes[9]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(22);
-                    //cout << *my_edge << "\n";
-                }
-            }
-            if (tmp_nodes[2]!=0 && tmp_nodes[10]!=0) {
-                //search for node 23
-                QuadEdge e(tmp_nodes[2],tmp_nodes[10]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(23);
-                    //cout << *my_edge << "\n";
-                }
-            }
-            if (tmp_nodes[3]!=0 && tmp_nodes[11]!=0) {
-                //search for node 24
-                QuadEdge e(tmp_nodes[3],tmp_nodes[11]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(24);
-                    //cout << *my_edge << "\n";
-                }
-            }
-            if (tmp_nodes[9]!=0 && tmp_nodes[11]!=0) {
-                //search for node 25
-                QuadEdge e(tmp_nodes[9],tmp_nodes[11]);
-                set<QuadEdge>::iterator my_edge = edges->find(e);
-                if (my_edge != edges->end() && (*my_edge)[2]!=0) {
-                    l_nodes.push_back((*my_edge)[2]);
-                    l_mid_nodes.push_back(25);
-                    //cout << *my_edge << "\n";
-                }
-            }
-            //The middle node of the hexahedron can never be inserted
-            //otherwise this Quadrant was already removed from the list
-            //of elements and replaced with the new 8 Quadrants
-
-            //------------------------------------------------------
-            //Finally, apply the transition pattern
-            //------------------------------------------------------
-
-            //add the indexes to the vectors
-            list<unsigned int>::iterator ui_iter;
-            nodes.reserve(l_nodes.size());
-            for (ui_iter = l_nodes.begin(); ui_iter!=l_nodes.end(); ui_iter++) {
-                nodes.push_back(*ui_iter);
-            }
-            mid_nodes.reserve(l_mid_nodes.size());
-            for (ui_iter=l_mid_nodes.begin(); ui_iter!=l_mid_nodes.end(); ui_iter++) {
-                mid_nodes.push_back(*ui_iter);
-            }
-            //temporal new points, but they won't be inserted. It's just
-            //to see if the pattern for this configuration is already implemented
-            list<Point3D> local_new_pts;
-
-            vector<vector<unsigned int> > new_eles;
-            list<MeshPoint> new_pts;
-
-            patterns::TransitionTemplate tt (nodes,mid_nodes);
-            //find out if the pattern is implemented
-            return tt.getNewElements(nodes,mid_nodes,*points,local_new_pts,new_eles);
         }
+        //if this elements do not present nodes inserted in its edges
+        //then return true (meaning this case is already considered in
+        //the transition patterns) and add this element to the vector
+        //of "new elements"
+        if (!splitted) {
+            return true;
+        }
+        
+        //The middle node of the Quadrant can never be inserted
+        //otherwise this Quadrant was already removed from the list
+        //and replaced with 4 new Quadrants.
+        
+        //------------------------------------------------------
+        //Finally, apply the transition pattern
+        //------------------------------------------------------
+        
+        //creat the pattern
+        patterns::QuadTransition qt (nodes);
+        
+        //the subelements of this Quadrant will no longer be a Quad.
+        //It will now contain mixed-elements.
+        vector<vector<unsigned int>> &sub_elements = o->sub_elements;
+        sub_elements.clear();
+        
+        return qt.getNewElements(*points,sub_elements);
     }
 }
