@@ -32,7 +32,7 @@ namespace Clobscode
     }
 
     bool RemoveSubElementsVisitor::visit(Quadrant *o) {
-        //cout << "RemoveElements" << endl;
+
         vector<vector<unsigned int>> &sub_elements = o->sub_elements;
 
         list<vector<unsigned int> > still_in;

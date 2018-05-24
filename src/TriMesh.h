@@ -52,8 +52,6 @@ namespace Clobscode
 
 		virtual vector<Point3D> &getVerticePseudoNormals();		
         
-        virtual set<SurfaceEdge> &getEdges();
-		
 		virtual vector<double> &getBounds();
 		
 		virtual bool pointIsInMesh(const Point3D &pPoint);
@@ -105,13 +103,6 @@ namespace Clobscode
 		
 		//Point used by Ray Tracing Method (unstable)
 		Point3D outside;
-        
-        //the set of edges
-        set<SurfaceEdge> edges;
-        
-        
-        
-        
 	};
 	
 	inline vector<Point3D> &TriMesh::getPoints(){
@@ -119,18 +110,12 @@ namespace Clobscode
 	}
 	
 	inline vector<double> &TriMesh::getBounds(){
-        
-        //cout << "tri bounds: " << bounds.size() << endl;
 		return bounds;
 	}
 	
 	inline vector<SurfTriangle> &TriMesh::getFaces(){
 		return mTriangles;
 	}
-    
-    inline set<SurfaceEdge> &TriMesh::getEdges(){
-        return edges;
-    }
     
     inline vector<Point3D> &TriMesh::getVerticePseudoNormals(){
         return mVerticePseudoNormals;

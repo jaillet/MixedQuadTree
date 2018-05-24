@@ -23,20 +23,8 @@
 #include "../QuadEdge.h"
 #include "../MeshPoint.h"
 #include "../TriMesh.h"
-
-//#include "../TransitionTemplate.h"
-
-#include "../SurfTemplate1.h"
-#include "../SurfTemplate2.h"
-#include "../SurfTemplate3.h"
-#include "../SurfTemplate4.h"
-#include "../SurfTemplate5.h"
-#include "../SurfTemplate6.h"
-#include "../SurfTemplate7.h"
-#include "../SurfPrism.h"
-#include "../SurfPyramid.h"
-#include "../SurfTetrahedron.h"
-#include "../SurfHexahedron.h"
+#include "../Quadrant.h"
+#include "../QuadSurfTemplate.h"
 
 #include "Visitor.h"
 #include "EdgeVisitor.h"

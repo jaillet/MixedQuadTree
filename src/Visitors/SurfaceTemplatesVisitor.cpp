@@ -18,14 +18,17 @@
  */
 
 #include "SurfaceTemplatesVisitor.h"
-#include "../Quadrant.h"
 
 namespace Clobscode
 {
 
+    /*Note: newpts will probably needed later when analysing
+     quadrants that presents both, surface and transition patterns.
+     */
+    
     SurfaceTemplatesVisitor::SurfaceTemplatesVisitor() {
         meshpts = NULL;
-        newpts = NULL;
+        //newpts = NULL;
         input = NULL;
         e_idx = NULL;
     }
@@ -35,9 +38,10 @@ namespace Clobscode
         this->meshpts = &meshpts;
     }
 
-    void SurfaceTemplatesVisitor::setNewPoints(list<MeshPoint> &newpts) {
+    //This will probably needed later
+    /*void SurfaceTemplatesVisitor::setNewPoints(list<MeshPoint> &newpts) {
         this->newpts = &newpts;
-    }
+    }*/
 
     void SurfaceTemplatesVisitor::setInput(TriMesh &input) {
         this->input = &input;
@@ -53,136 +57,55 @@ namespace Clobscode
         //that intersect one surface or all of them. In both cases
         //at least one element node should be outside the sum of
         //input surfaces
-
-        vector<unsigned int> inpts, outpts;
-        list<unsigned int> tmpin,tmpout;
         list<unsigned int>::iterator piter;
-
         vector<unsigned int> &pointindex = o->pointindex;
-        vector<vector<unsigned int>> &sub_elements = o->sub_elements;
+        vector<vector<unsigned int> > &sub_elements = o->sub_elements;
+        vector<bool> in(pointindex.size(),true);
+        unsigned int nin = 0;
 
         for (unsigned int i=0; i<pointindex.size(); i++) {
 
             if (meshpts->at(pointindex[i]).isOutside()) {
-                tmpout.push_back(i);
-            }
-            else {
-                tmpin.push_back(i);
+                in[i] = false;
+                nin++;
             }
         }
+        
+        QuadSurfTemplate st;
+        
+        switch (nin) {
+            case 0:
+                return true;
+            case 1:
+                return st.one(pointindex,in,sub_elements);
+            case 2:
+                return st.two(pointindex,in,sub_elements);
+            case 3:
+                return st.three(pointindex,in,sub_elements);
+            default:
+                return true;
+        }
 
-        //save the points in a std::vector for quick acces
-        inpts.reserve(tmpin.size());
-        for(piter=tmpin.begin();piter!=tmpin.end();piter++)
-            inpts.push_back(*piter);
-        outpts.reserve(tmpout.size());
-        for(piter=tmpout.begin();piter!=tmpout.end();piter++)
-            outpts.push_back(*piter);
-
-
-        if (pointindex.size()==8 && sub_elements.size()==1) {
+        /*if (pointindex.size()==4 && sub_elements.size()==1) {
 
             //if we are here, the "inside" projected nodes will count as
             //outside nodes.
-            return applyHexSurfaceTemplates(o, inpts, outpts);
-        }
-        //if we are here, the Quadrant contains mixed elements (either from a previous
-        //surface pattern or a transition pattern).
-
-        list<vector<unsigned int> > new_eles_lst;
-        for (unsigned int i=0; i<sub_elements.size(); i++) {
-
-            if (sub_elements[i].size() == 4) {
-                new_eles_lst.push_back(sub_elements[i]);
-                continue;
-            }
-
-            if (sub_elements[i].size() == 5) {
-
-                //create the element
-                SurfPyramid p(sub_elements[i]);
-
-                //differenciat an outside node from an inside projected node
-                //one_outside = false;
-
-                //check inside state for each of its nodes
-                vector<bool> nds_inside (5,true);
-                for (unsigned int j=0; j<5; j++) {
-
-                    if (meshpts->at(sub_elements[i][j]).isOutside()) {
-                        nds_inside[j] = false;
-                    }
-                }
-                vector<vector<unsigned int> > new_sub_eles = p.getSubElements(nds_inside);
-
-                for (unsigned int j=0; j<new_sub_eles.size(); j++) {
-                    new_eles_lst.push_back(new_sub_eles[j]);
-                }
-                continue;
-
-            }
-
-            if (sub_elements[i].size() == 6) {
-
-                //create the element
-                SurfPrism p(sub_elements[i]);
-
-                //differenciat an outside node from an inside projected node
-                //one_outside = false;
-
-                //check inside state for each of its nodes
-                vector<bool> nds_inside (6,true);
-                for (unsigned int j=0; j<6; j++) {
-                    if (meshpts->at(sub_elements[i][j]).isOutside()) {
-                        nds_inside[j] = false;
-                    }
-                }
-                vector<vector<unsigned int> > new_sub_eles = p.getSubElements(nds_inside);
-
-                for (unsigned int j=0; j<new_sub_eles.size(); j++) {
-                    new_eles_lst.push_back(new_sub_eles[j]);
-                }
-
-                continue;
-            }
-
-            if (sub_elements[i].size() == 8) {
-                //manage a hexahedron
-
-                SurfHexahedron h(sub_elements[i]);
-
-                vector<vector<unsigned int> > new_sub_eles = h.getSubElements(*meshpts,
-                                                                              *newpts,
-                                                                              *input,
-                                                                              *e_idx,
-                                                                              o->possibles,
-                                                                              o->continuity,
-                                                                              o->intersected_faces);
-
-                for (unsigned int j=0; j<new_sub_eles.size(); j++) {
-                    new_eles_lst.push_back(new_sub_eles[j]);
-                }
-
-                //check inside state for each of its nodes
-                //cout << "warning: sub element type hexahedron not implemented in Quadrant::applySurfaceTemplates\n";
-                //new_eles_lst.push_back(sub_elements[i]);
-            }
-        }
-
-        list<vector<unsigned int> >::iterator ne_iter;
+            return applyHexSurfaceTemplates(o,in);
+        }*/
+        
+        /*list<vector<unsigned int> >::iterator ne_iter;
         sub_elements.clear();
         sub_elements.reserve(new_eles_lst.size());
         for (ne_iter=new_eles_lst.begin(); ne_iter!=new_eles_lst.end(); ne_iter++) {
             sub_elements.push_back(*ne_iter);
-        }
+        }*/
 
-        return true;
+        return false;
 
     }
 
-    bool SurfaceTemplatesVisitor::applyHexSurfaceTemplates(Quadrant *o,
-                                                           vector<unsigned int> &inpts,
-                                                           vector<unsigned int> &outpts) {
+    /*bool SurfaceTemplatesVisitor::applyHexSurfaceTemplates(Quadrant *o, vector<bool> &inpts) {
+        
         vector<unsigned int> &pointindex = o->pointindex;
         vector<vector<unsigned int>> &sub_elements = o->sub_elements;
 
@@ -200,14 +123,14 @@ namespace Clobscode
         //select the patter to apply
         switch (inpts.size()) {
             case 0:{
-                /*If at this point, the element has 0 node inside,
+                //If at this point, the element has 0 node inside,
                  it might be tangencial to input mesh, in which case
                  it should be removed, or represent a feature of
                  the domain (e.g. all nodes outside, but there is
                  something like a pipeline crossing it). This algorithm
                  isn't yet "future sensitive", therefore the element
                  is simply removed.
-                 */
+     
                 //sub_elements.push_back(pointindex);
                 //return false;
                 sub_elements.clear();
@@ -262,5 +185,5 @@ namespace Clobscode
                 return false;
             }
         }
-    }
+    }*/
 }
