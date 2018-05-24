@@ -54,7 +54,7 @@ namespace Clobscode
         
         virtual void rotate(GeometricTransform &gt)=0;
         
-        virtual GeometricTransform rotateWithinYou(TriMesh &input)=0;
+        virtual GeometricTransform rotateWithinYou(Polyline &input)=0;
         
         virtual bool intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)=0;
         

@@ -56,7 +56,7 @@ namespace Clobscode
 
         bool visit(Quadrant *o);
 
-        void setTriMesh(TriMesh &mesh);
+        void setPolyline(Polyline &mesh);
         void setPoints(vector<MeshPoint> &points);
         void setFaces(list<unsigned int> &faces);
         void setCoords(vector<Point3D> &coords);

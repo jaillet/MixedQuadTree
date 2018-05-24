@@ -74,8 +74,10 @@ namespace Clobscode
 		virtual double operator*(const Point3D &p) const;
 		
         virtual double distance(const Point3D &p) const;
-		
-		virtual double DistanceTo(const Point3D &p) const;
+
+        virtual double distanceToSegment(const Point3D &P0, const Point3D &P1) const;
+
+        virtual int isLeft(const Point3D &P0, const Point3D &P1) const;
 				
 		virtual Point3D operator-(const Point3D &p) const;
 		
@@ -128,7 +130,7 @@ namespace Clobscode
 		
 		friend bool operator!=(Point3D &p1,Point3D &p2);
 		
-		friend Point3D operator/(double div, const Point3D &p);
+//FJA		friend Point3D operator/(double div, const Point3D &p);
 		
 		friend Point3D operator*(double mul, const Point3D &p);
 		
@@ -178,15 +180,40 @@ namespace Clobscode
         return sqrt(x*x + y*y + z*z);
     }
 
-    // why 2 distance/DistanceTo
     inline double Point3D::distance(const Point3D &p) const {
         return ((*this)-p).Norm();
     }
 
-    inline double Point3D::DistanceTo(const Point3D &p) const{
-        return ((*this)-p).Norm();
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    inline double Point3D::distanceToSegment(const Point3D &P0, const Point3D &P1 ) const
+    {
+         Point3D V = P1 - P0;
+         Point3D W = (*this) - P0;
+
+         double c1 = W.dot(V);
+         if ( c1 <= 0 )
+              return distance(P0);
+
+         double c2 = V.dot(V);
+         if ( c2 <= c1 )
+              return distance(P1);
+
+         double b = c1 / c2;
+         Point3D Pb= P0 + b * V;
+         return distance(Pb);
     }
 
+    // isLeft(): tests if a point is Left|On|Right of an infinite line.
+    //    Input:  two points P0, P1
+    //    Return: >0 for P left of the line through P0 and P1
+    //            =0 for P  on the line
+    //            <0 for P  right of the line
+    inline int Point3D::isLeft(const Point3D &P0, const Point3D &P1 ) const
+           {
+               return ( (P1.x - P0.x) * (y - P0.y)
+                       - (x -  P0.x) * (P1.y - P0.y) );
+           }
 
     inline Point3D Point3D::cross(const Point3D &p) const {
         Point3D ret;
@@ -228,9 +255,9 @@ namespace Clobscode
 		return Point3D(x+p[0],y+p[1],z+p[2]);
 	}
 	
-	inline Point3D operator/(double div, const Point3D &p) {
-		return p/div;
-	}
+//	inline Point3D operator/(double div, const Point3D &p) {
+//		return p/div;
+//	}
 	
 	inline const Point3D &Point3D::operator+=(const Point3D &p) {
 		x+=p[0]; y+=p[1]; z+=p[2];

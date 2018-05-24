@@ -23,14 +23,14 @@
 #include <iostream>
 #include <math.h>
 #include "Point3D.h"
-#include "TriMesh.h"
+#include "Polyline.h"
 #include <vector>
 #include <list>
 
 using Clobscode::Point3D;
 using std::list;
 using std::vector;
-using Clobscode::TriMesh;
+using Clobscode::Polyline;
 
 namespace Clobscode
 {	
@@ -46,11 +46,11 @@ namespace Clobscode
 		virtual ~GeometricTransform();
         
         //to implement
-        virtual void rotateSurfaceMesh(TriMesh &tm);
+        virtual void rotateSurfaceMesh(Polyline &tm);
         
-        virtual void rotateSurfaceMeshInverse(TriMesh &tm);
+        virtual void rotateSurfaceMeshInverse(Polyline &tm);
         
-        virtual void calculateAnglesAndCentroid(TriMesh &tm);
+        virtual void calculateAnglesAndCentroid(Polyline &tm);
         
         virtual void apply(Point3D &p);
         

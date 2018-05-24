@@ -1,5 +1,5 @@
 [Name, STRING]
-square
+square_with_hole
 
 [Normals, ARRAY1<VECTOR3D>]
 1

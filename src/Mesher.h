@@ -20,7 +20,7 @@
 #ifndef Mesher_h
 #define Mesher_h 1
 
-#include "TriMesh.h"
+#include "Polyline.h"
 #include "FEMesh.h"
 #include "GridMesher.h"
 #include "Quadrant.h"
@@ -48,7 +48,7 @@ using std::vector;
 using std::list;
 using std::set;
 using Clobscode::QuadEdge;
-using Clobscode::TriMesh;
+using Clobscode::Polyline;
 using Clobscode::RefinementRegion;
 
 namespace Clobscode
@@ -57,15 +57,15 @@ namespace Clobscode
 	class Mesher{
 		
 	public:
-		
+
 		Mesher();
 		
 		virtual ~Mesher();
 				
-		virtual FEMesh generateMesh(TriMesh &input, const unsigned short &rl,
+        virtual FEMesh generateMesh(Polyline &input, const unsigned short &rl,
                                     const string &name, list<RefinementRegion *> &all_reg);
 		
-        virtual FEMesh refineMesh(TriMesh &input, const unsigned short &rl,
+        virtual FEMesh refineMesh(Polyline &input, const unsigned short &rl,
                                   const string &name, list<unsigned int> &roctli,
                                   list<RefinementRegion *> &all_reg,
                                   GeometricTransform &gt, const unsigned short &minrl,
@@ -77,35 +77,35 @@ namespace Clobscode
         
 	protected:
         
-        virtual void splitQuadrants(const unsigned short &rl, TriMesh &input,
+        virtual void splitQuadrants(const unsigned short &rl, Polyline &input,
                                   list<unsigned int> &roctli,
                                   list<RefinementRegion *> &all_reg, const string &name,
                                   const unsigned short &minrl, const unsigned short &omaxrl);
 		
-		virtual void generateOctreeMesh(const unsigned short &rl, TriMesh &input,
+        virtual void generateOctreeMesh(const unsigned short &rl, Polyline &input,
                                         list<RefinementRegion *> &all_reg, const string &name);
 
-		virtual bool isItIn(TriMesh &mesh, list<unsigned int> &faces, vector<Point3D> &coords);
+        virtual bool isItIn(Polyline &mesh, list<unsigned int> &faces, vector<Point3D> &coords);
 
-		virtual bool rotateGridMesh(TriMesh &input,
+        virtual bool rotateGridMesh(Polyline &input,
 									list<RefinementRegion *> &all_reg,
 									GeometricTransform &gt);
 		
 		/*virtual void generateGridFromOctree(const unsigned short &rl, 
-                                              TriMesh &input,
+                                              Polyline &input,
                                               const string &name);*/
 		
-		virtual void generateGridMesh(TriMesh &input);
+        virtual void generateGridMesh(Polyline &input);
 		
 		virtual void linkElementsToNodes();
 
-		virtual void detectInsideNodes(TriMesh &input);
+        virtual void detectInsideNodes(Polyline &input);
 
 		virtual void removeOnSurface();
 		
-		virtual void applySurfacePatterns(TriMesh &input);
+        virtual void applySurfacePatterns(Polyline &input);
 
-		virtual void shrinkToBoundary(TriMesh &input);
+        virtual void shrinkToBoundary(Polyline &input);
 
 		virtual unsigned int saveOutputMesh(FEMesh &mesh);
 		
@@ -113,7 +113,7 @@ namespace Clobscode
 									vector<MeshPoint> &points, 
 									list<Quadrant> &elements);
         
-        virtual void projectCloseToBoundaryNodes(TriMesh &input);
+        virtual void projectCloseToBoundaryNodes(Polyline &input);
 
 
 		

@@ -46,7 +46,7 @@ namespace Clobscode
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    GeometricTransform RefinementCubeRegion::rotateWithinYou(TriMesh &input) {
+    GeometricTransform RefinementCubeRegion::rotateWithinYou(Polyline &input) {
 		//~ GeometricTransform gt;
         //~ gt.rotateSurfaceMesh(input);
         //~ rotate(gt);

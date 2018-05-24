@@ -24,7 +24,7 @@
 #include <set>
 #include <iostream>
 #include "RefinementRegion.h"
-#include "TriMesh.h"
+#include "Polyline.h"
 #include "Quadrant.h"
 
 using Clobscode::Point3D;
@@ -32,7 +32,7 @@ using std::vector;
 using std::cout;
 using std::set;
 using Clobscode::RefinementRegion;
-using Clobscode::TriMesh;
+using Clobscode::Polyline;
 using Clobscode::Quadrant;
 
 namespace Clobscode
@@ -46,7 +46,7 @@ namespace Clobscode
 		
 		virtual ~RefinementInputSurfaceRegion();
         
-        virtual GeometricTransform rotateWithinYou(TriMesh &input);
+        virtual GeometricTransform rotateWithinYou(Polyline &input);
 		
         virtual void rotate(GeometricTransform &gt);
 		

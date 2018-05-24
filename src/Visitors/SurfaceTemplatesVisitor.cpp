@@ -39,7 +39,7 @@ namespace Clobscode
         this->newpts = &newpts;
     }
 
-    void SurfaceTemplatesVisitor::setInput(TriMesh &input) {
+    void SurfaceTemplatesVisitor::setInput(Polyline &input) {
         this->input = &input;
     }
 

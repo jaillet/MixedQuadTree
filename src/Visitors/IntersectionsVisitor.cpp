@@ -45,7 +45,7 @@ namespace Clobscode
         this->select_faces = select_faces;
     }
 
-    void IntersectionsVisitor::setTriMesh(TriMesh &mesh) {
+    void IntersectionsVisitor::setPolyline(Polyline &mesh) {
         this->mesh = &mesh;
     }
     void IntersectionsVisitor::setPoints(vector<MeshPoint> &points){

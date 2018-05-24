@@ -133,48 +133,32 @@ namespace PolyMesh
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-//    Point3D SurfTriangle::computeNormalAtNode(unsigned int nidx,
-//                                           vector<Point3D> &pts ) const
-//    {
-//        //return mTriangleNormal;
-//        unsigned int lidx = 0;
-//        bool found = true;
+    Point3D PolyEdge::getNormalAtNode(unsigned int nidx,
+                                      vector<Point3D> &pts ) const
+    {
+        //return mEdgeNormal;
+        unsigned int lidx = 2; // trick to avoid true/false variable
 
-//        if (nidx == mIdxV[0]) {
-//            lidx = 0;
-//        }
-//        else {
-//            if (nidx == mIdxV[1]) {
-//                lidx = 1;
-//            }
-//            else {
-//                if (nidx == mIdxV[2]) {
-//                    lidx = 2;
-//                }
-//                else {
-//                    found = false;
-//                }
-//            }
-//        }
+        if (nidx == nodes[0]) {
+            lidx = 0;
+        }
+        else {
+            if (nidx == nodes[1]) {
+                lidx = 1;
+            }
+        }
 
-//        if (!found) {
-//            Point3D v;
-//            std::cerr << "warning at SurfMesh::SurfTriangle::computeNormalAtNode";
-//            std::cerr << " node index not found in triangle\n";
-//            return v;
-//        }
+        if (lidx==2) { //should be 0 or 1 if found
+            Point3D v;
+            std::cerr << "warning at PolyMesh::PolyEdge::getNormalAtNode";
+            std::cerr << " node index not found in edge\n";
+            return v;
+        }
 
-//        // triangle normal computation
-//        // vector between A and B
-//        Point3D  vec1;
-//        vec1 = pts[mIdxV[(lidx+1)%3]] - pts[mIdxV[lidx]];
-
-//        // vector between A and C
-//        Point3D  vec2;
-//        vec2 = pts[mIdxV[(lidx+2)%3]] - pts[mIdxV[lidx]];
-//        double angle = acos((vec1*vec2)/(vec1.Norm()*vec2.Norm()));
-//        return angle * mTriangleNormal;
-//    }
+        // edge lenght computation
+        double  length = (pts[nodes[(lidx+1)%2]] - pts[nodes[lidx]]).Norm();
+        return length * mEdgeNormal;
+    }
 
 
     ostream& operator<<(ostream& o, const PolyEdge &e){

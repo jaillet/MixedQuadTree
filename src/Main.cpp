@@ -1,24 +1,30 @@
 /*
- <Mix-mesher: region type. This program generates a mixed-elements mesh>
- 
- Copyright (C) <2013,2017>  <Claudio Lobos>
- 
+ <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
+
+ Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+
  This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
+ it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
+ GNU Lesser General Public License for more details.
+
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/gpl.txt>
+ along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
  */
+/**
+* @file Main.cpp
+* @author Claudio Lobos, Fabrice Jaillet
+* @version 0.1
+* @brief
+**/
 
 #include "Mesher.h"
-#include "TriMesh.h"
+#include "Polyline.h"
 #include "FEMesh.h"
 #include "Services.h"
 #include "RefinementCubeRegion.h"
@@ -86,8 +92,8 @@ int main(int argc,char** argv){
 	bool edge_projection = false;
 	
 	unsigned short ref_level = 0, rl = 0, cminrl=0, omaxrl=0;
-    //cminrl: current min refinement level (used when starting from an Octree mesh)
-    //omaxrl: old max refinement level (used when starting from an Octree mesh)
+    //cminrl: current min refinement level (used when starting from an Quadtree mesh)
+    //omaxrl: old max refinement level (used when starting from an Quadtree mesh)
     list<unsigned int> roctli;
     //this list contains the index of the Quadrants previously generated that need
     //one extra level of refinement.
@@ -98,7 +104,7 @@ int main(int argc,char** argv){
     vector<double> bounds;
     Point3D pmin,pmax;
     
-    vector<Clobscode::TriMesh> inputs;
+    vector<Clobscode::Polyline> inputs;
     inputs.reserve(4);
     //Clobscode::Services io;
     

@@ -22,7 +22,7 @@
 
 #include "../QuadEdge.h"
 #include "../MeshPoint.h"
-#include "../TriMesh.h"
+#include "../Polyline.h"
 
 //#include "../TransitionTemplate.h"
 
@@ -62,7 +62,7 @@ namespace Clobscode
 
         void setPoints(vector<MeshPoint> &meshpts);
         void setNewPoints(list<MeshPoint> &newpts);
-        void setInput(TriMesh &input);
+        void setInput(Polyline &input);
         void setIdx(unsigned int &e_idx);
 
     private:

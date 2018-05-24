@@ -48,7 +48,7 @@ namespace Clobscode
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    void GeometricTransform::rotateSurfaceMesh(TriMesh &tm) {
+    void GeometricTransform::rotateSurfaceMesh(Polyline &tm) {
 		//calculateAnglesAndCentroid(tm);
 		
 		for (unsigned int i=0; i<tm.getPoints().size(); i++){
@@ -59,8 +59,8 @@ namespace Clobscode
         for (unsigned int i=0; i<tm.getFaces().size(); i++) {
             faces[i] = tm.getFaces()[i].getPoints();
         }
-        //creating a new trimesh with the new vertices rotated
-        TriMesh tm2 (tm.getPoints(), faces);
+        //creating a new Polyline with the new vertices rotated
+        Polyline tm2 (tm.getPoints(), faces);
         tm = tm2;
         
     }
@@ -68,13 +68,13 @@ namespace Clobscode
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    void GeometricTransform::rotateSurfaceMeshInverse(TriMesh &tm) {
+    void GeometricTransform::rotateSurfaceMeshInverse(Polyline &tm) {
         //to implement here
     }
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    void GeometricTransform::calculateAnglesAndCentroid(TriMesh &tm) {
+    void GeometricTransform::calculateAnglesAndCentroid(Polyline &tm) {
 		
         vector<Point3D> vertices, normals, maxNormals;
 		vertices = tm.getPoints();

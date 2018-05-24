@@ -21,7 +21,7 @@
 #define Services_h 1
 
 #include <string.h>
-#include "TriMesh.h"
+#include "Polyline.h"
 #include "FEMesh.h"
 #include "RefinementCubeRegion.h"
 #include "RefinementSurfaceRegion.h"
@@ -38,7 +38,7 @@
 
 
 using Clobscode::Point3D;
-using Clobscode::TriMesh;
+using Clobscode::Polyline;
 using Clobscode::MeshPoint;
 using Clobscode::Quadrant;
 using Clobscode::QuadEdge;
@@ -133,7 +133,7 @@ namespace Clobscode
                                                 list<RefinementRegion *> &regions,
                                                 const unsigned short &rrl){
             
-            vector<TriMesh> tmp;
+            vector<Polyline> tmp;
             tmp.reserve(1);
             if (!ReadMdlMesh(name,tmp)) {
                 return false;
@@ -147,13 +147,13 @@ namespace Clobscode
         //-------------------------------------------------------------------
         //-------------------------------------------------------------------
         static bool ReadOffMesh(string name,
-                                vector<Clobscode::TriMesh> &clobs_inputs){
+                                vector<Clobscode::Polyline> &clobs_inputs){
             
             char word [256];
             int np, nf;
             double x,y,z;
             bool skel = false;
-            vector<vector<unsigned int> > allfaces;
+            vector<vector<unsigned int> > alledges;
             vector<Point3D> tri_pts;
             
             FILE *file = fopen(name.c_str(),"r");
@@ -207,7 +207,7 @@ namespace Clobscode
                 fgets(word,256,file);
             }
             
-            allfaces.reserve(nf);
+            alledges.reserve(nf);
             //number of face points
             int nfp;
             for( int i=0;i<nf;i++){
@@ -217,13 +217,13 @@ namespace Clobscode
                 for(unsigned int j=0;j<nfp;j++){
                     std::fscanf(file,"%i",&fpts[j]);
                 }
-                allfaces.push_back(fpts);
+                alledges.push_back(fpts);
                 //read any other data in the line
                 fgets(word,256,file);
             }
             fclose(file);
             
-            TriMesh tm (tri_pts, allfaces);
+            Polyline tm (tri_pts, alledges);
             clobs_inputs.push_back(tm);
             
             return true;
@@ -232,13 +232,13 @@ namespace Clobscode
 		//-------------------------------------------------------------------
 		//-------------------------------------------------------------------
 		static bool ReadMdlMesh(std::string name,
-								  vector<Clobscode::TriMesh> &clobs_inputs){
+                                  vector<Clobscode::Polyline> &clobs_inputs){
 
 			char word [256];
 			int cant;
 			double x,y,z;
-			vector<vector<unsigned int> > allfaces;
-			vector<Point3D> tri_pts;
+            vector<vector<unsigned int> > alledges;
+            vector<Point3D> pts;
 			
 			FILE *file = fopen(name.c_str(),"r");
 			
@@ -261,7 +261,7 @@ namespace Clobscode
 			if(cant<=0)
 				return false;
 			//read each node
-			tri_pts.reserve(cant);
+            pts.reserve(cant);
 			
 			for( int i=0;i<cant;i++){
 				std::fscanf(file,"%s",word);
@@ -271,14 +271,14 @@ namespace Clobscode
 				std::fscanf(file,"%s",word);
 				z=atof(word);
 				Point3D p (x,y,z);
-				tri_pts.push_back(p);
+                pts.push_back(p);
 			}
 			
-			//read number of "triangle faces"
+            //read number of "Edges"
 			cant = 0;
 			while(1){
 				if(std::fscanf(file,"%s",word) == EOF){
-					std::cout << "didn't find faces\n";
+                    std::cout << "didn't find polylines\n";
 					fclose(file);
 					return false;
 				}
@@ -290,24 +290,24 @@ namespace Clobscode
 				}
 			}
 			
-			allfaces.reserve(cant);
-			//read each face (assuming they are triangles
+            alledges.reserve(cant);
+            //read each edge (assuming they have 2 endpoints
 			int dust;
 			for( int i=0;i<cant;i++){
-				std::vector<unsigned int> fpts(3,0);
-				for(unsigned int j=0;j<3;j++){
-					std::fscanf(file,"%i",&fpts[j]);
+                std::vector<unsigned int> edgpts(2,0);
+                for(unsigned int j=0;j<2;j++){
+                    std::fscanf(file,"%i",&edgpts[j]);
 				}
-				//read some unnecessary integers
-				for(unsigned int j=0;j<3;j++)
+                //read some unnecessary for the moment integers
+                for(unsigned int j=0;j<1;j++)
 					std::fscanf(file,"%i",&dust);
 				
-				allfaces.push_back(fpts);
+                alledges.push_back(edgpts);
 			}
 			fclose(file);
 						
-			TriMesh tm (tri_pts, allfaces);
-			clobs_inputs.push_back(tm);
+            Polyline pm (pts, alledges);
+            clobs_inputs.push_back(pm);
 			
 			return true;
 		}
@@ -315,7 +315,7 @@ namespace Clobscode
         //-------------------------------------------------------------------
         //-------------------------------------------------------------------
         static bool ReadQuadrantList(std::string name, list<unsigned int> &olist,
-                                   vector<unsigned int> &ele_oct_ref) {
+                                   vector<unsigned int> &ele_quadt_ref) {
             FILE *file = fopen(name.c_str(),"r");
             int idx = 0;
             char word [256];
@@ -329,14 +329,14 @@ namespace Clobscode
                 }
                 if(num) {
                     idx = atoi(word);
-                    if (ele_oct_ref.size()<=idx) {
+                    if (ele_quadt_ref.size()<=idx) {
                         cerr << "Invalid element index while reading list of elements to refine\n";
-                        cerr << "Octree mesh must be readed before the list is provided\n";
-                        cerr << "Abortig!!!\n";
+                        cerr << "Quadtree mesh must be readed before the list is provided\n";
+                        cerr << "Aborting!!!\n";
                         std:abort();
                     }
                 
-                    olist.push_back(ele_oct_ref[idx]);
+                    olist.push_back(ele_quadt_ref[idx]);
                 }
             }
             olist.sort();

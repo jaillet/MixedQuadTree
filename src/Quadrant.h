@@ -30,13 +30,11 @@
 #include "MeshPoint.h"
 #include "Point3D.h"
 #include "QuadEdge.h"
-#include "TriMesh.h"
 
 using Clobscode::MeshPoint;
 using Clobscode::QuadEdge;
 using Clobscode::Point3D;
-using Clobscode::TriMesh;
-using SurfMesh::SurfTriangle;
+//using SurfMesh::SurfTriangle;
 using std::vector;
 using std::list;
 using std::set;

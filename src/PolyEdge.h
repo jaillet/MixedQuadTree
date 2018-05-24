@@ -70,9 +70,8 @@ namespace PolyMesh
 
         virtual void computeNormal(vector<Point3D> &pts);
 
-        //FJA useful?? besides, should be get?
-        // as computeNormal set the normal, here, calculates a normal and returns
-        //        virtual Point3D computeNormalAtNode(unsigned int nidx,vector<Point3D> &pts) const;
+        // here, calculates a normal and returns
+        virtual Point3D getNormalAtNode(unsigned int nidx,vector<Point3D> &pts) const;
 
         //FJA usefull? why 2 points as parameters
         //        virtual Point3D projection(const Point3D &p1, const Point3D &p2) const;

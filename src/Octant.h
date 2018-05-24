@@ -30,13 +30,12 @@
 #include "MeshPoint.h"
 #include "Point3D.h"
 #include "OctreeEdge.h"
-#include "TriMesh.h"
+#include "Polyline.h"
 
 using Clobscode::MeshPoint;
 using Clobscode::OctreeEdge;
 using Clobscode::Point3D;
-using Clobscode::TriMesh;
-using SurfMesh::SurfTriangle;
+using Clobscode::Polyline;
 using std::vector;
 using std::list;
 using std::set;

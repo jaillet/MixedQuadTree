@@ -42,7 +42,7 @@ namespace Clobscode
     //This will produce several cubes as roots of an octree structure.
     //Then split each initial element 8^rl times (where rl stands
     //for Refinement Level).
-    FEMesh Mesher::refineMesh(TriMesh &input, const unsigned short &rl,
+    FEMesh Mesher::refineMesh(Polyline &input, const unsigned short &rl,
                               const string &name, list<unsigned int> &roctli,
                               list<RefinementRegion *> &all_reg,
                               GeometricTransform &gt, const unsigned short &minrl,
@@ -113,7 +113,7 @@ namespace Clobscode
 	//This will produce several cubes as roots of an octree structure.
 	//Then split each initial element 8^rl times (where rl stands
 	//for Refinement Level).
-	FEMesh Mesher::generateMesh(TriMesh &input, const unsigned short &rl,
+    FEMesh Mesher::generateMesh(Polyline &input, const unsigned short &rl,
 								const string &name, list<RefinementRegion *> &all_reg){
         
         //ATTENTION: geometric transform causes invalid input rotation when the
@@ -179,7 +179,7 @@ namespace Clobscode
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-	bool Mesher::rotateGridMesh(TriMesh &input, list<RefinementRegion *> &all_reg,
+    bool Mesher::rotateGridMesh(Polyline &input, list<RefinementRegion *> &all_reg,
 								GeometricTransform &gt){
         
         list<RefinementRegion *>::iterator it, rrot;
@@ -213,7 +213,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     
-    void Mesher::generateGridMesh(TriMesh &input){
+    void Mesher::generateGridMesh(Polyline &input){
         //vectors with each coordinate per axis
         vector<double> all_x, all_y, all_z;
         vector<vector<unsigned int> > elements;
@@ -234,7 +234,7 @@ namespace Clobscode
             //all input faces.
             IntersectionsVisitor iv(false);
             //if (o.checkIntersections(input,points)) {
-            iv.setTriMesh(input);
+            iv.setPolyline(input);
             iv.setPoints(points);
             if (o.accept(&iv)) {
                 EdgeVisitor::insertEdges(&o, QuadEdges);
@@ -246,7 +246,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     
-    void Mesher::splitQuadrants(const unsigned short &rl, TriMesh &input,
+    void Mesher::splitQuadrants(const unsigned short &rl, Polyline &input,
                               list<unsigned int> &roctli,
                               list<RefinementRegion *> &all_reg, const string &name,
                               const unsigned short &minrl, const unsigned short &omaxrl){
@@ -309,7 +309,7 @@ namespace Clobscode
                         //"manually" at this point (clipping_coords).
                         IntersectionsVisitor iv(true);
                         //if (o.checkIntersections(input,inter_faces,clipping_coords[j]))
-                        iv.setTriMesh(input);
+                        iv.setPolyline(input);
                         iv.setFaces(inter_faces);
                         iv.setCoords(clipping_coords[j]);
                         
@@ -450,7 +450,7 @@ namespace Clobscode
                             //"manually" at this point (clipping_coords).
                             IntersectionsVisitor iv(true);
                             //if (o.checkIntersections(input,inter_faces,clipping_coords[j]))
-                            iv.setTriMesh(input);
+                            iv.setPolyline(input);
                             iv.setFaces(inter_faces);
                             iv.setCoords(clipping_coords[j]);
                             
@@ -563,7 +563,7 @@ namespace Clobscode
                         //select_faces = true
                         IntersectionsVisitor iv(true);
                         //if (o.checkIntersections(input,inter_faces,clipping_coords[j]))
-                        iv.setTriMesh(input);
+                        iv.setPolyline(input);
                         iv.setFaces(inter_faces);
                         iv.setCoords(clipping_coords[j]);
                         
@@ -665,7 +665,7 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 	
-	void Mesher::generateOctreeMesh(const unsigned short &rl, TriMesh &input,
+    void Mesher::generateOctreeMesh(const unsigned short &rl, Polyline &input,
 									list<RefinementRegion *> &all_reg,
 									const string &name){
 		
@@ -763,7 +763,7 @@ namespace Clobscode
                             //select_faces = true
                             IntersectionsVisitor iv(true);
                             //if (o.checkIntersections(input,inter_faces,clipping_coords[j]))
-                            iv.setTriMesh(input);
+                            iv.setPolyline(input);
                             iv.setFaces(inter_faces);
                             iv.setCoords(clipping_coords[j]);
 
@@ -876,7 +876,7 @@ namespace Clobscode
                         //select_faces = true
                         IntersectionsVisitor iv(true);
                         //if (o.checkIntersections(input,inter_faces,clipping_coords[j]))
-                        iv.setTriMesh(input);
+                        iv.setPolyline(input);
                         iv.setFaces(inter_faces);
                         iv.setCoords(clipping_coords[j]);
 
@@ -976,7 +976,7 @@ namespace Clobscode
 		//cout.flush();
 	}
 
-    bool Mesher::isItIn(TriMesh &mesh, list<unsigned int> &faces, vector<Point3D> &coords) {
+    bool Mesher::isItIn(Polyline &mesh, list<unsigned int> &faces, vector<Point3D> &coords) {
         //this method is meant to be used by Quadrants that don't
         //intersect input domains. If they are inside of at least
         //one input mesh, then they must remain in the output mesh.
@@ -1110,7 +1110,7 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 	
-	void Mesher::detectInsideNodes(TriMesh &input){
+    void Mesher::detectInsideNodes(Polyline &input){
 		for (unsigned int i=0; i<points.size(); i++) {
 			if (points[i].wasOutsideChecked()) {
 				continue;
@@ -1202,7 +1202,7 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 	
-	void Mesher::applySurfacePatterns(TriMesh &input){
+    void Mesher::applySurfacePatterns(Polyline &input){
 		//apply patters to avoid flat, invalid and
 		//poor quality elements.
 		list<MeshPoint> tmppts;
@@ -1242,7 +1242,7 @@ namespace Clobscode
 	//shrink elements intersecting the envelope defined by all
 	//input surfaces
 	
-	void Mesher::shrinkToBoundary(TriMesh &input){
+    void Mesher::shrinkToBoundary(Polyline &input){
 		
 		//Slow element removed (but works): from elements intersecting the
 		//input domain, detect inner nodes. Project this nodes onto the
@@ -1401,7 +1401,7 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 	
-	void Mesher::projectCloseToBoundaryNodes(TriMesh &input){
+    void Mesher::projectCloseToBoundaryNodes(Polyline &input){
         
         //Slow element removed (but works): from elements intersecting the
         //input domain, detect inner nodes. Project this nodes onto the

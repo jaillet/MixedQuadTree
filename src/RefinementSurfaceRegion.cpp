@@ -23,7 +23,7 @@ namespace Clobscode
 {	
 	//--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-	RefinementSurfaceRegion::RefinementSurfaceRegion(TriMesh &tm, const unsigned short &level)
+    RefinementSurfaceRegion::RefinementSurfaceRegion(Polyline &tm, const unsigned short &level)
 	{
 		this->tm = tm;
 		refine_level = level;
@@ -51,19 +51,19 @@ namespace Clobscode
         for (unsigned int i=0; i<tm.getFaces().size(); i++) {
             faces[i] = tm.getFaces()[i].getPoints();
         }
-        //creating a new trimesh with the new vertices rotated
-        TriMesh tm2 (tm.getPoints(), faces);
+        //creating a new Polyline with the new vertices rotated
+        Polyline tm2 (tm.getPoints(), faces);
         this->tm = tm2;
     }
 
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    GeometricTransform RefinementSurfaceRegion::rotateWithinYou(TriMesh &input) {
+    GeometricTransform RefinementSurfaceRegion::rotateWithinYou(Polyline &input) {
         
         GeometricTransform gt;
         gt.calculateAnglesAndCentroid(tm);
         gt.rotateSurfaceMesh(this->tm);
-        TriMesh aux = tm;
+        Polyline aux = tm;
         this->tm = input;
         rotate(gt);
         input = this->tm;

@@ -29,7 +29,6 @@
 #include "Point3D.h"
 #include "PolyEdge.h"
 //FJA no more used #include "SurfEdgeContainer.h"
-#include "SurfaceEdge.h"
 #include <limits>
 #include <set>
 
@@ -47,7 +46,7 @@ namespace Clobscode
         Polyline();
         
         Polyline(vector<Point3D> &pts,
-				vector<vector<unsigned int> > &fv);
+                vector<vector<unsigned int> > &edg_ind);
 		
         virtual ~Polyline();
 		
@@ -57,16 +56,18 @@ namespace Clobscode
         virtual vector<Point3D> &getVerticePseudoNormals();
         virtual const vector<Point3D> &getVerticePseudoNormals() const;
 
-        virtual set<SurfaceEdge> &getEdges();
-        virtual const set<SurfaceEdge> &getEdges() const;
-
         virtual vector<double> &getBounds();
         virtual const vector<double> &getBounds() const;
 
-		virtual bool pointIsInMesh(const Point3D &pPoint);
-		
+        virtual vector<PolyEdge> &getEdges();
+        virtual const vector<PolyEdge> &getEdges() const;
+
+        virtual int crossingNumber(const Point3D &P) const;
+        virtual int windingNumber(const Point3D &P) const;
+
+        virtual bool pointIsInMesh(const Point3D &pPoint) const;
 		virtual bool pointIsInMesh(const Point3D & pPoint, 
-								   list<unsigned int> &lFaces);
+                                   list<unsigned int> &lFaces) const;
 		
         virtual Point3D getProjection(const Point3D &pPoint) const;
 		
@@ -80,45 +81,31 @@ namespace Clobscode
 	protected:
 		
 		// compute the pseudo normal at each surface node
-		virtual void computeNodePseudoNormal();
+		virtual void computeNodesPseudoNormal();
 		
-		// compute the pseudo normal at each surface edge
-		virtual void computeEdgePseudoNormal();
-		
-		virtual bool SignedDistToTriangle(const Point3D & pP, 
-										  const unsigned int &iT, 
-										  const double &current_min_dist, 
-										  double & pDist, 
-										  Point3D & pProjP, bool & pIsIn, 
-										  int & faceEdgeNode);
+        virtual bool SignedDistToSegment(const Point3D & pP,
+                                          const unsigned int &iEdg,
+                                          const double &current_min_dist,
+                                          double & pDist,
+                                          Point3D & pProjP, bool & pIsIn,
+                                          int & edgeNode) const;
 		
 		
 	protected:
 		
 		vector<Point3D> mVertices;
-        vector<PolyEdge> mSegments;
+        vector<PolyEdge> mEdges;
 		
 		//one pseudo normal per vertices (same size)
 		vector<Point3D> mVerticePseudoNormals; 
 		
-		//one pseudo normal per edge, so 3 pseudo normals per 
-		//triangle (3*size)
-		vector<Point3D> mEdgePseudoNormals;
-		
-		//bounding box of this surface mesh
+        //bounding box of this surface mesh
 		vector<double> bounds;	
 		
-		//Point used by Ray Tracing Method (unstable)
-		Point3D outside;
-        
         //the set of edges
         //FJA to be decided: the best dataset for this...
-        set<SurfaceEdge> edges;
-        
-        
-        
-        
-	};
+        //        set<SurfaceEdge> edges;
+    };
 	
     inline vector<Point3D> &Polyline::getPoints() {
         return mVertices;
@@ -138,11 +125,11 @@ namespace Clobscode
         return bounds;
     }
 
-    inline set<SurfaceEdge> &Polyline::getEdges() {
-        return edges;
+    inline vector<PolyMesh::PolyEdge> &Polyline::getEdges() {
+        return mEdges;
     }
-    inline const set<SurfaceEdge> &Polyline::getEdges() const {
-        return edges;
+    inline const vector<PolyMesh::PolyEdge> &Polyline::getEdges() const {
+        return mEdges;
     }
 
     inline vector<Point3D> &Polyline::getVerticePseudoNormals() {
@@ -154,9 +141,9 @@ namespace Clobscode
 
     inline Point3D Polyline::getCentroid() const {
 		Point3D mCentroid;
-		mCentroid.X() = (bounds[0]+bounds[3])/2;
-        mCentroid.Y() = (bounds[1]+bounds[4])/2;
-        mCentroid.Z() = (bounds[2]+bounds[5])/2;
+        mCentroid.X() = (bounds[0]+bounds[3])/2.;
+        mCentroid.Y() = (bounds[1]+bounds[4])/2.;
+        mCentroid.Z() = (bounds[2]+bounds[5])/2.;
 		return mCentroid;
 	}
 	   

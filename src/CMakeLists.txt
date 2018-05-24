@@ -17,7 +17,7 @@ set(SOURCE_FILES Main MeshPoint Point3D Polyline PolyEdge Quadrant QuadEdge
         RefinementRegion RefinementCubeRegion RefinementSurfaceRegion
         RefinementInputSurfaceRegion RefinementAllRegion
         FaceDiagonal SurfPrism SurfPyramid SurfHexahedron SurfTetrahedron 
-	SurfaceEdge GeometricTransform
+         GeometricTransform
         Visitors/Visitor Visitors/SplitVisitor Visitors/EdgeVisitor 
 	Visitors/IntersectionsVisitor
         Visitors/OneIrregularVisitor Visitors/PointMovedVisitor

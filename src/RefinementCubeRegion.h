@@ -41,7 +41,7 @@ namespace Clobscode
 				
 		virtual ~RefinementCubeRegion();
         
-        virtual GeometricTransform rotateWithinYou(TriMesh &input);
+        virtual GeometricTransform rotateWithinYou(Polyline &input);
 		
         virtual void rotate(GeometricTransform &gt);
 		
