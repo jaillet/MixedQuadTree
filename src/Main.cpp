@@ -36,10 +36,16 @@ using std::cout;
 using std::cerr;
 using std::vector;
 using std::string;
+using std::endl;
 using Clobscode::RefinementRegion;
 using Clobscode::RefinementCubeRegion;
 using Clobscode::RefinementSurfaceRegion;
+using Clobscode::RefinementAllRegion;
+using Clobscode::RefinementInputSurfaceRegion;
 using Clobscode::Point3D;
+using Clobscode::Services;
+
+namespace chrono = std::chrono;
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
@@ -287,7 +293,7 @@ int main(int argc,char** argv){
     }
 
     auto end_time = chrono::high_resolution_clock::now();
-    cout << "  All done in " << chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+    cout << "  All done in " << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
     cout << " ms"<< endl;
 	
     list<RefinementRegion *>::iterator rriter;

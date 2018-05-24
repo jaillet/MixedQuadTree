@@ -24,19 +24,7 @@
 #include "../MeshPoint.h"
 #include "../TriMesh.h"
 
-#include "../TransitionTemplate.h"
-
-//#include "../SurfTemplate1.h"
-//#include "../SurfTemplate2.h"
-//#include "../SurfTemplate3.h"
-//#include "../SurfTemplate4.h"
-//#include "../SurfTemplate5.h"
-//#include "../SurfTemplate6.h"
-//#include "../SurfTemplate7.h"
-//#include "../SurfPrism.h"
-//#include "../SurfPyramid.h"
-//#include "../SurfTetrahedron.h"
-//#include "../SurfHexahedron.h"
+#include "../QuadTransition.h"
 
 #include "Visitor.h"
 #include "EdgeVisitor.h"
@@ -57,23 +45,17 @@ namespace Clobscode
     class TransitionPatternVisitor : public Visitor{
     public:
         TransitionPatternVisitor();
-        TransitionPatternVisitor(bool apply_pattern);
 
         bool visit(Quadrant *o);
 
         void setPoints(vector<MeshPoint> &points);
-        void setNewPoints(list<Point3D> &new_pts);
         void setEdges(const set<QuadEdge> &edges);
         void setMaxRefLevel(const unsigned short &max_ref_level);
-        void setApplyMode(bool apply_pattern);
 
     private:
         vector<MeshPoint> *points;
-        list<Point3D> *new_pts;
         const set<QuadEdge> *edges;
         const unsigned short *max_ref_level;
-        bool apply_pattern;
-
     };
 }
 
