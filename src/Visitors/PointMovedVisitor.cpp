@@ -75,9 +75,9 @@ namespace Clobscode
             //if the edge doesn't exist return false,
             //but this should be considered as an error.
             if (my_edge==edges->end()) {
-                cout << "Quadrant::isOneIrregular wtf!!!\n";
-                cout.flush();
-                return false;
+                cerr << "Error at Quadrant::isOneIrregular!!!\n";
+                cerr << "Edge not found\n";
+                std::abort();
             }
 
             unsigned int mid_idx = (*my_edge)[2];

@@ -1215,7 +1215,7 @@ namespace Clobscode
 		for (unsigned int i=0; i<Quadrants.size(); i++) {
 			
 			if (Quadrants[i].isSurface()) {
-                stv.setNewPoints(tmppts);
+                //stv.setNewPoints(tmppts);
                 stv.setIdx(i);
 				if (!Quadrants[i].accept(&stv)) {
 					cout << "Error in Mesher::applySurfacePatterns: coultd't apply";

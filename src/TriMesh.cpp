@@ -193,17 +193,8 @@ namespace Clobscode
 			t_edges[1] = ec.addEdge(mTriangles[i][1], mTriangles[i][2], i);
 			t_edges[2] = ec.addEdge(mTriangles[i][0], mTriangles[i][2], i);
 			edges_per_triangle.push_back(t_edges);
-            
-            //insert each edge in edge set:
-            SurfaceEdge se1(mTriangles[i][0], mTriangles[i][1]);
-            SurfaceEdge se2(mTriangles[i][1], mTriangles[i][2]);
-            SurfaceEdge se3(mTriangles[i][2], mTriangles[i][0]);
-            
-            edges.insert(se1);
-            edges.insert(se2);
-            edges.insert(se3);
-            
 		}
+        
 		//compute normal of each edge
 		for (unsigned int i=0; i<nfcs; i++) {
 			for (unsigned int j=0; j<3; j++) {

@@ -38,20 +38,23 @@ namespace Clobscode
     }
 
     bool OneIrregularVisitor::visit(Quadrant *o) {
-        //cout << "OneIrregular visit" << endl;
+
         if (*max_ref_level==o->ref_level) {
             return true;
         }
 
         //EdgeVisitor ev;
-        for (unsigned int i=0; i<12; i++) {
+        for (unsigned int i=0; i<4; i++) {
+            
             QuadEdge ee;
             EdgeVisitor::getEdge(o,i,ee);
             set<QuadEdge>::iterator my_edge, sub_edge;
             my_edge = edges->find(ee);
+            
             if (my_edge==edges->end()) {
-                cout << "Quadrant::isOneIrregular wtf!!!\n";
-                return false;
+                cerr << "Error at Quadrant::isOneIrregular!!!\n";
+                cerr << "Edge not found\n";
+                std::abort();
             }
 
             unsigned int mid_idx = (*my_edge)[2];

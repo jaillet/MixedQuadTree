@@ -44,23 +44,23 @@ namespace Clobscode
     class SplitVisitor : public Visitor {
 
     public:
+        
         SplitVisitor();
-        /*void VisitQuadrant(Quadrant *o,
-                         vector<MeshPoint> &points,
-                         list<Point3D> &new_pts,
-                         set<QuadEdge> &edges,
-                         vector< vector<unsigned int> > &new_eles,
-                         vector<vector<Point3D> > &clipping);*/
 
         bool visit(Quadrant *o);
 
         void setPoints(vector<MeshPoint> &points);
+        
         void setNewPts(list<Point3D> &new_pts);
+        
         void setEdges(set<QuadEdge> &edges);
+        
         void setNewEles(vector<vector<unsigned int> > &new_eles);
+        
         void setClipping(vector<vector<Point3D> > &clipping);
 
     protected:
+        
         //references
         vector<MeshPoint> *points;
         list<Point3D> *new_pts;
@@ -73,12 +73,12 @@ namespace Clobscode
                        unsigned int &c_n_pts,
                        unsigned int &mid_idx);
 
-        bool splitFace(const unsigned int &idx1,
+/*        bool splitFace(const unsigned int &idx1,
                        const unsigned int &idx2,
                        const unsigned int &idx3,
                        const unsigned int &idx4,
                        unsigned int &c_n_pts,
-                       unsigned int &mid_idx);
+                       unsigned int &mid_idx);*/
 
 
     };
