@@ -30,11 +30,13 @@ namespace PolyMesh
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
+    // pts contains all the vertices of the polyline
     void PolyEdge::computeNormal(vector<Point3D> &pts)
     {
         // edge normal computation
         // vector orthogonal to A and B
-        mEdgeNormal = pts[nodes[1]] ^ pts[nodes[0]];
+        mEdgeNormal[0] = -(pts[nodes[1]][1]-pts[nodes[0]][1]);
+        mEdgeNormal[1] =   pts[nodes[1]][0]-pts[nodes[0]][0] ;
 
         //FJA will be used only in distance
         onepoint = pts[nodes[0]];

@@ -55,9 +55,9 @@ namespace Clobscode
 			apply(tm.getPoints()[i]);
         }
 		
-		vector<vector<unsigned int> > faces (tm.getFaces().size(), vector<unsigned int>(3, 0));
-        for (unsigned int i=0; i<tm.getFaces().size(); i++) {
-            faces[i] = tm.getFaces()[i].getPoints();
+        vector<vector<unsigned int> > faces (tm.getEdges().size(), vector<unsigned int>(2, 0));
+        for (unsigned int i=0; i<tm.getEdges().size(); i++) {
+            faces[i] = tm.getEdges()[i].getPoints();
         }
         //creating a new Polyline with the new vertices rotated
         Polyline tm2 (tm.getPoints(), faces);

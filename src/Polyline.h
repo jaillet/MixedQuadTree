@@ -69,10 +69,16 @@ namespace Clobscode
 		virtual bool pointIsInMesh(const Point3D & pPoint, 
                                    list<unsigned int> &lFaces) const;
 		
+
+        //projection of a Point to Edge iedg
+        virtual Point3D getProjection(const Point3D &pPoint, int iedg) const;
+
+        //projection of a Point to the Polyline
         virtual Point3D getProjection(const Point3D &pPoint) const;
-		
+
+        //projection of a Point to a list of Edges, identified by index
 		virtual Point3D getProjection(const Point3D & pPoint, 
-                                   list<unsigned int> &lFaces) const;
+                                   list<unsigned int> &lEdges) const;
 								 
         virtual Point3D getCentroid() const;
 		
@@ -83,12 +89,12 @@ namespace Clobscode
 		// compute the pseudo normal at each surface node
 		virtual void computeNodesPseudoNormal();
 		
-        virtual bool SignedDistToSegment(const Point3D & pP,
-                                          const unsigned int &iEdg,
-                                          const double &current_min_dist,
+        // returns if pPoint co-linear to edge of indice #iEdg
+        // computes non-signed distance pDist, and projected Point pProjP
+        virtual bool closestPointToEdge(const Point3D & pPoint,
+                                          unsigned int iEdg,
                                           double & pDist,
-                                          Point3D & pProjP, bool & pIsIn,
-                                          int & edgeNode) const;
+                                          Point3D & pProjP) const;
 		
 		
 	protected:

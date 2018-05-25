@@ -181,151 +181,41 @@ namespace Clobscode
 
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    bool Polyline::SignedDistToSegment(const Point3D & pP, const unsigned int &iEdg,
-                                       const double &current_min_dist, double & pDist,
-                                       Point3D & pProjP, bool & pIsIn, int & edgeNode) const
+    // returns if pPoint co-linear to edge of indice #iEdg
+    // computes non-signed distance pDist, and projected Point pProjP
+    bool Polyline::closestPointToEdge(const Point3D & pPoint, unsigned int iEdg, double & pDist,
+                                       Point3D & pProjP) const
 	
     {
-        std::cerr << "bool Polyline::SignedDistToSegment(...) const\n" ;
-        std::cerr << "not implemented yet\n" ;
+        const Point3D &P0=mVertices[mEdges[iEdg][0]];
+        const Point3D &P1=mVertices[mEdges[iEdg][1]];
 
-        // compute the shortest distance between pP and the Segment (index iT).
-		
-        // inputs:
-        // Point3D pP, the point to be projected
-        // uInt iEdg, the index of the edge/segment to test
-		
-        // outputs
-        // double & pDist, the signed distance between the point and the edge
-        // VPoint3D & pProjP, the projected point
-        // bool pIsIn, boolean expressing if the node P is inside or outside the polyline
-		
-		
-        // declare points and normals of this edge.
-        // p* the vertices of the edge
-        // pN*, the pseudo normals at each vertices of the edge
-        // pN**, the pseudo normals at each edges of the polyline
-        Point3D pA = mVertices[mEdges[iEdg][0]];
-        Point3D pB = mVertices[mEdges[iEdg][1]];
-		
-        Point3D pNA = mVerticePseudoNormals[mEdges[iEdg][0]];
-        Point3D pNB = mVerticePseudoNormals[mEdges[iEdg][1]];
-		
-        // Edge vectors
-        Point3D AB = pB - pA;
-		
-//        // Normal vector pointing towards positive half-space, assuming (ABC) is CCW
-//        Point3D N  = AB^AC;
-//        double N2  = N * N;
-		
-        // normal used to compute the sign
-        Point3D pProjN;
-		
+        Point3D V = P1 - P0;
+        Point3D W = pPoint - P0;
+
+        double c1 = W.dot(V);
+        if ( c1 <= 0 ) {
+            pProjP=P0;
+            pDist=P0.distance(pPoint);
+        }
+
+        double c2 = V.dot(V);
+        if ( c2 <= c1 ){
+            pProjP=P1;
+            pDist=P1.distance(pPoint);
+        }
+
+        double b = c1 / c2;
+        Point3D Pb= P0 + b * V;
+        pProjP=Pb;
+        pDist=Pb.distance(pPoint);
+
+        // sign of distance (negative if pP inside)
+//        if (W.dot(mEdges[iEdg].getNormal())<0)
+//            pDist=-pDist;
+
         //True if the given node is co-linear to this edge
-        bool coplanar = false;
-		
-//        //------------------------------
-//        // Projection on plane (ABC)
-//        //------------------------------
-		
-//        // P1 = P projected on plane
-//        Point3D P1;
-//        Point3D AP1;
-//        {
-//            // Projection of P on ABC plane
-//            Point3D AP = pP - pA;
-//            double k = ( AP * N ) / N2;
-			
-//			// do not trust this face when the node is co-planar
-//			// to it and the result is "outside", unless all
-//			// faces be co-planar to the node.
-//			if (fabs(k)<1E-8) {
-//				coplanar = true;
-//			}
-			
-//            P1 = pP - k*N;
-						
-//            // Check if P1 is in triangle
-//            AP1 = P1 - pA;
-//            double x = (AP1 ^  AC) * N / N2;
-//            double y = (AB  ^ AP1) * N / N2;
-			
-//            // AP1 = x*AB + y*AC
-//            if( x>=0 && y>=0 && x+y<=1 )
-//            {
-//                // Normal interpolation
-//				// real normal of the triangle
-//				pProjN = N;
-				
-//                // Signed distance
-//                double lAbsDist = pP.distance(P1);
-//                double lSgn = pProjN * ( pP - P1 );
-				
-//                // Projection params
-//                pProjP = P1;
-//                pDist = lSgn<0 ? -lAbsDist : lAbsDist ;
-				
-//				// computing if the node is inside the surface
-//				pIsIn = lSgn < 0;
-				
-//				faceEdgeNode = 0;
-                
-//				// return false as the node is inside the triangle
-//				return false;
-//            }
-//        }
-		
-//        //-------------------------------------------------------------------
-//        // P1 is out of the triangle : compute projections on triangle edges
-//        //-------------------------------------------------------------------
-		
-//        //-------------------------------
-//        // Distance to segment AB
-//        //-------------------------------
-//        {
-//            Point3D AP = P - pA;
-//            double AB2 = AB * AB;
-//            double t = ( AP * AB ) / AB2;
-			
-//            if( t < 0 )
-//            {
-//                pProjP = pA;
-//                pProjN = pNA;
-				
-//                faceEdgeNode = 2;
-//            }
-//            else
-//                if( t > 1 )
-//                {
-//                    pProjP = pB;
-//                    pProjN = pNB;
-					
-//                    faceEdgeNode = 2;
-//                }
-//                else
-//                {
-//                    pProjP = pA + t * AB;
-//                    // pseudo normal of the edge AB
-//                    pProjN = pNab;
-//                    faceEdgeNode = 1;
-//                }
-			
-//            pDist = pProjP.distance( pP );
-//        }
-
-//        //-------------------------------
-//        // Orientation
-//        //-------------------------------
-		
-//        // Change distance sign
-//        if( pProjN * ( pP - pProjP ) < 0)
-//		{
-//            pDist = -pDist;
-//		}
-		
-//		pIsIn = pDist < 1E-8;
-		
-        return coplanar;
+        return (c1<1E-8);
 		
     }
 
@@ -408,50 +298,67 @@ namespace Clobscode
 		
         return bIsIn;
     }
-	
+
+    //projection of a Point to Edge iedg
+    Point3D Polyline::getProjection(const Point3D &pPoint, int iedg) const {
+        {
+            const Point3D &P0=mVertices[mEdges[iedg][0]];
+            const Point3D &P1=mVertices[mEdges[iedg][1]];
+            Point3D V = P1 - P0;
+            Point3D W = pPoint - P0;
+
+            double c1 = W.dot(V);
+            if ( c1 <= 0 )
+                return (P0);
+
+            double c2 = V.dot(V);
+            if ( c2 <= c1 )
+                return (P1);
+
+            double b = c1 / c2;
+            Point3D Pb= P0 + b * V;
+            return (Pb);
+        }
+    }
+
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     Point3D Polyline::getProjection(const Point3D & pPoint) const{
         std::cerr << "Point3D Polyline::getProjection(const Point3D & pPoint) const\n" ;
         std::cerr << "not implemented yet\n" ;
 
-//		// define if a point is inside a mesh or not
-		
-//		// index of the closest triangle
-//		unsigned int closestTriangle = 0;
-//		// closest point on the triangle (on triangle face, on edge, or vertice)
+        // define if a point is inside a mesh or not
+
+        // index of the closest triangle
+        unsigned int closestTriangle = 0;
+        // closest point on the triangle (on triangle face, on edge, or vertice)
         Point3D pProjP_tmp,pProjP;
-//		// distance to this closest point (always positive)
-//		double pDist;
-//		//current closest distance: positive infinity
-//		double closestDist = numeric_limits<double>::infinity();
-//		// true if this node is inside the surface
-//		bool pIsIn;
-//		bool bIsIn = false;
-//		// 0 if close to a face, 1 if close to an edge, 2 if close to a vertice
-//		int faceEdgeNode;
-//		int iFaceEdgeNode;
-		
-//		if (mTriangles.empty()) {
-//			cout << "Error at Polyline::getProjection nowhere to project a point\n";
-//			return pProjP;
-//		}
-		
-//		// browsing all the surface faces for min distance.
-//		for (unsigned int iSurfF = 0; iSurfF < mTriangles.size(); iSurfF++) {
-//			// computing the distance for this face (triangle)
-//            SignedDistToEdge(pPoint,iSurfF,closestDist,pDist,pProjP_tmp,pIsIn,faceEdgeNode);
-			
-//			pDist = fabs(pDist);
-			
-//			if (pDist < closestDist) {
-//				pProjP = pProjP_tmp;
-//				closestTriangle = iSurfF;
-//				closestDist = pDist;
-//				bIsIn = pIsIn;
-//				iFaceEdgeNode = faceEdgeNode;
-//			}
-//		}
+        // distance to this closest point (always positive)
+        double pDist;
+        //current closest distance: positive infinity
+        double closestDist = numeric_limits<double>::infinity();
+        // true if this node is inside the surface
+        bool pIsIn;
+        bool bIsIn = false;
+        // 0 if close to an edge, 1 if close to a vertice
+        int edgeNode;
+        int iEdgeNode;
+
+        if (mEdges.empty()) {
+            cout << "Error at Polyline::getProjection nowhere to project a point\n";
+            return pProjP;
+        }
+
+        // browsing all the surface faces for min distance.
+        for (unsigned int iEdge = 0; iEdge < mEdges.size(); iEdge++) {
+            // computing the distance for this edge (segment)
+            closestPointToEdge(pPoint,iEdge,pDist,pProjP_tmp);
+
+            if (pDist < closestDist) {
+                pProjP = pProjP_tmp;
+                closestDist = pDist;
+            }
+        }
 		
         return pProjP;
     }
@@ -459,7 +366,7 @@ namespace Clobscode
 	
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    Point3D Polyline::getProjection(const Point3D & pPoint, list<unsigned int> &lFaces) const{
+    Point3D Polyline::getProjection(const Point3D & pPoint, list<unsigned int> &lEdges) const{
         std::cerr << "Point3D Polyline::getProjection(const Point3D & pPoint, list<unsigned int> &lFaces)\n" ;
         std::cerr << "not implemented yet\n" ;
 

@@ -23,7 +23,7 @@
 #include "../MeshPoint.h"
 #include "../QuadEdge.h"
 #include "../Point3D.h"
-#include "../SurfTriangle.h"
+#include "../Polyline.h"
 #include "../TriMesh.h"
 
 #include <list>
@@ -63,7 +63,7 @@ namespace Clobscode
 
     protected:
         //variables
-        TriMesh *mesh;
+        Polyline *mesh;
         vector<MeshPoint> *points;
         list<unsigned int> *faces;
         vector<Point3D> *coords;

@@ -77,6 +77,8 @@ namespace Clobscode
 
         virtual double distanceToSegment(const Point3D &P0, const Point3D &P1) const;
 
+        virtual Point3D projectionOntoSegment(const Point3D &P0, const Point3D &P1) const;
+
         virtual int isLeft(const Point3D &P0, const Point3D &P1) const;
 				
 		virtual Point3D operator-(const Point3D &p) const;
@@ -202,6 +204,26 @@ namespace Clobscode
          double b = c1 / c2;
          Point3D Pb= P0 + b * V;
          return distance(Pb);
+    }
+
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    inline Point3D Point3D::projectionOntoSegment(const Point3D &P0, const Point3D &P1) const
+    {
+         Point3D V = P1 - P0;
+         Point3D W = (*this) - P0;
+
+         double c1 = W.dot(V);
+         if ( c1 <= 0 )
+              return (P0);
+
+         double c2 = V.dot(V);
+         if ( c2 <= c1 )
+              return (P1);
+
+         double b = c1 / c2;
+         Point3D Pb= P0 + b * V;
+         return (Pb);
     }
 
     // isLeft(): tests if a point is Left|On|Right of an infinite line.
