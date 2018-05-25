@@ -327,22 +327,12 @@ namespace Clobscode
         std::cerr << "Point3D Polyline::getProjection(const Point3D & pPoint) const\n" ;
         std::cerr << "not implemented yet\n" ;
 
-        // define if a point is inside a mesh or not
-
-        // index of the closest triangle
-        unsigned int closestTriangle = 0;
-        // closest point on the triangle (on triangle face, on edge, or vertice)
+        // closest point on the edge (on edge, or vertice)
         Point3D pProjP_tmp,pProjP;
         // distance to this closest point (always positive)
         double pDist;
         //current closest distance: positive infinity
         double closestDist = numeric_limits<double>::infinity();
-        // true if this node is inside the surface
-        bool pIsIn;
-        bool bIsIn = false;
-        // 0 if close to an edge, 1 if close to a vertice
-        int edgeNode;
-        int iEdgeNode;
 
         if (mEdges.empty()) {
             cout << "Error at Polyline::getProjection nowhere to project a point\n";

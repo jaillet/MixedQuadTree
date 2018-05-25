@@ -63,6 +63,7 @@ namespace Clobscode
 
     protected:
         //variables
+        TriMesh *oldtrimesh;
         Polyline *mesh;
         vector<MeshPoint> *points;
         list<unsigned int> *faces;

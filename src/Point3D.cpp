@@ -81,7 +81,7 @@ namespace Clobscode
         z+=t[2];
     }
 
-
+// old version for registry
 //	Point3D::Point3D(){
 //        x=y=z=0.0;
 //	}

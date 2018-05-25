@@ -72,7 +72,7 @@ namespace Clobscode
             vector<Point3D> input_pts = mesh->getPoints();
 
             for (f_iter = faces->begin(); f_iter!=faces->end(); f_iter++) {
-                SurfTriangle face = mesh->getFaces()[*f_iter];
+                SurfTriangle face = oldtrimesh->getFaces()[*f_iter];
                 if (intersectsTriangle(face,input_pts,coords->at(0),coords->at(1))) {
                     intersected_faces.push_back(*f_iter);
                 }
@@ -88,7 +88,7 @@ namespace Clobscode
             vector<unsigned int> &pointindex = o->pointindex;
             list<unsigned int> &intersected_faces = o->intersected_faces;
 
-            vector<SurfTriangle> faces = mesh->getFaces();
+            vector<SurfTriangle> faces = oldtrimesh->getFaces();
             vector<Point3D> input_pts = mesh->getPoints();
 
             for (unsigned int j=0; j<faces.size(); j++) {

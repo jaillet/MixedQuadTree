@@ -22,6 +22,7 @@
 
 #include "../QuadEdge.h"
 #include "../MeshPoint.h"
+#include "../TriMesh.h"
 #include "../Polyline.h"
 #include "../Quadrant.h"
 #include "../QuadSurfTemplate.h"
@@ -56,7 +57,7 @@ namespace Clobscode
     private:
         vector<MeshPoint> *meshpts;
         list<MeshPoint> *newpts;
-        TriMesh *input;
+        Polyline *input;
         unsigned int *e_idx;
 
         bool applyHexSurfaceTemplates(Quadrant *o,
