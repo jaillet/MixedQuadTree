@@ -105,7 +105,7 @@ int main(int argc,char** argv){
     Point3D pmin,pmax;
     
     vector<Clobscode::Polyline> inputs;
-    inputs.reserve(4);
+//    inputs.reserve(4);
     //Clobscode::Services io;
     
     bool getfem = false, vtkformat = false, Quadrant_start = false, m3dfor = false;
@@ -129,8 +129,33 @@ int main(int argc,char** argv){
 			endMsg();
 			return 0;
 		}
-        
         switch (argv[i][1]) {
+            case 'p': //test polyline
+                for (uint i=0;i<inputs.size();++i) {
+                    std::cerr << inputs[i].crossingNumber(Point3D(.5,0.5,0.0));
+                    std::cerr << inputs[i].crossingNumber(Point3D(1.0,0.0,0.0));
+                    std::cerr << inputs[i].crossingNumber(Point3D(0.42,0.49,0.0));
+                    std::cerr << inputs[i].crossingNumber(Point3D(1.0000000001,0.0,0.0));
+                    std::cerr << inputs[i].crossingNumber(Point3D(.99999999999,0.0,0.0)) << std::endl;
+                    std::cerr << inputs[i].windingNumber(Point3D(0.5,0.5,1.0));
+                    std::cerr << inputs[i].windingNumber(Point3D(0.2,1.2,1.0));
+                    std::cerr << inputs[i].windingNumber(Point3D(1.2,0.2,1.0));
+                    std::cerr << inputs[i].windingNumber(Point3D(0.4,0.3,1.0));
+                    std::cerr << inputs[i].windingNumber(Point3D(.9999999999999999,1.0,0.0));
+                    std::cerr << inputs[i].windingNumber(Point3D(1.0000000001,0.000000001,0.0));
+                    std::cerr << inputs[i].windingNumber(Point3D(0.9999999999,0.999999999,0.0)) << std::endl;
+                    std::cerr << inputs[i].getProjection(Point3D(0.5,0.50000001,0.0))<< std::endl;
+                    std::cerr << inputs[i].getProjection(Point3D(0.2,1.2,0.0))<< std::endl;
+                    std::cerr << inputs[i].getProjection(Point3D(1.2,0.2,0.0))<< std::endl;
+                    std::cerr << inputs[i].getProjection(Point3D(1.2,0.2,1.0))<< std::endl;
+                    std::cerr << inputs[i].getProjection(Point3D(.9999999999999999,1.0,0.0))<< std::endl;
+                    std::cerr << inputs[i].getProjection(Point3D(1.0000000001,0.000000001,0.0))<< std::endl;
+                    std::cerr << inputs[i].getProjection(Point3D(0.9999999999,0.999999999,0.0)) << std::endl;
+                    std::cerr << inputs[i].getCentroid() << std::endl;
+                }
+                i++;
+//                exit(3);
+                break;
             case 'd':
                 in_name = argv[i+1];
 

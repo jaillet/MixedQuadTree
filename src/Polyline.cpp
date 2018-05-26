@@ -37,7 +37,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     Polyline::Polyline(vector<Point3D> &pts,
-                       vector<vector<unsigned int> > &edg_ind){
+                       vector<vector<unsigned int> > &edg_ind) : mVertices(pts) {
 		
 		if (pts.empty()) {
 			std::cout << "Error in Mesh::Init input mesh without points\n";
@@ -53,15 +53,15 @@ namespace Clobscode
 		
         // initialising the vertices
         // and also, search for max and min coodinates in X, Y and Z.
-        mVertices.reserve(pts.size());
-        mVertices.push_back(pts[0]);
+//        mVertices.reserve(pts.size());
+//        mVertices.push_back(pts[0]);
         for (unsigned int i=1; i< pts.size(); ++i) {
 			
 			double x = pts[i][0];
 			double y = pts[i][1];
 			double z = pts[i][2];
 			
-            mVertices.push_back(pts[i]);
+//            mVertices.push_back(pts[i]);
 
 			if(bounds[0]>x)
 				bounds[0]=x;
@@ -144,7 +144,7 @@ namespace Clobscode
             if (((P0.Y() <= P.Y()) && (P1.Y() > P.Y()))     // an upward crossing
             || ((P0.Y() > P.Y()) && (P1.Y() <=  P.Y()))) { // a downward crossing
                 // compute  the actual edge-ray intersect x-coordinate
-                float vt = (float)(P.Y()  - P1.Y()) / (P1.Y() - P0.Y());
+                double vt = (P.Y()  - P0.Y()) / (P1.Y() - P0.Y());
                 if (P.X() <  P0.X() + vt * (P1.X() - P0.X())) // P.x < intersect
                      ++cn;   // a valid crossing of y=P.y right of P.x
             }
@@ -166,9 +166,11 @@ namespace Clobscode
             const Point3D &P0=mVertices[mEdges[i][0]];
             const Point3D &P1=mVertices[mEdges[i][1]];
             if (P0.Y() <= P.Y()) {          // start y <= P.y
-                if (P1.Y()  > P.Y())      // an upward crossing
+                if (P1.Y()  > P.Y()) {     // an upward crossing
+                    int isLeft=P.isLeft( P0, P1) ;
                      if (P.isLeft( P0, P1) > 0)  // P left of  edge
                          ++wn;            // have  a valid up intersect
+                }
             }
             else {                        // start y > P.y (no test needed)
                 if (P1.Y()  <= P.Y())     // a downward crossing
@@ -198,18 +200,18 @@ namespace Clobscode
             pProjP=P0;
             pDist=P0.distance(pPoint);
         }
-
-        double c2 = V.dot(V);
-        if ( c2 <= c1 ){
-            pProjP=P1;
-            pDist=P1.distance(pPoint);
+        else {
+            double c2 = V.dot(V);
+            if ( c2 <= c1 ){
+                pProjP=P1;
+                pDist=P1.distance(pPoint);
+            } else {
+                double b = c1 / c2;
+                Point3D Pb= P0 + b * V;
+                pProjP=Pb;
+                pDist=Pb.distance(pPoint);
+            }
         }
-
-        double b = c1 / c2;
-        Point3D Pb= P0 + b * V;
-        pProjP=Pb;
-        pDist=Pb.distance(pPoint);
-
         // sign of distance (negative if pP inside)
 //        if (W.dot(mEdges[iEdg].getNormal())<0)
 //            pDist=-pDist;
@@ -324,8 +326,6 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     Point3D Polyline::getProjection(const Point3D & pPoint) const{
-        std::cerr << "Point3D Polyline::getProjection(const Point3D & pPoint) const\n" ;
-        std::cerr << "not implemented yet\n" ;
 
         // closest point on the edge (on edge, or vertice)
         Point3D pProjP_tmp,pProjP;

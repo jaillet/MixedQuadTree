@@ -34,9 +34,9 @@ namespace PolyMesh
     void PolyEdge::computeNormal(vector<Point3D> &pts)
     {
         // edge normal computation
-        // vector orthogonal to A and B
-        mEdgeNormal[0] = -(pts[nodes[1]][1]-pts[nodes[0]][1]);
-        mEdgeNormal[1] =   pts[nodes[1]][0]-pts[nodes[0]][0] ;
+        // vector orthogonal to A and B, assuming CCW
+        mEdgeNormal[0] = -(pts[nodes[0]][1]-pts[nodes[1]][1]);
+        mEdgeNormal[1] =   pts[nodes[0]][0]-pts[nodes[1]][0] ;
 
         //FJA will be used only in distance
         onepoint = pts[nodes[0]];
@@ -157,9 +157,9 @@ namespace PolyMesh
             return v;
         }
 
-        // edge lenght computation
+        // edge length computation
         double  length = (pts[nodes[(lidx+1)%2]] - pts[nodes[lidx]]).Norm();
-        return length * mEdgeNormal;
+        return length * getNormalizedNormal();
     }
 
 

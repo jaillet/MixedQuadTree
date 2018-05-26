@@ -62,7 +62,9 @@ namespace Clobscode
         virtual vector<PolyEdge> &getEdges();
         virtual const vector<PolyEdge> &getEdges() const;
 
+        // 0 = outside, 1 = inside
         virtual int crossingNumber(const Point3D &P) const;
+        // =0 only when P is outside
         virtual int windingNumber(const Point3D &P) const;
 
         virtual bool pointIsInMesh(const Point3D &pPoint) const;

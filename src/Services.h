@@ -150,11 +150,11 @@ namespace Clobscode
                                 vector<Clobscode::Polyline> &clobs_inputs){
             
             char word [256];
-            int np, nf;
+            int np, nf; //nb pts, nfaces=nb polylines
             double x,y,z;
             bool skel = false;
             vector<vector<unsigned int> > alledges;
-            vector<Point3D> tri_pts;
+            vector<Point3D> pts;
             
             FILE *file = fopen(name.c_str(),"r");
             
@@ -174,9 +174,11 @@ namespace Clobscode
                 }
                 if(!strcmp(word,"OFF\0"))
                     break;
-                if(!strcmp(word,"SKEL\0")){
+                if(!strcmp(word,"2OFF\0"))
                     break;
+                if(!strcmp(word,"SKEL\0")){
                     skel = true;
+                    break;
                 }
                 fclose(file);
                 return false;
@@ -186,14 +188,14 @@ namespace Clobscode
             fscanf(file,"%i",&np);
             //read number of faces
             fscanf(file,"%i",&nf);
-            
+
             if (!skel) {
                 //read number of edges [info not needed].
                 fscanf(file,"%s",word);
             }
             
             //read each node
-            tri_pts.reserve(np);
+            pts.reserve(np);
             
             for( int i=0;i<np;i++){
                 std::fscanf(file,"%s",word);
@@ -203,28 +205,31 @@ namespace Clobscode
                 std::fscanf(file,"%s",word);
                 z=atof(word);
                 Point3D p (x,y,z);
-                tri_pts.push_back(p);
+                pts.push_back(p);
                 fgets(word,256,file);
             }
             
-            alledges.reserve(nf);
             //number of face points
-            int nfp;
             for( int i=0;i<nf;i++){
+                int nfp;
                 std::fscanf(file,"%i",&nfp);
-                
-                std::vector<unsigned int> fpts(nfp,0);
+                alledges.resize(nfp, std::vector<unsigned int>(2));
+
+                int fpts;
                 for(unsigned int j=0;j<nfp;j++){
-                    std::fscanf(file,"%i",&fpts[j]);
+                    std::fscanf(file,"%i",&fpts);
+                    alledges[(j-1)%nfp][1]=fpts;
+                    alledges[j][0]=fpts;
                 }
-                alledges.push_back(fpts);
                 //read any other data in the line
                 fgets(word,256,file);
+
+                Polyline pm (pts, alledges);
+                clobs_inputs.push_back(pm);
+                alledges.resize(0);
             }
             fclose(file);
             
-            Polyline tm (tri_pts, alledges);
-            clobs_inputs.push_back(tm);
             
             return true;
         }
@@ -236,6 +241,7 @@ namespace Clobscode
 
 			char word [256];
 			int cant;
+            bool isEdges=false; //true if mdl edge format, false if polyline
 			double x,y,z;
             vector<vector<unsigned int> > alledges;
             vector<Point3D> pts;
@@ -283,15 +289,18 @@ namespace Clobscode
 					return false;
 				}
 				
-				if(!strcmp(word,"ARRAY1<STRING>]\0")){
-					//std::fscanf(file,"%s",word);
-					std::fscanf(file,"%i",&cant);
-					break;
-				}
-			}
+                if(strstr(word,"Edges"))
+                    isEdges=true;
+                else if(!strcmp(word,"ARRAY1<STRING>]\0")){
+                    //std::fscanf(file,"%s",word);
+                    std::fscanf(file,"%i",&cant);
+                    break;
+                }
+            }
 			
+            if (isEdges==true) { // list of edges, assume CCW
             alledges.reserve(cant);
-            //read each edge (assuming they have 2 endpoints
+            //read each edge (assuming they have 2 endpoints)
 			int dust;
 			for( int i=0;i<cant;i++){
                 std::vector<unsigned int> edgpts(2,0);
@@ -304,6 +313,9 @@ namespace Clobscode
 				
                 alledges.push_back(edgpts);
 			}
+            } else { // one polyline, nodes 0 1 2 3 4, assume CCW
+
+            }
 			fclose(file);
 						
             Polyline pm (pts, alledges);

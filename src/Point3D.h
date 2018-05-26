@@ -79,7 +79,7 @@ namespace Clobscode
 
         virtual Point3D projectionOntoSegment(const Point3D &P0, const Point3D &P1) const;
 
-        virtual int isLeft(const Point3D &P0, const Point3D &P1) const;
+        virtual double isLeft(const Point3D &P0, const Point3D &P1) const;
 				
 		virtual Point3D operator-(const Point3D &p) const;
 		
@@ -231,7 +231,7 @@ namespace Clobscode
     //    Return: >0 for P left of the line through P0 and P1
     //            =0 for P  on the line
     //            <0 for P  right of the line
-    inline int Point3D::isLeft(const Point3D &P0, const Point3D &P1 ) const
+    inline double Point3D::isLeft(const Point3D &P0, const Point3D &P1 ) const
            {
                return ( (P1.x - P0.x) * (y - P0.y)
                        - (x -  P0.x) * (P1.y - P0.y) );

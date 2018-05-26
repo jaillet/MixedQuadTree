@@ -1,0 +1,23 @@
+[Name, STRING]
+square
+
+[Normals, ARRAY1<VECTOR3D>]
+1
+1 0 0
+
+[Vertices, ARRAY1<POINT3D>]
+4
+
+0.0  0.0  0.0
+1.0  0.0  0.0
+1.0  1.0  0.0
+0.0  1.0  0.0
+
+[Edges, ARRAY1<STRING>]
+4
+
+0 1 -1
+1 2 -1
+2 3 -1
+3 0 -1
+

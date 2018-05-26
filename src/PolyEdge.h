@@ -43,17 +43,8 @@ namespace PolyMesh
         // Construction / destruction
         PolyEdge() {}
 
-        PolyEdge(unsigned int point1, unsigned int point2){
-            nodes.reserve(2);
-            if(point1 < point2){
-                nodes.push_back(point1);
-                nodes.push_back(point2);
-            }
-            else{
-                nodes.push_back(point2);
-                nodes.push_back(point1);
-            }
-        }
+        PolyEdge(unsigned int i1, unsigned int i2) :nodes({i1,i2}) {}
+
         PolyEdge(vector<unsigned int> &fpts) : PolyEdge(fpts[0],fpts[1]) {}
 
         virtual ~PolyEdge(){
