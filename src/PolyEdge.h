@@ -43,7 +43,7 @@ namespace PolyMesh
         // Construction / destruction
         PolyEdge() {}
 
-        PolyEdge(unsigned int i1, unsigned int i2) :nodes({i1,i2}) {}
+        PolyEdge(unsigned int i1, unsigned int i2) :inodes({i1,i2}) {}
 
         PolyEdge(vector<unsigned int> &fpts) : PolyEdge(fpts[0],fpts[1]) {}
 
@@ -97,16 +97,16 @@ namespace PolyMesh
 
 	protected:
 		// Data
-        vector<unsigned int> nodes;
+        vector<unsigned int> inodes; // indices of the extremities
         Point3D mEdgeNormal, onepoint; //FJA onepoint will be used only in distance
 		
 	};
 	
     inline vector<unsigned int> &PolyEdge::getPoints(){
-        return nodes;
+        return inodes;
     }
     inline const vector<unsigned int> &PolyEdge::getPoints() const{
-        return nodes;
+        return inodes;
     }
 
     inline const Point3D &PolyEdge::getNormal() const {
@@ -119,17 +119,17 @@ namespace PolyMesh
 	}
 	
     inline Point3D PolyEdge::getSemiNormalizedNormal() const {
-        std::cerr << "WARNING FJA: returns Normal divided by 1000.!\n";
+        std::cerr << "warning at PolyEdge::getSemiNormalizedNormal(), returns Normal divided by 10000.!\n";
         Point3D normal = mEdgeNormal/10000.;
 		return normal;
     }
 
     inline unsigned int PolyEdge::getKey() const{
-        return nodes[0];
+        return inodes[0];
     }
 
     inline unsigned int PolyEdge::getVal() const{
-        return nodes[1];
+        return inodes[1];
     }
 
 }

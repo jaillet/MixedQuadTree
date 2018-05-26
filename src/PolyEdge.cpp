@@ -35,11 +35,11 @@ namespace PolyMesh
     {
         // edge normal computation
         // vector orthogonal to A and B, assuming CCW
-        mEdgeNormal[0] = -(pts[nodes[0]][1]-pts[nodes[1]][1]);
-        mEdgeNormal[1] =   pts[nodes[0]][0]-pts[nodes[1]][0] ;
+        mEdgeNormal[0] = -(pts[inodes[0]][1]-pts[inodes[1]][1]);
+        mEdgeNormal[1] =   pts[inodes[0]][0]-pts[inodes[1]][0] ;
 
         //FJA will be used only in distance
-        onepoint = pts[nodes[0]];
+        onepoint = pts[inodes[0]];
     }
 
     //--------------------------------------------------------------------------------
@@ -67,13 +67,13 @@ namespace PolyMesh
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     unsigned int &PolyEdge::operator[](unsigned int pos){
-        return nodes.at(pos);
+        return inodes.at(pos);
     }
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     unsigned int PolyEdge::operator[](unsigned int pos) const{
-        return nodes.at(pos);
+        return inodes.at(pos);
     }
 
     //--------------------------------------------------------------------------------
@@ -141,11 +141,11 @@ namespace PolyMesh
         //return mEdgeNormal;
         unsigned int lidx = 2; // trick to avoid true/false variable
 
-        if (nidx == nodes[0]) {
+        if (nidx == inodes[0]) {
             lidx = 0;
         }
         else {
-            if (nidx == nodes[1]) {
+            if (nidx == inodes[1]) {
                 lidx = 1;
             }
         }
@@ -158,7 +158,7 @@ namespace PolyMesh
         }
 
         // edge length computation
-        double  length = (pts[nodes[(lidx+1)%2]] - pts[nodes[lidx]]).Norm();
+        double  length = (pts[inodes[(lidx+1)%2]] - pts[inodes[lidx]]).Norm();
         return length * getNormalizedNormal();
     }
 

@@ -62,7 +62,7 @@ namespace Clobscode
         
         GeometricTransform gt;
         gt.calculateAnglesAndCentroid(tm);
-        gt.rotateSurfaceMesh(this->tm);
+        gt.rotatePolyline(this->tm);
         Polyline aux = tm;
         this->tm = input;
         rotate(gt);

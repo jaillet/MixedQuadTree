@@ -46,7 +46,7 @@ namespace Clobscode
     GeometricTransform RefinementAllRegion::rotateWithinYou(Polyline &input) {
         //rotate input and return transformation
         GeometricTransform gt;
-        gt.rotateSurfaceMesh(input);
+        gt.rotatePolyline(input);
         return gt;
         //gt defined in parent class
     }

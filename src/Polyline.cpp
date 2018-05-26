@@ -98,11 +98,19 @@ namespace Clobscode
 		
 	}
 	
-	//--------------------------------------------------------------------------------
-	//--------------------------------------------------------------------------------	
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    void Polyline::computeEdgesNormal(){
+        for (auto &e:mEdges) {
+            e.computeNormal(mVertices);
+        }
+    }
+
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
     void Polyline::computeNodesPseudoNormal(){
-		
-		unsigned int npts = mVertices.size();
+
+        unsigned int npts = mVertices.size();
         mVerticePseudoNormals.assign(npts,Point3D());
         vector<list<unsigned int> > seg_per_node(npts);
 

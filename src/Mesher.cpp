@@ -55,7 +55,7 @@ namespace Clobscode
             cout << gt.getCentroid() << "\n";
             cout << gt.getXAxis() << " " << gt.getYAxis();
             cout << " " << gt.getZAxis() << "\n";*/
-            gt.rotateSurfaceMesh(input);
+            gt.rotatePolyline(input);
         }
         
         //split Quadrants until the refinement level (rl) is achieved.
@@ -120,7 +120,7 @@ namespace Clobscode
         //input is a cube.
 		GeometricTransform gt;
         
-		//rotate: This method is written below and its mostly comented because
+        //rotate: This method is written below and its mostly commented because
         //it causes conflicts when the input is a cube. Must be checked.
 		bool rotated = rotateGridMesh(input, all_reg, gt);
         
@@ -182,7 +182,7 @@ namespace Clobscode
     bool Mesher::rotateGridMesh(Polyline &input, list<RefinementRegion *> &all_reg,
 								GeometricTransform &gt){
         
-        list<RefinementRegion *>::iterator it, rrot;
+        list<RefinementRegion *>::const_iterator it, rrot;
         bool inputHasbeenRotated = false;
 
         for (it = all_reg.begin(); it!=all_reg.end(); it++) {

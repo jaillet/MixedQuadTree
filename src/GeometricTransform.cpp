@@ -1,21 +1,27 @@
 /*
- <Mix-mesher: region type. This program generates a mixed-elements mesh>
- 
- Copyright (C) <2013,2017>  <Claudio Lobos>
- 
+ <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
+
+ Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+
  This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
+ it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
+ GNU Lesser General Public License for more details.
+
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/gpl.txt>
+ along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
  */
+/**
+* @file GeometricTransform.cpp
+* @author Claudio Lobos, Fabrice Jaillet
+* @version 0.1
+* @brief
+**/
 
 #include "GeometricTransform.h"
 #include <algorithm>
@@ -25,19 +31,13 @@ namespace Clobscode
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-	GeometricTransform::GeometricTransform(){
-        x=y=z=0;
-	}
-	
+    GeometricTransform::GeometricTransform()
+        :x(0.0),y(0.0),z(0.0) {	} //centroid initialized by Point3D default constructor
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-	GeometricTransform::GeometricTransform(Point3D &p, double &x, double &y, double &z){
-		centroid = p;
-        this->x=x;
-        this->y=y;
-        this->z=z;
-	}
+    GeometricTransform::GeometricTransform(Point3D &p, double &x, double &y, double &z)
+     :centroid(p),x(x),y(y),z(z) {	}
 	
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
@@ -45,39 +45,51 @@ namespace Clobscode
 		
 	}
     
-    
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    void GeometricTransform::rotateSurfaceMesh(Polyline &tm) {
-		//calculateAnglesAndCentroid(tm);
+    void GeometricTransform::rotatePolyline(Polyline &ply) {
+        //calculateAnglesAndCentroid(ply);
+
+        std::cerr << "warning at GeometricTransform::rotatePolyline(Polyline &ply)\n";
+        std::cerr << "Create ply2 and copy back to ply\n";
+        std::cerr << "Why not rotate ply directly.... to be checked\n";
 		
-		for (unsigned int i=0; i<tm.getPoints().size(); i++){
-			apply(tm.getPoints()[i]);
+        for (unsigned int i=0; i<ply.getPoints().size(); i++){
+            apply(ply.getPoints()[i]);
         }
-		
-        vector<vector<unsigned int> > faces (tm.getEdges().size(), vector<unsigned int>(2, 0));
-        for (unsigned int i=0; i<tm.getEdges().size(); i++) {
-            faces[i] = tm.getEdges()[i].getPoints();
-        }
-        //creating a new Polyline with the new vertices rotated
-        Polyline tm2 (tm.getPoints(), faces);
-        tm = tm2;
+        ply.computeEdgesNormal(); // to implement...
+        ply.computeNodesPseudoNormal();
+
+//        // edges are the same, no need to copy
+//        vector<vector<unsigned int> > edges (ply.getEdges().size(), vector<unsigned int>(2, 0));
+//        for (unsigned int i=0; i<ply.getEdges().size(); i++) {
+//            edges[i] = ply.getEdges()[i].getPoints();
+//        }
+//        //creating a new Polyline with the new vertices rotated
+//        Polyline ply2 (ply.getPoints(), edges);
+//        ply = ply2;
         
     }
     
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    void GeometricTransform::rotateSurfaceMeshInverse(Polyline &tm) {
+    void GeometricTransform::rotatePolylineInverse(Polyline &ply) {
         //to implement here
+        std::cerr << "warning at GeometricTransform::rotateSurfaceMeshInverse(Polyline &ply)\n";
+        std::cerr << "not implemented yet...\n";
     }
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
     void GeometricTransform::calculateAnglesAndCentroid(Polyline &tm) {
-		
-        vector<Point3D> vertices, normals, maxNormals;
-		vertices = tm.getPoints();
+
+        std::cerr << "GeometricTransform::calculateAnglesAndCentroid(Polyline &ply)\n";
+        std::cerr << "!!!!!!!!!!!!!!! seems to be different in 3D... to be checked\n";
+
+        const vector<Point3D> &vertices= tm.getPoints();
+        const vector<Point3D> &normals= tm.getNormals();
+        vector<Point3D> maxNormals;
         
         double alpha = 0;//77/57.2957795;
         double beta = 0;//35/57.2957795;
@@ -86,7 +98,6 @@ namespace Clobscode
         double maxNorm = 0;
         int maxIndex = 0;
         
-        normals = tm.getNormals();
         maxNormals.push_back(normals[0]);
         //getting a distribution of mean maximum normals
         for (unsigned int i=1; i<normals.size(); i++){

@@ -83,14 +83,18 @@ namespace Clobscode
                                    list<unsigned int> &lEdges) const;
 								 
         virtual Point3D getCentroid() const;
-		
+
+        // compute the pseudo normal at each surface node
+        virtual void computeEdgesNormal();
+
         virtual vector<Point3D> getNormals() const;
+
+        // compute the pseudo normal at each surface node
+        virtual void computeNodesPseudoNormal();
+
 		
 	protected:
-		
-		// compute the pseudo normal at each surface node
-		virtual void computeNodesPseudoNormal();
-		
+				
         // returns if pPoint co-linear to edge of indice #iEdg
         // computes non-signed distance pDist, and projected Point pProjP
         virtual bool closestPointToEdge(const Point3D & pPoint,
