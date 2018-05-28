@@ -1,21 +1,27 @@
 /*
- <Mix-mesher: region type. This program generates a mixed-elements mesh>
- 
- Copyright (C) <2013,2017>  <Claudio Lobos>
- 
+ <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
+
+ Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+
  This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
+ it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
+ GNU Lesser General Public License for more details.
+
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/gpl.txt>
+ along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
  */
+/**
+* @file RefinementSurfaceRegion.cpp
+* @author Claudio Lobos, Fabrice Jaillet
+* @version 0.1
+* @brief
+**/
 
 #include "RefinementSurfaceRegion.h"
 
@@ -23,9 +29,9 @@ namespace Clobscode
 {	
 	//--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    RefinementSurfaceRegion::RefinementSurfaceRegion(Polyline &tm, const unsigned short &level)
+    RefinementSurfaceRegion::RefinementSurfaceRegion(Polyline &input, const unsigned short &level)
 	{
-		this->tm = tm;
+        this->ply = input;
 		refine_level = level;
         
         local_rot = true;
@@ -43,17 +49,22 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
 	void RefinementSurfaceRegion::rotate(GeometricTransform &gt) {
 		
-		for (unsigned int i=0; i<tm.getPoints().size(); i++){
-			gt.apply(tm.getPoints()[i]);
-        }
+        std::cerr << "warning at RefinementSurfaceRegion::rotate(GeometricTransform &gt)\n";
+        std::cerr << "Really needed? as simply overloading GeometricTransform::rotatePolyline...\n";
+
+        gt.rotatePolyline(ply);
+
+//        for (unsigned int i=0; i<ply.getPoints().size(); i++){
+//            gt.apply(ply.getPoints()[i]);
+//        }
 		
-        vector<vector<unsigned int> > faces (tm.getEdges().size(), vector<unsigned int>(2, 0));
-        for (unsigned int i=0; i<tm.getEdges().size(); i++) {
-            faces[i] = tm.getEdges()[i].getPoints();
-        }
-        //creating a new Polyline with the new vertices rotated
-        Polyline tm2 (tm.getPoints(), faces);
-        this->tm = tm2;
+//        vector<vector<unsigned int> > edges (ply.getEdges().size(), vector<unsigned int>(2, 0));
+//        for (unsigned int i=0; i<ply.getEdges().size(); i++) {
+//            edges[i] = ply.getEdges()[i].getPoints();
+//        }
+//        //creating a new Polyline with the new vertices rotated
+//        Polyline tm2 (ply.getPoints(), edges);
+//        this->ply = tm2;
     }
 
     //--------------------------------------------------------------------------------
@@ -61,20 +72,14 @@ namespace Clobscode
     GeometricTransform RefinementSurfaceRegion::rotateWithinYou(Polyline &input) {
         
         GeometricTransform gt;
-        gt.calculateAnglesAndCentroid(tm);
-        gt.rotatePolyline(this->tm);
-        Polyline aux = tm;
-        this->tm = input;
-        rotate(gt);
-        input = this->tm;
-        this->tm = aux;
+        gt.calculateAnglesAndCentroid(input);
+        gt.rotatePolyline(input); // rotate the input
+        gt.rotatePolyline(this->ply); // and next the ROI
+
+//        std::cerr << input << std::endl;
+//        std::cerr << this->ply << std::endl;
+
         return gt;
-        
-		/*GeometricTransform gt;
-        gt.calculateAnglesAndCentroid(tm);
-        gt.rotateSurfaceMesh(tm);
-        gt.rotateSurfaceMesh(input);
-        return gt;*/
     }
 	
 	//--------------------------------------------------------------------------------
@@ -82,18 +87,17 @@ namespace Clobscode
 
 	bool RefinementSurfaceRegion::intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)
     {
-        
         //(Point3D &p1, Point3D &p2)
         
         Point3D p1 = points[oct.getPoints()[0]].getPoint();
         Point3D p2 = points[oct.getPoints()[6]].getPoint();
         
         //test if any node of the Quadrant is Inside the Mesh.
-        if (tm.pointIsInMesh(p1)) {
+        if (ply.pointIsInMesh(p1)) {
             return true;
         }
         
-        if (tm.pointIsInMesh(p2)) {
+        if (ply.pointIsInMesh(p2)) {
             return true;
         }
         
@@ -102,43 +106,43 @@ namespace Clobscode
         aux[0] = p1[0];
         aux[1] = p1[1];
         aux[2] = p2[2];
-        if (tm.pointIsInMesh(aux)) {
+        if (ply.pointIsInMesh(aux)) {
             return true;
         }
         aux[0] = p1[0];
         aux[1] = p2[1];
         aux[2] = p1[2];
-        if (tm.pointIsInMesh(aux)) {
+        if (ply.pointIsInMesh(aux)) {
             return true;
         }
         aux[0] = p2[0];
         aux[1] = p1[1];
         aux[2] = p1[2];
-        if (tm.pointIsInMesh(aux)) {
+        if (ply.pointIsInMesh(aux)) {
             return true;
         }
         aux[0] = p2[0];
         aux[1] = p2[1];
         aux[2] = p1[2];
-        if (tm.pointIsInMesh(aux)) {
+        if (ply.pointIsInMesh(aux)) {
             return true;
         }
         aux[0] = p2[0];
         aux[1] = p1[1];
         aux[2] = p2[2];
-        if (tm.pointIsInMesh(aux)) {
+        if (ply.pointIsInMesh(aux)) {
             return true;
         }
         aux[0] = p1[0];
         aux[1] = p2[1];
         aux[2] = p2[2];
-        if (tm.pointIsInMesh(aux)) {
+        if (ply.pointIsInMesh(aux)) {
             return true;
         }
         
         
         //test if any node of the mesh is inside the Quadrant
-        vector<Point3D> tmpts = tm.getPoints();
+        vector<Point3D> tmpts = ply.getPoints();
         for (unsigned int i=0; i<tmpts.size(); i++) {
             if (tmpts[i][0]<p1[0] || p2[0]<tmpts[i][0]) {
                 continue;

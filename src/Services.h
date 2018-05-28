@@ -241,8 +241,9 @@ namespace Clobscode
 
 			char word [256];
 			int cant;
-            bool isEdges=false; //true if mdl edge format, false if polyline
-			double x,y,z;
+            bool isEdges=false; //true if mdl edge format
+            bool isPolyline=false; //true if mdl polyline format
+            double x,y,z;
             vector<vector<unsigned int> > alledges;
             vector<Point3D> pts;
 			
@@ -291,6 +292,8 @@ namespace Clobscode
 				
                 if(strstr(word,"Edges"))
                     isEdges=true;
+                else if(strstr(word,"Polyline"))
+                    isPolyline=true;
                 else if(!strcmp(word,"ARRAY1<STRING>]\0")){
                     //std::fscanf(file,"%s",word);
                     std::fscanf(file,"%i",&cant);
@@ -313,8 +316,10 @@ namespace Clobscode
 				
                 alledges.push_back(edgpts);
 			}
-            } else { // one polyline, nodes 0 1 2 3 4, assume CCW
-
+            } else if (isPolyline==true) { // one polyline, nodes 0 1 2 3 4, assume CCW
+                exit(5); // TODO
+            } else { // no edges nor polyline, just circulate nodes, assuming CCW
+                exit(6); // TODO
             }
 			fclose(file);
 						

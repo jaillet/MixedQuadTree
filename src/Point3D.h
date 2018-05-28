@@ -61,8 +61,10 @@ namespace Clobscode
 		
         virtual double Norm() const;
 		
+        virtual bool colinear(const Point3D &p) const;
+
         virtual Point3D cross(const Point3D &p) const;
-		
+
 		//cross product operator
 		virtual Point3D operator^(const Point3D &p) const;
 		
@@ -107,11 +109,7 @@ namespace Clobscode
 		virtual double operator[](int pos) const;
 		
         virtual Point3D& operator=(const Point3D& p);
-				
-		virtual void update(Point3D *Point3D);
-		
-		virtual void update(Point3D Point3D);
-		
+						
         virtual string print() const;
 		
 		virtual void xAxisRotation(double angle);
@@ -245,6 +243,10 @@ namespace Clobscode
         return ret;
     }
 
+    inline bool Point3D::colinear(const Point3D &p) const {
+        return (x*p[1] == y*p[0]);
+    }
+
 	inline Point3D Point3D::operator^(const Point3D &p) const {
 		Point3D ret;
 		ret[0]=y*p[2] - z*p[1];
@@ -311,18 +313,6 @@ namespace Clobscode
 		return Point3D(p.X()*mul,p.Y()*mul,p.Z()*mul);
 	}
 	
-	inline void Point3D::update(Point3D *Point3D){
-		x = (*Point3D)[0];
-		y = (*Point3D)[1];
-		z = (*Point3D)[2]; 
-	}
-	
-	inline void Point3D::update(Point3D Point3D){
-		x = Point3D[0];
-		y = Point3D[1];
-		z = Point3D[2]; 
-	}
-
     inline double &Point3D::operator[](int pos){
         if(pos==0)
             return x;

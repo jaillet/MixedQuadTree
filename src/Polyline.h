@@ -47,7 +47,7 @@ namespace Clobscode
         
         Polyline(vector<Point3D> &pts,
                 vector<vector<unsigned int> > &edg_ind);
-		
+
         virtual ~Polyline();
 		
         virtual vector<Point3D> &getPoints();
@@ -82,7 +82,14 @@ namespace Clobscode
 		virtual Point3D getProjection(const Point3D & pPoint, 
                                    list<unsigned int> &lEdges) const;
 								 
+        virtual void update();
+
+        virtual Point3D computeNormalToPlane();
+
         virtual Point3D getCentroid() const;
+
+        // compute the pseudo normal at each surface node
+        virtual void computeBounds();
 
         // compute the pseudo normal at each surface node
         virtual void computeEdgesNormal();
@@ -92,6 +99,7 @@ namespace Clobscode
         // compute the pseudo normal at each surface node
         virtual void computeNodesPseudoNormal();
 
+        friend ostream& operator<<(ostream& os, const Polyline &ply);
 		
 	protected:
 				
@@ -112,13 +120,16 @@ namespace Clobscode
 		vector<Point3D> mVerticePseudoNormals; 
 		
         //bounding box of this surface mesh
-		vector<double> bounds;	
-		
-        //the set of edges
-        //FJA to be decided: the best dataset for this...
-        //        set<SurfaceEdge> edges;
+        vector<double> bounds;
     };
 	
+    inline void Polyline::update() {
+        computeBounds();
+        computeNormalToPlane();
+        computeEdgesNormal();
+        computeNodesPseudoNormal();
+    }
+
     inline vector<Point3D> &Polyline::getPoints() {
         return mVertices;
     }
@@ -152,12 +163,11 @@ namespace Clobscode
     }
 
     inline Point3D Polyline::getCentroid() const {
-		Point3D mCentroid;
-        mCentroid.X() = (bounds[0]+bounds[3])/2.;
-        mCentroid.Y() = (bounds[1]+bounds[4])/2.;
-        mCentroid.Z() = (bounds[2]+bounds[5])/2.;
+        Point3D mCentroid ( (bounds[0]+bounds[3])/2.,
+                            (bounds[1]+bounds[4])/2.,
+                            (bounds[2]+bounds[5])/2.);;
 		return mCentroid;
 	}
-	   
+
 }
 #endif

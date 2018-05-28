@@ -45,38 +45,9 @@ namespace Clobscode
 		}
 		
         // init bouding box with first Point3D
-        bounds.resize(6);
-		bounds[0]=bounds[3]=pts[0][0];
-		bounds[1]=bounds[4]=pts[0][1];
-		bounds[2]=bounds[5]=pts[0][2];
-		
-		
-        // initialising the vertices
-        // and also, search for max and min coodinates in X, Y and Z.
-//        mVertices.reserve(pts.size());
-//        mVertices.push_back(pts[0]);
-        for (unsigned int i=1; i< pts.size(); ++i) {
-			
-			double x = pts[i][0];
-			double y = pts[i][1];
-			double z = pts[i][2];
-			
-//            mVertices.push_back(pts[i]);
+        computeBounds();
+        computeNormalToPlane();
 
-			if(bounds[0]>x)
-				bounds[0]=x;
-			else if(bounds[3]<x)
-				bounds[3]=x;
-			if(bounds[1]>y)
-				bounds[1]=y;
-			else if(bounds[4]<y)
-				bounds[4]=y;
-			if(bounds[2]>z)
-				bounds[2]=z;
-			else if(bounds[5]<z)
-				bounds[5]=z;
-		}
-        
         /*for (unsigned int i=0; i<bounds.size(); ++i) {
             cout << bounds[i] << endl;
         }*/
@@ -93,11 +64,46 @@ namespace Clobscode
         computeNodesPseudoNormal();
 		
 	}
-	
+
     Polyline::~Polyline(){
 		
 	}
 	
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    void Polyline::computeBounds(){
+
+        bounds.resize(6,0.0);
+
+        if (mVertices.size()>=0) {
+            bounds[0]=bounds[3]=mVertices[0][0];
+            bounds[1]=bounds[4]=mVertices[0][1];
+            bounds[2]=bounds[5]=mVertices[0][2];
+
+            // search for max and min coodinates in X, Y and Z.
+            double x,y,z;
+            for (unsigned int i=1; i< mVertices.size(); ++i) {
+
+                x = mVertices[i][0];
+                y = mVertices[i][1];
+                z = mVertices[i][2];
+
+                if(bounds[0]>x)
+                    bounds[0]=x;
+                else if(bounds[3]<x)
+                    bounds[3]=x;
+                if(bounds[1]>y)
+                    bounds[1]=y;
+                else if(bounds[4]<y)
+                    bounds[4]=y;
+                if(bounds[2]>z)
+                    bounds[2]=z;
+                else if(bounds[5]<z)
+                    bounds[5]=z;
+            }
+        }
+    }
+
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     void Polyline::computeEdgesNormal(){
@@ -420,7 +426,29 @@ namespace Clobscode
 		
 //		return pProjP;
 	}
-	
+
+    Point3D Polyline::computeNormalToPlane() {
+        Point3D W;
+        if (mVertices.size()>=3) {
+            Point3D U=mVertices[1]-mVertices[0], V;
+            uint i=2;
+            do { // suppose not all points are colinear....
+                V=mVertices[i]-mVertices[0];
+                ++i;
+            } while (U.colinear(V));
+            W=(U^V).normalize();
+        }
+
+        if (W.distance(Point3D(0.0,0.0,1.0)) >1E-8) {
+            std::cerr << "warning Polyline::computeNormalToPlane()\n";
+            std::cerr << "Polyline not aligned to XY plane\n";
+            exit(1);
+        }
+        return (W);
+    }
+
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
     vector<Point3D> Polyline::getNormals() const{
 		vector<Point3D> normals;
         for (unsigned int i=0; i<getEdges().size(); i++){
@@ -429,4 +457,22 @@ namespace Clobscode
         }
         return normals;
 	} 
+
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    ostream& operator<<(ostream& os, const Polyline &ply){
+        for (auto &v:ply.getPoints()) {
+            os << v << "; ";
+        }
+        os << std::endl;
+        for (auto &n:ply.getNormals()) {
+            os << n << "; ";
+        }
+        os << std::endl;
+        for (auto &e:ply.getEdges()) {
+            os << e << " ";
+        }
+        os << std::endl;
+        return os;
+    }
 }

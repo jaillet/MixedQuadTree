@@ -44,22 +44,18 @@ namespace Clobscode
 	GeometricTransform::~GeometricTransform(){
 		
 	}
-    
+
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
     void GeometricTransform::rotatePolyline(Polyline &ply) {
         //calculateAnglesAndCentroid(ply);
-
-        std::cerr << "warning at GeometricTransform::rotatePolyline(Polyline &ply)\n";
-        std::cerr << "Create ply2 and copy back to ply\n";
-        std::cerr << "Why not rotate ply directly.... to be checked\n";
 		
         for (unsigned int i=0; i<ply.getPoints().size(); i++){
             apply(ply.getPoints()[i]);
         }
-        ply.computeEdgesNormal(); // to implement...
-        ply.computeNodesPseudoNormal();
+        ply.update();
 
+//FJA rq: previous version simpler....
 //        // edges are the same, no need to copy
 //        vector<vector<unsigned int> > edges (ply.getEdges().size(), vector<unsigned int>(2, 0));
 //        for (unsigned int i=0; i<ply.getEdges().size(); i++) {
@@ -82,20 +78,20 @@ namespace Clobscode
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    void GeometricTransform::calculateAnglesAndCentroid(Polyline &tm) {
+    void GeometricTransform::calculateAnglesAndCentroid(Polyline &input) {
 
         std::cerr << "GeometricTransform::calculateAnglesAndCentroid(Polyline &ply)\n";
         std::cerr << "!!!!!!!!!!!!!!! seems to be different in 3D... to be checked\n";
 
-        const vector<Point3D> &vertices= tm.getPoints();
-        const vector<Point3D> &normals= tm.getNormals();
+//        const vector<Point3D> &vertices= tm.getPoints();
+        const vector<Point3D> &normals= input.getNormals();
         vector<Point3D> maxNormals;
         
-        double alpha = 0;//77/57.2957795;
-        double beta = 0;//35/57.2957795;
-        double gamma = 0;//56/57.2957795;
-        double epsilon = 5/57.2957795, angle;
-        double maxNorm = 0;
+        double alpha = 0.0;//77/57.2957795;
+        double beta = 0.0;//35/57.2957795;
+        double gamma = 0.0;//56/57.2957795;
+        double epsilon = toRadians(5.), angle;
+        double maxNorm = 0.0;
         int maxIndex = 0;
         
         maxNormals.push_back(normals[0]);
@@ -107,7 +103,7 @@ namespace Clobscode
                     maxNormals[j] += normals[i];
                     break;
                 }
-                else if(angle>175/57.2957795){
+                else if(angle>toRadians(175.)){
                     maxNormals[j] += normals[i]*(-1);
                     break;
                 }
@@ -117,55 +113,83 @@ namespace Clobscode
                 }
             }
         }
-        
-        
+          
         //sorting the maxnormals from the greatest norm to lower one
         std::sort (maxNormals.begin(), maxNormals.end(), largestNormal);
         
-        Point3D xAxis (1, 0, 0);
-        Point3D zAxis (0, 0, 1);
-        Point3D yAxis (0, 1, 0);
+        Point3D xAxis (1., 0., 0.);
+        Point3D zAxis (0., 0., 1.);
+        Point3D yAxis (0., 1., 0.);
         Point3D aux =  maxNormals[0];
         //finding a orthogonal maxnormal for the greatest maxnormal
         for (unsigned int j=1; j<maxNormals.size(); j++){
             if(maxNormals[j].Norm()/maxNormals[0].Norm() > 0.2){
-                maxNorm = acos((maxNormals[0]*maxNormals[j])/(maxNormals[0].Norm()*maxNormals[j].Norm()))*57.2957795;
-                if(maxNorm > 80 && maxNorm < 100){
+                maxNorm = acos((maxNormals[0]*maxNormals[j])/(maxNormals[0].Norm()*maxNormals[j].Norm()));
+                if(maxNorm > toRadians(80.) && maxNorm < toRadians(100.)){
                     maxIndex = j;
                     break;
                 }
             }
         }
 
+
+        //        //finding the rotation angles
+        //        aux.X() = 0;
+        //        alpha = acos(zAxis*aux/(zAxis.Norm()*aux.Norm()));
+        //        if(aux.Y() < 0) alpha*=-1;
+
+        //        maxNormals[0].xAxisRotation(alpha);
+
+        //        aux =  maxNormals[0];
+        //        aux.Y() = 0;
+        //        beta = acos(zAxis*aux/(zAxis.Norm()*aux.Norm()));
+        //        if(aux.X() > 0) beta*=-1;
+        //        maxNormals[maxIndex].xAxisRotation(alpha);
+        //        maxNormals[maxIndex].yAxisRotation(beta);
+        //        aux = maxNormals[maxIndex];
+        //        aux.Z() = 0;
+        //        if(maxIndex==0 || acos(xAxis*aux/(xAxis.Norm()*aux.Norm()))==acos(-1)) {
+        //            gamma=0;
+        //        }
+        //        else{
+        //            gamma = acos(xAxis*aux/(xAxis.Norm()*aux.Norm()));
+        //            if(aux.Y() > 0) {
+        //                gamma*=-1;
+        //            }
+        //        }
+
         //finding the rotation angles
-        aux.X() = 0;
-        alpha = acos(zAxis*aux/(zAxis.Norm()*aux.Norm()));
-        if(aux.Y() < 0) alpha*=-1;
-        
-        maxNormals[0].xAxisRotation(alpha);
-        
+        // align maxNormal[0] on X, wrt Z
+        aux.Z() = 0;
+        gamma = acos(xAxis*aux/(xAxis.Norm()*aux.Norm()));
+        if(aux.Y() > 0) gamma*=-1;
+
+        maxNormals[0].zAxisRotation(gamma);
+
+        // align maxNormal[0] on X, wrt Y
         aux =  maxNormals[0];
         aux.Y() = 0;
-        beta = acos(zAxis*aux/(zAxis.Norm()*aux.Norm()));
-        if(aux.X() > 0) beta*=-1;
-        maxNormals[maxIndex].xAxisRotation(alpha);
+        beta = acos(xAxis*aux/(xAxis.Norm()*aux.Norm()));
+        if(aux.X() < 0) beta*=-1;
+        maxNormals[maxIndex].zAxisRotation(gamma);
         maxNormals[maxIndex].yAxisRotation(beta);
+        // align maxNormals[maxIndex] on Y, wrt X
         aux = maxNormals[maxIndex];
-        aux.Z() = 0;
-        if(maxIndex==0 || acos(xAxis*aux/(xAxis.Norm()*aux.Norm()))==acos(-1)) {
-            gamma=0;
+        aux.X() = 0;
+        if(maxIndex==0 || acos(yAxis*aux/(yAxis.Norm()*aux.Norm()))==acos(-1)) {
+            alpha=0;
         }
         else{
-			gamma = acos(xAxis*aux/(xAxis.Norm()*aux.Norm()));
-            if(aux.Y() > 0) {
-                gamma*=-1;
+            alpha = acos(yAxis*aux/(yAxis.Norm()*aux.Norm()));
+            if(aux.Z() > 0) {
+                alpha*=-1;
             }
-		}
-		
+        }
+
 		this->x=alpha;
 		this->y=beta;
 		this->z=gamma;
-		this->centroid=tm.getCentroid();
+        this->centroid=input.getCentroid();
 	}
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------

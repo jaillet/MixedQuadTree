@@ -79,7 +79,10 @@ namespace Clobscode
         virtual double &getZAxis();
         
         virtual bool Default();
-		
+
+        virtual double toDegrees(double rad) { return rad*57.2957795; }
+        virtual double toRadians(double deg) { return deg/57.2957795; }
+
 	protected:
 		
 		Point3D centroid;
@@ -126,5 +129,6 @@ namespace Clobscode
     inline bool GeometricTransform::Default() {
         return x==0 && y==0 && z==0;
     }
+
 }
 #endif

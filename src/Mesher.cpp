@@ -215,12 +215,12 @@ namespace Clobscode
     
     void Mesher::generateGridMesh(Polyline &input){
         //vectors with each coordinate per axis
-        vector<double> all_x, all_y, all_z;
+        vector<double> all_x, all_y;
         vector<vector<unsigned int> > elements;
         
         GridMesher gm;
-        gm.generatePoints(input.getBounds(),all_x,all_y,all_z);
-        gm.generateMesh(all_x,all_y,all_z,points,elements);
+        gm.generatePoints(input.getBounds(),all_x,all_y);
+        gm.generateMesh(all_x,all_y,points,elements);
         
         Quadrants.reserve(elements.size());
         

@@ -165,7 +165,8 @@ namespace PolyMesh
 
     ostream& operator<<(ostream& o, const PolyEdge &e){
         o << "e(" << e.getKey() << ",";
-        o << e.getVal() << ")";
+        o << e.getVal() << ") ";
+        o << "n(" << e.getNormal() << ")";
         return o;
     }
 
