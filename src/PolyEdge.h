@@ -81,9 +81,9 @@ namespace PolyMesh
 		virtual unsigned int operator[](unsigned int pos) const;
 		
         //FJA transform triangle/edge intersection into what?
-        //        virtual bool segmentIntersection(vector<Point3D> &pts,
-        //                                         const Point3D &ep1,
-        //                                         const Point3D &ep2);
+        virtual bool segmentIntersection(const vector<Clobscode::Point3D> &pts,
+                                         const Point3D &ep1,
+                                         const Point3D &ep2) const;
 
         //computes the distant of pPoint to the line generated
         //by this segment.

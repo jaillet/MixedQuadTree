@@ -24,6 +24,7 @@
 #include <vector>
 #include <list>
 #include <set>
+#include <limits>
 
 #include "Visitors/Visitor.h"
 
@@ -83,7 +84,7 @@ namespace Clobscode
 		
 		virtual void resetProjectionInfluence();
 
-		virtual list<unsigned int> &getIntersectedFaces();
+        virtual list<unsigned int> &getIntersectedFaces();
 		
 		virtual vector<vector<unsigned int> > &getSubElements();
 		
@@ -98,14 +99,14 @@ namespace Clobscode
 		
 		virtual bool isSurface();
 		
-		virtual void setIntersectedFaces(list<unsigned int> &ifcs);
+        virtual void setIntersectedEdges(list<unsigned int> &iedges);
 
     protected:
         
 		//protected:
 		vector<unsigned int> pointindex;
 		vector<vector<unsigned int> > sub_elements, possibles, continuity;
-		list<unsigned int> intersected_faces;
+        list<unsigned int> intersected_edges;
 		//the level at which this Quadrant is found in the
 		//the tree structure (octree). Used for optimization
 		unsigned short ref_level;
@@ -124,15 +125,15 @@ namespace Clobscode
 	}
 	
 	inline bool Quadrant::isInside(){
-		return intersected_faces.empty();
+        return intersected_edges.empty();
 	}
 	
 	inline bool Quadrant::intersectsSurface(){
-		return !intersected_faces.empty();
+        return !intersected_edges.empty();
 	}
 	
-	inline list<unsigned int> &Quadrant::getIntersectedFaces(){
-		return intersected_faces;
+    inline list<unsigned int> &Quadrant::getIntersectedFaces(){
+        return intersected_edges;
 	}
 	
 	inline unsigned short &Quadrant::getRefinementLevel() {
@@ -188,11 +189,11 @@ namespace Clobscode
 	}
 	
 	inline bool Quadrant::isSurface(){
-		return surface || !intersected_faces.empty();
+        return surface || !intersected_edges.empty();
 	}
 	
-	inline void Quadrant::setIntersectedFaces(list<unsigned int> &ifcs){
-		intersected_faces = ifcs;
+    inline void Quadrant::setIntersectedEdges(list<unsigned int> &iedges){
+        intersected_edges = iedges;
 	}
 	
 	std::ostream& operator<<(ostream& o,Quadrant &e);

@@ -57,7 +57,7 @@ namespace Clobscode
         
 		list<double> deltas;
 		deltas.push_back(bounds[3]-bounds[0]);
-		deltas.push_back(bounds[4]-bounds[1]);
+        deltas.push_back(bounds[4]-bounds[1]);
 		deltas.sort();
 		
 		double step = *(deltas.begin());
@@ -79,8 +79,10 @@ namespace Clobscode
 
         points.reserve(nx*ny);
         points.clear();
+        std::cerr << "points.size()=" << points.size() << " points.capacity()=" << points.capacity() << std::endl;
         elements.reserve((nx-1)*(ny-1));
         elements.clear();
+        std::cerr << "elements.size()=" << points.size() << " elements.capacity()=" << points.capacity() << std::endl;
 
         for (unsigned int j=0; j<ny; j++) {
             for (unsigned int k=0; k<nx; k++) {

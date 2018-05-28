@@ -43,8 +43,8 @@ namespace Clobscode
 		
 		virtual ~GridMesher();
 		
-		virtual void generatePoints(vector<double> &bounds,
-									vector<double> &all_x,
+        virtual void generatePoints(vector<double> &bounds,
+                                    vector<double> &all_x,
                                     vector<double> &all_y);
 		
 		virtual void generateMesh(vector<double> &all_x,

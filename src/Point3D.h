@@ -61,57 +61,52 @@ namespace Clobscode
 		
         virtual double Norm() const;
 		
-        virtual bool colinear(const Point3D &p) const;
-
-        virtual Point3D cross(const Point3D &p) const;
+        virtual bool is2DCollinear(const Point3D &p) const;
 
 		//cross product operator
-		virtual Point3D operator^(const Point3D &p) const;
+        virtual Point3D cross(const Point3D &p) const;
+        virtual Point3D operator^(const Point3D &p) const;
 		
+        //dot product operator
         virtual double dot(const Point3D &p) const;
-		
-		//dot product operator
-//        virtual double operator*(Point3D p);
-		
 		virtual double operator*(const Point3D &p) const;
 		
         virtual double distance(const Point3D &p) const;
-
         virtual double distanceToSegment(const Point3D &P0, const Point3D &P1) const;
-
         virtual Point3D projectionOntoSegment(const Point3D &P0, const Point3D &P1) const;
 
         virtual double isLeft(const Point3D &P0, const Point3D &P1) const;
 				
 		virtual Point3D operator-(const Point3D &p) const;
-		
+        // invert Point3D
 		virtual Point3D operator-() const;
 		
 		virtual Point3D operator+(const Point3D &p) const;
-		
-		//virtual void operator+=(Point3D p2);
-		
+
 		virtual const Point3D &operator+=(const Point3D &p);
-		
 		virtual const Point3D &operator-=(const Point3D &p);
-		
 		virtual const Point3D &operator*=(double mul);
-		
         virtual const Point3D &operator/=(double div);
-		
+
+        // P/div
 		virtual Point3D operator/(double div) const;
 		
+        // P*mul
 		virtual Point3D operator*(double mul) const;
-		
+
+        //FJA: div/P, has no sense
+        // friend Point3D operator/(double div, const Point3D &p);
+
+        // mul*P
+        friend Point3D operator*(double mul, const Point3D &p);
+
         //modification
 		virtual double &operator[](int pos);
         //only access
 		virtual double operator[](int pos) const;
 		
         virtual Point3D& operator=(const Point3D& p);
-						
-        virtual string print() const;
-		
+								
 		virtual void xAxisRotation(double angle);
 		
 		virtual void yAxisRotation(double angle);
@@ -124,13 +119,15 @@ namespace Clobscode
         virtual void rotateTranslate(const Point3D &t, double xangle,
                                      double yangle, double zangle);
 		
+        virtual string print() const;
         friend std::ostream& operator<<(std::ostream& o,const Point3D &p);
 		
 		friend bool operator==(Point3D &p1,Point3D &p2);
 		
 		friend bool operator!=(Point3D &p1,Point3D &p2);
 		
-//FJA		friend Point3D operator/(double div, const Point3D &p);
+        //FJA: double/Pt, has no sense
+        // friend Point3D operator/(double div, const Point3D &p);
 		
 		friend Point3D operator*(double mul, const Point3D &p);
 		
@@ -172,7 +169,7 @@ namespace Clobscode
             z/=nor;
         }
         else
-            x=y=z=0;
+            x=y=z=0.0;
         return *this;
     }
 
@@ -230,10 +227,16 @@ namespace Clobscode
     //            =0 for P  on the line
     //            <0 for P  right of the line
     inline double Point3D::isLeft(const Point3D &P0, const Point3D &P1 ) const
-           {
-               return ( (P1.x - P0.x) * (y - P0.y)
-                       - (x -  P0.x) * (P1.y - P0.y) );
-           }
+    {
+        return ( (P1.x - P0.x) * (y - P0.y)
+                 - (x -  P0.x) * (P1.y - P0.y) );
+    }
+
+    inline bool Point3D::is2DCollinear(const Point3D &p) const {
+        // A^B = 0
+        // rq in XY plane, only first test is required
+        return ( fabs(x*p[1]- y*p[0]) < 1E-8 );
+    }
 
     inline Point3D Point3D::cross(const Point3D &p) const {
         Point3D ret;
@@ -243,9 +246,6 @@ namespace Clobscode
         return ret;
     }
 
-    inline bool Point3D::colinear(const Point3D &p) const {
-        return (x*p[1] == y*p[0]);
-    }
 
 	inline Point3D Point3D::operator^(const Point3D &p) const {
 		Point3D ret;
@@ -279,10 +279,6 @@ namespace Clobscode
 		return Point3D(x+p[0],y+p[1],z+p[2]);
 	}
 	
-//	inline Point3D operator/(double div, const Point3D &p) {
-//		return p/div;
-//	}
-	
 	inline const Point3D &Point3D::operator+=(const Point3D &p) {
 		x+=p[0]; y+=p[1]; z+=p[2];
 		return *this;
@@ -305,10 +301,12 @@ namespace Clobscode
         return *this;
     }
 
+    // Pt*dbl
 	inline Point3D Point3D::operator*(double mul) const {
 		return Point3D (x*mul,y*mul,z*mul);
 	}
 	
+    // dbl*Pt
 	inline Point3D operator*(double mul, const Point3D&p){
 		return Point3D(p.X()*mul,p.Y()*mul,p.Z()*mul);
 	}

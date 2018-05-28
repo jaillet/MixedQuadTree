@@ -38,7 +38,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     Polyline::Polyline(vector<Point3D> &pts,
                        vector<vector<unsigned int> > &edg_ind) : mVertices(pts) {
-		
+
 		if (pts.empty()) {
 			std::cout << "Error in Mesh::Init input mesh without points\n";
 			return;
@@ -46,7 +46,7 @@ namespace Clobscode
 		
         // init bouding box with first Point3D
         computeBounds();
-        computeNormalToPlane();
+        checkNormalToPlane();
 
         /*for (unsigned int i=0; i<bounds.size(); ++i) {
             cout << bounds[i] << endl;
@@ -427,7 +427,7 @@ namespace Clobscode
 //		return pProjP;
 	}
 
-    Point3D Polyline::computeNormalToPlane() {
+    Point3D Polyline::checkNormalToPlane() {
         Point3D W;
         if (mVertices.size()>=3) {
             Point3D U=mVertices[1]-mVertices[0], V;
@@ -435,7 +435,7 @@ namespace Clobscode
             do { // suppose not all points are colinear....
                 V=mVertices[i]-mVertices[0];
                 ++i;
-            } while (U.colinear(V));
+            } while (U.is2DCollinear(V));
             W=(U^V).normalize();
         }
 

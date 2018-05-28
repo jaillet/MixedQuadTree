@@ -79,16 +79,15 @@ namespace PolyMesh
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
-//    bool SurfTriangle::segmentIntersection(vector<Point3D> &pts,
-//                                           const Point3D &ep1,
-//                                           const Point3D &ep2){
-//        Point3D p0 = pts[mIdxV[0]];
-//        Point3D p1 = pts[mIdxV[1]];
-//        Point3D p2 = pts[mIdxV[2]];
+    bool PolyEdge::segmentIntersection(const vector<Point3D> &pts,
+                                           const Point3D &ep1,
+                                           const Point3D &ep2) const{
+        const Point3D &p0 = pts[getKey()];
+        const Point3D &p1 = pts[getVal()];
 
-//        //compute the distance to each point of the edge
-//        double dis_min = (ep1 - p0).dot(mTriangleNormal);
-//        double dis_max = (ep2 - p0).dot(mTriangleNormal);
+        //compute the distance to each point of the edge
+        double dis_min = (ep1 - p0).dot(mEdgeNormal);
+        double dis_max = (ep2 - p0).dot(mEdgeNormal);
 
 //        //if both, ep1 and ep2 are at the same side of the
 //        //plane, there is no intersection.
@@ -130,8 +129,8 @@ namespace PolyMesh
 //            return true;
 //        }
 
-//        return false;
-//    }
+        return false;
+    }
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------

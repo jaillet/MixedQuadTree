@@ -84,7 +84,7 @@ namespace Clobscode
 								 
         virtual void update();
 
-        virtual Point3D computeNormalToPlane();
+        virtual Point3D checkNormalToPlane();
 
         virtual Point3D getCentroid() const;
 
@@ -125,7 +125,7 @@ namespace Clobscode
 	
     inline void Polyline::update() {
         computeBounds();
-        computeNormalToPlane();
+        checkNormalToPlane();
         computeEdgesNormal();
         computeNodesPseudoNormal();
     }

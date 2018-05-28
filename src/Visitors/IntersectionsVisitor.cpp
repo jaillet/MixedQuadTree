@@ -1,25 +1,28 @@
 /*
- <Mix-mesher: region type. This program generates a mixed-elements mesh>
- 
- Copyright (C) <2013,2017>  <Claudio Lobos>
- 
+ <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
+
+ Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+
  This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
+ it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/gpl.txt>
- */
+ GNU Lesser General Public License for more details.
 
-//
-// Created by nanairo on 08-03-16.
-//
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
+ */
+/**
+* @file IntersectionsVisitor.cpp
+* @author Created by nanairo on 08-03-16.
+* @authors Claudio Lobos, Fabrice Jaillet
+* @version 0.1
+* @brief
+**/
 
 #include "IntersectionsVisitor.h"
 
@@ -27,106 +30,104 @@
 #include "../Quadrant.h"
 
 namespace Clobscode
+
+//Polyline *mesh;
+//vector<MeshPoint> *points;
+//list<unsigned int> *edges;
+//vector<Point3D> *coords;
+//bool select_edges;
+
 {
-    IntersectionsVisitor::IntersectionsVisitor() {
-        mesh = NULL;
-        points = NULL;
-        faces = NULL;
-        coords = NULL;
-        select_faces = false;
-    }
+    IntersectionsVisitor::IntersectionsVisitor()
+        :ply(NULL),points(NULL),edges(NULL),coords(NULL),select_edges(false)
+    {    }
 
 
-    IntersectionsVisitor::IntersectionsVisitor(bool select_faces) {
-        mesh = NULL;
-        points = NULL;
-        faces = NULL;
-        coords = NULL;
-        this->select_faces = select_faces;
-    }
+    IntersectionsVisitor::IntersectionsVisitor(bool select_edges)
+        :ply(NULL),points(NULL),edges(NULL),coords(NULL),select_edges(select_edges)
+    {    }
 
     void IntersectionsVisitor::setPolyline(Polyline &mesh) {
-        this->mesh = &mesh;
+        this->ply = &mesh;
     }
     void IntersectionsVisitor::setPoints(vector<MeshPoint> &points){
         this->points = &points;
     }
-    void IntersectionsVisitor::setFaces(list<unsigned int> &faces){
-        this->faces = &faces;
+    void IntersectionsVisitor::setEdges(list<unsigned int> &edges){
+        this->edges = &edges;
     }
     void IntersectionsVisitor::setCoords(vector<Point3D> &coords){
         this->coords = &coords;
     }
 
 
-    bool IntersectionsVisitor::visit(Quadrant *o) {
+    bool IntersectionsVisitor::visit(Quadrant *q) {
         //cout << "IntersectionsVisitor" << endl;
-        //check intersections with selected input faces
-        if (select_faces) //checkIntersections(TriMesh &mesh,list<unsigned int> &faces,vector<Point3D> &coords);
+        //check intersections with selected input edges
+        if (select_edges) //checkIntersections(PolyEdge &ply,list<unsigned int> &edges,vector<Point3D> &coords);
         {
-            if (faces == NULL || coords == NULL)
+            if (edges == NULL || coords == NULL)
                 throw std::runtime_error(std::string("Calling wrong IntersectionsVisitor!"));
-            list<unsigned int> &intersected_faces = o->intersected_faces;
+            list<unsigned int> &intersected_edges = q->intersected_edges;
 
-            list<unsigned int>::iterator f_iter;
-            vector<Point3D> input_pts = mesh->getPoints();
+            list<unsigned int>::const_iterator e_iter;
+            vector<Point3D> input_pts = ply->getPoints();
 
-            for (f_iter = faces->begin(); f_iter!=faces->end(); f_iter++) {
-                SurfTriangle face = oldtrimesh->getFaces()[*f_iter];
-                if (intersectsTriangle(face,input_pts,coords->at(0),coords->at(1))) {
-                    intersected_faces.push_back(*f_iter);
+            for (e_iter = edges->begin(); e_iter!=edges->end(); e_iter++) {
+                PolyEdge edge = ply->getEdges()[*e_iter];
+                if (intersectsEdge(edge,input_pts,coords->at(0),coords->at(1))) {
+                    intersected_edges.push_back(*e_iter);
                 }
             }
 
-            return !intersected_faces.empty();
+            return !intersected_edges.empty();
         }
-        //check intersections with all input faces
-        else //checkIntersections(TriMesh &mesh, vector<MeshPoint> &pts)
+        //check intersections with all input edges
+        else //checkIntersections(PolyEdge &ply, vector<MeshPoint> &pts)
         {
             if (points == NULL)
                 throw std::runtime_error(std::string("Calling wrong IntersectionsVisitor!"));
-            vector<unsigned int> &pointindex = o->pointindex;
-            list<unsigned int> &intersected_faces = o->intersected_faces;
+            const vector<unsigned int> &pointindex = q->pointindex;
+            list<unsigned int> &intersected_edges = q->intersected_edges;
 
-            vector<SurfTriangle> faces = oldtrimesh->getFaces();
-            vector<Point3D> input_pts = mesh->getPoints();
+            const vector<PolyEdge> &edges = ply->getEdges();
+            const vector<Point3D> &input_pts = ply->getPoints();
 
-            for (unsigned int j=0; j<faces.size(); j++) {
-                if (intersectsTriangle(faces[j],input_pts,
-                                       points->at(pointindex[0]).getPoint(),
-                                       points->at(pointindex[6]).getPoint())) {
-
-                    intersected_faces.push_back(j);
-
+            for (unsigned int j=0; j<edges.size(); j++) {
+                if (intersectsEdge(edges[j],input_pts,
+                                       points->at(pointindex[0]).getPoint(),  //bbox vertices
+                                       points->at(pointindex[2]).getPoint()))
+                {
+                    intersected_edges.push_back(j);
                 }
             }
-            return !intersected_faces.empty();
+            return !intersected_edges.empty();
         }
 
     }
 
     //auxiliary functions
-    bool IntersectionsVisitor::intersectsTriangle(SurfTriangle &st, vector<Point3D> &input_pts, const Point3D &pmin,
-                                             const Point3D &pmax) {
+    bool IntersectionsVisitor::intersectsEdge(const PolyMesh::PolyEdge &pEdge, const vector<Point3D> &input_pts, const Point3D &pmin,
+                                             const Point3D &pmax) const {
 
         //pmin and pmax describe the bounding box of the
         //Quadrant. They are used to detect intersections
-        //between input faces and the Quadrant by a clipping
+        //between input edges and the Quadrant by a clipping
         //method.
 
         //This code is based on the Cohen-Sutherland algorithm
         //for image clipping over a given window. In this case
-        //the "window" is the Quadrant (cube), and the "lines"
-        //to be clipped are the triangles.
+        //the "window" is the Quadrant (square), and the "lines"
+        //to be clipped are the edges.
 
-        vector<unsigned int> face = st.getPoints();
+        vector<unsigned int> iEdge = pEdge.getPoints(); //indices of edge extremities
 
-        unsigned int n_pts = face.size();
+        unsigned int n_pts = iEdge.size();
 
         vector<unsigned int> sides(n_pts,0);
 
         for (unsigned int i=0; i<n_pts; i++) {
-            sides[i] = computePosition(input_pts[face[i]],
+            sides[i] = computePosition(input_pts[iEdge[i]],
                                        pmin,pmax);
             if (sides[i] == 0) {
                 return true;
@@ -182,8 +183,8 @@ namespace Clobscode
         //the Quadrant.
         for (unsigned int i=0; i<n_pts; i++) {
             //cout << pts[face_pts_idx[i]] << " code is ";
-            Point3D p1 = input_pts[face[i]];
-            Point3D p2 = input_pts[face[(i+1)%n_pts]];
+            Point3D p1 = input_pts[iEdge[i]];
+            Point3D p2 = input_pts[iEdge[(i+1)%n_pts]];
 
             if (clipGeneralCase(p1,p2,pmin,pmax)) {
                 return true;
@@ -198,14 +199,14 @@ namespace Clobscode
         //If the test didn't succeed, the triangle
         //is not intersected by this Quadrant
 
-        return edgeTriangleIntersection(st,input_pts,pmin,pmax);
+        return edgeTriangleIntersection(pEdge,input_pts,pmin,pmax);
     }
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
     bool IntersectionsVisitor::clipGeneralCase(const Point3D &p1, const Point3D &p2, const Point3D &pmin,
-                                          const Point3D &pmax) {
+                                          const Point3D &pmax) const {
 
         //compute the parametric equations of the given segment
         double dx = p2[0]-p1[0];
@@ -347,10 +348,10 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
-    bool IntersectionsVisitor::edgeTriangleIntersection(SurfTriangle &st,
-                                                   vector<Point3D> &input_pts,
+    bool IntersectionsVisitor::edgeTriangleIntersection(const PolyMesh::PolyEdge &st,
+                                                   const vector<Point3D> &input_pts,
                                                    const Point3D &pmin,
-                                                   const Point3D &pmax) {
+                                                   const Point3D &pmax) const {
 
         //compute the coords of all Quadrant edges
         vector<vector<Point3D> > oct_edges = getEdges(pmin,pmax);
@@ -371,7 +372,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 
     vector<vector<Point3D>> IntersectionsVisitor::getEdges(const Point3D &pmin,
-                                                      const Point3D &pmax) {
+                                                      const Point3D &pmax) const {
         vector<vector<Point3D> > edges;
         edges.reserve(12);
 
@@ -441,7 +442,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
-    unsigned int IntersectionsVisitor::computePosition(const Point3D &p, const Point3D &pmin, const Point3D &pmax) {
+    unsigned int IntersectionsVisitor::computePosition(const Point3D &p, const Point3D &pmin, const Point3D &pmax) const {
 
         unsigned int sides = 0;
 

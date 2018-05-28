@@ -27,19 +27,23 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 	Quadrant::Quadrant(vector<unsigned int> &epts, 
-				   const unsigned short &ref_level){
+                   const unsigned short &ref_level)
+        :pointindex(epts),ref_level(ref_level),
+          n_influences(0),influence_commit(false),surface(false),max_dis(numeric_limits<double>::infinity()) {
 		
-        pointindex.assign(8,0);
+        //members'inits in initialisation list !!
+
+//        pointindex.assign(4,0);
 		//for optimization
-		(*this).ref_level = ref_level;
+//		(*this).ref_level = ref_level;
         
-        for (unsigned int i=0; i<8; i++) {
-            pointindex[i] = epts[i];
-        }
+//        for (unsigned int i=0; i<4; i++) {
+//            pointindex[i] = epts[i];
+//        }
         
 		sub_elements.assign(1,pointindex);
-		n_influences = 0;
-		influence_commit = false;
+//		n_influences = 0;
+//		influence_commit = false;
 	}
 	
 	//--------------------------------------------------------------------------------

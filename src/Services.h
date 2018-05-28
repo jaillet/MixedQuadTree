@@ -461,7 +461,7 @@ namespace Clobscode
                     ofcs.push_back(ni);
                 }
                 Quadrant Quadrant (opts,orl);
-                Quadrant.setIntersectedFaces(ofcs);
+                Quadrant.setIntersectedEdges(ofcs);
                 Quadrants.push_back(Quadrant);
                 
                 if (orl<minrl) {
