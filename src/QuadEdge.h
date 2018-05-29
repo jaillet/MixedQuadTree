@@ -51,7 +51,7 @@ namespace Clobscode
 		
 		virtual ~QuadEdge();
 		
-		virtual void assign(const unsigned int &idx1, const unsigned int &idx2);
+        virtual void assign(const unsigned int idx1, const unsigned int idx2);
 		
 		virtual void updateMidPoint(const unsigned int &idx);
 		

@@ -29,13 +29,19 @@
 
 namespace Clobscode
 {
-    void EdgeVisitor::insertEdges(Quadrant *o, set<QuadEdge> &edges) {
-        // assume 4 edges in Quadrant
-        for (unsigned int i=0; i<4; i++) {
-            QuadEdge ee;
-            getEdge(o,i,ee);
-            edges.insert(ee);
-        }
+void EdgeVisitor::insertEdges(Quadrant *o, set<QuadEdge> &edges) {
+
+    // assume 4 edges in Quadrant
+    for (unsigned int i=0; i<4; i++) {
+        QuadEdge ee;
+        getEdge(o,i,ee);
+        edges.insert(ee);
+    }
+//    std::cerr << "edges contains:";
+//    for (auto it=edges.begin(); it!=edges.end(); ++it)
+//        std::cerr << '-' << *it;
+//    std::cerr << '\n'<< std::flush;
+
     }
 
     void EdgeVisitor::getEdge(Quadrant *o, const unsigned int &idx, QuadEdge &e) {

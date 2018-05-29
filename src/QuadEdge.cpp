@@ -51,8 +51,9 @@ namespace Clobscode
 	}
 
     // REM: possible name confusion with std::assign
-	void QuadEdge::assign(const unsigned int &point1, const unsigned int &point2){
-		if (point1<point2) {
+//    void QuadEdge::assign(const unsigned int &point1, const unsigned int &point2){
+    void QuadEdge::assign(const unsigned int point1, const unsigned int point2){
+        if (point1<point2) {
 			info[0]=point1;
 			info[1]=point2;
 		}

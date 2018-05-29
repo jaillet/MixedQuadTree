@@ -247,6 +247,15 @@ namespace Clobscode
                 Quadrants.push_back(o);
             }
         }
+        std::cerr << "QuadEdges cont:";
+        for (auto it=QuadEdges.begin(); it!=QuadEdges.end(); ++it)
+            std::cerr << '-' << *it;
+        std::cerr << '\n'<< std::flush;
+        std::cerr << "Quadrants contains:";
+        for (auto it=Quadrants.begin(); it!=Quadrants.end(); ++it)
+            std::cerr << '-' << *it;
+        std::cerr << '\n'<< std::flush;
+
     }
 
     //--------------------------------------------------------------------------------
