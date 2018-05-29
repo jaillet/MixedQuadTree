@@ -75,7 +75,7 @@ namespace Clobscode
 
         bounds.resize(6,0.0);
 
-        if (mVertices.size()>=0) {
+        if (mVertices.size()>0) {
             bounds[0]=bounds[3]=mVertices[0][0];
             bounds[1]=bounds[4]=mVertices[0][1];
             bounds[2]=bounds[5]=mVertices[0][2];
@@ -348,8 +348,8 @@ namespace Clobscode
         double closestDist = numeric_limits<double>::infinity();
 
         if (mEdges.empty()) {
-            cout << "Error at Polyline::getProjection nowhere to project a point\n";
-            return pProjP;
+            cerr << "Error at Polyline::getProjection nowhere to project a point\n";
+            exit(1);
         }
 
         // browsing all the surface faces for min distance.
@@ -372,6 +372,31 @@ namespace Clobscode
     Point3D Polyline::getProjection(const Point3D & pPoint, list<unsigned int> &lEdges) const{
         std::cerr << "Point3D Polyline::getProjection(const Point3D & pPoint, list<unsigned int> &lFaces)\n" ;
         std::cerr << "not implemented yet\n" ;
+
+        // closest point on the edge (on edge, or vertice)
+        Point3D pProjP_tmp,pProjP;
+        // distance to this closest point (always positive)
+        double pDist;
+        //current closest distance: positive infinity
+        double closestDist = numeric_limits<double>::infinity();
+
+        if (mEdges.empty()) {
+            std::cerr << "Error at Polyline::getProjection nowhere to project a point\n";
+            exit(1);
+        }
+
+        // browsing all the surface faces for min distance.
+        for (unsigned int iEdge = 0; iEdge < mEdges.size(); iEdge++) {
+            // computing the distance for this edge (segment)
+            closestPointToEdge(pPoint,iEdge,pDist,pProjP_tmp);
+
+            if (pDist < closestDist) {
+                pProjP = pProjP_tmp;
+                closestDist = pDist;
+            }
+        }
+
+        return pProjP;
 
 //        // define if a point is inside a mesh or not
 		

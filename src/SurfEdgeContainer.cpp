@@ -77,11 +77,11 @@ namespace SurfMesh {
 	}
 	
 	ostream& operator<<(ostream& o,SurfEdgeContainer &ec){
-		for(int i=0;i<ec.length();i++){
+        for(unsigned int i=0;i<ec.length();i++){
 			o << ec.getEdge(i) << " [";
 			list<unsigned int> ef = ec.getEdge(i).getFaces();
 			list<unsigned int>::iterator iter;
-			int semicolon=0;
+            unsigned int semicolon=0;
 			for(iter=ef.begin();iter!=ef.end();iter++){
 				o << *iter;
 				if(semicolon++<ef.size()-1)

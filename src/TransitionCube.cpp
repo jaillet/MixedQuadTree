@@ -57,7 +57,7 @@ namespace patterns {
 		
 		if (edges.size() > 0) {        
 			
-            for (int i=0; i<edges.size(); i++)
+            for (unsigned int i=0; i<edges.size(); i++)
 				// Convert input edge points to local internal mapping.
 				m_edges.push_back(ExternalToInternal[edges[i]]);
 			

@@ -217,8 +217,8 @@ namespace Clobscode
             
             //number of face points
             for( int i=0;i<nf;i++){
-                int nfp;
-                std::fscanf(file,"%i",&nfp);
+                unsigned int nfp;
+                std::fscanf(file,"%u",&nfp);
                 alledges.resize(nfp, std::vector<unsigned int>(2));
 
                 int fpts;
@@ -314,11 +314,11 @@ namespace Clobscode
 			for( int i=0;i<cant;i++){
                 std::vector<unsigned int> edgpts(2,0);
                 for(unsigned int j=0;j<2;j++){
-                    std::fscanf(file,"%i",&edgpts[j]);
+                    std::fscanf(file,"%u",&edgpts[j]);
 				}
                 //read some unnecessary for the moment integers
                 for(unsigned int j=0;j<1;j++)
-					std::fscanf(file,"%i",&dust);
+                    std::fscanf(file,"%i",&dust);
 				
                 alledges.push_back(edgpts);
 			}
@@ -340,7 +340,7 @@ namespace Clobscode
         static bool ReadQuadrantList(std::string name, list<unsigned int> &olist,
                                    vector<unsigned int> &ele_quadt_ref) {
             FILE *file = fopen(name.c_str(),"r");
-            int idx = 0;
+            unsigned int idx = 0;
             char word [256];
             while (std::fscanf(file,"%s",word) != EOF) {
                 bool num = true;
@@ -356,7 +356,7 @@ namespace Clobscode
                         cerr << "Invalid element index while reading list of elements to refine\n";
                         cerr << "Quadtree mesh must be readed before the list is provided\n";
                         cerr << "Aborting!!!\n";
-                        std:abort();
+                        std::abort();
                     }
                 
                     olist.push_back(ele_quadt_ref[idx]);
@@ -382,8 +382,9 @@ namespace Clobscode
             
             char word [256];
             double x,y,z;
-            int e1,e2,e3,elem;
-            int np=0, ne=0, no=0, nl=0;
+            int e1,e2,e3;
+            unsigned int elem;
+            unsigned int np=0, ne=0, no=0, nl=0;
             
             FILE *file = fopen(name.c_str(),"r");
             
@@ -393,10 +394,10 @@ namespace Clobscode
             }
             
             //read header
-            std::fscanf(file,"%i",&np);
-            std::fscanf(file,"%i",&ne);
-            std::fscanf(file,"%i",&no);
-            std::fscanf(file,"%i",&nl);
+            std::fscanf(file,"%u",&np);
+            std::fscanf(file,"%u",&ne);
+            std::fscanf(file,"%u",&no);
+            std::fscanf(file,"%u",&nl);
             
             //read each node
             points.reserve(np);
@@ -425,9 +426,9 @@ namespace Clobscode
             
             //read the element Quadrant link
             ele_oct_ref.reserve(nl);
-            unsigned int checksum = 0;
+//            unsigned int checksum = 0;
             for (unsigned int i=0; i<no; i++) {
-                std::fscanf(file,"%i",&elem);
+                std::fscanf(file,"%u",&elem);
                 for (unsigned int j=0; j<elem; j++) {
                     ele_oct_ref.push_back(i);
                 }
@@ -436,12 +437,13 @@ namespace Clobscode
             //read the Quadrants, its refinement level and
             //the input faces intersected by it.
             Quadrants.reserve(no);
-            int nop = 0, nof = 0, orl = 0, ni=0;
+            unsigned int nop = 0, nof = 0, ni=0;
+            int orl = 0;
             
             minrl = 100;
             maxrl = 0;
             
-            unsigned int noregular=0;
+//            unsigned int noregular=0;
             for (unsigned int i=0; i<no; i++) {
                 vector<unsigned int> opts;
                 list<unsigned int> ofcs;
@@ -457,13 +459,13 @@ namespace Clobscode
                 }
                 
                 for (unsigned int j=0; j<nop; j++) {
-                    std::fscanf(file,"%i",&ni);
+                    std::fscanf(file,"%u",&ni);
                     opts.push_back(ni);
                 }
                 std::fscanf(file,"%i",&orl);
-                std::fscanf(file,"%i",&nof);
+                std::fscanf(file,"%u",&nof);
                 for (unsigned int j=0; j<nof; j++) {
-                    std::fscanf(file,"%i",&ni);
+                    std::fscanf(file,"%u",&ni);
                     ofcs.push_back(ni);
                 }
                 Quadrant Quadrant (opts,orl);
@@ -683,7 +685,7 @@ namespace Clobscode
             //write the volume mesh
             FILE *f = fopen(vol_name.c_str(),"wt");
             
-            unsigned int n = points.size();
+//            unsigned int n = points.size();
             
             fprintf(f,"MIXED\n%i %i\n\n",(int)points.size(),(int)elements.size());
             

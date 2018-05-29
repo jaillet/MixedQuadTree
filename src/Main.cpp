@@ -89,7 +89,7 @@ int main(int argc,char** argv){
 	//const int n_meshes = 1;
 	string in_name = "", out_name = "";
 	bool out_name_given = false, in_name_given = false;
-	bool edge_projection = false;
+//	bool edge_projection = false;
 	
 	unsigned short ref_level = 0, rl = 0, cminrl=0, omaxrl=0;
     //cminrl: current min refinement level (used when starting from an Quadtree mesh)
@@ -117,7 +117,7 @@ int main(int argc,char** argv){
     vector<unsigned int> oct_ele_link;
     GeometricTransform gt;
     
-	for (unsigned int i=1; i<argc; i++) {
+    for (int i=1; i<argc; i++) {
         
 		if (argv[i][0]!='-') {
 			cout << "Error: expected option -X and got " << argv[i] << "\n";

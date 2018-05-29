@@ -138,7 +138,7 @@ void TransitionTemplate::createEdgesMapping(const UintVec& nodes, const UintVec&
     UintVecIt itn = nodes.begin() + CORNER_POINTS;
     UintVecIt ite = edges.begin();
 
-    int SIZE;
+    unsigned int SIZE;
     if ( nodes.size() > CORNER_POINTS) {
 
         SIZE = nodes.size() - CORNER_POINTS;
@@ -147,7 +147,7 @@ void TransitionTemplate::createEdgesMapping(const UintVec& nodes, const UintVec&
             SIZE = edges.size();
 
         //for ( ;itn != nodes.end(); ++itn) {
-        for ( int i=0; i<SIZE; i++) {
+        for (unsigned int i=0; i<SIZE; i++) {
 
             // This map is a link of internal and external points
             // The constructor was created with point 123 which is linked to 11
@@ -168,7 +168,7 @@ bool TransitionTemplate::findPattern() {
     int step;
 
     // Max cube rotation defined in PERMUTATIONS
-    for (int i=0; i<PERMUTATIONS; i++) {
+    for (unsigned int i=0; i<PERMUTATIONS; i++) {
 
         axis = RotationMatrix[i].Axis;
         step = RotationMatrix[i].Step;

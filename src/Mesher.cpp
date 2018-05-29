@@ -363,7 +363,7 @@ namespace Clobscode
         }
 
 
-        unsigned int oldnpts = points.size();
+//        unsigned int oldnpts = points.size();
 
         //----------------------------------------------------------
         //refine each Quadrant until the Refinement Level is reached
