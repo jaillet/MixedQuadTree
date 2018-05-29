@@ -62,6 +62,7 @@ namespace Clobscode
         virtual double Norm() const;
 		
         virtual bool is2DCollinear(const Point3D &p) const;
+        virtual bool is3DCollinear(const Point3D &p) const;
 
 		//cross product operator
         virtual Point3D cross(const Point3D &p) const;
@@ -236,6 +237,13 @@ namespace Clobscode
         // A^B = 0
         // rq in XY plane, only first test is required
         return ( fabs(x*p[1]- y*p[0]) < 1E-8 );
+    }
+
+    inline bool Point3D::is3DCollinear(const Point3D &p) const {
+        // A^B = 0
+        return (fabs(x*p[1] - y*p[0])<1E-8 &&
+                fabs(z*p[0] - x*p[2])<1E-8 &&
+                fabs(y*p[2] - z*p[1])<1E-8 );
     }
 
     inline Point3D Point3D::cross(const Point3D &p) const {

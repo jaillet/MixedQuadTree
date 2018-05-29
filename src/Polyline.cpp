@@ -75,32 +75,31 @@ namespace Clobscode
 
         bounds.resize(6,0.0);
 
-        if (mVertices.size()>0) {
-            bounds[0]=bounds[3]=mVertices[0][0];
-            bounds[1]=bounds[4]=mVertices[0][1];
-            bounds[2]=bounds[5]=mVertices[0][2];
+        // .at(0) throw exception if empty polyline
+        bounds[0]=bounds[3]=mVertices.at(0)[0];
+        bounds[1]=bounds[4]=mVertices.at(0)[1];
+        bounds[2]=bounds[5]=mVertices.at(0)[2];
 
-            // search for max and min coodinates in X, Y and Z.
-            double x,y,z;
-            for (unsigned int i=1; i< mVertices.size(); ++i) {
+        // search for max and min coodinates in X, Y and Z.
+        double x,y,z;
+        for (unsigned int i=1; i< mVertices.size(); ++i) {
 
-                x = mVertices[i][0];
-                y = mVertices[i][1];
-                z = mVertices[i][2];
+            x = mVertices[i][0];
+            y = mVertices[i][1];
+            z = mVertices[i][2];
 
-                if(bounds[0]>x)
-                    bounds[0]=x;
-                else if(bounds[3]<x)
-                    bounds[3]=x;
-                if(bounds[1]>y)
-                    bounds[1]=y;
-                else if(bounds[4]<y)
-                    bounds[4]=y;
-                if(bounds[2]>z)
-                    bounds[2]=z;
-                else if(bounds[5]<z)
-                    bounds[5]=z;
-            }
+            if(bounds[0]>x)
+                bounds[0]=x;
+            else if(bounds[3]<x)
+                bounds[3]=x;
+            if(bounds[1]>y)
+                bounds[1]=y;
+            else if(bounds[4]<y)
+                bounds[4]=y;
+            if(bounds[2]>z)
+                bounds[2]=z;
+            else if(bounds[5]<z)
+                bounds[5]=z;
         }
     }
 
@@ -196,7 +195,7 @@ namespace Clobscode
 
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    // returns if pPoint co-linear to edge of indice #iEdg
+    // returns if pPoint lies on edge of indice #iEdg
     // computes non-signed distance pDist, and projected Point pProjP
     bool Polyline::closestPointToEdge(const Point3D & pPoint, unsigned int iEdg, double & pDist,
                                        Point3D & pProjP) const
@@ -230,8 +229,11 @@ namespace Clobscode
 //            pDist=-pDist;
 
         //True if the given node is co-linear to this edge
-        return (c1<1E-8);
-		
+        //return (c1<1E-8);
+
+        //True if the given node lies on this edge
+        return (pDist<1E-8);
+
     }
 
 	//--------------------------------------------------------------------------------
@@ -249,68 +251,48 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     bool Polyline::pointIsInMesh(const Point3D & pPoint, const list<unsigned int> &lEdges) const{
-        std::cerr << "bool Polyline::pointIsInMesh(const Point3D & pPoint, list<unsigned int> &lEdges) const\n" ;
-        std::cerr << "not implemented yet\n" ;
 
-//		// define if a point is inside a mesh or not
-		
-//		// index of the closest triangle
-//		unsigned int closestTriangle = 0;
-//		// closest point on the triangle (on triangle face, on edge, or vertice)
-//		Point3D pProjP;
-//		// distance to this closest point (always positive)
-//		double pDist;
-//		//current closest distance: positive infinity
-//		double closestDist = numeric_limits<double>::infinity();
+        // index of the closest edge
+        unsigned int closestEdge = 0;
+        // closest point on the list of Edges (on edge, or vertice)
+        Point3D pProjP,pProjP_tmp;
+        // distance to this closest point (always positive)
+        double pDist;
+        //current closest distance: positive infinity
+        double closestDist = numeric_limits<double>::infinity();
 //		// true if this node is inside the surface
-//		bool pIsIn;
         bool bIsIn = false;
-//		// 0 if close to a face, 1 if close to an edge, 2 if close to a vertice
-//		int faceEdgeNode;
-//		int iFaceEdgeNode;
 		
-//		if (mTriangles.empty() || lFaces.empty()) {
-//			return false;
-//		}
+        if (mEdges.empty() || lEdges.empty()) {
+            std::cerr << "Error at Polyline::pointIsInMesh, nowhere to project a point\n";
+            exit(1); //or: return false;
+        }
 		
-//		list<unsigned int>::iterator iSurfF;
-		
-//		//one_good recalls if a non co-planar face conserve the
-//		//current_min_dis
-//		bool one_good = false;
-		
-//		// browsing all the surface faces
-//		for (iSurfF = lFaces.begin(); iSurfF!=lFaces.end(); iSurfF++)
-//		{
-			
-//			bool coplanar = SignedDistToTriangle(pPoint,*iSurfF,closestDist,
-//												 pDist,pProjP,pIsIn,faceEdgeNode);
-			
-//			if (coplanar) {
-//				if (!one_good) {
-//					pDist = fabs(pDist);
-					
-//					if (pDist < closestDist) {
-//						closestTriangle = *iSurfF;
-//						closestDist = pDist;
-//						bIsIn = pIsIn;
-//						iFaceEdgeNode = faceEdgeNode;
-//					}
-//				}
-//			}
-//			else {
-//				pDist = fabs(pDist);
-				
-//				if (!one_good || pDist < closestDist) {
-//					closestTriangle = *iSurfF;
-//					closestDist = pDist;
-//					bIsIn = pIsIn;
-//					iFaceEdgeNode = faceEdgeNode;
-//				}
-//				one_good = true;
-//			}
-//		}
-		
+        bool found=false;
+        // loop through all edges of the list
+        for (unsigned int iEdg=0; iEdg<lEdges.size(); iEdg++) {
+
+            bool isOn=closestPointToEdge(pPoint, iEdg, pDist, pProjP_tmp);
+
+            if (pDist < closestDist) {
+                pProjP = pProjP_tmp;
+                closestEdge = iEdg;
+                closestDist = pDist;
+                found = true;
+                if (isOn) // lies on edge, no need to continue
+                    break;
+            }
+
+            if (found) {
+                const Point3D &P0=mVertices[mEdges[closestEdge][0]];
+                const Point3D &P1=mVertices[mEdges[closestEdge][1]];
+                bIsIn = pProjP.isLeft(P0,P1);
+            }
+            else {
+                std::cerr << "Error in Polyline::getProjection";
+                std::cerr << " couldn't project node\n";
+            }
+        }
         return bIsIn;
     }
 
@@ -340,6 +322,11 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     Point3D Polyline::getProjection(const Point3D & pPoint) const{
 
+        // FJA TODO merge with
+        // Point3D Polyline::getProjection(const Point3D & pPoint, list<unsigned int> &lEdges) const;
+        // set lEdges (list<>) with mEdges (vector<>) and call
+        // return (pPoint, lEdges);
+
         // closest point on the edge (on edge, or vertice)
         Point3D pProjP_tmp,pProjP;
         // distance to this closest point (always positive)
@@ -349,20 +336,28 @@ namespace Clobscode
 
         if (mEdges.empty()) {
             cerr << "Error at Polyline::getProjection nowhere to project a point\n";
-            exit(1);
+            exit(1); //or: return pProjP;
         }
 
+        bool found = false;
         // browsing all the surface faces for min distance.
         for (unsigned int iEdge = 0; iEdge < mEdges.size(); iEdge++) {
             // computing the distance for this edge (segment)
-            closestPointToEdge(pPoint,iEdge,pDist,pProjP_tmp);
+            bool isOn=closestPointToEdge(pPoint,iEdge,pDist,pProjP_tmp);
 
             if (pDist < closestDist) {
                 pProjP = pProjP_tmp;
                 closestDist = pDist;
+                found = true;
+                if (isOn) // lies on edge, no need to continue
+                    break;
             }
         }
-		
+        if (!found) {
+            std::cerr << "Error in Polyline::getProjection";
+            std::cerr << " couldn't project node\n";
+        }
+
         return pProjP;
     }
 		
@@ -370,8 +365,6 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     Point3D Polyline::getProjection(const Point3D & pPoint, list<unsigned int> &lEdges) const{
-        std::cerr << "Point3D Polyline::getProjection(const Point3D & pPoint, list<unsigned int> &lFaces)\n" ;
-        std::cerr << "not implemented yet\n" ;
 
         // closest point on the edge (on edge, or vertice)
         Point3D pProjP_tmp,pProjP;
@@ -380,76 +373,31 @@ namespace Clobscode
         //current closest distance: positive infinity
         double closestDist = numeric_limits<double>::infinity();
 
-        if (mEdges.empty()) {
+        if (mEdges.empty() || lEdges.empty()) {
             std::cerr << "Error at Polyline::getProjection nowhere to project a point\n";
-            exit(1);
+            exit(1); //or: return pProjP;
         }
 
+        bool found = false;
         // browsing all the surface faces for min distance.
-        for (unsigned int iEdge = 0; iEdge < mEdges.size(); iEdge++) {
+        for (unsigned int iEdge = 0; iEdge < lEdges.size(); iEdge++) {
             // computing the distance for this edge (segment)
-            closestPointToEdge(pPoint,iEdge,pDist,pProjP_tmp);
+            bool isOn=closestPointToEdge(pPoint,iEdge,pDist,pProjP_tmp);
 
             if (pDist < closestDist) {
                 pProjP = pProjP_tmp;
                 closestDist = pDist;
+                found = true;
+                if (isOn) // lies on edge, no need to continue
+                    break;
             }
         }
-
+        if (!found) {
+            std::cerr << "Error in Polyline::getProjection";
+            std::cerr << " couldn't project node\n";
+        }
         return pProjP;
-
-//        // define if a point is inside a mesh or not
-		
-//		// index of the closest triangle
-//		unsigned int closestTriangle = 0;
-//		// closest point on the triangle (on triangle face, on edge, or vertice)
-//		Point3D pProjP_tmp,pProjP;
-//		// distance to this closest point (always positive)
-//		double pDist;
-//		//current closest distance: positive infinity
-//		double closestDist = numeric_limits<double>::infinity();
-//		// true if this node is inside the surface
-//		bool pIsIn;
-//		bool bIsIn = false;
-//		// 0 if close to a face, 1 if close to an edge, 2 if close to a vertice
-//		int faceEdgeNode;
-//		int iFaceEdgeNode;
-		
-//		if (mTriangles.empty() || lFaces.empty()) {
-//			cout << "Error at Polyline::getProjection nowhere to project a point\n";
-//			return pProjP;
-//		}
-		
-//		list<unsigned int>::iterator iSurfF;
-		
-//		bool found = false;
-		
-//		// browsing all the surface faces
-//		for (iSurfF = lFaces.begin(); iSurfF!=lFaces.end(); iSurfF++)
-//		{
-			
-//			// computing the distance for this face (triangle)
-//			SignedDistToTriangle(pPoint,*iSurfF,closestDist,pDist,pProjP_tmp,pIsIn,faceEdgeNode);
-			
-//			pDist = fabs(pDist);
-			
-//			if (pDist < closestDist) {
-//				pProjP = pProjP_tmp;
-//				closestTriangle = *iSurfF;
-//				closestDist = pDist;
-//				bIsIn = pIsIn;
-//				iFaceEdgeNode = faceEdgeNode;
-//				found = true;
-//			}
-//		}
-		
-//		if (!found) {
-//			cout << "Error in Polyline::getProjection";
-//			cout << " couldn't project node\n";
-//		}
-		
-//		return pProjP;
-	}
+    }
 
     Point3D Polyline::checkNormalToPlane() {
         Point3D W;
@@ -460,10 +408,11 @@ namespace Clobscode
                 V=mVertices[i]-mVertices[0];
                 ++i;
             } while (U.is2DCollinear(V));
-            W=(U^V).normalize();
+//            W=(U^V).normalize();
         }
 
-        if (W.distance(Point3D(0.0,0.0,1.0)) >1E-8) {
+//        if (W.distance(Point3D(0.0,0.0,1.0)) >1E-8) {
+        if ( ! W.is3DCollinear(Point3D(0.0,0.0,1.0)) ) {
             std::cerr << "warning Polyline::computeNormalToPlane()\n";
             std::cerr << "Polyline not aligned to XY plane\n";
             exit(1);

@@ -82,6 +82,9 @@ namespace PolyMesh
     bool PolyEdge::segmentIntersection(const vector<Point3D> &pts,
                                            const Point3D &ep1,
                                            const Point3D &ep2) const{
+        std::cerr << "warning PolyEdge::segmentIntersection(...)\n" ;
+        std::cerr << "  not implemented yet\n" ;
+
         const Point3D &p0 = pts[getKey()];
         const Point3D &p1 = pts[getVal()];
 
