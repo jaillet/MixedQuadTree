@@ -270,7 +270,7 @@ namespace Clobscode
 		
         bool found=false;
         // loop through all edges of the list
-        for (unsigned int iEdg=0; iEdg<lEdges.size(); iEdg++) {
+        for (auto iEdg:lEdges) {
 
             bool isOn=closestPointToEdge(pPoint, iEdg, pDist, pProjP_tmp);
 
@@ -282,17 +282,17 @@ namespace Clobscode
                 if (isOn) // lies on edge, no need to continue
                     break;
             }
-
-            if (found) {
-                const Point3D &P0=mVertices[mEdges[closestEdge][0]];
-                const Point3D &P1=mVertices[mEdges[closestEdge][1]];
-                bIsIn = pProjP.isLeft(P0,P1);
-            }
-            else {
-                std::cerr << "Error in Polyline::getProjection";
-                std::cerr << " couldn't project node\n";
-            }
         }
+        if (found) {
+            const Point3D &P0=mVertices[mEdges[closestEdge][0]];
+            const Point3D &P1=mVertices[mEdges[closestEdge][1]];
+            bIsIn = pProjP.isLeft(P0,P1);
+        }
+        else {
+            std::cerr << "Error in Polyline::getProjection";
+            std::cerr << " couldn't project node\n";
+        }
+
         return bIsIn;
     }
 

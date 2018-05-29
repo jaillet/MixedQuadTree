@@ -28,6 +28,11 @@
 
 namespace Clobscode
 {
+//vector<MeshPoint> points;
+//vector<Quadrant> Quadrants;
+//set<QuadEdge> QuadEdges;
+//list<RefinementRegion *> regions;
+
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     Mesher::Mesher(){
@@ -1147,9 +1152,11 @@ namespace Clobscode
                 if (qedges.empty()) {
                     continue;
                 }
-                for (qe_iter=qedges.begin(); qe_iter!=qedges.end(); ++qe_iter) {
-                    p_edges.push_back(*qe_iter);
-                }
+                // append qedges to p_edges
+                p_edges.insert(p_edges.end(),qedges.begin(),qedges.end());
+//                for (qe_iter=qedges.begin(); qe_iter!=qedges.end(); ++qe_iter) {
+//                    p_edges.push_back(*qe_iter);
+//                }
             }
 
             p_edges.sort();
