@@ -182,7 +182,7 @@ namespace Clobscode
 	
 	inline void Quadrant::computeMaxDistance(vector<MeshPoint> &mp){
 		Point3D p0 = mp[pointindex[0]].getPoint();
-		Point3D p1 = mp[pointindex[6]].getPoint();
+        Point3D p1 = mp[pointindex[2]].getPoint();
 		max_dis = 0.3 * (p0 - p1).Norm();
 	}
 	

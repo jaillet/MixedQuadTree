@@ -634,14 +634,14 @@ namespace Clobscode
                 unsigned int np = epts.size();
                 fprintf(f,"%i", np);
                 
-                if (np==6) {
-                    unsigned int aux = epts[1];
-                    epts[1] = epts[2];
-                    epts[2] = aux;
-                    aux = epts[4];
-                    epts[4] = epts[5];
-                    epts[5] = aux;
-                }
+//                if (np==6) {
+//                    unsigned int aux = epts[1];
+//                    epts[1] = epts[2];
+//                    epts[2] = aux;
+//                    aux = epts[4];
+//                    epts[4] = epts[5];
+//                    epts[5] = aux;
+//                }
                 
                 for (unsigned int j= 0; j<np; j++) {
                     fprintf(f," %i", epts.at(j));
@@ -653,17 +653,11 @@ namespace Clobscode
             fprintf(f,"\nCELL_TYPES %i\n",(int)elements.size());
             for (unsigned int i=0; i<elements.size(); i++) {
                 unsigned int np = elements[i].size();
-                if (np == 4) {
+                if (np == 3) {
+                    fprintf(f,"5\n"); //VTK_TRIANGLE
+                }
+                else if (np == 4){ //VTK_QUAD
                     fprintf(f,"10\n");
-                }
-                else if (np == 5){
-                    fprintf(f,"14\n");
-                }
-                else if (np == 6){
-                    fprintf(f,"13\n");
-                }
-                else if (np == 8){
-                    fprintf(f,"12\n");
                 }
             }
             
@@ -676,8 +670,8 @@ namespace Clobscode
         //-------------------------------------------------------------------
         static bool WriteMixedVolumeMesh(std::string name, FEMesh &output){
             
-            vector<Point3D> points = output.getPoints();
-            vector<vector<unsigned int> > elements = output.getElements();
+            const vector<Point3D> &points = output.getPoints();
+            const vector<vector<unsigned int> > &elements = output.getElements();
             
             if (elements.empty()) {
                 std::cout << "no output elements\n";
@@ -704,17 +698,11 @@ namespace Clobscode
             for (unsigned int i=0; i<elements.size(); i++) {
                 std::vector<unsigned int> epts = elements[i];
                 unsigned int np = epts.size();
-                if (np == 4) {
+                if (np == 3) {
                     fprintf(f,"T");
                 }
-                else if (np == 5){
-                    fprintf(f,"P");
-                }
-                else if (np == 6){
-                    fprintf(f,"R");
-                }
-                else if (np == 8){
-                    fprintf(f,"H");
+                else if (np == 4){
+                    fprintf(f,"Q");
                 }
                 
                 for (unsigned int j= 0; j<np; j++) {
@@ -740,7 +728,7 @@ namespace Clobscode
 				return false;
 			}
 			
-			string vol_name = name+".m3d";
+            string vol_name = name+".m2d";
 			
 			//write the volume mesh
 			FILE *f = fopen(vol_name.c_str(),"wt");
@@ -766,17 +754,12 @@ namespace Clobscode
 			for (unsigned int i=0; i<n; i++) {
 				std::vector<unsigned int> epts = elements[i];
 				unsigned int np = epts.size();
-				if (np == 4) {
-					fprintf(f,"T");
+                // lowercase to avoid confusion with m3d Tetra=uppercase T
+                if (np == 3) {
+                    fprintf(f,"t"); // triangle
 				}
-				else if (np == 5){
-					fprintf(f,"P");
-				}
-				else if (np == 6){
-					fprintf(f,"R");
-				}
-				else if (np == 8){
-					fprintf(f,"H");
+                else if (np == 4){
+                    fprintf(f,"q"); // quadrangle
 				}
 				
 				for (unsigned int j= 0; j<np; j++) {
