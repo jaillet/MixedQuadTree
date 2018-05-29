@@ -47,8 +47,8 @@ namespace Clobscode
         :ply(NULL),points(NULL),edges(NULL),coords(NULL),select_edges(select_edges)
     {    }
 
-    void IntersectionsVisitor::setPolyline(Polyline &mesh) {
-        this->ply = &mesh;
+    void IntersectionsVisitor::setPolyline( Polyline &ply) {
+        this->ply = &ply;
     }
     void IntersectionsVisitor::setPoints(vector<MeshPoint> &points){
         this->points = &points;
@@ -74,7 +74,7 @@ namespace Clobscode
             vector<Point3D> input_pts = ply->getPoints();
 
             for (e_iter = edges->begin(); e_iter!=edges->end(); e_iter++) {
-                PolyEdge edge = ply->getEdges()[*e_iter];
+                const PolyEdge &edge = ply->getEdges()[*e_iter];
                 if (intersectsEdge(edge,input_pts,coords->at(0),coords->at(1))) {
                     intersected_edges.push_back(*e_iter);
                 }
@@ -136,7 +136,7 @@ namespace Clobscode
 
         //Compute logic and between bits associated to each
         //triangle node. If all of them are at same side (e.g.
-        //all at left), the result will be different from cero,
+        //all at left), the result will be different from zero,
         //meaning that there is no intersection.
         unsigned int all_and = sides[0];
         for (unsigned int i=1; i<n_pts; i++) {
@@ -193,7 +193,7 @@ namespace Clobscode
 
         //Last "hard" test: Apply Ray Tracing to detect
         //intersection between every edge of the Quadrant
-        //(hexahedron) and the triangle. If at least one
+        //(square) and the polyline. If at least one
         //of them instersects, then this triangle
         //intersects the Quadrant.
         //If the test didn't succeed, the triangle

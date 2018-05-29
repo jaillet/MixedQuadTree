@@ -69,7 +69,7 @@ namespace Clobscode
 
         virtual bool pointIsInMesh(const Point3D &pPoint) const;
 		virtual bool pointIsInMesh(const Point3D & pPoint, 
-                                   list<unsigned int> &lFaces) const;
+                                   const list<unsigned int> &lEdges) const;
 		
 
         //projection of a Point to Edge iedg

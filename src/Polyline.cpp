@@ -152,7 +152,7 @@ namespace Clobscode
         int    cn = 0;    // the  crossing number counter
 
         // loop through all edges of the polygon
-        for (int i=0; i<mEdges.size(); i++) {    // edge from V[i]  to V[i+1]
+        for (unsigned int i=0; i<mEdges.size(); i++) {    // edge from V[i]  to V[i+1]
             const Point3D &P0=mVertices[mEdges[i][0]];
             const Point3D &P1=mVertices[mEdges[i][1]];
             if (((P0.Y() <= P.Y()) && (P1.Y() > P.Y()))     // an upward crossing
@@ -176,12 +176,11 @@ namespace Clobscode
         int    wn = 0;    // the  winding number counter
 
         // loop through all edges of the polygon
-        for (int i=0; i<mEdges.size(); i++) {   // edge from V[i] to  V[i+1]
+        for (unsigned int i=0; i<mEdges.size(); i++) {   // edge from V[i] to  V[i+1]
             const Point3D &P0=mVertices[mEdges[i][0]];
             const Point3D &P1=mVertices[mEdges[i][1]];
             if (P0.Y() <= P.Y()) {          // start y <= P.y
                 if (P1.Y()  > P.Y()) {     // an upward crossing
-                    int isLeft=P.isLeft( P0, P1) ;
                      if (P.isLeft( P0, P1) > 0)  // P left of  edge
                          ++wn;            // have  a valid up intersect
                 }
@@ -249,8 +248,8 @@ namespace Clobscode
 	
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    bool Polyline::pointIsInMesh(const Point3D & pPoint, list<unsigned int> &lFaces) const{
-        std::cerr << "bool Polyline::pointIsInMesh(const Point3D & pPoint, list<unsigned int> &lFaces) const\n" ;
+    bool Polyline::pointIsInMesh(const Point3D & pPoint, const list<unsigned int> &lEdges) const{
+        std::cerr << "bool Polyline::pointIsInMesh(const Point3D & pPoint, list<unsigned int> &lEdges) const\n" ;
         std::cerr << "not implemented yet\n" ;
 
 //		// define if a point is inside a mesh or not

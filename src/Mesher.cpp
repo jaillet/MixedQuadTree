@@ -1,21 +1,27 @@
 /*
- <Mix-mesher: region type. This program generates a mixed-elements mesh>
+ <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2017>  <Claudio Lobos>
+ Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
+ it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+ GNU Lesser General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/gpl.txt>
+ along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
  */
+/**
+* @file Mesher.cpp
+* @author Claudio Lobos, Fabrice Jaillet
+* @version 0.1
+* @brief
+**/
 
 #include "Mesher.h"
 #include <math.h>
@@ -277,13 +283,13 @@ namespace Clobscode
         unsigned int cindex = 0;
         list<unsigned int>::iterator octidx = roctli.begin();
 
-        for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
+        for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
             if (octidx!=roctli.end() && cindex==(*octidx)) {
 
                 octidx++;
                 unsigned short orl = (*iter).getRefinementLevel();
 
-                list<unsigned int> inter_faces = iter->getIntersectedFaces();
+                list<unsigned int> inter_faces = iter->getIntersectedEdges();
 
                 vector<vector<Point3D> > clipping_coords;
                 sv.setClipping(clipping_coords);
@@ -351,7 +357,7 @@ namespace Clobscode
             //add the new points to the vector
             list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); piter++) {
+            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
                 points.push_back(MeshPoint (*piter));
             }
         }
@@ -380,11 +386,11 @@ namespace Clobscode
             list<RefinementRegion *>::iterator reg_iter;
 
             //split the Quadrants as needed
-            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
+            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
 
                 bool to_refine = false;
 
-                for (reg_iter=all_reg.begin(); reg_iter!=all_reg.end(); reg_iter++) {
+                for (reg_iter=all_reg.begin(); reg_iter!=all_reg.end(); ++reg_iter) {
 
                     unsigned short region_rl = (*reg_iter)->getRefinementLevel();
                     if (region_rl<i) {
@@ -414,7 +420,7 @@ namespace Clobscode
                 else {
                     unsigned short orl = (*iter).getRefinementLevel();
 
-                    list<unsigned int> inter_faces = iter->getIntersectedFaces();
+                    list<unsigned int> inter_faces = iter->getIntersectedEdges();
 
                     vector<vector<Point3D> > clipping_coords;
                     sv.setClipping(clipping_coords);
@@ -502,7 +508,7 @@ namespace Clobscode
             //add the new points to the vector
             list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); piter++) {
+            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
                 points.push_back(MeshPoint (*piter));
             }
         }
@@ -535,7 +541,7 @@ namespace Clobscode
             one_irregular = true;
             new_pts.clear();
             //refine until the mesh is one-irregular
-            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
+            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
                 if (!(*iter).accept(&oiv) || !(*iter).accept(&tpv)) {
                     //split this Quadrant
                     vector<vector<Point3D> > clipping_coords;
@@ -543,7 +549,7 @@ namespace Clobscode
                     vector< vector <unsigned int> > split_elements;
                     sv.setNewEles(split_elements);
 
-                    list<unsigned int> inter_faces = (*iter).getIntersectedFaces();
+                    list<unsigned int> inter_faces = (*iter).getIntersectedEdges();
 
                     //(*iter).split(points,new_pts,QuadEdges,split_elements,clipping_coords);
                     //split the Quadrant
@@ -602,7 +608,7 @@ namespace Clobscode
             //add the new points to the vector
             list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); piter++) {
+            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
                 points.push_back(MeshPoint (*piter));
             }
         }
@@ -618,7 +624,7 @@ namespace Clobscode
 
         unsigned int cl3=0;
 
-        for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
+        for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
 
             if (!(*iter).accept(&tpv)) {
                 std::cerr << "Error at Mesher::generateOctreeMesh";
@@ -637,7 +643,7 @@ namespace Clobscode
             //add the new points to the vector
             list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); piter++) {
+            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
                 points.push_back(MeshPoint (*piter));
             }
         }
@@ -654,7 +660,7 @@ namespace Clobscode
         //put the Quadrants in a vector
         Quadrants.clear();
         Quadrants.reserve(tmp_Quadrants.size());
-        for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
+        for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
             Quadrants.push_back(*iter);
         }
 
@@ -666,7 +672,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 
     void Mesher::generateOctreeMesh(const unsigned short &rl, Polyline &input,
-                                    list<RefinementRegion *> &all_reg,
+                                    const list<RefinementRegion *> &all_reg,
                                     const string &name){
 
         //to save m3d files per stage
@@ -678,10 +684,11 @@ namespace Clobscode
         list<Point3D> new_pts;
         list<Quadrant>::iterator iter;
 
-
-        for (unsigned int i=0; i<Quadrants.size(); i++) {
-            tmp_Quadrants.push_back(Quadrants[i]);
-        }
+        //initialize list with vector, FJA: sure we want a list?
+        tmp_Quadrants.assign(Quadrants.begin(),Quadrants.end());
+//        for (unsigned int i=0; i<Quadrants.size(); i++) {
+//            tmp_Quadrants.push_back(Quadrants[i]); //push_back is slow...
+//        }
 
         //create visitors and give them variables
         SplitVisitor sv;
@@ -700,14 +707,14 @@ namespace Clobscode
             //this bucle, they are inserted in the point vector
             new_pts.clear();
 
-            list<RefinementRegion *>::iterator reg_iter;
+            list<RefinementRegion *>::const_iterator reg_iter;
 
             //split the Quadrants as needed
-            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
+            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
 
                 bool to_refine = false;
 
-                for (reg_iter=all_reg.begin(); reg_iter!=all_reg.end(); reg_iter++) {
+                for (reg_iter=all_reg.begin(); reg_iter!=all_reg.end(); ++reg_iter) {
 
                     unsigned short region_rl = (*reg_iter)->getRefinementLevel();
                     if (region_rl<i) {
@@ -722,7 +729,7 @@ namespace Clobscode
                     //Get the two extreme nodes of the Quadrant to test intersection with
                     //this RefinementRegion. If not, conserve it as it is.
                     //unsigned int n_idx1 = (*iter).getPoints()[0];
-                    //unsigned int n_idx2 = (*iter).getPoints()[6];
+                    //unsigned int n_idx2 = (*iter).getPoints()[2];
 
                     if ((*reg_iter)->intersectsQuadrant(points,*iter)) {
                         to_refine = true;
@@ -735,7 +742,7 @@ namespace Clobscode
                     continue;
                 }
                 else {
-                    list<unsigned int> inter_faces = iter->getIntersectedFaces();
+                    list<unsigned int> inter_faces = iter->getIntersectedEdges();
 
                     vector<vector<Point3D> > clipping_coords;
                     sv.setClipping(clipping_coords);
@@ -807,7 +814,7 @@ namespace Clobscode
             //add the new points to the vector
             list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); piter++) {
+            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
                 points.push_back(MeshPoint (*piter));
             }
         }
@@ -846,7 +853,7 @@ namespace Clobscode
             one_irregular = true;
             new_pts.clear();
             //refine until the mesh is one-irregular
-            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
+            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
                 if (//(*iter).accept(&pmv)  || //(*iter).pointMoved(points,QuadEdges,rl) ||
                     !(*iter).accept(&oiv) || //!(*iter).isOneIrregular(QuadEdges,rl) ||
                     !(*iter).accept(&tpv)) {//!(*iter).checkTransitionPattern(points,QuadEdges,rl)) {
@@ -856,7 +863,7 @@ namespace Clobscode
                     vector< vector <unsigned int> > split_elements;
                     sv.setNewEles(split_elements);
 
-                    list<unsigned int> inter_faces = (*iter).getIntersectedFaces();
+                    list<unsigned int> inter_faces = (*iter).getIntersectedEdges();
 
                     //(*iter).split(points,new_pts,QuadEdges,split_elements,clipping_coords);
                     //split the Quadrant
@@ -911,11 +918,13 @@ namespace Clobscode
                 break;
             }
             //add the new points to the vector
-            list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); piter++) {
-                points.push_back(MeshPoint (*piter));
-            }
+            // append new_points to points
+            points.insert(points.end(),new_pts.begin(),new_pts.end());
+//            list<Point3D>::iterator piter;
+//            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
+//                points.push_back(MeshPoint (*piter)); // push_back is costly
+//            }
         }
 
         //save current stage of the mesh in a file
@@ -937,7 +946,7 @@ namespace Clobscode
 
         new_pts.clear();
 
-        for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
+        for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
             //vector<vector <unsigned int> > trs_ele;
             //if (!(*iter).applyTransitionPattern(points,new_pts,QuadEdges,rl)) {
             if (!(*iter).accept(&tpv)) {
@@ -950,19 +959,20 @@ namespace Clobscode
         //necessary to continue the refinement.
         if (!new_pts.empty()) {
             //add the new points to the vector
-            list<Point3D>::iterator piter;
-            points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); piter++) {
-                points.push_back(MeshPoint (*piter));
-            }
+//            points.reserve(points.size() + new_pts.size());
+            points.insert(points.end(),new_pts.begin(),new_pts.end());
+//            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
+//                points.push_back(MeshPoint (*piter)); //push_back is costly
+//            }
         }
 
         //put the Quadrants in a vector
-        Quadrants.clear();
-        Quadrants.reserve(tmp_Quadrants.size());
-        for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); iter++) {
-            Quadrants.push_back(*iter);
-        }
+        Quadrants.assign(tmp_Quadrants.begin(),tmp_Quadrants.end());
+//        Quadrants.clear();
+//        Quadrants.reserve(tmp_Quadrants.size());
+//        for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
+//            Quadrants.push_back(*iter); //push_back is costly
+//        }
 
         //cout << " done\n";
 
@@ -976,7 +986,7 @@ namespace Clobscode
         //cout.flush();
     }
 
-    bool Mesher::isItIn(Polyline &mesh, list<unsigned int> &faces, vector<Point3D> &coords) {
+    bool Mesher::isItIn(const Polyline &mesh, const list<unsigned int> &faces, const vector<Point3D> &coords) const {
         //this method is meant to be used by Quadrants that don't
         //intersect input domains. If they are inside of at least
         //one input mesh, then they must remain in the output mesh.
@@ -1034,7 +1044,7 @@ namespace Clobscode
         //write output elements
         out_els.reserve(tmp_els.size());
         list<vector<unsigned int> >::iterator iter;
-        for (iter=tmp_els.begin(); iter!=tmp_els.end(); iter++) {
+        for (iter=tmp_els.begin(); iter!=tmp_els.end(); ++iter) {
             out_els.push_back(*iter);
         }
 
@@ -1068,7 +1078,7 @@ namespace Clobscode
 
         list<Quadrant>::iterator o_iter;
 
-        for (o_iter=tmp_Quadrants.begin(); o_iter!=tmp_Quadrants.end(); o_iter++) {
+        for (o_iter=tmp_Quadrants.begin(); o_iter!=tmp_Quadrants.end(); ++o_iter) {
 
             vector<vector<unsigned int> > sub_els= o_iter->getSubElements();
             for (unsigned int j=0; j<sub_els.size(); j++) {
@@ -1079,7 +1089,7 @@ namespace Clobscode
         out_els.reserve(tmp_elements.size());
         list<vector<unsigned int> >::iterator e_iter;
 
-        for (e_iter=tmp_elements.begin(); e_iter!=tmp_elements.end(); e_iter++) {
+        for (e_iter=tmp_elements.begin(); e_iter!=tmp_elements.end(); ++e_iter) {
             out_els.push_back(*e_iter);
         }
 
@@ -1094,15 +1104,15 @@ namespace Clobscode
     void Mesher::linkElementsToNodes(){
         //clear previous information
         for (unsigned int i=0; i<points.size(); i++) {
-            points.at(i).clearElements();
+            points[i].clearElements();
         }
 
         //link element info to nodes
         for (unsigned int i=0; i<Quadrants.size(); i++) {
-            vector <unsigned int> o_pts = Quadrants[i].getPoints();
+            const vector <unsigned int> &q_indpts = Quadrants[i].getPoints();
 
-            for (unsigned int j=0; j<o_pts.size(); j++) {
-                points.at(o_pts[j]).addElement(i);
+            for (unsigned int j=0; j<q_indpts.size(); j++) {
+                points.at(q_indpts[j]).addElement(i);
             }
         }
     }
@@ -1116,27 +1126,28 @@ namespace Clobscode
                 continue;
             }
 
-            list<unsigned int> p_eles = points[i].getElements(),p_faces;
+            list<unsigned int> p_eles = points[i].getElements(),p_edges;
             points[i].outsideChecked();
             if (p_eles.empty()) {
                 continue;
             }
-            list<unsigned int>::iterator iter;
-            for (iter=p_eles.begin(); iter!=p_eles.end(); iter++) {
-                list<unsigned int> o_faces= Quadrants[*iter].getIntersectedFaces();
-                list<unsigned int>::iterator of_iter;
-                if (o_faces.empty()) {
+            list<unsigned int>::const_iterator iter;
+            for (iter=p_eles.begin(); iter!=p_eles.end(); ++iter) {
+                const list<unsigned int> &qedges= Quadrants[*iter].getIntersectedEdges();
+                list<unsigned int>::const_iterator qe_iter;
+                if (qedges.empty()) {
                     continue;
                 }
-                for (of_iter=o_faces.begin(); of_iter!=o_faces.end(); of_iter++) {
-                    p_faces.push_back(*of_iter);
+                for (qe_iter=qedges.begin(); qe_iter!=qedges.end(); ++qe_iter) {
+                    p_edges.push_back(*qe_iter);
                 }
             }
 
-            p_faces.sort();
-            p_faces.unique();
+            p_edges.sort();
+            p_edges.unique();
 
-            if (p_faces.empty() || input.pointIsInMesh(points[i].getPoint(),p_faces)) {
+            // p_edges = edges intersected
+            if (p_edges.empty() || input.pointIsInMesh(points[i].getPoint(),p_edges)) {
                 points[i].setInside();
             }
         }
@@ -1194,7 +1205,7 @@ namespace Clobscode
         //now element std::list from Vomule mesh can be cleared, as all remaining
         //elements are still in use and attached to newele std::list.
         Quadrants.clear();
-        for (eiter = newele.begin(); eiter!=newele.end(); eiter++) {
+        for (eiter = newele.begin(); eiter!=newele.end(); ++eiter) {
             Quadrants.push_back(*eiter);
         }
     }
@@ -1230,7 +1241,7 @@ namespace Clobscode
         if (!tmppts.empty()) {
             unsigned int npts = points.size()+tmppts.size();
             points.reserve(npts);
-            for (piter=tmppts.begin(); piter!=tmppts.end(); piter++) {
+            for (piter=tmppts.begin(); piter!=tmppts.end(); ++piter) {
                 points.push_back(*piter);
             }
         }
@@ -1268,7 +1279,7 @@ namespace Clobscode
 
                     points[epts[j]].outsideChecked();
                     Point3D oct_p = points.at(epts[j]).getPoint();
-                    if (input.pointIsInMesh(oct_p,Quadrants[i].getIntersectedFaces())) {
+                    if (input.pointIsInMesh(oct_p,Quadrants[i].getIntersectedEdges())) {
                         points[epts[j]].setInside();
                     }
                 }
@@ -1289,14 +1300,14 @@ namespace Clobscode
         //project all outside points onto the surface
         std::list<unsigned int>::iterator piter;
 
-        for (piter=out_nodes.begin(); piter!=out_nodes.end(); piter++) {
+        for (piter=out_nodes.begin(); piter!=out_nodes.end(); ++piter) {
 
             //get the faces of Quadrants sharing this node
             list<unsigned int> p_faces, p_eles = points.at(*piter).getElements();
             list<unsigned int>::iterator p_eiter;
 
-            for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); p_eiter++) {
-                list<unsigned int> o_faces = Quadrants[*p_eiter].getIntersectedFaces();
+            for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); ++p_eiter) {
+                list<unsigned int> o_faces = Quadrants[*p_eiter].getIntersectedEdges();
                 list<unsigned int>::iterator oct_fcs;
                 for (oct_fcs=o_faces.begin(); oct_fcs!=o_faces.end(); oct_fcs++) {
                     p_faces.push_back(*oct_fcs);
@@ -1310,7 +1321,7 @@ namespace Clobscode
                 cout << "\nWarning at Mesher::shrinkToBoundary";
                 cout << " no faces to project an outside node\n";
                 cout << *piter << " n_els " << p_eles.size() << ":";
-                for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); p_eiter++) {
+                for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); ++p_eiter) {
                     cout << " " << *p_eiter;
                 }
                 cout << "\n";
@@ -1320,7 +1331,7 @@ namespace Clobscode
             Point3D current = points.at(*piter).getPoint();
             Point3D projected = input.getProjection(current,p_faces);
 
-            /*for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); p_eiter++) {
+            /*for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); ++p_eiter) {
                 Quadrants[*p_eiter].addProjectionInfluence(projected-current);
             }*/
 
@@ -1359,11 +1370,11 @@ namespace Clobscode
 
          //cout << "   > moving " << to_move.size() << " inside nodes\n";
 
-         for (p_iter=to_move.begin(); p_iter!=to_move.end(); p_iter++) {
+         for (p_iter=to_move.begin(); p_iter!=to_move.end(); ++p_iter) {
          list<unsigned int> p_eles = points[*p_iter].getElements();
          Point3D p_to_add;
          unsigned short qty = 0;
-         for (o_iter=p_eles.begin(); o_iter!=p_eles.end(); o_iter++) {
+         for (o_iter=p_eles.begin(); o_iter!=p_eles.end(); ++o_iter) {
          if (!Quadrants[*o_iter].wasConsideredInProjection()) {
          continue;
          }
@@ -1375,7 +1386,7 @@ namespace Clobscode
          //use this for less displacement of internal nodes.
          //p_to_add = p_to_add * (factor/(2*qty));
 
-         for (o_iter=p_eles.begin(); o_iter!=p_eles.end(); o_iter++) {
+         for (o_iter=p_eles.begin(); o_iter!=p_eles.end(); ++o_iter) {
          if (Quadrants[*o_iter].wasConsideredInProjection()) {
          continue;
          }
@@ -1387,7 +1398,7 @@ namespace Clobscode
          }
 
          //clear information over already shrunk Quadrants
-         for (o_iter=to_reset.begin(); o_iter!=to_reset.end(); o_iter++) {
+         for (o_iter=to_reset.begin(); o_iter!=to_reset.end(); ++o_iter) {
          Quadrants[*o_iter].resetProjectionInfluence();
          }
 
@@ -1434,7 +1445,7 @@ namespace Clobscode
                     points[epts[j]].outsideChecked();
                     Point3D oct_p = points.at(epts[j]).getPoint();
 
-                    if (input.pointIsInMesh(oct_p,Quadrants[i].getIntersectedFaces())) {
+                    if (input.pointIsInMesh(oct_p,Quadrants[i].getIntersectedEdges())) {
                         points[epts[j]].setInside();
                     }
                 }
@@ -1456,7 +1467,7 @@ namespace Clobscode
         //move (when possible) all inner points to surface
         std::list<unsigned int>::iterator piter;
 
-        for (piter=in_nodes.begin(); piter!=in_nodes.end(); piter++) {
+        for (piter=in_nodes.begin(); piter!=in_nodes.end(); ++piter) {
 
             //if this node is attached to an Quadrant which was split in
             //mixed-elements due to transition patterns, avoid the
@@ -1469,8 +1480,8 @@ namespace Clobscode
 
             //bool trans_pattern = false;
 
-            for (peiter=p_eles.begin(); peiter!=p_eles.end(); peiter++) {
-                o_faces = Quadrants[*peiter].getIntersectedFaces();
+            for (peiter=p_eles.begin(); peiter!=p_eles.end(); ++peiter) {
+                o_faces = Quadrants[*peiter].getIntersectedEdges();
                 for (oct_fcs=o_faces.begin(); oct_fcs!=o_faces.end(); oct_fcs++) {
                     p_faces.push_back(*oct_fcs);
                 }
@@ -1490,7 +1501,7 @@ namespace Clobscode
                 //points.at(*piter).setOutside();
                 points.at(*piter).setProjected();
                 points.at(*piter).setPoint(projected);
-                for (peiter=p_eles.begin(); peiter!=p_eles.end(); peiter++) {
+                for (peiter=p_eles.begin(); peiter!=p_eles.end(); ++peiter) {
                     Quadrants[*peiter].setSurface();
                 }
             }
