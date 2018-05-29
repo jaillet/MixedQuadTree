@@ -61,8 +61,8 @@ namespace Clobscode
 		
 		virtual unsigned int operator[](unsigned const int &pos) const;
 		
-        virtual QuadEdge& operator=(const QuadEdge &e);
-		
+//        virtual QuadEdge& operator=(const QuadEdge &e);
+
 		friend ostream& operator<<(ostream& o, const QuadEdge &e);
 		
         friend bool operator==(const QuadEdge &e1, const QuadEdge &e2);
