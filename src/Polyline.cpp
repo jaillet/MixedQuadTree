@@ -286,7 +286,7 @@ namespace Clobscode
         if (found) {
             const Point3D &P0=mVertices[mEdges[closestEdge][0]];
             const Point3D &P1=mVertices[mEdges[closestEdge][1]];
-            bIsIn = pProjP.isLeft(P0,P1);
+            bIsIn = (pPoint.isLeft(P0,P1)>0); // pPoint left of the closest edge
         }
         else {
             std::cerr << "Error in Polyline::getProjection";

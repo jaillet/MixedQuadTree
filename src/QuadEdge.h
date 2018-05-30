@@ -47,19 +47,19 @@ namespace Clobscode
         
 		QuadEdge();
 		
-		QuadEdge(const unsigned int &idx1, const unsigned int &idx2);
+        QuadEdge(unsigned int idx1, unsigned int idx2);
 		
 		virtual ~QuadEdge();
 		
-        virtual void assign(const unsigned int idx1, const unsigned int idx2);
+        virtual void assign(unsigned int idx1, unsigned int idx2);
 		
-		virtual void updateMidPoint(const unsigned int &idx);
+        virtual void updateMidPoint(unsigned int idx);
 		
 		virtual bool split(set<QuadEdge> &allQuadEdges, unsigned int maxp);
 		
-		virtual void setMidPoint(unsigned int &mid);
+        virtual void setMidPoint(unsigned int mid);
 		
-		virtual unsigned int operator[](unsigned const int &pos) const;
+        virtual unsigned int operator[](unsigned int pos) const;
 		
 //        virtual QuadEdge& operator=(const QuadEdge &e);
 
@@ -78,15 +78,15 @@ namespace Clobscode
 
 	};
 	
-	inline void QuadEdge::updateMidPoint(const unsigned int &idx){
+    inline void QuadEdge::updateMidPoint(unsigned int idx){
 		info[2] = idx;
 	}
 
-	inline unsigned int QuadEdge::operator[](unsigned const int &pos) const{
+    inline unsigned int QuadEdge::operator[](unsigned int pos) const{
 		return info.at(pos);
 	}
 	
-	inline void QuadEdge::setMidPoint(unsigned int &mid){
+    inline void QuadEdge::setMidPoint(unsigned int mid){
 		info[2] = mid;
 	}
 	

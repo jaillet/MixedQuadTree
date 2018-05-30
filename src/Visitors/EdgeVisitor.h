@@ -44,8 +44,8 @@ namespace Clobscode
     class EdgeVisitor : public Visitor{
     public:
         EdgeVisitor() {}
-        static void insertEdges(Quadrant *o, set<QuadEdge> &edges);
-        static void getEdge(Quadrant *o, const unsigned int &idx, QuadEdge &e);
+        static void insertEdges(Quadrant *q, set<QuadEdge> &edges);
+        static void getEdge(Quadrant *q, unsigned int idx, QuadEdge &e);
     };
 
 }

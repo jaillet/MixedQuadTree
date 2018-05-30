@@ -74,15 +74,15 @@ namespace Clobscode
         vector<vector<unsigned int> > *new_eles;
         vector<vector<Point3D> > *clipping;
 
-        bool splitEdge(const unsigned int &idx1,
-                       const unsigned int &idx2,
+        bool splitEdge(unsigned int idx1,
+                       unsigned int idx2,
                        unsigned int &c_n_pts,
                        unsigned int &mid_idx);
 
-/*        bool splitFace(const unsigned int &idx1,
-                       const unsigned int &idx2,
-                       const unsigned int &idx3,
-                       const unsigned int &idx4,
+/*        bool splitFace(unsigned int idx1,
+                       unsigned int idx2,
+                       unsigned int idx3,
+                       unsigned int idx4,
                        unsigned int &c_n_pts,
                        unsigned int &mid_idx);*/
 

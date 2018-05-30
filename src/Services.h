@@ -516,7 +516,7 @@ namespace Clobscode
         static bool WriteOctreeMesh(std::string name, vector<MeshPoint> &points,
                                     vector<Quadrant> &Quadrants,
                                     set<QuadEdge> &edges,
-                                    const unsigned int &nels,
+                                    unsigned int nels,
                                     GeometricTransform &gt){
             
             QuadEdge oe;

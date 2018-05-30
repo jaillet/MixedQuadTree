@@ -62,7 +62,7 @@ namespace Clobscode
     {
         //getting variables for modification
         //preferably by reference, to avoid unnecesary copying
-        vector<unsigned int>&pi = o->pointindex;
+        const vector<unsigned int> &pi = o->pointindex;
 
         new_eles->reserve(4);
 
@@ -79,25 +79,25 @@ namespace Clobscode
         const Point3D max = points->at(pi[2]).getPoint();
         const Point3D avg = (max-min)/2 + min;
 
-        //inserting node 8 between nodes 0 and 1
+        //inserting node 4 between nodes 0 and 1
         if (splitEdge(all_pts[0],all_pts[1],n_pts,all_pts[4])) {
             //the coordinates of node 8 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (avg[0],min[1],avg[2]));
         }
-        //inserting node 9 between nodes 1 and 2
+        //inserting node 5 between nodes 1 and 2
         if (splitEdge(all_pts[1],all_pts[2],n_pts,all_pts[5])) {
             //the coordinates of node 9 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (max[0],avg[1],avg[2]));
         }
-        //inserting node 10 between nodes 2 and 3
+        //inserting node 6 between nodes 2 and 3
         if (splitEdge(all_pts[2],all_pts[3],n_pts,all_pts[6])) {
             //the coordinates of node 10 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (avg[0],max[1],avg[2]));
         }
-        //inserting node 11 between nodes 3 and 0
+        //inserting node 7 between nodes 3 and 0
         if (splitEdge(all_pts[0],all_pts[3],n_pts,all_pts[7])) {
             //the coordinates of node 11 must be computed and added to
             //new_pts list of points
@@ -183,11 +183,11 @@ namespace Clobscode
 //--------------------------------------------------------------------------------
 
 
-    bool SplitVisitor::splitEdge(const unsigned int &idx1, const unsigned int &idx2,
+    bool SplitVisitor::splitEdge(unsigned int idx1, unsigned int idx2,
                                  unsigned int &c_n_pts, unsigned int &mid_idx){
         
         QuadEdge this_edge (idx1,idx2);
-        set<QuadEdge>::iterator found = edges->find(this_edge);
+        set<QuadEdge>::const_iterator found = edges->find(this_edge);
 
         if ((*found)[2]!=0) {
             //if the edge was already split, then save its mid_point and
@@ -219,8 +219,8 @@ namespace Clobscode
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 
-    /*bool SplitVisitor::splitFace(const unsigned int &idx1, const unsigned int &idx2,
-                                 const unsigned int &idx3, const unsigned int &idx4,
+    /*bool SplitVisitor::splitFace(unsigned int idx1, unsigned int idx2,
+                                 unsigned int idx3, unsigned int idx4,
                                  unsigned int &c_n_pts, unsigned int &mid_idx){
         QuadEdge e1 (idx1,idx3);
         set<QuadEdge>::iterator found = edges->find(e1);

@@ -29,23 +29,25 @@
 
 namespace Clobscode
 {
-void EdgeVisitor::insertEdges(Quadrant *o, set<QuadEdge> &edges) {
+void EdgeVisitor::insertEdges(Quadrant *q, set<QuadEdge> &edges) {
 
+    QuadEdge ee;
     // assume 4 edges in Quadrant
     for (unsigned int i=0; i<4; i++) {
-        QuadEdge ee;
-        getEdge(o,i,ee);
+        getEdge(q,i,ee);
         edges.insert(ee);
     }
+    //FJA for debugging purpose
+    // => OK, pb with qtcreator/gdb not updating after std::set reallocation
 //    std::cerr << "edges contains:";
 //    for (auto it=edges.begin(); it!=edges.end(); ++it)
-//        std::cerr << '-' << *it;
+//        std::cerr << " - " << *it << "-" << &(*it);
 //    std::cerr << '\n'<< std::flush;
 
     }
 
-    void EdgeVisitor::getEdge(Quadrant *o, const unsigned int &idx, QuadEdge &e) {
-        const vector<unsigned int> &pointindex = o->pointindex;
+    void EdgeVisitor::getEdge(Quadrant *q, unsigned int idx, QuadEdge &e) {
+        const vector<unsigned int> &pointindex = q->pointindex;
         unsigned int e0,e1;
         switch (idx) {
             case 0:

@@ -53,7 +53,10 @@ namespace Clobscode
 
     protected:
         set<QuadEdge> *edges;
-        const unsigned short *max_ref_level; //FJA const, really ???
+        const unsigned short *max_ref_level;
+        //FJA const *, really??
+        //and why not const set<QuadEdge> *, as well?
+        //and in any other visitors...
     };
 
 }

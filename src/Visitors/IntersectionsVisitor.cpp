@@ -71,7 +71,7 @@ namespace Clobscode
             list<unsigned int> &intersected_edges = q->intersected_edges;
 
             list<unsigned int>::const_iterator e_iter;
-            vector<Point3D> input_pts = ply->getPoints();
+            const vector<Point3D> &input_pts = ply->getPoints();
 
             for (e_iter = edges->begin(); e_iter!=edges->end(); e_iter++) {
                 const PolyEdge &edge = ply->getEdges()[*e_iter];
@@ -120,7 +120,7 @@ namespace Clobscode
         //the "window" is the Quadrant (square), and the "lines"
         //to be clipped are the edges.
 
-        vector<unsigned int> iEdge = pEdge.getPoints(); //indices of edge extremities
+        const vector<unsigned int> &iEdge = pEdge.getPoints(); //indices of edge extremities
 
         unsigned int n_pts = iEdge.size();
 
@@ -183,8 +183,8 @@ namespace Clobscode
         //the Quadrant.
         for (unsigned int i=0; i<n_pts; i++) {
             //cout << pts[face_pts_idx[i]] << " code is ";
-            Point3D p1 = input_pts[iEdge[i]];
-            Point3D p2 = input_pts[iEdge[(i+1)%n_pts]];
+            const Point3D &p1 = input_pts[iEdge[i]];
+            const Point3D &p2 = input_pts[iEdge[(i+1)%n_pts]];
 
             if (clipGeneralCase(p1,p2,pmin,pmax)) {
                 return true;
@@ -207,6 +207,9 @@ namespace Clobscode
 
     bool IntersectionsVisitor::clipGeneralCase(const Point3D &p1, const Point3D &p2, const Point3D &pmin,
                                           const Point3D &pmax) const {
+
+        std::cerr << "Warning IntersectionsVisitor::clipGeneralCase()\n";
+        std::cerr << "  FJA: I didn't checked this function in 2D yet! And you, Claudio?\n";
 
         //compute the parametric equations of the given segment
         double dx = p2[0]-p1[0];
@@ -352,6 +355,8 @@ namespace Clobscode
                                                    const vector<Point3D> &input_pts,
                                                    const Point3D &pmin,
                                                    const Point3D &pmax) const {
+        std::cerr << "Warning IntersectionsVisitor::edgeTriangleIntersection()\n";
+        std::cerr << "  FJA: I didn't checked this function in 2D yet! And you, Claudio?\n";
 
         //compute the coords of all Quadrant edges
         vector<vector<Point3D> > oct_edges = getEdges(pmin,pmax);

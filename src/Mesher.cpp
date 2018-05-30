@@ -254,11 +254,11 @@ namespace Clobscode
         }
         std::cerr << "QuadEdges cont:";
         for (auto it=QuadEdges.begin(); it!=QuadEdges.end(); ++it)
-            std::cerr << '-' << *it;
+            std::cerr << " -" << *it;
         std::cerr << '\n'<< std::flush;
         std::cerr << "Quadrants contains:";
         for (auto it=Quadrants.begin(); it!=Quadrants.end(); ++it)
-            std::cerr << '-' << *it;
+            std::cerr << " -" << *it;
         std::cerr << '\n'<< std::flush;
 
     }
@@ -756,7 +756,7 @@ namespace Clobscode
                     continue;
                 }
                 else {
-                    list<unsigned int> inter_faces = iter->getIntersectedEdges();
+                    list<unsigned int> inter_edges = iter->getIntersectedEdges();
 
                     vector<vector<Point3D> > clipping_coords;
                     sv.setClipping(clipping_coords);
@@ -768,7 +768,7 @@ namespace Clobscode
                     //cout << "Accept" << endl;
                     iter->accept(&sv);
 
-                    if (inter_faces.empty()) {
+                    if (inter_edges.empty()) {
                         for (unsigned int j=0; j<split_elements.size(); j++) {
                             Quadrant o (split_elements[j],i+1);
                             new_Quadrants.push_back(o);
@@ -785,7 +785,7 @@ namespace Clobscode
                             IntersectionsVisitor iv(true);
                             //if (o.checkIntersections(input,inter_faces,clipping_coords[j]))
                             iv.setPolyline(input);
-                            iv.setEdges(inter_faces);
+                            iv.setEdges(inter_edges);
                             iv.setCoords(clipping_coords[j]);
 
                             if (o.accept(&iv)) {
@@ -801,11 +801,11 @@ namespace Clobscode
                                 //only intersecting Quadrants are meant to be
                                 //displayed.
 
-                                //note: inter_faces is quite enough to check if
+                                //note: inter_edges is quite enough to check if
                                 //element is inside input, no Quadrant needed,
                                 //so i moved the method to mesher  --setriva
 
-                                if (isItIn(input,inter_faces,clipping_coords[j])) {
+                                if (isItIn(input,inter_edges,clipping_coords[j])) {
                                     new_Quadrants.push_back(o);
                                 }
                             }
@@ -826,7 +826,7 @@ namespace Clobscode
                 break;
             }
             //add the new points to the vector
-            list<Point3D>::iterator piter;
+            list<Point3D>::const_iterator piter;
             points.reserve(points.size() + new_pts.size());
             for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
                 points.push_back(MeshPoint (*piter));
@@ -1010,7 +1010,7 @@ namespace Clobscode
             return first;
         }
 
-        //cout << "one incosistency detected -> hard test\n";
+        //cout << "one inconsistency detected -> hard test\n";
         //return mesh.pointIsInMesh(coords[0],faces);
         return mesh.pointIsInMesh(coords[0]);
     }
@@ -1468,6 +1468,8 @@ namespace Clobscode
                 if (points[epts[j]].isInside()) {
                     in_nodes.push_back(epts[j]);
                     double md = Quadrants[i].getMaxDistance();
+                    cerr << "warning!! in Mesher::projectCloseToBoundaryNodes\n";
+                    cerr << "  hard coded test for Octree j>7 ???\n";
                     if (j>7) {
                         md*=0.5;
                     }
