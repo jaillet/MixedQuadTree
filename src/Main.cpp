@@ -87,7 +87,7 @@ int main(int argc,char** argv){
     }
     
 	//const int n_meshes = 1;
-	string in_name = "", out_name = "";
+    string in_name, out_name;
 	bool out_name_given = false, in_name_given = false;
 //	bool edge_projection = false;
 	
@@ -124,13 +124,13 @@ int main(int argc,char** argv){
 			endMsg();
 			return 0;
 		}
-		if (argc==i+1 && (argv[i][1]!='g' && argv[i][1]!='v' && argv[i][1]!='m')) {
+        if (argc==i+1 && (argv[i][1]!='g' && argv[i][1]!='v' && argv[i][1]!='m' && argv[i][1]!='t' )) {
 			cout << "Error: expected argument for option " << argv[i] << "\n";
 			endMsg();
 			return 0;
 		}
         switch (argv[i][1]) {
-            case 'p': //test polyline
+            case 't': //test polyline
                 for (uint i=0;i<inputs.size();++i) {
                     std::cerr << inputs[i].crossingNumber(Point3D(.5,0.5,0.0));
                     std::cerr << inputs[i].crossingNumber(Point3D(1.0,0.0,0.0));
@@ -153,7 +153,6 @@ int main(int argc,char** argv){
                     std::cerr << inputs[i].getProjection(Point3D(0.9999999999,0.999999999,0.0)) << std::endl;
                     std::cerr << inputs[i].getCentroid() << std::endl;
                 }
-                i++;
 //                exit(3);
                 break;
             case 'd':
@@ -168,8 +167,18 @@ int main(int argc,char** argv){
                 break;
             case 'o':
                 in_name = argv[i+1];
-                
+
                 if (!Services::ReadOffMesh(in_name,inputs)) {
+                    std::cerr << "couldn't read file " << argv[i+1] << std::endl;
+                    return 1;
+                }
+                in_name_given = true;
+                i++;
+                break;
+            case 'p': //read a .poly file (Triangle)
+                in_name = argv[i+1];
+
+                if (!Services::ReadPolyFile(in_name,inputs)) {
                     std::cerr << "couldn't read file " << argv[i+1] << std::endl;
                     return 1;
                 }
@@ -278,7 +287,7 @@ int main(int argc,char** argv){
         for (rriter = all_regions.begin(); rriter!=all_regions.end(); rriter++) {
             delete *rriter;
         }
-        return 0;
+        exit (1);
     }
 	
 	//give default output name if non is provided

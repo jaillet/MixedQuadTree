@@ -87,60 +87,19 @@ namespace Clobscode
 
 	bool RefinementSurfaceRegion::intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)
     {
-        //(Point3D &p1, Point3D &p2)
-        
-        Point3D p1 = points[oct.getPoints()[0]].getPoint();
-        Point3D p2 = points[oct.getPoints()[6]].getPoint();
         
         //test if any node of the Quadrant is Inside the Mesh.
-        if (ply.pointIsInMesh(p1)) {
-            return true;
+        for (unsigned int i=0; i< oct.getPointIndex().size(); i++) {
+            if (ply.pointIsInMesh(points[oct.getPointIndex(i)].getPoint())) {
+                return true;
+            }
+
         }
-        
-        if (ply.pointIsInMesh(p2)) {
-            return true;
-        }
-        
-        Point3D aux;
-        
-        aux[0] = p1[0];
-        aux[1] = p1[1];
-        aux[2] = p2[2];
-        if (ply.pointIsInMesh(aux)) {
-            return true;
-        }
-        aux[0] = p1[0];
-        aux[1] = p2[1];
-        aux[2] = p1[2];
-        if (ply.pointIsInMesh(aux)) {
-            return true;
-        }
-        aux[0] = p2[0];
-        aux[1] = p1[1];
-        aux[2] = p1[2];
-        if (ply.pointIsInMesh(aux)) {
-            return true;
-        }
-        aux[0] = p2[0];
-        aux[1] = p2[1];
-        aux[2] = p1[2];
-        if (ply.pointIsInMesh(aux)) {
-            return true;
-        }
-        aux[0] = p2[0];
-        aux[1] = p1[1];
-        aux[2] = p2[2];
-        if (ply.pointIsInMesh(aux)) {
-            return true;
-        }
-        aux[0] = p1[0];
-        aux[1] = p2[1];
-        aux[2] = p2[2];
-        if (ply.pointIsInMesh(aux)) {
-            return true;
-        }
-        
-        
+
+        //(Point3D &p1, Point3D &p2), diagonal extremities
+        const Point3D &p1 = points[oct.getPointIndex()[0]].getPoint();
+        const Point3D &p2 = points[oct.getPointIndex()[2]].getPoint();
+
         //test if any node of the mesh is inside the Quadrant
         vector<Point3D> tmpts = ply.getPoints();
         for (unsigned int i=0; i<tmpts.size(); i++) {
@@ -158,23 +117,21 @@ namespace Clobscode
         
         //to implement: adapt from Quadrant - triangle intersection test in order to
         //test if an edge (of Region Surface Mesh) intersects the Quadrant.
-        /*set<SurfaceEdge> r_edges = tm.getEdges();
-        set<SurfaceEdge>::iterator editer;
-        for (editer = r_edges.begin(); editer!=r_edges.end(); editer++) {
-            Point3D p3 = tm.getPoints()[(*editer)[0]];
-            Point3D p4 = tm.getPoints()[(*editer)[1]];
+        for (auto &edge:ply.getEdges()) {
+            const Point3D &p3 = ply.getPoints()[edge[0]];
+            const Point3D &p4 = ply.getPoints()[edge[1]];
             if (edgeIntersection(p1,p2,p3,p4)) {
                 return true;
             }
-        }*/
+        }
                 
         return false;
 	}
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-	bool RefinementSurfaceRegion::edgeIntersection(Point3D &oct_p1, Point3D &oct_p2,
-                                                   Point3D &seg_p1, Point3D &seg_p2)
+    bool RefinementSurfaceRegion::edgeIntersection(const Point3D &oct_p1, const Point3D &oct_p2,
+                                                   const Point3D &seg_p1, const Point3D &seg_p2) const
 	{
         //This code is based on the Cohen-Sutherland algorithm
 		//for image clipping over a given window. In this case
@@ -232,7 +189,8 @@ namespace Clobscode
             return true;
 		}
 		
-		//General case of clipping a triangle's edge against
+        //FJA that was already commented in master 3D version!
+        //General case of clipping a triangle's edge against
 		//the Quadrant.
 		/*for (unsigned int i=0; i<n_pts; i++) {
 			//cout << pts[face_pts_idx[i]] << " code is ";
@@ -370,7 +328,7 @@ namespace Clobscode
 	
 	unsigned int RefinementSurfaceRegion::computePosition(const Point3D &p,
                                                           const Point3D &pmin,
-                                                          const Point3D &pmax){
+                                                          const Point3D &pmax) const {
 		unsigned int sides = 0;
 		
 		//decide left/right X axis.

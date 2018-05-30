@@ -194,7 +194,7 @@ namespace Clobscode
         //Last "hard" test: Apply Ray Tracing to detect
         //intersection between every edge of the Quadrant
         //(square) and the polyline. If at least one
-        //of them instersects, then this triangle
+        //of them intersects, then this triangle
         //intersects the Quadrant.
         //If the test didn't succeed, the triangle
         //is not intersected by this Quadrant
@@ -359,13 +359,12 @@ namespace Clobscode
         std::cerr << "  FJA: I didn't checked this function in 2D yet! And you, Claudio?\n";
 
         //compute the coords of all Quadrant edges
-        vector<vector<Point3D> > oct_edges = getEdges(pmin,pmax);
+        const vector<vector<Point3D> > &oct_edges = getEdges(pmin,pmax);
 
         //test each edge against the triangle
         for (unsigned int i=0; i<oct_edges.size(); i++) {
-            vector<Point3D> oct_ed = oct_edges[i];
 
-            if (st.segmentIntersection(input_pts,oct_ed[0],oct_ed[1])) {
+            if (st.segmentIntersection(input_pts,oct_edges[i][0],oct_edges[i][1])) {
                 return true;
             }
         }
@@ -379,20 +378,16 @@ namespace Clobscode
     vector<vector<Point3D>> IntersectionsVisitor::getEdges(const Point3D &pmin,
                                                       const Point3D &pmax) const {
         vector<vector<Point3D> > edges;
-        edges.reserve(12);
+        edges.reserve(4);
 
-        //creat the 8 nodes of the Quadrant
-        Point3D p0 (pmin[0],pmin[1],pmin[2]);
-        Point3D p1 (pmin[0],pmin[1],pmax[2]);
-        Point3D p2 (pmax[0],pmin[1],pmax[2]);
-        Point3D p3 (pmax[0],pmin[1],pmin[2]);
-        Point3D p4 (pmin[0],pmax[1],pmin[2]);
-        Point3D p5 (pmin[0],pmax[1],pmax[2]);
-        Point3D p6 (pmax[0],pmax[1],pmax[2]);
-        Point3D p7 (pmax[0],pmax[1],pmin[2]);
+        //create the 4 nodes of the Quadrant
+        Point3D p0 (pmin[0],pmin[1],0.0); //FJA assume pmin[2]=pmax[2]=0.0;
+        Point3D p1 (pmax[0],pmin[1],0.0);
+        Point3D p2 (pmax[0],pmax[1],0.0);
+        Point3D p3 (pmin[0],pmax[1],0.0);
 
         vector<Point3D> edge(2, Point3D ());
-
+        //CCW
         edge[0] = p0;
         edge[1] = p1;
         edges.push_back(edge);
@@ -407,38 +402,6 @@ namespace Clobscode
 
         edge[0] = p3;
         edge[1] = p0;
-        edges.push_back(edge);
-
-        edge[0] = p0;
-        edge[1] = p4;
-        edges.push_back(edge);
-
-        edge[0] = p1;
-        edge[1] = p5;
-        edges.push_back(edge);
-
-        edge[0] = p2;
-        edge[1] = p6;
-        edges.push_back(edge);
-
-        edge[0] = p3;
-        edge[1] = p7;
-        edges.push_back(edge);
-
-        edge[0] = p4;
-        edge[1] = p5;
-        edges.push_back(edge);
-
-        edge[0] = p5;
-        edge[1] = p6;
-        edges.push_back(edge);
-
-        edge[0] = p6;
-        edge[1] = p7;
-        edges.push_back(edge);
-
-        edge[0] = p7;
-        edge[1] = p4;
         edges.push_back(edge);
 
         return edges;

@@ -91,7 +91,7 @@ namespace Clobscode
 
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
-        Services::WriteOctreeMesh(name,oct_points,Quadrants,QuadEdges,nels,gt);
+        Services::WriteQuadtreeMesh(name,oct_points,Quadrants,QuadEdges,nels,gt);
 
         /*detectInsideNodes(input);
 
@@ -152,15 +152,15 @@ namespace Clobscode
         detectInsideNodes(input);
 
         projectCloseToBoundaryNodes(input);
-        removeOnSurface();
+//FJA        removeOnSurface();
 
         //apply the surface Patterns
-        applySurfacePatterns(input);
-        removeOnSurface();
+//FJA        applySurfacePatterns(input);
+//FJA        removeOnSurface();
 
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
-        Services::WriteOctreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
+        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
 
 
         //projectCloseToBoundaryNodes(input);
@@ -171,7 +171,7 @@ namespace Clobscode
         linkElementsToNodes();
 
         //shrink outside nodes to the input domain boundary
-        shrinkToBoundary(input);
+//FJA        shrinkToBoundary(input);
 
         if (rotated) {
             for (unsigned int i=0; i<points.size(); i++) {
@@ -1123,7 +1123,7 @@ namespace Clobscode
 
         //link element info to nodes
         for (unsigned int i=0; i<Quadrants.size(); i++) {
-            const vector <unsigned int> &q_indpts = Quadrants[i].getPoints();
+            const vector <unsigned int> &q_indpts = Quadrants[i].getPointIndex();
 
             for (unsigned int j=0; j<q_indpts.size(); j++) {
                 points.at(q_indpts[j]).addElement(i);
@@ -1285,7 +1285,7 @@ namespace Clobscode
 
             //Put in a std::list inside nodes of boundary elements that
             //may be projected to the input domain.
-            vector<unsigned int> epts = Quadrants[i].getPoints();
+            vector<unsigned int> epts = Quadrants[i].getPointIndex();
             for (unsigned int j=0; j < epts.size(); j++) {
 
                 if (!points[epts[j]].wasOutsideChecked()) {
@@ -1451,7 +1451,7 @@ namespace Clobscode
 
             //Put in a std::list inside nodes of boundary elements that
             //may be projected to the input domain.
-            vector<unsigned int> epts = Quadrants[i].getPoints();
+            vector<unsigned int> epts = Quadrants[i].getPointIndex();
             for (unsigned int j=0; j < epts.size(); j++) {
 
                 if (!points[epts[j]].wasOutsideChecked()) {

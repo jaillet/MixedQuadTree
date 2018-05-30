@@ -335,6 +335,182 @@ namespace Clobscode
 			return true;
 		}
         
+
+        //-------------------------------------------------------------------
+        //-------------------------------------------------------------------
+//        First line: <# of vertices> <dimension (must be 2)> <# of attributes> <# of boundary markers (0 or 1)>
+//        Following lines: <vertex #> <x> <y> [attributes] [boundary marker]
+//        One line: <# of segments> <# of boundary markers (0 or 1)>
+//        Following lines: <segment #> <endpoint> <endpoint> [boundary marker]
+//        One line: <# of holes>
+//        Following lines: <hole #> <x> <y>
+//        Optional line: <# of regional attributes and/or area constraints>
+//        Optional following lines: <region #> <x> <y> <attribute> <maximum area>
+
+        static bool ReadPolyFile(std::string name,
+                                 vector<Clobscode::Polyline> &clobs_inputs){
+
+            char word [256];
+            int cant;
+            int shift=-1; //trick for determining shift from first point indice (0 or 1)
+            double x,y,z;
+            vector<vector<unsigned int> > alledges;
+            vector<Point3D> pts;
+
+            FILE *file = fopen(name.c_str(),"r");
+
+            if (file==NULL) {
+                std::cout << "File " << name << " doesn't exist\n";
+                return false;
+            }
+
+            //read first line
+            while(true) {
+                if(std::fscanf(file,"%s",word)==EOF){
+                    fclose(file);
+                    return false;
+                }
+                if(!strncmp(word,"#",1)) {
+                    //skip end of line
+                    fscanf(file,"%2000[^\n]", word);
+                }
+                else
+                    break;
+            }
+            cant=atoi(word);
+            std::fscanf(file,"%s",word);
+            int dim=atoi(word);
+            std::fscanf(file,"%s",word);
+            int nattribs=atoi(word);
+            std::fscanf(file,"%s",word);
+            int nmarkers=atoi(word);
+
+            if(cant<=0)
+                return false;
+            //read each node
+            pts.reserve(cant);
+            int i=0;
+            do {
+                if(std::fscanf(file,"%s",word)==EOF){
+                    fclose(file);
+                    return false;
+                }
+                if(!strncmp(word,"#",1)) {
+                    //skip end of line
+                    fscanf(file,"%2000[^\n]", word);
+                }
+                else {
+                    if (shift==-1) // if first point
+                        shift=atoi(word);
+                    // else, discard indice of all following nodes contained in word
+                    std::fscanf(file,"%s",word);
+                    x=atof(word);
+                    std::fscanf(file,"%s",word);
+                    y=atof(word);
+                    if (dim>=3) { // should not be, but one never knows...
+                        std::fscanf(file,"%s",word);
+                        z=atof(word);
+                    } else {
+                        z=0.;
+                    }
+                    for (int j=0; j<nattribs;++j) {
+                        std::fscanf(file,"%s",word);
+                        std::cerr << "Skipping this node attribute " << word << "\n";
+                    }
+                    for (int j=0; j<nmarkers;++j) {
+                        std::fscanf(file,"%s",word);
+                        std::cerr << "Skipping this node marker " << word << "\n";
+                    }
+                    Point3D p (x,y,z);
+                    pts.push_back(p);
+
+                    ++i;
+                }
+            } while(i!=cant);
+
+            //read number of "Edges"
+            cant = 0;
+            //read first line
+            while(true) {
+                if(std::fscanf(file,"%s",word)==EOF){
+                    fclose(file);
+                    return false;
+                }
+                if(!strncmp(word,"#",1)) {
+                    //skip end of line
+                    fscanf(file,"%2000[^\n]", word);
+                }
+                else
+                    break;
+            }
+            cant=atoi(word);
+            std::fscanf(file,"%s",word);
+            nmarkers=atoi(word);
+
+            alledges.reserve(cant);
+            if(cant<=0)
+                return false;
+            //read each edge
+            i=0;
+            do {
+                if(std::fscanf(file,"%s",word)==EOF){
+                    fclose(file);
+                    return false;
+                }
+                if(!strncmp(word,"#",1)) {
+                    //skip end of line
+                    fscanf(file,"%2000[^\n]", word);
+                }
+                else {
+                    // here, discard indice of the edge contained in word
+
+                    //read each edge (assuming they have 2 endpoints)
+                    std::vector<unsigned int> edgpts(2,0);
+                    for(unsigned int j=0;j<2;j++){
+                        std::fscanf(file,"%u",&edgpts[j]);
+                        edgpts[j]-=shift;
+                    }
+                    //read some unnecessary for the moment integers
+                    for(int j=0;j<nmarkers;j++) {
+                        std::fscanf(file,"%s",word);
+                        std::cerr << "Skipping this edge marker " << word << "\n";
+                    }
+                    alledges.push_back(edgpts);
+                    ++i;
+                }
+            } while (i!=cant);
+
+            //read number of "Holes"
+            cant = 0;
+            //read first line
+            while(true) {
+                if(std::fscanf(file,"%s",word)==EOF){
+                    fclose(file);
+                    return false;
+                }
+                if(!strncmp(word,"#",1)) {
+                    //skip end of line
+                    fscanf(file,"%2000[^\n]", word);
+                }
+                else
+                    break;
+            }
+            cant=atoi(word);
+            if (cant>0) {
+                std::cerr << "ReadPolyFile(): feature not yet supported... "
+                          << cant << " hole(s) skipped.\n";
+                std::cerr << "  and possibly some regions too.\n";
+            }
+
+            fclose(file);
+
+            Polyline pm (pts, alledges);
+            clobs_inputs.push_back(pm);
+
+            return true;
+        }
+
+
         //-------------------------------------------------------------------
         //-------------------------------------------------------------------
         static bool ReadQuadrantList(std::string name, list<unsigned int> &olist,
@@ -513,18 +689,18 @@ namespace Clobscode
 
         //-------------------------------------------------------------------
         //-------------------------------------------------------------------
-        static bool WriteOctreeMesh(std::string name, vector<MeshPoint> &points,
+        static bool WriteQuadtreeMesh(std::string name, vector<MeshPoint> &points,
                                     vector<Quadrant> &Quadrants,
                                     set<QuadEdge> &edges,
                                     unsigned int nels,
                                     GeometricTransform &gt){
             
-            QuadEdge oe;
-            set<QuadEdge>::iterator my_edge;
+//            QuadEdge qe;
+            set<QuadEdge>::const_iterator my_edge;
             
             string vol_name = name+".oct";
             
-            //write the volume mesh
+            //write the surface mesh
             FILE *f = fopen(vol_name.c_str(),"wt");
             unsigned int np = points.size();
             unsigned int no = Quadrants.size();
@@ -539,7 +715,7 @@ namespace Clobscode
             }
             fprintf(f,"\n");
             
-            //write edeges
+            //write edges
             for(my_edge=edges.begin();my_edge!=edges.end();my_edge++){
                 QuadEdge me = *my_edge;
                 fprintf(f,"%i %i %i\n",me[0],me[1],me[2]);
@@ -557,16 +733,16 @@ namespace Clobscode
             fprintf(f,"\n\n");
             
             for (unsigned int i=0; i<Quadrants.size(); i++) {
-                vector<unsigned int> opts = Quadrants[i].getPoints();
+                const vector<unsigned int> &opts = Quadrants[i].getPointIndex();
                 unsigned int nopts = opts.size();
-                if (nopts<8) {
+                if (nopts<4) {
                     cerr << "warning at Services::WriteOctreeMesh\n";
-                    cerr << "        Quadrant has less than 8 nodes\n";
+                    cerr << "        Quadrant has less than 4 nodes\n";
                     fprintf(f,"%u ",nopts);
                 }
                 else {
-                    nopts=8;
-                    fprintf(f,"8 ");
+                    nopts=4;
+                    fprintf(f,"4 ");
                 }
                 for (unsigned int j=0; j<nopts; j++) {
                     fprintf(f,"%u ",opts[j]);

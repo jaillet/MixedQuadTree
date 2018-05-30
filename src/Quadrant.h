@@ -76,8 +76,9 @@ namespace Clobscode
 		virtual void noMoreProjectionInfluences();
 				
 		//access methods
-		virtual vector<unsigned int> &getPoints();
-		
+        virtual vector<unsigned int> &getPointIndex();
+        virtual unsigned int getPointIndex(unsigned int i) const;
+
 		virtual bool isInside();
 		
 		virtual bool intersectsSurface();
@@ -126,10 +127,13 @@ namespace Clobscode
 	};
 	
 	
-	inline vector<unsigned int> &Quadrant::getPoints(){
+    inline vector<unsigned int> &Quadrant::getPointIndex(){
 		return pointindex;
 	}
-	
+    inline unsigned int Quadrant::getPointIndex(unsigned int i) const{
+        return pointindex[i];
+    }
+
 	inline bool Quadrant::isInside(){
         return intersected_edges.empty();
 	}

@@ -64,11 +64,11 @@ namespace Clobscode
         
     protected:
         
-        virtual bool edgeIntersection(Point3D &oct_p1, Point3D &oct_p2,
-                                      Point3D &seg_p1, Point3D &seg_p2);
+        virtual bool edgeIntersection(const Point3D &oct_p1, const Point3D &oct_p2,
+                                      const Point3D &seg_p1, const Point3D &seg_p2) const;
         
         virtual unsigned int computePosition(const Point3D &p, const Point3D &pmin,
-                                             const Point3D &pmax);
+                                             const Point3D &pmax) const;
 
 		
 	protected:

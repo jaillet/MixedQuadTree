@@ -72,7 +72,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 	
 	std::ostream& operator<<(std::ostream& o,Quadrant &e){
-		std::vector<unsigned int> points = e.getPoints();
+        std::vector<unsigned int> points = e.getPointIndex();
 		for (unsigned int i=0; i<points.size(); i++)
 			o << " " << points[i];
 		return o;

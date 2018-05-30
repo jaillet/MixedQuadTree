@@ -74,8 +74,8 @@ namespace Clobscode
 	bool RefinementCubeRegion::intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)
     {
         
-        Point3D p1 = points[oct.getPoints()[0]].getPoint();
-        Point3D p2 = points[oct.getPoints()[6]].getPoint();
+        Point3D p1 = points[oct.getPointIndex()[0]].getPoint();
+        Point3D p2 = points[oct.getPointIndex()[6]].getPoint();
      
         //if the input mesh was rotated w.r.t. this cube, apply inverse
         
