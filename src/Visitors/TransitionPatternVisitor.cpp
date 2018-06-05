@@ -53,11 +53,12 @@ namespace Clobscode
         }
         
         const vector<unsigned int> &pointindex = o->pointindex;
-//        EdgeVisitor ev;
         
+        //number of mid-edges.
+        unsigned int quantity = 0;
         // 4 vertex + one node per Edge => 8
         vector<unsigned int> nodes (8,0);
-        bool splitted = false;
+
         //update the 4 nodes of the Quadrant.
         for (unsigned int i=0; i<4; i++) {
             nodes[i] = pointindex[i];
@@ -73,7 +74,7 @@ namespace Clobscode
             else {
                 if ((*my_edge)[2]!=0) {
                     nodes[i+4] = (*my_edge)[2];
-                    splitted = true;
+                    quantity++;
                 }
             }
         }
@@ -81,7 +82,7 @@ namespace Clobscode
         //then return true (meaning this case is already considered in
         //the transition patterns) and add this element to the vector
         //of "new elements"
-        if (!splitted) {
+        if (quantity!=0) {
             return true;
         }
         
@@ -94,13 +95,13 @@ namespace Clobscode
         //------------------------------------------------------
         
         //creat the pattern
-        patterns::QuadTransition qt (nodes);
+        patterns::QuadTransition qt(nodes);
         
         //the subelements of this Quadrant will no longer be a Quad.
         //It will now contain mixed-elements.
         vector<vector<unsigned int>> &sub_elements = o->sub_elements;
         sub_elements.clear();
         
-        return qt.getNewElements(*points,sub_elements);
+        return qt.getNewElements(sub_elements,quantity);
     }
 }

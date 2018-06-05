@@ -38,8 +38,24 @@ namespace patterns {
 		
 		QuadTransition(vector<unsigned int> &nodes);
 		
-        virtual bool getNewElements(vector<MeshPoint> &points,
-                                    vector<vector<unsigned int> > &sub_elements);
+        virtual bool getNewElements(vector<vector<unsigned int> > &sub_elements,
+                                    const unsigned int &nedges);
+        
+    protected:
+        
+        virtual bool oneEdge(vector<vector<unsigned int> > &sub_elements);
+        
+        virtual bool twoEdges(vector<vector<unsigned int> > &sub_elements);
+        
+        virtual bool threeEdges(vector<vector<unsigned int> > &sub_elements);
+        
+        virtual bool fourEdges(vector<vector<unsigned int> > &sub_elements);
+        
+        virtual vector<unsigned int> rotate(const vector<unsigned int> &nodes,
+                                             const unsigned int &times);
+        
+        virtual vector<unsigned int> inverseRotate(const vector<unsigned int> &nodes,
+                                                    const unsigned int &times);
 		
 	protected:
 		
