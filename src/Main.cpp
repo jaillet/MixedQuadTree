@@ -249,7 +249,7 @@ int main(int argc,char** argv){
                 break;
             case 'c':
                 Quadrant_start = true;
-                Services::ReadOctreeMesh(argv[i+1], oct_points, oct_Quadrants,
+                Services::ReadQuadMesh(argv[i+1], oct_points, oct_Quadrants,
                                          oct_edges,oct_ele_link,gt,cminrl,omaxrl);
                 if (ref_level<omaxrl) {
                     ref_level = omaxrl;

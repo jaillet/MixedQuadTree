@@ -548,7 +548,7 @@ namespace Clobscode
         
         //-------------------------------------------------------------------
         //-------------------------------------------------------------------
-        static bool ReadOctreeMesh(std::string name, vector<MeshPoint> &points,
+        static bool ReadQuadMesh(std::string name, vector<MeshPoint> &points,
                                    vector<Quadrant> &Quadrants,
                                    set<QuadEdge> &edges,
                                    vector<unsigned int> &ele_oct_ref,
@@ -627,9 +627,9 @@ namespace Clobscode
                 nop = atoi(word);
                 opts.reserve(nop);
                 
-                if (nop!=8) {
+                if (nop!=4) {
                     cerr << "warning at Services::ReadOctreeMesh\n";
-                    cerr << "         Quadrant hasn't 8 nodes: " << nop << "\n";
+                    cerr << "         Quadrant hasn't 4 nodes: " << nop << "\n";
                     cout << "Quadrant index " << i << "\n";
                     continue;
                 }
@@ -786,7 +786,7 @@ namespace Clobscode
             FILE *f = fopen(vol_name.c_str(),"wt");
             
             fprintf(f,"# vtk DataFile Version 2.0\nUnstructured Grid %s\nASCII",name.c_str());
-            fprintf(f,"\n\nDATASET UNSTRUCTURED_GRID\nPoints %i float",(int)points.size());
+            fprintf(f,"\n\nDATASET UNSTRUCTURED_GRID\nPOINTS %i float",(int)points.size());
             
             //write points
             for(unsigned int i=0;i<points.size();i++){
