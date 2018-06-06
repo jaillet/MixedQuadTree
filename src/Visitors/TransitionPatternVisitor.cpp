@@ -82,7 +82,7 @@ namespace Clobscode
         //then return true (meaning this case is already considered in
         //the transition patterns) and add this element to the vector
         //of "new elements"
-        if (quantity!=0) {
+        if (quantity==0) {
             return true;
         }
         
@@ -99,9 +99,12 @@ namespace Clobscode
         
         //the subelements of this Quadrant will no longer be a Quad.
         //It will now contain mixed-elements.
-        vector<vector<unsigned int>> &sub_elements = o->sub_elements;
-        sub_elements.clear();
         
-        return qt.getNewElements(sub_elements,quantity);
+        cout << "\n\n\n hello!!! \n";
+        
+        bool done = qt.getNewElements(o->sub_elements,quantity);
+        
+        cout << "new number of subele: " << (o->sub_elements).size() << endl;
+        return done;
     }
 }

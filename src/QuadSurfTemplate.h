@@ -21,6 +21,7 @@
 #define QuadSurfTemplate_h 1
 
 #include <vector>
+#include <iostream>
 #include "HexRotation.h"
 
 using std::vector;

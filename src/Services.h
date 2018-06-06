@@ -835,7 +835,7 @@ namespace Clobscode
                     fprintf(f,"5\n"); //VTK_TRIANGLE
                 }
                 else if (np == 4){ //VTK_QUAD
-                    fprintf(f,"10\n");
+                    fprintf(f,"9\n");
                 }
             }
             

@@ -539,13 +539,6 @@ namespace Clobscode
         oiv.setEdges(QuadEdges);
         oiv.setMaxRefLevel(omaxrl);
 
-        //visitante TransitionPattern in check mode
-        //(we'll reuse it in apply mode later)
-        TransitionPatternVisitor tpv;
-        tpv.setPoints(points);
-        tpv.setEdges(QuadEdges);
-        tpv.setMaxRefLevel(omaxrl);
-
 
         unsigned int irroct = 0;
         //cout << "number of regular Quadrants ";
@@ -556,7 +549,7 @@ namespace Clobscode
             new_pts.clear();
             //refine until the mesh is one-irregular
             for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
-                if (!(*iter).accept(&oiv) || !(*iter).accept(&tpv)) {
+                if (!(*iter).accept(&oiv)) {
                     //split this Quadrant
                     vector<vector<Point3D> > clipping_coords;
                     sv.setClipping(clipping_coords);
@@ -636,6 +629,12 @@ namespace Clobscode
         //clean tmp point list
         new_pts.clear();
 
+        //TransitionPatternVisitor section 
+        TransitionPatternVisitor tpv;
+        tpv.setPoints(points);
+        tpv.setEdges(QuadEdges);
+        tpv.setMaxRefLevel(omaxrl);
+        
         unsigned int cl3=0;
 
         for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {

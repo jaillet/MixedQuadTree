@@ -27,14 +27,21 @@ namespace patterns {
 	
     bool QuadTransition::getNewElements(vector<vector<unsigned int> > &sub_elements,
                                         const unsigned int &nedges) {
+        
+        std::cout << "analysing case with " << nedges << "\n";
+        
         switch (nedges) {
             case 1:
+                std::cout << "QuadTransition::getNewElements applying pattern 1\n";
                 return oneEdge(sub_elements);
             case 2:
+                std::cout << "QuadTransition::getNewElements applying pattern 2\n";
                 return twoEdges(sub_elements);
             case 3:
+                std::cout << "QuadTransition::getNewElements applying pattern 3\n";
                 return threeEdges(sub_elements);
             case 4:
+                std::cout << "QuadTransition::getNewElements applying pattern 4\n";
                 return fourEdges(sub_elements);
             default:
                 return false;
