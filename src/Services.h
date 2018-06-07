@@ -956,6 +956,8 @@ namespace Clobscode
         //-------------------------------------------------------------------
         static bool WriteMeshGetfem(std::string name, FEMesh &output){
             
+            /* 2D file */
+            
             vector<Point3D> points = output.getPoints();
             vector<vector<unsigned int> > elements = output.getElements();
             
@@ -973,12 +975,13 @@ namespace Clobscode
             
             fprintf(f,"%s\n%s\n\n\n\n","% GETFEM MESH FILE","% GETFEM VERSION 5.1");
             fprintf(f,"%s\n\n","BEGIN POINTS LIST");
+            fprintf(f,"%s %i\n\n","POINT COUNT",n);
             
             //write points
             for(unsigned int i=0;i<n;i++){
                 fprintf(f,"  POINT  %i %+1.8E",i,points[i][0]);
-                fprintf(f," %+1.8E",points[i][1]);
-                fprintf(f," %+1.8E\n",points[i][2]);
+                fprintf(f," %+1.8E\n",points[i][1]);
+                //fprintf(f," %+1.8E\n",points[i][2]);
             }
             
             n = elements.size();
@@ -998,45 +1001,21 @@ namespace Clobscode
                 //}
 
                 
-                if (np == 4) {
-                    fprintf(f,"'GT_PK(3,1)'      ");
-                    std::vector<unsigned int> vaux (4,0);
-                    aux = epts[1];
-                    epts[1] = epts[2];
-                    epts[2] = aux;
+                if (np == 3) {
+                    fprintf(f,"'GT_PK(2,1)'      ");
                 }
-                else if (np == 5){
-                    fprintf(f,"'GT_PYRAMID(1)'      ");
-                    std::vector<unsigned int> vaux (5,0);
-                    aux = epts[2];
+                else {
+                    fprintf(f,"'GT_QK(2,1)'      ");
+                    unsigned int aux = epts[2];
                     epts[2] = epts[3];
                     epts[3] = aux;
                 }
-                else if (np == 6){
-                    fprintf(f,"'GT_PRISM(3,1)'      ");
-                    aux = epts[1];
-                }
-                else if (np == 8){
-                    fprintf(f,"'GT_QK(3,1)'      ");
-                    std::vector<unsigned int> vaux (8,0);
-                    vaux[0] = epts[0];
-                    vaux[1] = epts[3];
-                    vaux[2] = epts[4];
-                    vaux[3] = epts[7];
-                    vaux[4] = epts[1];
-                    vaux[5] = epts[2];
-                    vaux[6] = epts[5];
-                    vaux[7] = epts[6];
-                    epts = vaux;
+
+                for (unsigned int j= 0; j<np; j++) {
+                    fprintf(f," %i", epts.at(j));
                 }
                 
-                //if (np==8 || np==4) {
-                    for (unsigned int j= 0; j<np; j++) {
-                        fprintf(f," %i", epts.at(j));
-                    }
-                
-                    fprintf(f,"\n");
-                //}
+                fprintf(f,"\n");
             }
             
             fprintf(f,"\n%s\n","END MESH STRUCTURE DESCRIPTION");

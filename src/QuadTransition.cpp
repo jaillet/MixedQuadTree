@@ -27,21 +27,14 @@ namespace patterns {
 	
     bool QuadTransition::getNewElements(vector<vector<unsigned int> > &sub_elements,
                                         const unsigned int &nedges) {
-        
-        std::cout << "analysing case with " << nedges << "\n";
-        
         switch (nedges) {
             case 1:
-                std::cout << "QuadTransition::getNewElements applying pattern 1\n";
                 return oneEdge(sub_elements);
             case 2:
-                std::cout << "QuadTransition::getNewElements applying pattern 2\n";
                 return twoEdges(sub_elements);
             case 3:
-                std::cout << "QuadTransition::getNewElements applying pattern 3\n";
                 return threeEdges(sub_elements);
             case 4:
-                std::cout << "QuadTransition::getNewElements applying pattern 4\n";
                 return fourEdges(sub_elements);
             default:
                 return false;
@@ -211,9 +204,9 @@ namespace patterns {
         sub_elements.reserve(5);
         
         vector<unsigned int> t1(3,0);
-        t1[0]=nodes[0];
-        t1[1]=nodes[4];
-        t1[2]=nodes[7];
+        t1[0]=nodes[7];
+        t1[1]=nodes[0];
+        t1[2]=nodes[4];
         
         vector<unsigned int> t2(3,0);
         t2[0]=nodes[4];
@@ -226,15 +219,15 @@ namespace patterns {
         t3[2]=nodes[6];
         
         vector<unsigned int> t4(3,0);
-        t3[0]=nodes[6];
-        t3[1]=nodes[3];
-        t3[2]=nodes[7];
+        t4[0]=nodes[6];
+        t4[1]=nodes[3];
+        t4[2]=nodes[7];
         
         vector<unsigned int> q1(4,0);
         q1[0] = nodes[4];
         q1[1] = nodes[5];
         q1[2] = nodes[6];
-        q1[3] = nodes[1];
+        q1[3] = nodes[7];
         
         sub_elements.push_back(t1);
         sub_elements.push_back(t2);

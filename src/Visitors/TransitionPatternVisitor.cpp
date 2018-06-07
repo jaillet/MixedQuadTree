@@ -100,11 +100,9 @@ namespace Clobscode
         //the subelements of this Quadrant will no longer be a Quad.
         //It will now contain mixed-elements.
         
-        cout << "\n\n\n hello!!! \n";
-        
         bool done = qt.getNewElements(o->sub_elements,quantity);
         
-        cout << "new number of subele: " << (o->sub_elements).size() << endl;
+        //cout << "new number of subele: " << (o->sub_elements).size() << endl;
         return done;
     }
 }

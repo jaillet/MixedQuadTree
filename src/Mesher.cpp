@@ -267,9 +267,9 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 
     void Mesher::splitQuadrants(const unsigned short &rl, Polyline &input,
-                              list<unsigned int> &roctli,
-                              list<RefinementRegion *> &all_reg, const string &name,
-                              const unsigned short &minrl, const unsigned short &omaxrl){
+                                list<unsigned int> &roctli,
+                                list<RefinementRegion *> &all_reg, const string &name,
+                                const unsigned short &minrl, const unsigned short &omaxrl){
 
         //to save m3d files per stage
         Clobscode::Services io;
@@ -295,79 +295,81 @@ namespace Clobscode
         //refine once each Quadrant in the list
         //----------------------------------------------------------
         unsigned int cindex = 0;
-        list<unsigned int>::iterator octidx = roctli.begin();
-
-        for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
-            if (octidx!=roctli.end() && cindex==(*octidx)) {
-
-                octidx++;
-                unsigned short orl = (*iter).getRefinementLevel();
-
-                list<unsigned int> inter_faces = iter->getIntersectedEdges();
-
-                vector<vector<Point3D> > clipping_coords;
-                sv.setClipping(clipping_coords);
-
-                vector<vector<unsigned int> > split_elements;
-                sv.setNewEles(split_elements);
-
-                iter->accept(&sv);
-
-                if (inter_faces.empty()) {
-                    for (unsigned int j=0; j<split_elements.size(); j++) {
-
-                        Quadrant o (split_elements[j],orl+1);
-                        new_Quadrants.push_back(o);
-                    }
-                }
-                else {
-                    for (unsigned int j=0; j<split_elements.size(); j++) {
-                        Quadrant o (split_elements[j],orl+1);
-
-                        //the new points are inserted in bash at the end of this
-                        //iteration. For this reason, the coordinates must be passed
-                        //"manually" at this point (clipping_coords).
-                        IntersectionsVisitor iv(true);
-                        //if (o.checkIntersections(input,inter_faces,clipping_coords[j]))
-                        iv.setPolyline(input);
-                        iv.setEdges(inter_faces);
-                        iv.setCoords(clipping_coords[j]);
-
-                        if (o.accept(&iv)) {
+        
+        if (!roctli.empty()) {
+            list<unsigned int>::iterator octidx = roctli.begin();
+            
+            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
+                if (octidx!=roctli.end() && cindex==(*octidx)) {
+                    
+                    octidx++;
+                    unsigned short orl = (*iter).getRefinementLevel();
+                    
+                    list<unsigned int> inter_faces = iter->getIntersectedEdges();
+                    
+                    vector<vector<Point3D> > clipping_coords;
+                    sv.setClipping(clipping_coords);
+                    
+                    vector<vector<unsigned int> > split_elements;
+                    sv.setNewEles(split_elements);
+                    
+                    iter->accept(&sv);
+                    
+                    if (inter_faces.empty()) {
+                        for (unsigned int j=0; j<split_elements.size(); j++) {
+                            
+                            Quadrant o (split_elements[j],orl+1);
                             new_Quadrants.push_back(o);
                         }
-                        else {
-                            //The element doesn't intersect any input face.
-                            //It must be checked if it's inside or outside.
-                            //Only in the first case add it to new_Quadrants.
-                            //Test this with parent Quadrant faces only.
-
-                            //Comment the following lines of this 'else' if
-                            //only intersecting Quadrants are meant to be
-                            //displayed.
-
-                            //note: inter_faces is quite enough to check if
-                            //element is inside input, no Quadrant needed,
-                            //so i moved the method to mesher  --setriva
-
-                            if (isItIn(input,inter_faces,clipping_coords[j])) {
+                    }
+                    else {
+                        for (unsigned int j=0; j<split_elements.size(); j++) {
+                            Quadrant o (split_elements[j],orl+1);
+                            
+                            //the new points are inserted in bash at the end of this
+                            //iteration. For this reason, the coordinates must be passed
+                            //"manually" at this point (clipping_coords).
+                            IntersectionsVisitor iv(true);
+                            //if (o.checkIntersections(input,inter_faces,clipping_coords[j]))
+                            iv.setPolyline(input);
+                            iv.setEdges(inter_faces);
+                            iv.setCoords(clipping_coords[j]);
+                            
+                            if (o.accept(&iv)) {
                                 new_Quadrants.push_back(o);
+                            }
+                            else {
+                                //The element doesn't intersect any input face.
+                                //It must be checked if it's inside or outside.
+                                //Only in the first case add it to new_Quadrants.
+                                //Test this with parent Quadrant faces only.
+                                
+                                //Comment the following lines of this 'else' if
+                                //only intersecting Quadrants are meant to be
+                                //displayed.
+                                
+                                //note: inter_faces is quite enough to check if
+                                //element is inside input, no Quadrant needed,
+                                //so i moved the method to mesher  --setriva
+                                
+                                if (isItIn(input,inter_faces,clipping_coords[j])) {
+                                    new_Quadrants.push_back(o);
+                                }
                             }
                         }
                     }
                 }
+                else {
+                    new_Quadrants.push_back(*iter);
+                }
+                cindex++;
             }
-            else {
-                new_Quadrants.push_back(*iter);
-            }
-            cindex++;
-        }
-
-        if (!roctli.empty()) {
+            
+            
             tmp_Quadrants.clear();
             tmp_Quadrants = new_Quadrants;
             new_Quadrants.clear();
-
+            
             //add the new points to the vector
             list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
@@ -376,21 +378,14 @@ namespace Clobscode
             }
         }
 
-
-//        unsigned int oldnpts = points.size();
-
         //----------------------------------------------------------
         //refine each Quadrant until the Refinement Level is reached
         //----------------------------------------------------------
-
+        
         for (unsigned short i=minrl; i<rl; i++) {
 
-
+            bool changed = false;
             unsigned int refoct_int = 0, refoct_ext = 0;
-
-            //cout << "initial Quadrants in round" << i << " " << tmp_Quadrants.size() << "\n";
-
-
 
             //the new_pts is a list that holds the coordinates of
             //new points inserted at this iteration. At the end of
@@ -423,6 +418,7 @@ namespace Clobscode
 
                     if ((*reg_iter)->intersectsQuadrant(points,*iter)) {
                         to_refine = true;
+                        changed = true;
                     }
                 }
 
@@ -443,9 +439,6 @@ namespace Clobscode
                     sv.setNewEles(split_elements);
 
                     iter->accept(&sv);
-
-                    //cout << "refining oct of level " << orl;
-                    //cout << " intersecting " << inter_faces.size() << "\n";
 
                     if (inter_faces.empty()) {
 
@@ -499,26 +492,16 @@ namespace Clobscode
                     }
                 }
             }
-
-            //cout << "internal refined " << refoct_int << "\n";
-            //cout << "external refined " << refoct_ext << "\n";
-
-            //cout << "tmp Quadrants " << tmp_Quadrants.size() << "\n";
-            //cout << "refined Quadrants " << nor << " and not " << maxr << "\n";
+            
+            if (!changed) {
+                continue;
+            }
 
             //remove the old Quadrants
             tmp_Quadrants.clear();
             tmp_Quadrants = new_Quadrants;
             new_Quadrants.clear();
 
-            //cout << "Quadrants at the end of round" << i << " " << tmp_Quadrants.size() << "\n";
-            //cout << "new points " << new_pts.size() << "\n";
-
-            //if no points were added at this iteration, it is no longer
-            //necessary to continue the refinement.
-            if (new_pts.empty()) {
-                break;
-            }
             //add the new points to the vector
             list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
@@ -538,7 +521,6 @@ namespace Clobscode
         OneIrregularVisitor oiv;
         oiv.setEdges(QuadEdges);
         oiv.setMaxRefLevel(omaxrl);
-
 
         unsigned int irroct = 0;
         //cout << "number of regular Quadrants ";
@@ -620,8 +602,6 @@ namespace Clobscode
             }
         }
 
-        //cout << irroct << "\n";
-
         //----------------------------------------------------------
         // apply transition patterns
         //----------------------------------------------------------
@@ -643,12 +623,7 @@ namespace Clobscode
                 std::cerr << "Error at Mesher::generateOctreeMesh";
                 std::cerr << " Transition Pattern not found\n";
             }
-            if ((*iter).getRefinementLevel()==3) {
-                cl3++;
-            }
         }
-
-        //cout << "number of rl 3 Quadrants: " << cl3 << endl;
 
         //if no points were added at this iteration, it is no longer
         //necessary to continue the refinement.
@@ -676,8 +651,6 @@ namespace Clobscode
         for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
             Quadrants.push_back(*iter);
         }
-
-        //cout << "refinement finished\n";
     }
 
 
