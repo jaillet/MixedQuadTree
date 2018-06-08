@@ -112,17 +112,17 @@ namespace Clobscode
 
         //pmin and pmax describe the bounding box of the
         //Quadrant. They are used to detect intersections
-        //between input edges and the Quadrant by a clipping
+        //between input edges and the Quadrant with a clipping
         //method.
 
         //This code is based on the Cohen-Sutherland algorithm
         //for image clipping over a given window. In this case
-        //the "window" is the Quadrant (square), and the "lines"
-        //to be clipped are the edges.
+        //the "window" is the Quadrant (square), and the "line"
+        //to be clipped is the edge.
 
         const vector<unsigned int> &iEdge = pEdge.getPoints(); //indices of edge extremities
 
-        unsigned int n_pts = iEdge.size();
+        unsigned int n_pts = iEdge.size(); //FJA always 2 ?????
 
         vector<unsigned int> sides(n_pts,0);
 
@@ -138,10 +138,7 @@ namespace Clobscode
         //triangle node. If all of them are at same side (e.g.
         //all at left), the result will be different from zero,
         //meaning that there is no intersection.
-        unsigned int all_and = sides[0];
-        for (unsigned int i=1; i<n_pts; i++) {
-            all_and = all_and & sides[i];
-        }
+        unsigned int all_and = sides[0] & sides[1];
         //If all are at the same side, return false.
         if (all_and != 0) {
             return false;
@@ -152,44 +149,52 @@ namespace Clobscode
 
         //TEST EDGES//
 
-        //Find out if they cross the hex. Two cases: both are
+        //Find out if the edge cross the quad. Two cases: both are
         //"centered", but one is on the left and the other on
-        //the right (same for Top/bottom and Front/Back).
+        //the right (same for Top/bottom)
+        // FJA@discussion (and Front/Back).
         //Tested with logic or. The other case is that their
-        //are in exact opposite "3D corners". Tested with XoR.
-        for (unsigned int i=0; i<n_pts; i++) {
-            unsigned int next = (i+1)%n_pts;
-            unsigned int result_or = sides[i]|sides[next];
-            unsigned int result_xor = sides[i]^sides[next];
-            if (result_or == 48) {
-                //48 <> 11 00 00
-                return true;
-            }
-            if (result_or == 12) {
-                //12 <> 00 11 00
-                return true;
-            }
-            if (result_or == 3) {
-                //3 <> 00 00 11
-                return true;
-            }
-            if (result_xor == 63) {
-                //63 <> 11 11 11
-                return true;
-            }
+        //are in exact opposite "2D corners". Tested with XoR.
+        // FJA@discussion1 I think this is not true for 00 11 11
+        // if side[p1]=9 up-left, and p[2]=6 bottom-right for example
+        // and p1 high enough and p2 right enough, there is no intersection
+        // are we supposing they are close enougth from the quadrant???
+        // I guess no, so this test (15 <> 00 11 11) is wrong !
+        // and the 3D one as well (63 <> 11 11 11) is wrong !
+        // FJA@discussion2 and exact opposite "3D corners"
+        unsigned int result_or = sides[0]|sides[1];
+//        unsigned int result_xor = sides[0]^sides[1];
+        if (result_or == 48) {
+            //48 <> 11 00 00 z
+            std::cerr << "Warning in IntersectionsVisitor::intersectsEdge()\n";
+            std::cerr << "  case 48 should never happen, as z=0.0\n";
+            return true;
         }
+        if (result_or == 12) {
+            //12 <> 00 11 00 y
+            return true;
+        }
+        if (result_or == 3) {
+            //3 <> 00 00 11 x
+            return true;
+        }
+//        if (result_xor == 63) {
+//            //63 <> 11 11 11
+//            return true;
+//        }
 
-        //General case of clipping a triangle's edge against
+        //General case of clipping this edge against
         //the Quadrant.
-        for (unsigned int i=0; i<n_pts; i++) {
-            //cout << pts[face_pts_idx[i]] << " code is ";
-            const Point3D &p1 = input_pts[iEdge[i]];
-            const Point3D &p2 = input_pts[iEdge[(i+1)%n_pts]];
-
-            if (clipGeneralCase(p1,p2,pmin,pmax)) {
-                return true;
-            }
-        }
+        const Point3D &p1 = input_pts[iEdge[0]];
+        const Point3D &p2 = input_pts[iEdge[1]];
+        /* FJA: for me, if we are here it's because clipping
+        * returned false for all sides of the quadrant
+        * I think we should trust it, and return false,
+        * the edge is not intersecting this quadrant */
+//        if (clipGeneralCase(p1,p2,pmin,pmax)) {
+//            return true;
+//        }
+        return (clipGeneralCase(p1,p2,pmin,pmax));
 
         //Last "hard" test: Apply Ray Tracing to detect
         //intersection between every edge of the Quadrant
@@ -199,7 +204,7 @@ namespace Clobscode
         //If the test didn't succeed, the triangle
         //is not intersected by this Quadrant
 
-        return edgeTriangleIntersection(pEdge,input_pts,pmin,pmax);
+        //return edgeTriangleIntersection(pEdge,input_pts,pmin,pmax);
     }
 
     //--------------------------------------------------------------------------------
@@ -207,9 +212,6 @@ namespace Clobscode
 
     bool IntersectionsVisitor::clipGeneralCase(const Point3D &p1, const Point3D &p2, const Point3D &pmin,
                                           const Point3D &pmax) const {
-
-        std::cerr << "Warning IntersectionsVisitor::clipGeneralCase()\n";
-        std::cerr << "  FJA: I didn't checked this function in 2D yet! And you, Claudio?\n";
 
         //compute the parametric equations of the given segment
         double dx = p2[0]-p1[0];
@@ -308,6 +310,9 @@ namespace Clobscode
                 }
             }
         }
+
+        std::cerr << "Warning IntersectionsVisitor::clipGeneralCase()\n";
+        std::cerr << "  FJA: usefull to test z in 2D???? as dz=0 and t=NaN\n";
 
         //test Z axis over Z_min
         t = (pmin[2]-p1[2])/dz;
@@ -433,9 +438,13 @@ namespace Clobscode
         //decide back/front Z axis.
         if (p[2]<pmin[2]) {
             sides += 16;
+            std::cerr << "FJA: Warning in IntersectionsVisitor::computePosition()\n";
+            std::cerr << "  case 16 should never happen, as z=0.0\n";
         }
         else if (pmax[2]<p[2]) {
             sides += 32;
+            std::cerr << "FJA: Warning in IntersectionsVisitor::computePosition()\n";
+            std::cerr << "  case 32 should never happen, as z=0.0\n";
         }
 
         return sides;
