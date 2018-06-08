@@ -71,40 +71,40 @@ namespace Clobscode
 		
 		virtual void addProjectionInfluence(const Point3D &dir);
 		
-		virtual const Point3D &getProjectionInfluence();
+        virtual const Point3D &getProjectionInfluence() const;
 		
-		virtual void noMoreProjectionInfluences();
+        virtual void noMoreProjectionInfluences();
 				
 		//access methods
-        virtual vector<unsigned int> &getPointIndex();
+        virtual const vector<unsigned int> &getPointIndex() const; // read only
         virtual unsigned int getPointIndex(unsigned int i) const;
 
-		virtual bool isInside();
+        virtual bool isInside() const;
 		
-		virtual bool intersectsSurface();
+        virtual bool intersectsSurface() const;
 		
 		virtual unsigned short &getRefinementLevel();
 		
-		virtual bool wasShrink();
+        virtual bool wasShrink() const;
 		
-		virtual bool wasConsideredInProjection();
+        virtual bool wasConsideredInProjection() const;
 		
 		virtual void resetProjectionInfluence();
 
-        virtual list<unsigned int> &getIntersectedEdges();
+        virtual const list<unsigned int> &getIntersectedEdges() const; //read only
 		
-		virtual vector<vector<unsigned int> > &getSubElements();
+        virtual const vector<vector<unsigned int> > &getSubElements() const; //read only
 		
-		virtual void computeMaxDistance(vector<MeshPoint> &mp);
+        virtual void computeMaxDistance(vector<MeshPoint> &mp);
 		
-        virtual double getMaxDistance();
+        virtual double getMaxDistance() const;
 		
 		//flag for inside Quadrants that due to "inside node" moved
 		//to the input domain, it must be treated as a surface
 		//element by the surfacePatterns
 		virtual void setSurface();
 		
-		virtual bool isSurface();
+        virtual bool isSurface() const;
 		
         virtual void setIntersectedEdges(list<unsigned int> &iedges);
 
@@ -127,22 +127,22 @@ namespace Clobscode
 	};
 	
 	
-    inline vector<unsigned int> &Quadrant::getPointIndex(){
+    inline const vector<unsigned int> &Quadrant::getPointIndex() const{
 		return pointindex;
 	}
-    inline unsigned int Quadrant::getPointIndex(unsigned int i) const{
+    inline unsigned int Quadrant::getPointIndex(unsigned int i) const {
         return pointindex[i];
     }
 
-	inline bool Quadrant::isInside(){
+    inline bool Quadrant::isInside() const {
         return intersected_edges.empty();
 	}
 	
-	inline bool Quadrant::intersectsSurface(){
+    inline bool Quadrant::intersectsSurface() const {
         return !intersected_edges.empty();
 	}
 	
-    inline list<unsigned int> &Quadrant::getIntersectedEdges(){
+    inline const list<unsigned int> &Quadrant::getIntersectedEdges() const {
         return intersected_edges;
 	}
 	
@@ -150,7 +150,7 @@ namespace Clobscode
 		return ref_level;
 	}
 	
-	inline vector<vector<unsigned int> > &Quadrant::getSubElements() {
+    inline const vector<vector<unsigned int> > &Quadrant::getSubElements() const {
 		return sub_elements;
 	}
 	
@@ -159,15 +159,15 @@ namespace Clobscode
 		n_influences++;
 	}
 	
-	inline bool Quadrant::wasShrink() {
+    inline bool Quadrant::wasShrink() const {
 		return n_influences!=0;
 	}
 	
-	inline const Point3D &Quadrant::getProjectionInfluence(){
+    inline const Point3D &Quadrant::getProjectionInfluence() const {
 		return projection_influence;
 	}
 	
-	inline void Quadrant::noMoreProjectionInfluences(){
+    inline void Quadrant::noMoreProjectionInfluences() {
 		if (n_influences==0) {
 			return;
 		}
@@ -180,25 +180,25 @@ namespace Clobscode
 		n_influences = 0;
 	}
 	
-	inline bool Quadrant::wasConsideredInProjection(){
+    inline bool Quadrant::wasConsideredInProjection() const {
 		return influence_commit;
 	}
-	
-	inline void Quadrant::computeMaxDistance(vector<MeshPoint> &mp){
+
+    inline void Quadrant::computeMaxDistance(vector<MeshPoint> &mp){
 		Point3D p0 = mp[pointindex[0]].getPoint();
         Point3D p1 = mp[pointindex[2]].getPoint();
 		max_dis = 0.3 * (p0 - p1).Norm();
 	}
 	
-	inline double Quadrant::getMaxDistance(){
+    inline double Quadrant::getMaxDistance() const {
 		return max_dis;
 	}
 	
-	inline void Quadrant::setSurface(){
+    inline void Quadrant::setSurface() {
 		surface = true;
 	}
 	
-	inline bool Quadrant::isSurface(){
+    inline bool Quadrant::isSurface() const {
         return surface || !intersected_edges.empty();
 	}
 	
