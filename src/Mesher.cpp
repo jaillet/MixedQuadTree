@@ -152,7 +152,7 @@ namespace Clobscode
         detectInsideNodes(input);
 
         projectCloseToBoundaryNodes(input);
-//FJA        removeOnSurface();
+        removeOnSurface();
 
         //apply the surface Patterns
 //FJA        applySurfacePatterns(input);
@@ -171,7 +171,7 @@ namespace Clobscode
         linkElementsToNodes();
 
         //shrink outside nodes to the input domain boundary
-//FJA        shrinkToBoundary(input);
+        shrinkToBoundary(input);
 
         if (rotated) {
             for (unsigned int i=0; i<points.size(); i++) {
@@ -1147,7 +1147,6 @@ namespace Clobscode
     void Mesher::removeOnSurface(){
 
         list<Quadrant> newele,removed;
-        list<Quadrant>::iterator eiter;
         RemoveSubElementsVisitor rsv;
         rsv.setPoints(points);
         //remove elements without an inside node.
@@ -1193,7 +1192,7 @@ namespace Clobscode
         //now element std::list from Vomule mesh can be cleared, as all remaining
         //elements are still in use and attached to newele std::list.
         Quadrants.clear();
-        for (eiter = newele.begin(); eiter!=newele.end(); ++eiter) {
+        for (auto eiter = newele.begin(); eiter!=newele.end(); ++eiter) {
             Quadrants.push_back(*eiter);
         }
     }
@@ -1407,7 +1406,6 @@ namespace Clobscode
         //surface. If after all is done, if an element counts only with "on
         //surface" and "outside" nodes, remove it.
         list<unsigned int> in_nodes;
-        list<Quadrant>::iterator oiter;
 
         for (unsigned int i=0; i<Quadrants.size(); i++) {
             if (!Quadrants[i].isSurface()) {
@@ -1423,7 +1421,7 @@ namespace Clobscode
 
             //Put in a std::list inside nodes of boundary elements that
             //may be projected to the input domain.
-            vector<unsigned int> epts = Quadrants[i].getPointIndex();
+            const vector<unsigned int> &epts = Quadrants[i].getPointIndex();
             for (unsigned int j=0; j < epts.size(); j++) {
 
                 if (!points[epts[j]].wasOutsideChecked()) {
@@ -1452,12 +1450,10 @@ namespace Clobscode
         }
 
         in_nodes.sort();
-        in_nodes.unique();
+        in_nodes.unique(); //need to be sorted to call this function
 
         //move (when possible) all inner points to surface
-        std::list<unsigned int>::iterator piter;
-
-        for (piter=in_nodes.begin(); piter!=in_nodes.end(); ++piter) {
+        for (auto p:in_nodes) {
 
             //if this node is attached to an Quadrant which was split in
             //mixed-elements due to transition patterns, avoid the
@@ -1465,34 +1461,30 @@ namespace Clobscode
 
 
             //get the faces of Quadrants sharing this node
-            list<unsigned int> o_faces,p_faces, p_eles = points.at(*piter).getElements();
-            list<unsigned int>::iterator peiter,oct_fcs;
+            list<unsigned int> p_qInterEdges;
 
-            //bool trans_pattern = false;
-
-            for (peiter=p_eles.begin(); peiter!=p_eles.end(); ++peiter) {
-                o_faces = Quadrants[*peiter].getIntersectedEdges();
-                for (oct_fcs=o_faces.begin(); oct_fcs!=o_faces.end(); oct_fcs++) {
-                    p_faces.push_back(*oct_fcs);
-                }
+            for (auto pe:points.at(p).getElements()) { //elements containing p
+                //append this to the list of edges
+                p_qInterEdges.insert(p_qInterEdges.end(), Quadrants[pe].getIntersectedEdges().begin(),
+                               Quadrants[pe].getIntersectedEdges().end());
             }
 
-            p_faces.sort();
-            p_faces.unique();
+            p_qInterEdges.sort();
+            p_qInterEdges.unique();
 
-            Point3D current = points.at(*piter).getPoint();
-            Point3D projected = input.getProjection(current,p_faces);
+            Point3D current = points.at(p).getPoint();
+            Point3D projected = input.getProjection(current,p_qInterEdges);
             double dis = (current - projected).Norm();
 
-            if(dis<points[*piter].getMaxDistance()){
-                //this node have been moved to boundary, thus every element
+            if(dis<points[p].getMaxDistance()){
+                //this node has been moved to boundary, thus every element
                 //sharing this node must be set as a border element in order
                 //to avoid topological problems.
                 //points.at(*piter).setOutside();
-                points.at(*piter).setProjected();
-                points.at(*piter).setPoint(projected);
-                for (peiter=p_eles.begin(); peiter!=p_eles.end(); ++peiter) {
-                    Quadrants[*peiter].setSurface();
+                points[p].setProjected();
+                points[p].setPoint(projected);
+                for (auto pe:points[p].getElements()) {
+                    Quadrants[pe].setSurface();
                 }
             }
         }
