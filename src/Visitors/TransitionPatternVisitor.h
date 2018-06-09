@@ -55,7 +55,7 @@ namespace Clobscode
     public:
         TransitionPatternVisitor();
 
-        bool visit(Quadrant *o);
+        bool visit(Quadrant *o) override;
 
         void setPoints(vector<MeshPoint> &points);
         void setEdges(const set<QuadEdge> &edges);

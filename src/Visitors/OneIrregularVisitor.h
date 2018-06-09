@@ -46,7 +46,7 @@ namespace Clobscode
         OneIrregularVisitor();
         OneIrregularVisitor(set<QuadEdge> *edges,const unsigned short *max_ref_level);
 
-        bool visit(Quadrant *o);
+        bool visit(Quadrant *o) override;
 
         void setEdges(set<QuadEdge> &edges);
         void setMaxRefLevel(const unsigned short &max_ref_level);

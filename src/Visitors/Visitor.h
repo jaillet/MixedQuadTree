@@ -42,7 +42,7 @@ namespace Clobscode {
     public:
         Visitor() { }
 
-        virtual bool visit(Quadrant *o) { return false; }
+        virtual bool visit(Quadrant *q) { return false; }
     };
 
 

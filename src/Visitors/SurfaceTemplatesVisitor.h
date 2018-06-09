@@ -47,7 +47,7 @@ namespace Clobscode
     public:
         SurfaceTemplatesVisitor();
 
-        bool visit(Quadrant *o);
+        bool visit(Quadrant *o) override;
 
         void setPoints(vector<MeshPoint> &meshpts);
         void setNewPoints(list<MeshPoint> &newpts);

@@ -61,7 +61,7 @@ namespace Clobscode
         IntersectionsVisitor();
         IntersectionsVisitor(bool select_edges);
 
-        bool visit(Quadrant *q);
+        bool visit(Quadrant *q) override;
 
         void setPolyline(Polyline &ply);
         void setPoints(vector<MeshPoint> &points);

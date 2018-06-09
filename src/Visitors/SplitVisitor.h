@@ -53,7 +53,7 @@ namespace Clobscode
         
         SplitVisitor();
 
-        bool visit(Quadrant *o);
+        bool visit(Quadrant *o) override;
 
         void setPoints(vector<MeshPoint> &points);
         
