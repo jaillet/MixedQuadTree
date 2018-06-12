@@ -73,7 +73,9 @@ void endMsg(){
     cout << "    -r Refine surface region. Will refine all the elements\n";
     cout << "       in the provided input_surface at level rl\n";
     cout << "    -g save output mesh in GetFem format (gmf) \n";
-    cout << "    -v save output mesh in VTK ASCII format (vtk) \n";
+    cout << "    -v save output mesh in VTK ASCII format (vtk)\n";
+    cout << "    -m save output mesh in M3D ASCII format (m3d)\n";
+    cout << "    -i save output mesh in MVM ASCII format (mvm)\n";
 }
 
 //-------------------------------------------------------------------
@@ -108,7 +110,7 @@ int main(int argc,char** argv){
 //    inputs.reserve(4);
     //Clobscode::Services io;
     
-    bool getfem = false, vtkformat = false, Quadrant_start = false, m3dfor = false;
+    bool getfem=false, vtkformat=false, Quadrant_start=false, m3dfor=false, mvmfor=false;
     
     //for reading an Quadrant mesh as starting point.
     vector<MeshPoint> oct_points;
@@ -198,6 +200,9 @@ int main(int argc,char** argv){
                 break;
             case 'm':
                 m3dfor = true;
+                break;
+            case 'i':
+                mvmfor = true;
                 break;
             case 'a':
                 rl = atoi(argv[i+1]);
@@ -318,18 +323,16 @@ int main(int argc,char** argv){
     if (getfem) {
         Services::WriteMeshGetfem(out_name,output);
     }
-    else {
-        if (vtkformat) {
-            Services::WriteVTK(out_name,output);
-        }
-        else {
-            if (m3dfor) {
-                Services::WriteOutputMesh(out_name,output);
-            }
-            else {
-                Services::WriteMixedVolumeMesh(out_name,output);
-            }
-        }
+
+    if (vtkformat) {
+        Services::WriteVTK(out_name,output);
+    }
+
+    if (m3dfor) {
+        Services::WriteOutputMesh(out_name,output);
+    }
+    if (mvmfor) {
+        Services::WriteMixedVolumeMesh(out_name,output);
     }
 
     auto end_time = chrono::high_resolution_clock::now();
