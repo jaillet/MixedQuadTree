@@ -29,61 +29,132 @@ namespace Clobscode
         
 	}
 	
-	bool QuadSurfTemplate::one(vector<unsigned int> &all, vector<bool> &in,
+	bool QuadSurfTemplate::one(const vector<unsigned int> &nodes, vector<bool> &in,
                                vector<vector<unsigned int> > &newsubs){
 		
-		newsubs.reserve(1);
-		vector<unsigned int> tetra, rotated;
-		tetra.reserve(4);
+        //cout << "\n\n QuadSurfTemplate::one\n";
+        
+        vector<unsigned int> rotated = nodes;
+        
+        unsigned int rotation = 0;
+        for (unsigned int i=0; i<4; i++) {
+            if (in[i]) {
+                break;
+            }
+            rotation++;
+        }
+        
+        if (rotation!=0) {
+            rotated = rotate(nodes,rotation);
+        }
+        
+        newsubs.clear();
+        newsubs.reserve(1);
+        vector<unsigned int> t(3,0);
 		
-		//rotated = hrot.rotate(all,in[0]);
+		t[0] = rotated[0];
+		t[1] = rotated[1];
+		t[2] = rotated[3];
 		
-		tetra.push_back(rotated[0]);
-		tetra.push_back(rotated[1]);
-		tetra.push_back(rotated[3]);
-		tetra.push_back(rotated[4]);
-		
-		newsubs.push_back(tetra);
+		newsubs.push_back(t);
 		
 		return true;
 	}
     
-    bool QuadSurfTemplate::two(vector<unsigned int> &all, vector<bool> &in,
+    bool QuadSurfTemplate::two(const vector<unsigned int> &nodes, vector<bool> &in,
                                vector<vector<unsigned int> > &newsubs){
         
-        newsubs.reserve(1);
-        vector<unsigned int> tetra,rotated;
-        tetra.reserve(4);
+        //cout << "\n\n QuadSurfTemplate::two\n";
+        vector<unsigned int> rotated = nodes;
         
-        //rotated = hrot.rotate(all,in[0]);
+        unsigned int rotation = 0;
+        for (unsigned int i=0; i<4; i++) {
+            if (in[i]) {
+                break;
+            }
+            rotation++;
+        }
         
-        tetra.push_back(rotated[0]);
-        tetra.push_back(rotated[1]);
-        tetra.push_back(rotated[3]);
-        tetra.push_back(rotated[4]);
+        //case: two consecutive nodes in: we return the same element.
+        if (in[(rotation+1)%4] || in[(rotation+3)%4]) {
+            newsubs.push_back(nodes);
+            return true;
+        }
         
-        newsubs.push_back(tetra);
+        if (rotation!=0) {
+            rotated = rotate(nodes,rotation);
+        }
+        
+        newsubs.clear();
+        newsubs.reserve(2);
+        vector<unsigned int> t1(3,0), t2(3,0);
+        
+        t1[0] = rotated[0];
+        t1[1] = rotated[1];
+        t1[2] = rotated[3];
+        
+        t2[0] = rotated[1];
+        t2[1] = rotated[2];
+        t2[2] = rotated[3];
+        
+        newsubs.push_back(t1);
+        newsubs.push_back(t2);
         
         return true;
     }
     
-    bool QuadSurfTemplate::three(vector<unsigned int> &all, vector<bool> &in,
+    bool QuadSurfTemplate::three(const vector<unsigned int> &nodes, vector<bool> &in,
                                  vector<vector<unsigned int> > &newsubs){
         
-        newsubs.reserve(1);
-        vector<unsigned int> tetra,rotated;
-        tetra.reserve(4);
+        //cout << "\n\n QuadSurfTemplate::three\n";
+        vector<unsigned int> rotated = nodes;
         
-        //rotated = hrot.rotate(all,in[0]);
+        unsigned int rotation = 0;
+        for (unsigned int i=0; i<4; i++) {
+            if (!in[(i+2)%4]) {
+                break;
+            }
+            rotation++;
+        }
         
-        tetra.push_back(rotated[0]);
-        tetra.push_back(rotated[1]);
-        tetra.push_back(rotated[3]);
-        tetra.push_back(rotated[4]);
+        if (rotation!=0) {
+            rotated = rotate(nodes,rotation);
+        }
         
-        newsubs.push_back(tetra);
+        newsubs.clear();
+        newsubs.reserve(2);
+
+        vector<unsigned int> t1(3,0), t2(3,0);
+        
+        t1[0] = rotated[0];
+        t1[1] = rotated[2];
+        t1[2] = rotated[3];
+        
+        t2[0] = rotated[0];
+        t2[1] = rotated[1];
+        t2[2] = rotated[2];
+        
+        newsubs.push_back(t1);
+        newsubs.push_back(t2);
         
         return true;
-    }
 
+    }
+    
+    vector<unsigned int> QuadSurfTemplate::rotate(const vector<unsigned int> &nodes,
+                                                  const unsigned int &times) {
+        
+        /*
+         0 1 2 3
+         | | | | >>1
+         1 2 3 0
+         */
+        
+        vector<unsigned int> res(4,0);
+        for (unsigned int i=0; i<4; i++) {
+            unsigned int pos = (i+times)%4;
+            res[i] = nodes[pos];
+        }
+        return res;
+    }
 }

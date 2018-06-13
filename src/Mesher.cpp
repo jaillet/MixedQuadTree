@@ -155,21 +155,20 @@ namespace Clobscode
         removeOnSurface();
 
         //apply the surface Patterns
-//FJA        applySurfacePatterns(input);
-//FJA        removeOnSurface();
-
+        applySurfacePatterns(input);
+        //removeOnSurface();
+        
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
         Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
 
-
-        //projectCloseToBoundaryNodes(input);
-        //removeOnSurface();
+        projectCloseToBoundaryNodes(input);
+        removeOnSurface();
         detectInsideNodes(input);
-
+        
         //update element and node info.
         linkElementsToNodes();
-
+        
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
 
@@ -1112,7 +1111,7 @@ namespace Clobscode
                 continue;
             }
 
-            list<unsigned int> p_eles = points[i].getElements(),p_edges;
+            list<unsigned int> p_eles = points[i].getElements(), p_edges;
             points[i].outsideChecked();
             if (p_eles.empty()) {
                 continue;
@@ -1201,11 +1200,9 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 
     void Mesher::applySurfacePatterns(Polyline &input){
+        
         //apply patters to avoid flat, invalid and
         //poor quality elements.
-        list<MeshPoint> tmppts;
-        list<MeshPoint>::iterator piter;
-
         SurfaceTemplatesVisitor stv;
         stv.setPoints(points);
         stv.setInput(input);
@@ -1221,15 +1218,6 @@ namespace Clobscode
                     cout << Quadrants[i] << "\n";
                     continue;
                 }
-            }
-        }
-
-        //add new nodes to the vector meshPoints.
-        if (!tmppts.empty()) {
-            unsigned int npts = points.size()+tmppts.size();
-            points.reserve(npts);
-            for (piter=tmppts.begin(); piter!=tmppts.end(); ++piter) {
-                points.push_back(*piter);
             }
         }
     }
@@ -1292,6 +1280,10 @@ namespace Clobscode
             //get the faces of Quadrants sharing this node
             list<unsigned int> p_faces, p_eles = points.at(*piter).getElements();
             list<unsigned int>::iterator p_eiter;
+            
+            if (points.at(*piter).wasProjected()) {
+                continue;
+            }
 
             for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); ++p_eiter) {
                 list<unsigned int> o_faces = Quadrants[*p_eiter].getIntersectedEdges();
@@ -1316,11 +1308,8 @@ namespace Clobscode
             }
 
             Point3D current = points.at(*piter).getPoint();
-            Point3D projected = input.getProjection(current,p_faces);
-
-            /*for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); ++p_eiter) {
-                Quadrants[*p_eiter].addProjectionInfluence(projected-current);
-            }*/
+            //Point3D projected = input.getProjection(current,p_faces);
+            Point3D projected = input.getProjection(current);
 
             points.at(*piter).setPoint(projected);
             points.at(*piter).setProjected();

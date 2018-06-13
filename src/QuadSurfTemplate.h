@@ -25,6 +25,7 @@
 #include "HexRotation.h"
 
 using std::vector;
+using std::cout;
 
 namespace Clobscode
 {
@@ -36,14 +37,19 @@ class QuadSurfTemplate {
 
     virtual ~QuadSurfTemplate();
 
-    virtual bool one(vector<unsigned int> &all, vector<bool> &in,
+    virtual bool one(const vector<unsigned int> &all, vector<bool> &in,
                      vector<vector<unsigned int> > &newsubs);
 
-    virtual bool two(vector<unsigned int> &all, vector<bool> &in,
+    virtual bool two(const vector<unsigned int> &all, vector<bool> &in,
                      vector<vector<unsigned int> > &newsubs);
     
-    virtual bool three(vector<unsigned int> &all, vector<bool> &in,
+    virtual bool three(const vector<unsigned int> &all, vector<bool> &in,
                        vector<vector<unsigned int> > &newsubs);
+    
+protected:
+    
+    virtual vector<unsigned int> rotate(const vector<unsigned int> &nodes,
+                                        const unsigned int &times);
 
 };
 }
