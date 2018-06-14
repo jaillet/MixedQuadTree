@@ -95,7 +95,7 @@ namespace Clobscode
 
         unsigned int rotation = 0;
         for (unsigned int i=0; i<4; i++) {
-            if (!in[(i+3)%4]) { //FJA was (i+2) but incoherent with the created triangles
+            if (!in[(i+2)%4]) { //FJA was (i+2) but incoherent with the created triangles
                 break;
             }
             rotation++;

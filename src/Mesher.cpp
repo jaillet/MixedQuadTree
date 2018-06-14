@@ -156,7 +156,7 @@ namespace Clobscode
 
         //apply the surface Patterns
         applySurfacePatterns(input);
-        //removeOnSurface();
+        removeOnSurface();
         
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
@@ -1471,7 +1471,11 @@ namespace Clobscode
                 points[p].setProjected();
                 points[p].setPoint(projected);
                 for (auto pe:points[p].getElements()) {
-                    Quadrants[pe].setSurface();
+                    
+                    //this should be studied further.
+                    if (Quadrants[pe].intersectsSurface()) {
+                        Quadrants[pe].setSurface();
+                    }
                 }
             }
         }
