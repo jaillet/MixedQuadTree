@@ -108,7 +108,7 @@ namespace Clobscode
         virtual bool closestPointToEdge(const Point3D & pPoint,
                                           unsigned int iEdg,
                                           double & pDist,
-                                          Point3D & pProjP) const;
+                                          Point3D & pProjP, int &projWhere) const;
 		
 		
 	protected:

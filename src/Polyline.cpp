@@ -198,11 +198,12 @@ namespace Clobscode
     // returns if pPoint lies on edge of indice #iEdg
     // computes non-signed distance pDist, and projected Point pProjP
     bool Polyline::closestPointToEdge(const Point3D & pPoint, unsigned int iEdg, double & pDist,
-                                       Point3D & pProjP) const
+                                       Point3D & pProjP, int &projWhere) const
 	
     {
         const Point3D &P0=mVertices[mEdges[iEdg][0]];
         const Point3D &P1=mVertices[mEdges[iEdg][1]];
+        projWhere=-1; // default, if projection on the edge
 
         Point3D V = P1 - P0;
         Point3D W = pPoint - P0;
@@ -211,12 +212,14 @@ namespace Clobscode
         if ( c1 <= 0 ) {
             pProjP=P0;
             pDist=P0.distance(pPoint);
+            projWhere=mEdges[iEdg][0]; // if projection on P0
         }
         else {
             double c2 = V.dot(V);
             if ( c2 <= c1 ){
                 pProjP=P1;
                 pDist=P1.distance(pPoint);
+                projWhere=mEdges[iEdg][1]; // if projection on P1
             } else {
                 double b = c1 / c2;
                 Point3D Pb= P0 + b * V;
@@ -252,10 +255,12 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     bool Polyline::pointIsInMesh(const Point3D & pPoint, const list<unsigned int> &lEdges) const{
 
-        // index of the closest edge
-        unsigned int closestEdge = 0;
+        // index of the closest edges (if many)
+        vector <unsigned int> closestEdge;
         // closest point on the list of Edges (on edge, or vertice)
         Point3D pProjP,pProjP_tmp;
+        // -1 if projection on edge, index of the point if projection on an extremity
+        int projWhere=-1, projWhere_tmp;
         // distance to this closest point (always positive)
         double pDist;
         //current closest distance: positive infinity
@@ -272,21 +277,36 @@ namespace Clobscode
         // loop through all edges of the list
         for (auto iEdg:lEdges) {
 
-            bool isOn=closestPointToEdge(pPoint, iEdg, pDist, pProjP_tmp);
+            bool isOn=closestPointToEdge(pPoint, iEdg, pDist, pProjP_tmp, projWhere_tmp);
 
-            if (pDist < closestDist) {
-                pProjP = pProjP_tmp;
-                closestEdge = iEdg;
-                closestDist = pDist;
-                found = true;
-                if (isOn) // lies on edge, no need to continue
-                    break;
+            // if projection on the same point for 2 edges
+            if (found && projWhere_tmp>0 && projWhere_tmp==projWhere ) {
+                closestEdge.push_back(iEdg); //just update list
+            } else {
+                if (pDist < closestDist ) {
+                    pProjP = pProjP_tmp;
+                    closestEdge.clear();
+                    closestEdge.push_back(iEdg);
+                    closestDist = pDist;
+                    projWhere=projWhere_tmp;
+                    found = true;
+                    if (isOn) // lies on edge, no need to continue
+                        break;
+                }
             }
         }
         if (found) {
-            const Point3D &P0=mVertices[mEdges[closestEdge][0]];
-            const Point3D &P1=mVertices[mEdges[closestEdge][1]];
-            bIsIn = (pPoint.isLeft(P0,P1)>0); // pPoint left of the closest edge
+            if (closestEdge.size()==1) {
+                const Point3D &P0=mVertices[mEdges[closestEdge[0]][0]];
+                const Point3D &P1=mVertices[mEdges[closestEdge[0]][1]];
+                bIsIn = (pPoint.isLeft(P0,P1)>0); // pPoint left of the closest edge
+            }
+            else {
+                //FJA TODO: change this for better test
+                // hint: edge with smallest angle of (pPoint,pProjP) with normal
+                // and check if pPoint is left of this edge
+               return(pointIsInMesh(pPoint));
+            }
         }
         else {
             std::cerr << "Error in Polyline::getProjection";
@@ -329,6 +349,8 @@ namespace Clobscode
 
         // closest point on the edge (on edge, or vertice)
         Point3D pProjP_tmp,pProjP;
+        // -1 if projection on edge, index of the point if projection on an extremity
+        int projWhere, projWhere_tmp;
         // distance to this closest point (always positive)
         double pDist;
         //current closest distance: positive infinity
@@ -343,7 +365,7 @@ namespace Clobscode
         // browsing all the surface faces for min distance.
         for (unsigned int iEdge = 0; iEdge < mEdges.size(); iEdge++) {
             // computing the distance for this edge (segment)
-            bool isOn=closestPointToEdge(pPoint,iEdge,pDist,pProjP_tmp);
+            bool isOn=closestPointToEdge(pPoint,iEdge,pDist,pProjP_tmp,projWhere_tmp);
 
             if (pDist < closestDist) {
                 pProjP = pProjP_tmp;
@@ -368,6 +390,8 @@ namespace Clobscode
 
         // closest point on the edge (on edge, or vertice)
         Point3D pProjP_tmp,pProjP;
+        // -1 if projection on edge, index of the point if projection on an extremity
+        int projWhere, projWhere_tmp;
         // distance to this closest point (always positive)
         double pDist;
         //current closest distance: positive infinity
@@ -383,7 +407,7 @@ namespace Clobscode
 //FJA BUG was here!!!        for (unsigned int iEdge = 0; iEdge < lEdges.size(); iEdge++) {
         for (unsigned int iEdge:lEdges) {
             // computing the distance for this edge (segment)
-            bool isOn=closestPointToEdge(pPoint,iEdge,pDist,pProjP_tmp);
+            bool isOn=closestPointToEdge(pPoint,iEdge,pDist,pProjP_tmp,projWhere_tmp);
 
             if (pDist < closestDist) {
                 pProjP = pProjP_tmp;
