@@ -185,6 +185,22 @@ namespace Clobscode
 
         //save the data of the mesh in its final state
         saveOutputMesh(mesh);
+        
+        
+        //Debugging:
+        unsigned int coins = 0;
+        cout << "corners index:\n";
+        for (unsigned int i=0; i<Quadrants.size(); i++) {
+            
+            if (Quadrants[i].isSurface()) {
+                
+                if (input.hasFeature(Quadrants[i].getIntersectedEdges())) {
+                    coins++;
+                    cout << i << "\n";
+                }
+            }
+        }
+        cout << "number of corners: " << coins << "\n";
 
         return mesh;
     }
@@ -1212,6 +1228,11 @@ namespace Clobscode
         for (unsigned int i=0; i<Quadrants.size(); i++) {
 
             if (Quadrants[i].isSurface()) {
+                
+                if (!input.hasFeature(Quadrants[i].getIntersectedEdges())) {
+                    continue;
+                }
+                    
                 //stv.setNewPoints(tmppts);
                 stv.setIdx(i);
                 if (!Quadrants[i].accept(&stv)) {
@@ -1237,6 +1258,7 @@ namespace Clobscode
         //surface. If after all is done, if an element counts only with "on
         //surface" and "outside" nodes, remove it.
         list<unsigned int> out_nodes;
+        list<vector<unsigned int> > feature_nodes;
         list<Quadrant>::iterator oiter;
 
         for (unsigned int i=0; i<Quadrants.size(); i++) {
@@ -1266,7 +1288,15 @@ namespace Clobscode
                 }
 
                 if (points[epts[j]].isOutside()) {
-                    out_nodes.push_back(epts[j]);
+                    if (input.hasFeature(Quadrants[i].getIntersectedEdges())) {
+                        vector<unsigned int> fn(2,0);
+                        fn[0] = epts[j];
+                        fn[1] = i;
+                        feature_nodes.push_back(fn);
+                    }
+                    else {
+                        out_nodes.push_back(epts[j]);
+                    }
                 }
             }
         }
@@ -1314,6 +1344,14 @@ namespace Clobscode
             points.at(p).setProjected();
         }
 
+        for (auto p:feature_nodes) {
+            if (!points.at(p[0]).wasProjected()) {
+                //points.at(p[0]).setPoint(input.getFeatureProjection(Quadrants[i],points.at(p[0])));
+                //points.at(p[0]).setProjected();
+            }
+        
+        }
+        
         //Shrink inside nodes with respect to outside ones.
         /*double factor = 0.75;
          for (unsigned int i=0; i<3; i++) {
