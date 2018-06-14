@@ -57,8 +57,7 @@ namespace chrono = std::chrono;
 //-------------------------------------------------------------------
 
 void endMsg(){
-	cout << "use: ./mesher [-d] input.mdl [-o] input.off [-u] output\n";
-    cout << "              [-c] volume_mesh.oct (Quadrant mesh to start from)\n";
+	cout << "use: ./mesher [-p] input.poly [-u] output\n";
     cout << "              [-s] ref_level [-a] ref_level [-b] file.reg\n";
     cout << "              [-r] input_surface rl [-g] [-v]\n";
 	cout << "where:\n";
@@ -76,6 +75,7 @@ void endMsg(){
     cout << "    -v save output mesh in VTK ASCII format (vtk)\n";
     cout << "    -m save output mesh in M3D ASCII format (m3d)\n";
     cout << "    -i save output mesh in MVM ASCII format (mvm)\n";
+    cout << "    -o save output mesh in OFF ASCII format (off)\n";
 }
 
 //-------------------------------------------------------------------
@@ -110,7 +110,8 @@ int main(int argc,char** argv){
 //    inputs.reserve(4);
     //Clobscode::Services io;
     
-    bool getfem=false, vtkformat=false, Quadrant_start=false, m3dfor=false, mvmfor=false;
+    bool getfem=false, vtkformat=false, Quadrant_start=false, m3dfor=false;
+    bool mvmfor=false, offfor=false;
     
     //for reading an Quadrant mesh as starting point.
     vector<MeshPoint> oct_points;
@@ -167,16 +168,6 @@ int main(int argc,char** argv){
                 in_name_given = true;
                 i++;
                 break;
-            case 'o':
-                in_name = argv[i+1];
-
-                if (!Services::ReadOffMesh(in_name,inputs)) {
-                    std::cerr << "couldn't read file " << argv[i+1] << std::endl;
-                    return 1;
-                }
-                in_name_given = true;
-                i++;
-                break;
             case 'p': //read a .poly file (Triangle)
                 in_name = argv[i+1];
 
@@ -203,6 +194,9 @@ int main(int argc,char** argv){
                 break;
             case 'i':
                 mvmfor = true;
+                break;
+            case 'o':
+                offfor = true;
                 break;
             case 'a':
                 rl = atoi(argv[i+1]);
@@ -334,6 +328,9 @@ int main(int argc,char** argv){
     }
     if (mvmfor) {
         Services::WriteMixedVolumeMesh(out_name,output);
+    }
+    if (offfor) {
+        Services::WriteOFF(out_name,output);
     }
 
     auto end_time = chrono::high_resolution_clock::now();

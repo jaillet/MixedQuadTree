@@ -62,6 +62,8 @@ namespace Clobscode
 
 		// computing the pseudo normal at each surface node
         computeNodesPseudoNormal();
+        
+        computeNodesAngle();
 		
 	}
 
@@ -108,6 +110,47 @@ namespace Clobscode
     void Polyline::computeEdgesNormal(){
         for (auto &e:mEdges) {
             e.computeNormal(mVertices);
+        }
+    }
+    
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    void Polyline::computeNodesAngle(){
+        
+        unsigned int npts = mVertices.size();
+        mVerticesAngles.assign(npts,0);
+        vector<vector<unsigned int> > seg_per_node(npts);
+        
+        //save a reference to the segment for each node
+        for (unsigned int i=0; i<mEdges.size(); i++) {
+            seg_per_node[mEdges[i][0]].push_back(i);
+            seg_per_node[mEdges[i][1]].push_back(i);
+        }
+        
+        //compute normal of each node
+        for (unsigned int i=0; i<npts; i++) {
+            if (seg_per_node[i].size()!=2) {
+                continue;
+            }
+            unsigned int i0, i2;
+            Point3D P1 = mVertices[i], P0, P2;
+            i0 = mEdges[seg_per_node[i][0]][0];
+            if (i==i0) {
+                i0 = mEdges[seg_per_node[i][0]][1];
+            }
+            i2 = mEdges[seg_per_node[i][1]][0];
+            if (i==i2) {
+                i2 = mEdges[seg_per_node[i][1]][1];
+            }
+            P0 = mVertices[i0];
+            P2 = mVertices[i2];
+            
+            Point3D V1 = P0-P1, V2 = P2-P1;
+            V1.normalize();
+            V2.normalize();
+            mVerticesAngles[i] = acos(V1.dot(V2));
+            //normalize
+            //mVerticePseudoNormals[i].normalize();
         }
     }
 
@@ -295,7 +338,34 @@ namespace Clobscode
 
         return bIsIn;
     }
-
+    
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    bool Polyline::hasFeature(const list<unsigned int> &iEdges) const {
+        
+        if (iEdges.size()<2) {
+            return false;
+        }
+        
+        list<unsigned int> iNodes;
+        for (auto iEdg:iEdges) {
+            iNodes.push_back(mEdges[iEdg][0]);
+            iNodes.push_back(mEdges[iEdg][1]);
+        }
+        iNodes.sort();
+        iNodes.unique();
+        
+        for (auto iNd:iNodes) {
+            //if angle is between 150 and 210 grades, then is not a sharp feature:
+            if (mVerticesAngles[iNd]<2.61799 || mVerticesAngles[iNd]>3.66519) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
     //projection of a Point to Edge iedg
     Point3D Polyline::getProjection(const Point3D &pPoint, int iedg) const {
         {

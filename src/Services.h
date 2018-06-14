@@ -771,23 +771,23 @@ namespace Clobscode
         //-------------------------------------------------------------------
         //-------------------------------------------------------------------
         static bool WriteVTK(std::string name, FEMesh &output){
-
+            
             vector<Point3D> points = output.getPoints();
             vector<vector<unsigned int> > elements = output.getElements();
-
+            
             if (elements.empty()) {
                 std::cout << "no output elements\n";
                 return false;
             }
-
+            
             string vol_name = name+".vtk";
-
+            
             //write the volume mesh
             FILE *f = fopen(vol_name.c_str(),"wt");
-
+            
             fprintf(f,"# vtk DataFile Version 2.0\nUnstructured Grid %s\nASCII",name.c_str());
             fprintf(f,"\n\nDATASET UNSTRUCTURED_GRID\nPOINTS %i float",(int)points.size());
-
+            
             //write points
             for(unsigned int i=0;i<points.size();i++){
                 if (i%2==0) {
@@ -797,37 +797,37 @@ namespace Clobscode
                 fprintf(f," %+1.8E",points[i][1]);
                 fprintf(f," %+1.8E",points[i][2]);
             }
-
+            
             //count conectivity index.
             unsigned int conectivity = 0;
             for (unsigned int i=0; i<elements.size(); i++) {
                 conectivity+=elements[i].size()+1;
             }
-
+            
             fprintf(f,"\n\nCELLS %i %i\n",(int)elements.size(),conectivity);
-
+            
             //get all the elements in a std::vector
             for (unsigned int i=0; i<elements.size(); i++) {
                 std::vector<unsigned int> epts = elements[i];
                 unsigned int np = epts.size();
                 fprintf(f,"%i", np);
-
-//                if (np==6) {
-//                    unsigned int aux = epts[1];
-//                    epts[1] = epts[2];
-//                    epts[2] = aux;
-//                    aux = epts[4];
-//                    epts[4] = epts[5];
-//                    epts[5] = aux;
-//                }
-
+                
+                //                if (np==6) {
+                //                    unsigned int aux = epts[1];
+                //                    epts[1] = epts[2];
+                //                    epts[2] = aux;
+                //                    aux = epts[4];
+                //                    epts[4] = epts[5];
+                //                    epts[5] = aux;
+                //                }
+                
                 for (unsigned int j= 0; j<np; j++) {
                     fprintf(f," %i", epts.at(j));
                 }
-
+                
                 fprintf(f,"\n");
             }
-
+            
             fprintf(f,"\nCELL_TYPES %i\n",(int)elements.size());
             for (unsigned int i=0; i<elements.size(); i++) {
                 unsigned int np = elements[i].size();
@@ -837,6 +837,51 @@ namespace Clobscode
                 else if (np == 4){ //VTK_QUAD
                     fprintf(f,"9\n");
                 }
+            }
+            
+            fclose(f);
+            
+            return true;
+        }
+        
+        //-------------------------------------------------------------------
+        //-------------------------------------------------------------------
+        static bool WriteOFF(std::string name, FEMesh &output){
+
+            vector<Point3D> points = output.getPoints();
+            vector<vector<unsigned int> > elements = output.getElements();
+
+            if (elements.empty()) {
+                std::cout << "no output elements\n";
+                return false;
+            }
+
+            string vol_name = name+".off";
+
+            //write the volume mesh
+            FILE *f = fopen(vol_name.c_str(),"wt");
+
+            fprintf(f,"OFF %i %i 0\n\n",(int)points.size(),(int)elements.size());
+
+            //write points
+            for(unsigned int i=0;i<points.size();i++){
+                fprintf(f," %f",points[i][0]);
+                fprintf(f," %f",points[i][1]);
+                fprintf(f," %f\n",points[i][2]);
+            }
+
+            fprintf(f,"\n");
+            
+            //get all the elements in a std::vector
+            for (unsigned int i=0; i<elements.size(); i++) {
+                std::vector<unsigned int> epts = elements[i];
+                unsigned int np = epts.size();
+                fprintf(f,"%i", np);
+
+                for (unsigned int j= 0; j<np; j++) {
+                    fprintf(f," %i", epts.at(j));
+                }
+                fprintf(f,"\n");
             }
 
             fclose(f);

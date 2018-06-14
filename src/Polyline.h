@@ -31,6 +31,7 @@
 //FJA no more used #include "SurfEdgeContainer.h"
 #include <limits>
 #include <set>
+#include <math.h>
 
 using std::vector;
 using std::set;
@@ -71,6 +72,8 @@ namespace Clobscode
 		virtual bool pointIsInMesh(const Point3D & pPoint, 
                                    const list<unsigned int> &lEdges) const;
 		
+        //returns true if the list of edges containts at least one feature.
+        virtual bool hasFeature(const list<unsigned int> &iEdges) const;
 
         //projection of a Point to Edge iedg
         virtual Point3D getProjection(const Point3D &pPoint, int iedg) const;
@@ -93,6 +96,9 @@ namespace Clobscode
 
         // compute the pseudo normal at each surface node
         virtual void computeEdgesNormal();
+        
+        // compute the angle of incident edges for each node
+        virtual void computeNodesAngle();
 
         virtual vector<Point3D> getNormals() const;
 
@@ -117,7 +123,8 @@ namespace Clobscode
         vector<PolyEdge> mEdges;
 		
 		//one pseudo normal per vertices (same size)
-		vector<Point3D> mVerticePseudoNormals; 
+		vector<Point3D> mVerticePseudoNormals;
+        vector<double> mVerticesAngles;
 		
         //bounding box of this surface mesh
         vector<double> bounds;
