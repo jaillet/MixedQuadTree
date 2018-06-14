@@ -21,6 +21,7 @@
 #define QuadSurfTemplate_h 1
 
 #include <vector>
+#include <algorithm>    // std::rotate_copy
 #include <iostream>
 #include "HexRotation.h"
 
@@ -48,8 +49,8 @@ class QuadSurfTemplate {
     
 protected:
     
-    virtual vector<unsigned int> rotate(const vector<unsigned int> &nodes,
-                                        const unsigned int &times);
+    virtual vector<unsigned int> rotated(const vector<unsigned int> &nodes,
+                                        const unsigned int &times); //obsolete
 
 };
 }

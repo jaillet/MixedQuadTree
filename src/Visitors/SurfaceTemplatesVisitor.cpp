@@ -54,7 +54,7 @@ namespace Clobscode
 
     bool SurfaceTemplatesVisitor::visit(Quadrant *o) {
         
-        vector<unsigned int> &pointindex = o->pointindex;
+        const vector<unsigned int> &pointindex = o->pointindex;
         if (pointindex.size()>4) {
             return true;
         }
@@ -64,7 +64,6 @@ namespace Clobscode
         //that intersect one surface or all of them. In both cases
         //at least one element node should be outside the sum of
         //input surfaces
-        list<unsigned int>::iterator piter;
         vector<vector<unsigned int> > &sub_elements = o->sub_elements;
         vector<bool> in(pointindex.size(),true);
         unsigned int nin = 0;

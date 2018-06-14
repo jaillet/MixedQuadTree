@@ -41,7 +41,7 @@
 #include <iostream>
 #include <fstream>
 #include <set>
-
+#include <algorithm>    // std::find_if
 
 using Clobscode::Point3D;
 using Clobscode::Polyline;
@@ -771,23 +771,23 @@ namespace Clobscode
         //-------------------------------------------------------------------
         //-------------------------------------------------------------------
         static bool WriteVTK(std::string name, FEMesh &output){
-            
+
             vector<Point3D> points = output.getPoints();
             vector<vector<unsigned int> > elements = output.getElements();
-            
+
             if (elements.empty()) {
                 std::cout << "no output elements\n";
                 return false;
             }
-            
+
             string vol_name = name+".vtk";
-            
+
             //write the volume mesh
             FILE *f = fopen(vol_name.c_str(),"wt");
-            
+
             fprintf(f,"# vtk DataFile Version 2.0\nUnstructured Grid %s\nASCII",name.c_str());
             fprintf(f,"\n\nDATASET UNSTRUCTURED_GRID\nPOINTS %i float",(int)points.size());
-            
+
             //write points
             for(unsigned int i=0;i<points.size();i++){
                 if (i%2==0) {
@@ -797,21 +797,21 @@ namespace Clobscode
                 fprintf(f," %+1.8E",points[i][1]);
                 fprintf(f," %+1.8E",points[i][2]);
             }
-            
+
             //count conectivity index.
             unsigned int conectivity = 0;
             for (unsigned int i=0; i<elements.size(); i++) {
                 conectivity+=elements[i].size()+1;
             }
-            
+
             fprintf(f,"\n\nCELLS %i %i\n",(int)elements.size(),conectivity);
-            
+
             //get all the elements in a std::vector
             for (unsigned int i=0; i<elements.size(); i++) {
                 std::vector<unsigned int> epts = elements[i];
                 unsigned int np = epts.size();
                 fprintf(f,"%i", np);
-                
+
 //                if (np==6) {
 //                    unsigned int aux = epts[1];
 //                    epts[1] = epts[2];
@@ -820,14 +820,14 @@ namespace Clobscode
 //                    epts[4] = epts[5];
 //                    epts[5] = aux;
 //                }
-                
+
                 for (unsigned int j= 0; j<np; j++) {
                     fprintf(f," %i", epts.at(j));
                 }
-                
+
                 fprintf(f,"\n");
             }
-            
+
             fprintf(f,"\nCELL_TYPES %i\n",(int)elements.size());
             for (unsigned int i=0; i<elements.size(); i++) {
                 unsigned int np = elements[i].size();
@@ -838,12 +838,96 @@ namespace Clobscode
                     fprintf(f,"9\n");
                 }
             }
-            
+
             fclose(f);
-            
+
             return true;
         }
-        
+        //-------------------------------------------------------------------
+        //-------------------------------------------------------------------
+        static bool WritePolyVTK(std::string name, vector<Polyline> inputs){
+
+            string vol_name = name+".poly.vtk";
+
+            //write the volume mesh
+            FILE *f = fopen(vol_name.c_str(),"wt");
+
+            // count the total number of Points, if many Polylines in Input
+            vector <unsigned int> noPts(inputs.size());
+            unsigned int noPtsTot=0, shiftNoPts=0;
+            for (unsigned int i=0;i<inputs.size();i++) {
+                noPts[i]=inputs[i].getPoints().size();
+                noPtsTot+=noPts[i];
+            }
+            if (noPtsTot==0) {
+                std::cout << "How strange, no inputs points to write...\n";
+                return false;
+            }
+
+            fprintf(f,"# vtk DataFile Version 2.0\nPolydata %s\nASCII",name.c_str());
+            fprintf(f,"\n\nDATASET POLYDATA\nPOINTS %u float", noPtsTot);
+
+            //for each input polyline
+            for (const Polyline& ply:inputs) {
+
+                //write points
+                const vector<Point3D> &points=ply.getPoints();
+                for(unsigned int i=0;i<points.size();i++){
+                    if (i%2==0) {
+                        fprintf(f,"\n");
+                    }
+                    fprintf(f," %+1.8E",points[i][0]);
+                    fprintf(f," %+1.8E",points[i][1]);
+                    fprintf(f," %+1.8E",points[i][2]);
+                }
+            }
+
+            //tricky part to recover connected subpolylines (polygons) in a polyline
+            vector <vector< unsigned int> > polygons;
+            uint iPly=0, noEdgesTot=0;
+            for (auto ply:inputs) {
+                // get connected polylines from input, assumming they are in order
+                // make a copy of edges
+                list<PolyEdge> edges(ply.getEdges().begin(),ply.getEdges().end());
+                noEdgesTot+=edges.size(); //data used at final to write VTK info
+                while (edges.size()>0) {
+                    polygons.push_back(vector<unsigned int>());
+                    auto e=edges.front(); edges.pop_front(); // get first edge and remove it from list
+                    int start=e.getKey();
+                    do {
+                        // keep the first point
+                        polygons[iPly].push_back(shiftNoPts+e.getKey());
+                        // and find to next edge that has the second pointas first point
+                        uint val=e.getVal();
+                        auto it=std::find_if(edges.begin(), edges.end(),
+                                       [&val] (const PolyEdge& pe) -> bool {return pe.getKey() == val; });
+                        // go to that edge and remove it from list
+                        e=*it;
+                        edges.erase(it);
+                    } while (start!=e.getVal());
+                    polygons[iPly].push_back(shiftNoPts+e.getKey()); // insert last point
+                    ++iPly; //that will start a new polygon
+                }
+                shiftNoPts+=ply.getPoints().size(); //don't forget to shift local numbering to global
+            }
+
+
+            fprintf(f,"\n\nPOLYGONS %lu %lu\n",polygons.size(),polygons.size()+noEdgesTot);
+            for (auto ply:polygons) {
+
+                //write index of the polygon points, as processed right above
+                fprintf(f,"%lu", ply.size());
+                for (unsigned int i=0; i<ply.size(); i++) {
+                    fprintf(f," %u", ply[i]);
+                }
+                fprintf(f,"\n");
+            }
+
+            fclose(f);
+
+            return true;
+        }
+
         //-------------------------------------------------------------------
         //-------------------------------------------------------------------
         static bool WriteMixedVolumeMesh(std::string name, FEMesh &output){

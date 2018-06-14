@@ -33,9 +33,8 @@ namespace Clobscode
                                vector<vector<unsigned int> > &newsubs){
 		
         //cout << "\n\n QuadSurfTemplate::one\n";
-        
-        vector<unsigned int> rotated = nodes;
-        
+        vector<unsigned int> rotated=nodes;
+
         unsigned int rotation = 0;
         for (unsigned int i=0; i<4; i++) {
             if (in[i]) {
@@ -43,21 +42,15 @@ namespace Clobscode
             }
             rotation++;
         }
-        
+                
         if (rotation!=0) {
-            rotated = rotate(nodes,rotation);
+//            rotated = rotate(nodes,rotation);
+            std::rotate(rotated.begin(),rotated.begin()+rotation,rotated.end());
         }
-        
-        newsubs.clear();
-        newsubs.reserve(1);
-        vector<unsigned int> t(3,0);
-		
-		t[0] = rotated[0];
-		t[1] = rotated[1];
-		t[2] = rotated[3];
-		
-		newsubs.push_back(t);
-		
+
+        newsubs.resize(1);
+        newsubs[0]={rotated[0],rotated[1],rotated[3]};
+
 		return true;
 	}
     
@@ -65,8 +58,8 @@ namespace Clobscode
                                vector<vector<unsigned int> > &newsubs){
         
         //cout << "\n\n QuadSurfTemplate::two\n";
-        vector<unsigned int> rotated = nodes;
-        
+        vector<unsigned int> rotated=nodes;
+
         unsigned int rotation = 0;
         for (unsigned int i=0; i<4; i++) {
             if (in[i]) {
@@ -77,72 +70,55 @@ namespace Clobscode
         
         //case: two consecutive nodes in: we return the same element.
         if (in[(rotation+1)%4] || in[(rotation+3)%4]) {
-            newsubs.push_back(nodes);
+            //FJA newsubs already contains nodes
+//            newsubs.push_back(nodes);
             return true;
         }
         
         if (rotation!=0) {
-            rotated = rotate(nodes,rotation);
+//            rotated = rotate(nodes,rotation);
+            std::rotate(rotated.begin(),rotated.begin()+rotation,rotated.end());
         }
-        
-        newsubs.clear();
-        newsubs.reserve(2);
-        vector<unsigned int> t1(3,0), t2(3,0);
-        
-        t1[0] = rotated[0];
-        t1[1] = rotated[1];
-        t1[2] = rotated[3];
-        
-        t2[0] = rotated[1];
-        t2[1] = rotated[2];
-        t2[2] = rotated[3];
-        
-        newsubs.push_back(t1);
-        newsubs.push_back(t2);
-        
-        return true;
+
+        newsubs.resize(2);
+        newsubs[0]= {rotated[0],rotated[1],rotated[3]} ;
+        newsubs[1]= {rotated[1],rotated[2],rotated[3]} ;
+
+            return true;
     }
     
     bool QuadSurfTemplate::three(const vector<unsigned int> &nodes, vector<bool> &in,
                                  vector<vector<unsigned int> > &newsubs){
         
         //cout << "\n\n QuadSurfTemplate::three\n";
-        vector<unsigned int> rotated = nodes;
-        
+        vector<unsigned int> rotated= nodes;
+
         unsigned int rotation = 0;
         for (unsigned int i=0; i<4; i++) {
-            if (!in[(i+2)%4]) {
+            if (!in[(i+3)%4]) { //FJA was (i+2) but incoherent with the created triangles
                 break;
             }
             rotation++;
         }
         
         if (rotation!=0) {
-            rotated = rotate(nodes,rotation);
+//            rotated = rotate(nodes,rotation);
+            std::rotate(rotated.begin(),rotated.begin()+rotation,rotated.end());
         }
-        
-        newsubs.clear();
-        newsubs.reserve(2);
 
-        vector<unsigned int> t1(3,0), t2(3,0);
-        
-        t1[0] = rotated[0];
-        t1[1] = rotated[2];
-        t1[2] = rotated[3];
-        
-        t2[0] = rotated[0];
-        t2[1] = rotated[1];
-        t2[2] = rotated[2];
-        
-        newsubs.push_back(t1);
-        newsubs.push_back(t2);
-        
+        newsubs.resize(2);
+        newsubs[0]= {rotated[0],rotated[2],rotated[3]} ;
+        newsubs[1]= {rotated[0],rotated[1],rotated[2]} ;
+
         return true;
 
     }
-    
-    vector<unsigned int> QuadSurfTemplate::rotate(const vector<unsigned int> &nodes,
-                                                  const unsigned int &times) {
+        
+    vector<unsigned int> QuadSurfTemplate::rotated(const vector<unsigned int> &nodes,
+                                                      const unsigned int &times) {
+
+        std::cerr << "Obsolete: replaced by std::rotate(),"
+                  <<   " Since no need to copy the vector in QuadSurfTemplate::one(), two(), three() ! \n";
         
         /*
          0 1 2 3

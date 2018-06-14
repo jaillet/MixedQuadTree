@@ -88,7 +88,7 @@ namespace Clobscode
                                   list<RefinementRegion *> &all_reg, const string &name,
                                   const unsigned short &minrl, const unsigned short &omaxrl);
 		
-        virtual void generateOctreeMesh(const unsigned short &rl, Polyline &input,
+        virtual void generateQuadtreeMesh(const unsigned short &rl, Polyline &input,
                                         const list<RefinementRegion *> &all_reg, const string &name);
 
         virtual bool isItIn(const Polyline &mesh, const list<unsigned int> &faces, const vector<Point3D> &coords) const;

@@ -326,6 +326,7 @@ int main(int argc,char** argv){
 
     if (vtkformat) {
         Services::WriteVTK(out_name,output);
+        Services::WritePolyVTK(out_name,inputs);
     }
 
     if (m3dfor) {

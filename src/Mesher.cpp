@@ -140,7 +140,7 @@ namespace Clobscode
 
         //split Quadrants until the refinement level (rl) is achieved.
         //The output will be a one-irregular mesh.
-        generateOctreeMesh(rl,input,all_reg,name);
+        generateQuadtreeMesh(rl,input,all_reg,name);
 
         //The points of the Quadrant mesh must be saved at this point, otherwise node are
         //projected onto the surface and causes further problems with knowing if nodes
@@ -162,19 +162,21 @@ namespace Clobscode
         unsigned int nels = Quadrants.size();
         Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
 
-        projectCloseToBoundaryNodes(input);
-        removeOnSurface();
-        detectInsideNodes(input);
-        
         //update element and node info.
         linkElementsToNodes();
-        
+        detectInsideNodes(input);
+
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
 
         if (rotated) {
+            // rotate the mesh
             for (unsigned int i=0; i<points.size(); i++) {
                 gt.applyInverse(points[i].getPoint());
+            }
+            // rotate back the polyline as well
+            for (unsigned int i=0; i<input.getPoints().size(); i++) {
+                gt.applyInverse(input.getPoints()[i]);
             }
         }
 
@@ -656,7 +658,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
-    void Mesher::generateOctreeMesh(const unsigned short &rl, Polyline &input,
+    void Mesher::generateQuadtreeMesh(const unsigned short &rl, Polyline &input,
                                     const list<RefinementRegion *> &all_reg,
                                     const string &name){
 
@@ -1244,7 +1246,7 @@ namespace Clobscode
 
             //Put in a std::list inside nodes of boundary elements that
             //may be projected to the input domain.
-            vector<unsigned int> epts = Quadrants[i].getPointIndex();
+            const vector<unsigned int> &epts = Quadrants[i].getPointIndex();
             for (unsigned int j=0; j < epts.size(); j++) {
 
                 if (!points[epts[j]].wasOutsideChecked()) {
@@ -1273,46 +1275,43 @@ namespace Clobscode
         out_nodes.unique();
 
         //project all outside points onto the surface
-        std::list<unsigned int>::iterator piter;
+        std::list<unsigned int>::iterator p;
 
-        for (piter=out_nodes.begin(); piter!=out_nodes.end(); ++piter) {
+        for (auto p:out_nodes) {
 
             //get the faces of Quadrants sharing this node
-            list<unsigned int> p_faces, p_eles = points.at(*piter).getElements();
-            list<unsigned int>::iterator p_eiter;
+            list<unsigned int> p_qInterEdges;
             
-            if (points.at(*piter).wasProjected()) {
+            if (points.at(p).wasProjected()) {
                 continue;
             }
 
-            for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); ++p_eiter) {
-                list<unsigned int> o_faces = Quadrants[*p_eiter].getIntersectedEdges();
-                list<unsigned int>::iterator oct_fcs;
-                for (oct_fcs=o_faces.begin(); oct_fcs!=o_faces.end(); oct_fcs++) {
-                    p_faces.push_back(*oct_fcs);
-                }
+            for (auto pe:points.at(p).getElements()) { //elements containing p
+                //append this to the list of edges
+                p_qInterEdges.insert(p_qInterEdges.end(), Quadrants[pe].getIntersectedEdges().begin(),
+                               Quadrants[pe].getIntersectedEdges().end());
             }
 
-            p_faces.sort();
-            p_faces.unique();
+            p_qInterEdges.sort();
+            p_qInterEdges.unique();
 
-            if (p_faces.empty()) {
+            if (p_qInterEdges.empty()) {
                 cout << "\nWarning at Mesher::shrinkToBoundary";
                 cout << " no faces to project an outside node\n";
-                cout << *piter << " n_els " << p_eles.size() << ":";
-                for (p_eiter=p_eles.begin(); p_eiter!=p_eles.end(); ++p_eiter) {
-                    cout << " " << *p_eiter;
+                cout << p << " n_els " << points.at(p).getElements().size() << ":";
+                for (auto pe:points.at(p).getElements()) {
+                    cout << " " << pe;
                 }
                 cout << "\n";
                 continue;
             }
 
-            Point3D current = points.at(*piter).getPoint();
-            //Point3D projected = input.getProjection(current,p_faces);
-            Point3D projected = input.getProjection(current);
+            Point3D current = points.at(p).getPoint();
+            Point3D projected = input.getProjection(current,p_qInterEdges);
+            //Point3D projected = input.getProjection(current);
 
-            points.at(*piter).setPoint(projected);
-            points.at(*piter).setProjected();
+            points.at(p).setPoint(projected);
+            points.at(p).setProjected();
         }
 
         //Shrink inside nodes with respect to outside ones.
@@ -1444,10 +1443,9 @@ namespace Clobscode
         //move (when possible) all inner points to surface
         for (auto p:in_nodes) {
 
-            //if this node is attached to an Quadrant which was split in
+            //if this node is attached to a Quadrant which was split in
             //mixed-elements due to transition patterns, avoid the
             //displacement.
-
 
             //get the faces of Quadrants sharing this node
             list<unsigned int> p_qInterEdges;
