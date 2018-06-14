@@ -893,7 +893,7 @@ namespace Clobscode
                 while (edges.size()>0) {
                     polygons.push_back(vector<unsigned int>());
                     auto e=edges.front(); edges.pop_front(); // get first edge and remove it from list
-                    int start=e.getKey();
+                    uint start=e.getKey();
                     do {
                         // keep the first point
                         polygons[iPly].push_back(shiftNoPts+e.getKey());
