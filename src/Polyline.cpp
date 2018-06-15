@@ -265,9 +265,8 @@ namespace Clobscode
                 projWhere=mEdges[iEdg][1]; // if projection on P1
             } else {
                 double b = c1 / c2;
-                Point3D Pb= P0 + b * V;
-                pProjP=Pb;
-                pDist=Pb.distance(pPoint);
+                pProjP=P0 + b * V;
+                pDist=pProjP.distance(pPoint); // proj on edge
             }
         }
         // sign of distance (negative if pP inside)
@@ -339,7 +338,7 @@ namespace Clobscode
             }
         }
         if (found) {
-            if (closestEdge.size()==1) {
+            if (projWhere==-1) { // ifcloset point lies on edge
                 const Point3D &P0=mVertices[mEdges[closestEdge[0]][0]];
                 const Point3D &P1=mVertices[mEdges[closestEdge[0]][1]];
                 bIsIn = (pPoint.isLeft(P0,P1)>0); // pPoint left of the closest edge
