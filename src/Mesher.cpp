@@ -1336,12 +1336,12 @@ namespace Clobscode
                 continue;
             }
 
-            Point3D current = points.at(p).getPoint();
+            const Point3D &current = points[p].getPoint();
             Point3D projected = input.getProjection(current,p_qInterEdges);
             //Point3D projected = input.getProjection(current);
 
-            points.at(p).setPoint(projected);
-            points.at(p).setProjected();
+            points[p].setPoint(projected);
+            points[p].setProjected();
         }
 
         for (auto p:feature_nodes) {
@@ -1497,7 +1497,7 @@ namespace Clobscode
             p_qInterEdges.sort();
             p_qInterEdges.unique();
 
-            Point3D current = points.at(p).getPoint();
+            const Point3D &current = points[p].getPoint();
             Point3D projected = input.getProjection(current,p_qInterEdges);
             double dis = (current - projected).Norm();
 
