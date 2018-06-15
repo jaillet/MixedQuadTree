@@ -322,7 +322,7 @@ namespace Clobscode
             bool isOn=closestPointToEdge(pPoint, iEdg, pDist, pProjP_tmp, projWhere_tmp);
 
             // if projection on the same point for 2 edges
-            if (found && projWhere_tmp>0 && projWhere_tmp==projWhere ) {
+            if (found && projWhere_tmp>=0 && projWhere_tmp==projWhere ) {
                 closestEdge.push_back(iEdg); //just update list
             } else {
                 if (pDist < closestDist ) {
@@ -338,16 +338,39 @@ namespace Clobscode
             }
         }
         if (found) {
-            if (projWhere==-1) { // ifcloset point lies on edge
+
+            if (closestEdge.size()==1) { // if closest point lies on edge
                 const Point3D &P0=mVertices[mEdges[closestEdge[0]][0]];
                 const Point3D &P1=mVertices[mEdges[closestEdge[0]][1]];
                 bIsIn = (pPoint.isLeft(P0,P1)>0); // pPoint left of the closest edge
             }
-            else {
-                //FJA TODO: change this for better test
-                // hint: edge with smallest angle of (pPoint,pProjP) with normal
-                // and check if pPoint is left of this edge
-               return(pointIsInMesh(pPoint));
+            else { // lies on a vertex
+                /*
+                bool isCCW= (mEdges[closestEdge[0]].getNormal()).isCounterClockWise(mEdges[closestEdge[1]].getNormal());
+                bool isN= (mEdges[closestEdge[0]].getNormal()).dot(mEdges[closestEdge[1]].getNormal())>=0;
+                const Point3D &P0=mVertices[mEdges[closestEdge[0]][0]];
+                const Point3D &P1=mVertices[mEdges[closestEdge[0]][1]];
+                bool bIsIn0 = (pPoint.isLeft(P0,P1)>0); // pPoint left of the closest edge
+                const Point3D &P2=mVertices[mEdges[closestEdge[1]][0]];
+                const Point3D &P3=mVertices[mEdges[closestEdge[1]][1]];
+                bool bIsIn1 = (pPoint.isLeft(P2,P3)>0); // pPoint left of the closest second edge
+
+                if (isCCW) {
+                    bIsIn=(bIsIn0&bIsIn1);
+                } else {
+                    bIsIn=(bIsIn0|bIsIn1);
+                }
+
+                if (bIsIn != pointIsInMesh(pPoint)) {
+                    std::cerr << "big bug here\n";
+                    return(pointIsInMesh(pPoint));
+//                    exit(4);
+                }
+
+                return bIsIn; */
+
+                //if this is not working, compute for the whole polyline
+                return(pointIsInMesh(pPoint));
             }
         }
         else {
@@ -365,18 +388,29 @@ namespace Clobscode
         if (iEdges.size()<2) {
             return false;
         }
-        
-        list<unsigned int> iNodes;
-        for (auto iEdg:iEdges) {
+
+        vector<unsigned int> iNodes;
+        for (const auto iEdg:iEdges) {
             iNodes.push_back(mEdges[iEdg][0]);
             iNodes.push_back(mEdges[iEdg][1]);
         }
-        iNodes.sort();
-        iNodes.unique();
+        std::sort(iNodes.begin(),iNodes.end());
+        //iNodes.unique();
+
+        //FJA: we want to test only the intersection, not the extremities of the edges
+        // the feature should lies IN the quadrant
+        list<unsigned int> iCommonNodes;
+        for (unsigned int i=1; i<iNodes.size(); ++i) {
+            if (iNodes.at(i-1)==iNodes.at(i)){
+                iCommonNodes.push_back(iNodes[i]); //insert duplicate
+                ++i; //skip next duplicate item
+           }
+        }
         
-        for (auto iNd:iNodes) {
+        for (auto iNd:iCommonNodes) {
             //if angle is between 150 and 210 grades, then is not a sharp feature:
             if (mVerticesAngles[iNd]<2.61799 || mVerticesAngles[iNd]>3.66519) {
+                std::cout << " " << iNd << std::flush;
                 return true;
             }
         }

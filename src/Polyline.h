@@ -31,6 +31,7 @@
 //FJA no more used #include "SurfEdgeContainer.h"
 #include <limits>
 #include <set>
+#include <algorithm>    // std::sort
 #include <math.h>
 
 using std::vector;

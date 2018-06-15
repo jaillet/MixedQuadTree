@@ -77,7 +77,8 @@ namespace Clobscode
         virtual Point3D projectionOntoSegment(const Point3D &P0, const Point3D &P1) const;
 
         virtual double isLeft(const Point3D &P0, const Point3D &P1) const;
-				
+        virtual bool isCounterClockWise(const Point3D &V) const;
+
 		virtual Point3D operator-(const Point3D &p) const;
         // invert Point3D
 		virtual Point3D operator-() const;
@@ -231,6 +232,11 @@ namespace Clobscode
     {
         return ( (P1.x - P0.x) * (y - P0.y)
                  - (x -  P0.x) * (P1.y - P0.y) );
+    }
+
+    inline bool Point3D::isCounterClockWise(const Point3D &V ) const
+    {
+        return ((V.x*y) - (V.y*x))>=0 ;
     }
 
     inline bool Point3D::is2DCollinear(const Point3D &p) const {

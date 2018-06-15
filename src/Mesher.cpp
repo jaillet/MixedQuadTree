@@ -196,7 +196,7 @@ namespace Clobscode
                 
                 if (input.hasFeature(Quadrants[i].getIntersectedEdges())) {
                     coins++;
-                    cout << i << "\n";
+                    cout << "->" << i << "\n";
                 }
             }
         }
