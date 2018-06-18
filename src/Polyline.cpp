@@ -339,39 +339,36 @@ namespace Clobscode
         }
         if (found) {
 
-            if (closestEdge.size()==1) { // if closest point lies on edge
-                const Point3D &P0=mVertices[mEdges[closestEdge[0]][0]];
-                const Point3D &P1=mVertices[mEdges[closestEdge[0]][1]];
-                bIsIn = (pPoint.isLeft(P0,P1)>0); // pPoint left of the closest edge
-            }
-            else { // lies on a vertex
-                /*
-                bool isCCW= (mEdges[closestEdge[0]].getNormal()).isCounterClockWise(mEdges[closestEdge[1]].getNormal());
-                bool isN= (mEdges[closestEdge[0]].getNormal()).dot(mEdges[closestEdge[1]].getNormal())>=0;
-                const Point3D &P0=mVertices[mEdges[closestEdge[0]][0]];
-                const Point3D &P1=mVertices[mEdges[closestEdge[0]][1]];
-                bool bIsIn0 = (pPoint.isLeft(P0,P1)>0); // pPoint left of the closest edge
-                const Point3D &P2=mVertices[mEdges[closestEdge[1]][0]];
-                const Point3D &P3=mVertices[mEdges[closestEdge[1]][1]];
-                bool bIsIn1 = (pPoint.isLeft(P2,P3)>0); // pPoint left of the closest second edge
+            uint iClosest=0;
 
-                if (isCCW) {
-                    bIsIn=(bIsIn0&bIsIn1);
+            if (closestEdge.size()>1) { // if closest point lies on edge
+                Point3D v=(pPoint-pProjP).normalize();
+                double dot0= v.dot(mEdges[closestEdge[0]].getNormalizedNormal());
+                double dot1= v.dot(mEdges[closestEdge[1]].getNormalizedNormal());
+                // check with the edge that normal is most colinear to the (pPoint-pProjP) line
+                // in other terms, the direction of the projection is most orthogonal to that edge
+                if (fabs(dot0)>=fabs(dot1)) {
+                    iClosest=0; // first edge
                 } else {
-                    bIsIn=(bIsIn0|bIsIn1);
+                    iClosest=1; // second edge
                 }
-
-                if (bIsIn != pointIsInMesh(pPoint)) {
-                    std::cerr << "big bug here\n";
-                    return(pointIsInMesh(pPoint));
-//                    exit(4);
-                }
-
-                return bIsIn; */
-
-                //if this is not working, compute for the whole polyline
-                return(pointIsInMesh(pPoint));
             }
+
+            const Point3D &P0=mVertices[mEdges[closestEdge[iClosest]][0]];
+            const Point3D &P1=mVertices[mEdges[closestEdge[iClosest]][1]];
+            bIsIn = (pPoint.isLeft(P0,P1)>=0); // pPoint left of the closest edge
+            //                std::cerr << pPoint << "  e:" << mEdges[closestEdge[0]] << " dot: " << dot0 << "  -  " << mEdges[closestEdge[1]] << " dot: " << dot1 << "->" << (fabs(dot0)>=fabs(dot1))
+            //                          << " -- " << bIsIn << "=" << windingNumber(pPoint) << "\n" << std::flush;
+
+            //FJA temporary test to get removed once one is sure this is working
+            if (bIsIn != pointIsInMesh(pPoint)) {
+                std::cerr << "big bug here\n";
+                //FJA in case this is not working, back to the computation for the whole polyline ;o(
+                //return(pointIsInMesh(pPoint));
+                exit(4);
+            }
+
+            return bIsIn;
         }
         else {
             std::cerr << "Error in Polyline::getProjection";
