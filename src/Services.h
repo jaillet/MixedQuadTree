@@ -850,6 +850,7 @@ namespace Clobscode
 
             vector<Point3D> points = output.getPoints();
             vector<vector<unsigned int> > elements = output.getElements();
+            vector<unsigned int> colored = output.getColoredCells();
 
             if (elements.empty()) {
                 std::cout << "no output elements\n";
@@ -872,6 +873,25 @@ namespace Clobscode
 
             fprintf(f,"\n");
             
+            if (colored.empty()) {
+                for (unsigned int i=0; i<elements.size(); i++) {
+                    std::vector<unsigned int> epts = elements[i];
+                    unsigned int np = epts.size();
+                    fprintf(f,"%i", np);
+                    
+                    for (unsigned int j= 0; j<np; j++) {
+                        fprintf(f," %i", epts.at(j));
+                    }
+                    
+                    if (np==3) {
+                        fprintf(f," 0 1 0");
+                    }
+                    
+                    fprintf(f,"\n");
+                }
+                return true;
+            }
+            
             //get all the elements in a std::vector
             for (unsigned int i=0; i<elements.size(); i++) {
                 std::vector<unsigned int> epts = elements[i];
@@ -881,6 +901,16 @@ namespace Clobscode
                 for (unsigned int j= 0; j<np; j++) {
                     fprintf(f," %i", epts.at(j));
                 }
+                
+                if (colored[i]!=0) {
+                    fprintf(f," 1 0 0");
+                }
+                else {
+                    if (np==3) {
+                        fprintf(f," 0 1 0");
+                    }
+                }
+                
                 fprintf(f,"\n");
             }
 

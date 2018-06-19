@@ -53,39 +53,39 @@ namespace Clobscode
 
         virtual list<unsigned int> &getOutsideNodes();
         virtual const list<unsigned int> &getOutsideNodes() const;
+        
+        //For debugging:
+        virtual void setColoredCells(const vector<unsigned int> &colored);
+        
+        virtual const vector<unsigned int> &getColoredCells();
 
 	protected:
 		
 		vector<Point3D> points;
 		vector<vector<unsigned int> > elements;
+        vector<unsigned int> color;
 		list<unsigned int> outpts;
 		
 	};
+    
+    inline void FEMesh::setColoredCells(const vector<unsigned int> &colored) {
+        color = colored;
+    }
+    
+    inline const vector<unsigned int> &FEMesh::getColoredCells() {
+        return color;
+    }
 	
     inline void FEMesh::setOutsideNodes(const list<unsigned int> &outpts){
         this->outpts=outpts;
-//		list<unsigned int>::iterator iter;
-//		for (iter=outpts.begin(); iter!=outpts.end(); iter++) {
-//			this->outpts.push_back(*iter);
-//		}
 	}
 	
     inline void FEMesh::setElements(const vector<vector<unsigned int> > &els){
         elements=els;
-//		unsigned int n = els.size();
-//		elements.reserve(n);
-//		for (unsigned int i=0; i<n; i++) {
-//			elements.push_back(els[i]);
-//		}
 	}
 	
     inline void FEMesh::setPoints(const vector<Point3D> &pts){
         points=pts;
-//		unsigned int n = pts.size();
-//		points.reserve(n);
-//		for (unsigned int i=0; i<n; i++) {
-//			points.push_back(pts[i]);
-//		}
 	}
 	
     inline vector<Point3D> &FEMesh::getPoints(){

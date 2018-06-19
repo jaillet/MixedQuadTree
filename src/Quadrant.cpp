@@ -35,34 +35,38 @@ namespace Clobscode
 	Quadrant::Quadrant(vector<unsigned int> &epts, 
                    const unsigned short &ref_level)
         :pointindex(epts),ref_level(ref_level),
-          n_influences(0),influence_commit(false),surface(false),max_dis(numeric_limits<double>::infinity()) {
-		
-        //members'inits in initialisation list !!
-
-//        pointindex.assign(4,0);
-		//for optimization
-//		(*this).ref_level = ref_level;
-        
-//        for (unsigned int i=0; i<4; i++) {
-//            pointindex[i] = epts[i];
-//        }
+          n_influences(0),influence_commit(false),surface(false),max_dis(numeric_limits<double>::infinity()),feature(false) {
         
 		sub_elements.assign(1,pointindex);
-//		n_influences = 0;
-//		influence_commit = false;
 	}
 	
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-	
 	Quadrant::~Quadrant(){
 		
 	}
 	
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
+    bool Quadrant::pointInside(vector<MeshPoint> &mp, const Point3D &p) const {
+        Point3D minp = mp[pointindex[0]].getPoint();
+        Point3D maxp = mp[pointindex[2]].getPoint();
+        if (minp[0]>p[0] || maxp[0]<p[0]) {
+            return false;
+        }
+        if (minp[1]>p[1] || maxp[1]<p[1]) {
+            return false;
+        }
+        if (minp[2]>p[2] || maxp[2]<p[2]) {
+            return false;
+        }
+        
+        cout << "Quadrant with feature\n" << minp << " " << maxp << " -> " << p << "\n";
+        return true;
+    }
 
-
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
     bool Quadrant::accept(Visitor *v)
     {
         return v->visit(this);
@@ -70,7 +74,6 @@ namespace Clobscode
 
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-	
 	std::ostream& operator<<(std::ostream& o,Quadrant &e){
         std::vector<unsigned int> points = e.getPointIndex();
 		for (unsigned int i=0; i<points.size(); i++)

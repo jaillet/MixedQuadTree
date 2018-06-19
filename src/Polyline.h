@@ -28,6 +28,8 @@
 
 #include "Point3D.h"
 #include "PolyEdge.h"
+#include "Quadrant.h"
+#include "MeshPoint.h"
 //FJA no more used #include "SurfEdgeContainer.h"
 #include <limits>
 #include <set>
@@ -48,7 +50,7 @@ namespace Clobscode
         Polyline();
         
         Polyline(vector<Point3D> &pts,
-                vector<vector<unsigned int> > &edg_ind);
+                 vector<vector<unsigned int> > &edg_ind);
 
         virtual ~Polyline();
 		
@@ -74,7 +76,10 @@ namespace Clobscode
                                    const list<unsigned int> &lEdges) const;
 		
         //returns true if the list of edges containts at least one feature.
-        virtual bool hasFeature(const list<unsigned int> &iEdges) const;
+        virtual bool hasFeature(const Quadrant &q, vector<MeshPoint> &mp) const;
+        
+        virtual list<Point3D> getFeatureProjection(const Quadrant &q,
+                                                   vector<MeshPoint> &mp);
 
         //projection of a Point to Edge iedg
         virtual Point3D getProjection(const Point3D &pPoint, int iedg) const;

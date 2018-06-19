@@ -127,7 +127,29 @@ int main(int argc,char** argv){
 			endMsg();
 			return 0;
 		}
-        if (argc==i+1 && (argv[i][1]!='g' && argv[i][1]!='v' && argv[i][1]!='m' && argv[i][1]!='t' )) {
+        
+        bool inout = false;
+        switch (argv[i][1]) {
+            case 'g':
+                inout = true;
+                break;
+            case 'v':
+                inout = true;
+                break;
+            case 'm':
+                inout = true;
+                break;
+            case 'i':
+                inout = true;
+                break;
+            case 'o':
+                inout = true;
+                break;
+            default:
+                break;
+        }
+        
+        if (argc==i+1 && !inout) {
 			cout << "Error: expected argument for option " << argv[i] << "\n";
 			endMsg();
 			return 0;
