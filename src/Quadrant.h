@@ -100,6 +100,8 @@ namespace Clobscode
         virtual void computeMaxDistance(vector<MeshPoint> &mp);
 		
         virtual double getMaxDistance() const;
+        
+        virtual bool badAngle(const unsigned int &nIdx, vector<MeshPoint> &mp) const;
 		
 		//flag for inside Quadrants that due to "inside node" moved
 		//to the input domain, it must be treated as a surface
