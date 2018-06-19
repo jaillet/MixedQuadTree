@@ -89,13 +89,17 @@ namespace Clobscode
 		virtual void setIOState(bool state);
 		
 		virtual bool getIOState();
+        
+        virtual void featureProjected();
+        
+        virtual bool isFeature() const;
 		
 	protected:
 		
 		Point3D point;
 		//this flag avoids to re-check if node is inside, 
 		//which is an expensive task
-		bool outsidechecked, projected;
+		bool outsidechecked, projected, feature;
 		//inside is a flag to shrink elements to the surface.
 		//it is a vector to know the state w.r.t. every input
 		//geometry
@@ -163,6 +167,14 @@ namespace Clobscode
 	inline bool MeshPoint::wasProjected(){
 		return projected;
 	}
+    
+    inline void MeshPoint::featureProjected() {
+        feature = true;
+    }
+    
+    inline bool MeshPoint::isFeature() const {
+        return feature;
+    }
 	
 	inline Point3D &MeshPoint::getPoint(){
 		return point;

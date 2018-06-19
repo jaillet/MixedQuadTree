@@ -79,15 +79,17 @@ namespace Clobscode
         vector<MeshPoint> oct_points = points;
 
         //link element and node info for code optimization.
-        /*linkElementsToNodes();
+        /*
+        detectFeatureQuadrants(input);
+        linkElementsToNodes();
         detectInsideNodes(input);
 
         projectCloseToBoundaryNodes(input);
-        removeOnSurface();
+        removeOnSurface(input);
 
         //apply the surface Patterns
         applySurfacePatterns(input);
-        removeOnSurface();*/
+        removeOnSurface(input);*/
 
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
@@ -154,11 +156,7 @@ namespace Clobscode
         detectInsideNodes(input);
 
         projectCloseToBoundaryNodes(input);
-        removeOnSurface();
-
-        //apply the surface Patterns
-        applySurfacePatterns(input);
-        removeOnSurface();
+        //removeOnSurface(input);
         
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
@@ -170,6 +168,10 @@ namespace Clobscode
 
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
+        
+        //apply the surface Patterns
+        applySurfacePatterns(input);
+        removeOnSurface(input);
 
         if (rotated) {
             // rotate the mesh
@@ -1132,17 +1134,40 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
-    void Mesher::removeOnSurface(){
+    void Mesher::removeOnSurface(Polyline &input){
 
         list<Quadrant> newele,removed;
         RemoveSubElementsVisitor rsv;
         rsv.setPoints(points);
         //remove elements without an inside node.
         for (unsigned int i=0; i<Quadrants.size(); i++) {
-            if (Quadrants[i].isInside() || Quadrants[i].hasFeature()) {
+            if (Quadrants[i].isInside()) {
                 newele.push_back(Quadrants[i]);
                 continue;
             }
+        
+            if (Quadrants[i].hasFeature()) {
+                if (Quadrants[i].accept(&rsv)) {
+                    //Quadrant with feature to be removed
+                    //only if average node is outside the
+                    //the edeges it intersects.
+                    Point3D avg;
+                    for (auto quaNoIdx:Quadrants[i].getPointIndex()) {
+                        avg+=points[quaNoIdx].getPoint();
+                    }
+                    avg/=Quadrants[i].getPointIndex().size();
+                    if (input.pointIsInMesh(avg,Quadrants[i].getIntersectedEdges())) {
+                        newele.push_back(Quadrants[i]);
+                    }
+                    else {
+                        removed.push_back(Quadrants[i]);
+                    }
+                }
+                else {
+                    newele.push_back(Quadrants[i]);
+                }
+            }
+        
 
             //if (Quadrants[i].removeOutsideSubElements(points)) {
             if (Quadrants[i].accept(&rsv)) {
@@ -1197,15 +1222,65 @@ namespace Clobscode
         stv.setInput(input);
 
         for (unsigned int i=0; i<Quadrants.size(); i++) {
-
-            if (Quadrants[i].isSurface() && !Quadrants[i].hasFeature()) {
-                stv.setIdx(i);
-                if (!Quadrants[i].accept(&stv)) {
-                    cout << "Error in Mesher::applySurfacePatterns: coultd't apply";
-                    cout << " a surface pattern\n";
-                    cout << Quadrants[i] << "\n";
-                    continue;
+            
+            /*if (Quadrants[i].getPointIndex().size()!=4) {
+                continue;
+            }*/
+            
+            bool feature = false;
+            for (auto octNo:Quadrants[i].getPointIndex()) {
+                if (points[octNo].isFeature()) {
+                    feature = true;
+                    break;
                 }
+            }
+            if (!feature) {
+                if (Quadrants[i].isSurface()) {
+                    stv.setIdx(i);
+                    if (!Quadrants[i].accept(&stv)) {
+                        cout << "Error in Mesher::applySurfacePatterns: coultd't apply";
+                        cout << " a surface pattern\n";
+                        cout << Quadrants[i] << "\n";
+                        continue;
+                    }
+                }
+            }
+            else {
+                unsigned int inNod = 0, oneN=0, oneF;
+                
+                vector<unsigned int> octIndx = Quadrants[i].getPointIndex();
+                
+                cout << "Feature Octant: ";
+                for (unsigned int j=0; j<octIndx.size(); j++) {
+                    if (points[octIndx[j]].isInside()) {
+                        cout << "I";
+                        inNod++;
+                        oneN = j;
+                    }
+                    else {
+                        cout << "O";
+                    }
+                    if (points[octIndx[j]].isFeature()) {
+                        cout << "F";
+                        oneF = j;
+                    }
+                    cout << " ";
+                }
+                if (inNod==1) {
+                    cout << "1I";
+                    if (!points[octIndx[(oneN+2)%4]].isFeature()) {
+                        cout << " surface Pat";
+                        Quadrants[i].accept(&stv);
+                    }
+                }
+                if (inNod==3) {
+                    if (Quadrants[i].badAngle(oneF,points)) {
+                        //cout << " surface 3In";
+                        //Quadrants[i].accept(&stv);
+                    }
+                }
+                
+                cout << "\n";
             }
         }
     }
@@ -1223,7 +1298,6 @@ namespace Clobscode
         //surface. If after all is done, if an element counts only with "on
         //surface" and "outside" nodes, remove it.
         list<unsigned int> out_nodes;
-        list<vector<unsigned int> > feature_nodes;
         list<Quadrant>::iterator oiter;
         
         
@@ -1234,6 +1308,12 @@ namespace Clobscode
             }
             
             list<Point3D> fs = input.getFeatureProjection(Quadrants[i],points);
+            
+            if (fs.empty()) {
+                cout << "wtf!!\n";
+                continue;
+            }
+            
             const vector<unsigned int> &epts = Quadrants[i].getPointIndex();
             
             unsigned int fsNum = fs.size(), outNo = 0;
@@ -1275,6 +1355,7 @@ namespace Clobscode
                 if (push) {
                     points[pos].setProjected();
                     points[pos].setPoint(projected);
+                    points[pos].featureProjected();
                     for (auto pe:points[pos].getElements()) {
                         
                         //this should be studied further.
@@ -1315,15 +1396,7 @@ namespace Clobscode
                 }
 
                 if (points[epts[j]].isOutside()) {
-                    if (Quadrants[i].hasFeature()) {
-                        vector<unsigned int> fn(2,0);
-                        fn[0] = epts[j];
-                        fn[1] = i;
-                        feature_nodes.push_back(fn);
-                    }
-                    else {
-                        out_nodes.push_back(epts[j]);
-                    }
+                    out_nodes.push_back(epts[j]);
                 }
             }
         }
@@ -1370,82 +1443,6 @@ namespace Clobscode
             points[p].setPoint(projected);
             points[p].setProjected();
         }
-
-        for (auto p:feature_nodes) {
-            if (!points.at(p[0]).wasProjected()) {
-                //points.at(p[0]).setPoint(input.getFeatureProjection(Quadrants[i],points.at(p[0])));
-                //points.at(p[0]).setProjected();
-            }
-        
-        }
-        
-        //Shrink inside nodes with respect to outside ones.
-        /*double factor = 0.75;
-         for (unsigned int i=0; i<3; i++) {
-
-         //detect all internal nodes to be displaced in this iteration.
-         list<unsigned int> to_move, to_reset;
-         list<unsigned int>::iterator o_iter, p_iter;
-         for (unsigned int j=0; j<Quadrants.size(); j++) {
-         if (Quadrants[j].wasShrink()) {
-         Quadrants[j].noMoreProjectionInfluences();
-         to_reset.push_back(j);
-         vector<unsigned int> o_pts = Quadrants[j].getPoints();
-         for (unsigned int k=0; k<o_pts.size(); k++) {
-         if (!points.at(o_pts[k]).wasProjected()) {
-         to_move.push_back(o_pts[k]);
-         }
-         }
-         }
-         }
-
-         if (to_move.empty()) {
-         //cout << "   > no one else to move\n";
-         break;
-         }
-
-         //move each node only once per iteration.
-         to_move.sort();
-         to_move.unique();
-
-         //cout << "   > moving " << to_move.size() << " inside nodes\n";
-
-         for (p_iter=to_move.begin(); p_iter!=to_move.end(); ++p_iter) {
-         list<unsigned int> p_eles = points[*p_iter].getElements();
-         Point3D p_to_add;
-         unsigned short qty = 0;
-         for (o_iter=p_eles.begin(); o_iter!=p_eles.end(); ++o_iter) {
-         if (!Quadrants[*o_iter].wasConsideredInProjection()) {
-         continue;
-         }
-         p_to_add += Quadrants[*o_iter].getProjectionInfluence();
-         qty++;
-         }
-
-         p_to_add = p_to_add * (factor/(qty));
-         //use this for less displacement of internal nodes.
-         //p_to_add = p_to_add * (factor/(2*qty));
-
-         for (o_iter=p_eles.begin(); o_iter!=p_eles.end(); ++o_iter) {
-         if (Quadrants[*o_iter].wasConsideredInProjection()) {
-         continue;
-         }
-         Quadrants[*o_iter].addProjectionInfluence(p_to_add);
-         }
-         p_to_add += points[*p_iter].getPoint();
-         points.at(*p_iter).setPoint(p_to_add);
-         points.at(*p_iter).setProjected();
-         }
-
-         //clear information over already shrunk Quadrants
-         for (o_iter=to_reset.begin(); o_iter!=to_reset.end(); ++o_iter) {
-         Quadrants[*o_iter].resetProjectionInfluence();
-         }
-
-         factor -= 0.25;
-         }*/
-
-        //cout.flush();
     }
 
 
@@ -1510,6 +1507,7 @@ namespace Clobscode
                         fs.erase(bIter);
                         points[epts[j]].setProjected();
                         points[epts[j]].setPoint(candidate);
+                        points[epts[j]].featureProjected();
                         for (auto pe:points[epts[j]].getElements()) {
                             
                             //this should be studied further.
@@ -1596,14 +1594,18 @@ namespace Clobscode
             if(dis<points[p].getMaxDistance()){
                 //this node has been moved to boundary, thus every element
                 //sharing this node must be set as a border element in order
-                //to avoid topological problems.
+                //to avoid topological problems. And if this node belonged
+                //to a feature Quadrants, all the quadrants sharing the node
+                //will labeled as Feature Quadrants too.
                 //points.at(*piter).setOutside();
                 points[p].setProjected();
                 points[p].setPoint(projected);
                 for (auto pe:points[p].getElements()) {
                     
-                    //this should be studied further.
+                    //intersectsSurface() returns true when the Quad previously
+                    //had non empty list of intersected edges.
                     if (Quadrants[pe].intersectsSurface()) {
+                        //setSurface() will change the flags of "inside" wich
                         Quadrants[pe].setSurface();
                     }
                 }

@@ -34,6 +34,7 @@ namespace Clobscode
 		//operation, so we try to do it only once
 		outsidechecked = false;
 		projected = false;
+        feature = false;
 		maxdistance = 0;
 	}
 	
