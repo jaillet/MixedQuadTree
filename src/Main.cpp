@@ -72,7 +72,7 @@ void endMsg(){
     cout << "    -r Refine surface region. Will refine all the elements\n";
     cout << "       in the provided input_surface at level rl\n";
     cout << "    -g save output mesh in GetFem format (gmf) \n";
-    cout << "    -v save output mesh in VTK ASCII format (vtk)\n";
+    cout << "    -v save output mesh + input in VTK ASCII format (vtk)\n";
     cout << "    -m save output mesh in M3D ASCII format (m3d)\n";
     cout << "    -i save output mesh in MVM ASCII format (mvm)\n";
     cout << "    -o save output mesh in OFF ASCII format (off)\n";
@@ -85,7 +85,7 @@ int main(int argc,char** argv){
 	
     if (argc<4) {
         endMsg();
-        return 0;
+        return EXIT_FAILURE;
     }
     
 	//const int n_meshes = 1;
@@ -125,12 +125,12 @@ int main(int argc,char** argv){
 		if (argv[i][0]!='-') {
 			cout << "Error: expected option -X and got " << argv[i] << "\n";
 			endMsg();
-			return 0;
+            return EXIT_FAILURE;
 		}
         if (argc==i+1 && (argv[i][1]!='g' && argv[i][1]!='v' && argv[i][1]!='m' && argv[i][1]!='t' )) {
 			cout << "Error: expected argument for option " << argv[i] << "\n";
 			endMsg();
-			return 0;
+            return EXIT_FAILURE;
 		}
         switch (argv[i][1]) {
             case 't': //test polyline
@@ -163,7 +163,7 @@ int main(int argc,char** argv){
 
                 if (!Services::ReadMdlMesh(in_name,inputs)) {
                     std::cerr << "couldn't read file " << argv[i+1] << std::endl;
-                    return 1;
+                    return EXIT_FAILURE;
                 }
                 in_name_given = true;
                 i++;
@@ -173,7 +173,7 @@ int main(int argc,char** argv){
 
                 if (!Services::ReadPolyFile(in_name,inputs)) {
                     std::cerr << "couldn't read file " << argv[i+1] << std::endl;
-                    return 1;
+                    return EXIT_FAILURE;
                 }
                 in_name_given = true;
                 i++;
@@ -342,6 +342,6 @@ int main(int argc,char** argv){
         delete *rriter;
     }
     
-	return 0;
+	return EXIT_SUCCESS;
 }
 
