@@ -145,5 +145,6 @@ public:
     //-------------------------------------------------------------------
     static bool WriteMeshGetfem(std::string name, FEMesh &output);
 };
+
 }
 #endif

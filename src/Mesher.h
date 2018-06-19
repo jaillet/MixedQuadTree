@@ -102,6 +102,8 @@ namespace Clobscode
                                               const string &name);*/
 		
         virtual void generateGridMesh(Polyline &input);
+        
+        virtual void detectFeatureQuadrants(Polyline &input);
 		
 		virtual void linkElementsToNodes();
 

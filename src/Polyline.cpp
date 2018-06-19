@@ -378,9 +378,47 @@ namespace Clobscode
         return bIsIn;
     }
     
+    list<Point3D> Polyline::getFeatureProjection(const Quadrant &q,
+                                                 vector<MeshPoint> &mp) {
+        
+        list<unsigned int> iEdges = q.getIntersectedEdges();
+        list<Point3D> fes;
+        if (iEdges.size()<2) {
+            return fes;
+        }
+        
+        vector<unsigned int> iNodes;
+        for (const auto iEdg:iEdges) {
+            iNodes.push_back(mEdges[iEdg][0]);
+            iNodes.push_back(mEdges[iEdg][1]);
+        }
+        std::sort(iNodes.begin(),iNodes.end());
+        
+        //FJA: we want to test only the intersection, not the extremities of the edges
+        // the feature should lies IN the quadrant
+        list<unsigned int> iCommonNodes;
+        for (unsigned int i=1; i<iNodes.size(); ++i) {
+            if (iNodes.at(i-1)==iNodes.at(i)){
+                iCommonNodes.push_back(iNodes[i]); //insert duplicate
+                ++i; //skip next duplicate item
+            }
+        }
+        
+        for (auto iNd:iCommonNodes) {
+            //if angle is between 150 and 210 grades, then is not a sharp feature:
+            if (mVerticesAngles[iNd]<2.61799 || mVerticesAngles[iNd]>3.66519) {
+                //std::cout << " " << iNd << std::flush;
+                fes.push_back(mVertices[iNd]);
+            }
+        }
+        return fes;
+    }
+    
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    bool Polyline::hasFeature(const list<unsigned int> &iEdges) const {
+    bool Polyline::hasFeature(const Quadrant &q, vector<MeshPoint> &mp) const {
+        
+        list<unsigned int> iEdges = q.getIntersectedEdges();
         
         if (iEdges.size()<2) {
             return false;
@@ -392,7 +430,6 @@ namespace Clobscode
             iNodes.push_back(mEdges[iEdg][1]);
         }
         std::sort(iNodes.begin(),iNodes.end());
-        //iNodes.unique();
 
         //FJA: we want to test only the intersection, not the extremities of the edges
         // the feature should lies IN the quadrant
@@ -407,8 +444,8 @@ namespace Clobscode
         for (auto iNd:iCommonNodes) {
             //if angle is between 150 and 210 grades, then is not a sharp feature:
             if (mVerticesAngles[iNd]<2.61799 || mVerticesAngles[iNd]>3.66519) {
-                std::cout << " " << iNd << std::flush;
-                return true;
+                //std::cout << " " << iNd << std::flush;
+                return q.pointInside(mp,mVertices[iNd]);
             }
         }
         return false;

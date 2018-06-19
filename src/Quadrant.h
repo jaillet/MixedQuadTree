@@ -82,6 +82,8 @@ namespace Clobscode
         virtual bool isInside() const;
 		
         virtual bool intersectsSurface() const;
+        
+        virtual bool pointInside(vector<MeshPoint> &mp, const Point3D &p) const;
 		
 		virtual unsigned short &getRefinementLevel();
 		
@@ -107,6 +109,10 @@ namespace Clobscode
         virtual bool isSurface() const;
 		
         virtual void setIntersectedEdges(list<unsigned int> &iedges);
+        
+        virtual void setFeature();
+        
+        virtual bool hasFeature() const;
 
     protected:
         
@@ -122,10 +128,18 @@ namespace Clobscode
 		unsigned short n_influences;
 		bool influence_commit;
 		bool surface;
+        bool feature;
 		
 		double max_dis;
 	};
 	
+    inline void Quadrant::setFeature() {
+        feature = true;
+    }
+    
+    inline bool Quadrant::hasFeature() const {
+        return feature;
+    }
 	
     inline const vector<unsigned int> &Quadrant::getPointIndex() const{
 		return pointindex;
