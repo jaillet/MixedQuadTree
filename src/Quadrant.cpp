@@ -51,19 +51,27 @@ namespace Clobscode
     bool Quadrant::badAngle(const unsigned int &nIdx, vector<MeshPoint> &mp) const {
         
         
-        unsigned int i0, i2;
-        Point3D P1 = mp[nIdx].getPoint(), P0, P2;
+        unsigned int i0 = (4+nIdx-1)%4, i2=(nIdx+1)%4;
+        cout << nIdx << "(" << pointindex.at(nIdx) << ") -> ";
+        cout <<  i0 << " " << i2;
+        
+        
+        Point3D P1 = mp.at(pointindex.at(nIdx)).getPoint(), P0, P2;
 
-        P0 = mp[(4+nIdx-1)%4].getPoint();
-        P2 = mp[(nIdx+1)%4].getPoint();
+        P0 = mp.at(pointindex.at(i0)).getPoint();
+        P2 = mp.at(pointindex.at(i2)).getPoint();
         
         Point3D V1 = P0-P1, V2 = P2-P1;
         V1.normalize();
         V2.normalize();
         double angle = acos(V1.dot(V2));
-        /*if (angle<2.61799 || angle>3.66519) {
+        cout << " " << angle;
+        
+        //if the angle is smoth, then it is bad angle that should be
+        //managed with transition patterns
+        if (angle>2.61799 && angle<3.66519) {
             return true;
-        }*/
+        }
         return false;
         
     }
@@ -83,7 +91,7 @@ namespace Clobscode
             return false;
         }
         
-        cout << "Quadrant with feature\n" << minp << " " << maxp << " -> " << p << "\n";
+        //cout << "Quadrant with feature\n" << minp << " " << maxp << " -> " << p << "\n";
         return true;
     }
 

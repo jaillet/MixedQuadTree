@@ -1246,12 +1246,12 @@ namespace Clobscode
                 }
             }
             else {
-                unsigned int inNod = 0, oneN=0, oneF;
+                unsigned int inNod = 0, oneN=0, oneF=0;
                 
                 vector<unsigned int> octIndx = Quadrants[i].getPointIndex();
                 
                 cout << "Feature Octant: ";
-                for (unsigned int j=0; j<octIndx.size(); j++) {
+                for (unsigned int j=0; j<4; j++) {
                     if (points[octIndx[j]].isInside()) {
                         cout << "I";
                         inNod++;
@@ -1275,8 +1275,8 @@ namespace Clobscode
                 }
                 if (inNod==3) {
                     if (Quadrants[i].badAngle(oneF,points)) {
-                        //cout << " surface 3In";
-                        //Quadrants[i].accept(&stv);
+                        cout << " surface 3In";
+                        Quadrants[i].accept(&stv);
                     }
                 }
                 
@@ -1457,34 +1457,34 @@ namespace Clobscode
         //surface" and "outside" nodes, remove it.
         list<unsigned int> in_nodes;
 
-        for (unsigned int i=0; i<Quadrants.size(); i++) {
-            if (!Quadrants[i].isSurface()) {
+        for (auto q:Quadrants) {
+            if (!q.isSurface()) {
                 continue;
             }
-            Quadrants[i].computeMaxDistance(points);
+            q.computeMaxDistance(points);
         }
         
         //Manage Quadrants with Features first
-        for (unsigned int i=0; i<Quadrants.size(); i++) {
-            if (!Quadrants[i].hasFeature()) {
+        for (auto q:Quadrants) {
+            if (!q.hasFeature()) {
                 continue;
             }
             
-            list<Point3D> fs = input.getFeatureProjection(Quadrants[i],points);
-            const vector<unsigned int> &epts = Quadrants[i].getPointIndex();
-            double md = Quadrants[i].getMaxDistance();
+            list<Point3D> fs = input.getFeatureProjection(q,points);
+            const vector<unsigned int> &epts = q.getPointIndex();
+            double md = q.getMaxDistance();
             
-            for (unsigned int j=0; j < epts.size(); j++) {
-                points[epts[j]].setMaxDistance(md);
+            for (auto pIdx:epts) {
+                points.at(pIdx).setMaxDistance(md);
             }
             
             unsigned int fsNum = fs.size();
             
-            for (unsigned int j=0; j < epts.size(); j++) {
-                if (points[epts[j]].isInside() && fsNum!=0) {
+            for (auto pIdx:epts) {
+                if (points[pIdx].isInside() && fsNum!=0) {
                 
-                    const Point3D &current = points[epts[j]].getPoint();
-                    double best = md;
+                    const Point3D &current = points[pIdx].getPoint();
+                    double best = std::numeric_limits<double>::infinity();
                     Point3D candidate;
                     
                     //we use a list and interator to erase the projected node
@@ -1495,7 +1495,7 @@ namespace Clobscode
                         Point3D projected = *iter;
                         double dis = (current - projected).Norm();
                         
-                        if(points[epts[j]].getMaxDistance()>dis && best>dis){
+                        if(points[pIdx].getMaxDistance()>dis && best>dis){
                             best = dis;
                             candidate = projected;
                             bIter = iter;
@@ -1505,13 +1505,13 @@ namespace Clobscode
                     
                     if (push) {
                         fs.erase(bIter);
-                        points[epts[j]].setProjected();
-                        points[epts[j]].setPoint(candidate);
-                        points[epts[j]].featureProjected();
-                        for (auto pe:points[epts[j]].getElements()) {
+                        points[pIdx].setProjected();
+                        points[pIdx].setPoint(candidate);
+                        points[pIdx].featureProjected();
+                        for (auto pe:points[pIdx].getElements()) {
                             
                             //this should be studied further.
-                            if (Quadrants[pe].intersectsSurface()) {
+                            if (Quadrants.at(pe).intersectsSurface()) {
                                 Quadrants[pe].setSurface();
                             }
                         }
@@ -1529,7 +1529,9 @@ namespace Clobscode
 
             //Put in a std::list inside nodes of boundary elements that
             //may be projected to the input domain.
-            const vector<unsigned int> &epts = Quadrants[i].getPointIndex();
+            const vector<unsigned int> &epts = Quadrants.at(i).getPointIndex();
+            double md = Quadrants[i].getMaxDistance();
+            
             for (unsigned int j=0; j < epts.size(); j++) {
 
                 if (!points[epts[j]].wasOutsideChecked()) {
@@ -1544,14 +1546,13 @@ namespace Clobscode
                     }
                 }
                 if (points[epts[j]].isInside()) {
-                    in_nodes.push_back(epts[j]);
-                    double md = Quadrants[i].getMaxDistance();
+                    in_nodes.push_back(epts.at(j));
                     /*cerr << "warning!! in Mesher::projectCloseToBoundaryNodes\n";
                     cerr << "  hard coded test for Octree j>7 ???\n";
                     if (j>7) {
                         md*=0.5;
                     }*/
-                    points[epts[j]].setMaxDistance(md);
+                    points.at(epts.at(j)).setMaxDistance(md);
                 }
             }
 
