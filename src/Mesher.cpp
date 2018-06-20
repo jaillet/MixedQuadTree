@@ -76,7 +76,7 @@ namespace Clobscode
         //The points of the Quadrant mesh must be saved at this point, otherwise node are
         //projected onto the surface and causes further problems with knowing if nodes
         //are inside, outside or projected.
-        vector<MeshPoint> oct_points = points;
+        const vector<MeshPoint> &oct_points = points;
 
         //link element and node info for code optimization.
         /*
@@ -1072,11 +1072,15 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     void Mesher::detectFeatureQuadrants(Polyline &input) {
+        
+        unsigned int featCount = 0;
         for (unsigned int i=0; i<Quadrants.size(); i++) {
             if (input.hasFeature(Quadrants[i],points)) {
                 Quadrants[i].setFeature();
+                featCount++;
             }
         }
+        cout << "number of quadrants with features: " << featCount << "\n";
     }
     
     //--------------------------------------------------------------------------------
@@ -1121,15 +1125,12 @@ namespace Clobscode
                 }
                 // append qedges to p_edges
                 p_edges.insert(p_edges.end(),qedges.begin(),qedges.end());
-//                for (qe_iter=qedges.begin(); qe_iter!=qedges.end(); ++qe_iter) {
-//                    p_edges.push_back(*qe_iter);
-//                }
             }
 
             p_edges.sort();
             p_edges.unique();
 
-            // p_edges = edges intersected
+            // p_edges: edges intersected
             if (p_edges.empty() || input.pointIsInMesh(points[i].getPoint(),p_edges)) {
                 points[i].setInside();
             }
@@ -1182,6 +1183,7 @@ namespace Clobscode
                     newele.push_back(Quadrants[i]);
                 }
             }
+
             /*bool onein = false;
              vector<unsigned int> epts = Quadrants[i].getPoints();
 

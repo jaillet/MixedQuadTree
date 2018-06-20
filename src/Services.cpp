@@ -661,7 +661,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-bool Services::WriteQuadtreeMesh(std::string name, vector<MeshPoint> &points,
+bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &points,
                                  vector<Quadrant> &Quadrants,
                                  set<QuadEdge> &edges,
                                  unsigned int nels,

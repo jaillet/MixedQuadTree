@@ -107,7 +107,7 @@ public:
 
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
-    static bool WriteQuadtreeMesh(std::string name, vector<MeshPoint> &points,
+    static bool WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &points,
                                   vector<Quadrant> &Quadrants,
                                   set<QuadEdge> &edges,
                                   unsigned int nels,
