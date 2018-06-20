@@ -66,14 +66,16 @@ namespace PolyMesh
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    unsigned int &PolyEdge::operator[](unsigned int pos){
-        return inodes.at(pos);
+    inline unsigned int &PolyEdge::operator[](unsigned int pos){
+        //return inodes.at(pos);
+        return inodes[pos];
     }
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    unsigned int PolyEdge::operator[](unsigned int pos) const{
-        return inodes.at(pos);
+    inline unsigned int PolyEdge::operator[](unsigned int pos) const{
+        //return inodes.at(pos);
+        return inodes[pos];
     }
 
     //--------------------------------------------------------------------------------

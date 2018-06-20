@@ -785,7 +785,7 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
         fprintf(f,"%i", np);
 
         for (unsigned int j= 0; j<np; j++) {
-            fprintf(f," %i", epts.at(j));
+            fprintf(f," %i", epts[j]);
         }
 
         fprintf(f,"\n");
@@ -876,7 +876,7 @@ bool Services::WriteOFF(std::string name, FEMesh &output){
             fprintf(f,"%i", np);
 
             for (unsigned int j= 0; j<np; j++) {
-                fprintf(f," %i", epts.at(j));
+                fprintf(f," %i", epts[j]);
             }
 
             if (np==3) {
@@ -895,7 +895,7 @@ bool Services::WriteOFF(std::string name, FEMesh &output){
         fprintf(f,"%i", np);
 
         for (unsigned int j= 0; j<np; j++) {
-            fprintf(f," %i", epts.at(j));
+            fprintf(f," %i", epts[j]);
         }
 
         if (colored[i]!=0) {
@@ -1039,7 +1039,7 @@ bool Services::WriteMixedVolumeMesh(std::string name, FEMesh &output){
         }
 
         for (unsigned int j= 0; j<np; j++) {
-            fprintf(f," %i", epts.at(j));
+            fprintf(f," %i", epts[j]);
         }
 
         fprintf(f,"\n");
@@ -1096,7 +1096,7 @@ bool Services::WriteOutputMesh(std::string name, FEMesh &output){
         }
 
         for (unsigned int j= 0; j<np; j++) {
-            fprintf(f," %i", epts.at(j));
+            fprintf(f," %i", epts[j]);
         }
 
         fprintf(f," 1000.0 0.45 1.0\n");
@@ -1167,7 +1167,7 @@ bool Services::WriteMeshGetfem(std::string name, FEMesh &output){
         }
 
         for (unsigned int j= 0; j<np; j++) {
-            fprintf(f," %i", epts.at(j));
+            fprintf(f," %i", epts[j]);
         }
 
         fprintf(f,"\n");

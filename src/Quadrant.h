@@ -222,6 +222,6 @@ namespace Clobscode
         intersected_edges = iedges;
 	}
 	
-	std::ostream& operator<<(ostream& o,Quadrant &e);
+    std::ostream& operator<<(ostream& o,Quadrant &q);
 }
 #endif
