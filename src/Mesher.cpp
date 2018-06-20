@@ -1252,7 +1252,7 @@ namespace Clobscode
                 }
             }
             else {
-                unsigned int inNod = 0, oneN=0, oneF=100001;
+                unsigned int inNod = 0, oneN=0, oneF=0;
                 
                 vector<unsigned int> octIndx = q.getPointIndex();
                 

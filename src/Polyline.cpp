@@ -134,7 +134,6 @@ namespace Clobscode
                 continue;
             }
             unsigned int i0, i2;
-            Point3D P1 = mVertices[i], P0, P2;
             i0 = mEdges[seg_per_node[i][0]][0];
             if (i==i0) {
                 i0 = mEdges[seg_per_node[i][0]][1];
@@ -143,8 +142,9 @@ namespace Clobscode
             if (i==i2) {
                 i2 = mEdges[seg_per_node[i][1]][1];
             }
-            P0 = mVertices[i0];
-            P2 = mVertices[i2];
+            const Point3D &P1 = mVertices[i],
+                    &P0 = mVertices[i0],
+                    &P2 = mVertices[i2];
             
             mVerticesAngles[i]= P1.angle3Points(P0,P2);
             //normalize
