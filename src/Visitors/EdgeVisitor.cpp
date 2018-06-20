@@ -67,6 +67,8 @@ void EdgeVisitor::insertEdges(Quadrant *q, set<QuadEdge> &edges) {
                 e1 = pointindex[0];
                 break;
             default:
+                std::cerr << "In EdgeVisitor::getEdge(Quadrant *q, unsigned int idx, QuadEdge &e),"
+                          << "bad idx value=" << idx << std::endl;
                 break;
         }
         // REM: possible name confusion with std::assign

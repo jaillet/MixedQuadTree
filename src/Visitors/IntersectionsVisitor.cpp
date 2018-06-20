@@ -311,8 +311,9 @@ namespace Clobscode
             }
         }
 
-        //std::cerr << "Warning IntersectionsVisitor::clipGeneralCase()\n";
-        //std::cerr << "  FJA: usefull to test z in 2D???? as dz=0 and t=NaN\n";
+        /*
+        std::cerr << "Warning IntersectionsVisitor::clipGeneralCase()\n";
+        std::cerr << "  FJA: usefull to test z in 2D???? as dz=0 and t=NaN\n";
 
         //test Z axis over Z_min
         t = (pmin[2]-p1[2])/dz;
@@ -348,7 +349,7 @@ namespace Clobscode
                     return true;
                 }
             }
-        }
+        } */
 
         return false;
     }

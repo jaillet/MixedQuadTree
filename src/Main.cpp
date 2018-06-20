@@ -57,25 +57,27 @@ namespace chrono = std::chrono;
 //-------------------------------------------------------------------
 
 void endMsg(){
-	cout << "use: ./mesher [-p] input.poly [-u] output\n";
-    cout << "              [-s] ref_level [-a] ref_level [-b] file.reg\n";
-    cout << "              [-r] input_surface rl [-g] [-v]\n";
-	cout << "where:\n";
-	cout << "  one of the parameters must be an input surface mesh in\n";
-    cout << "  mdl or off format. If output name is not provided it\n";
-	cout << "  will be saved in input_name.m3d. Options:\n";
-	cout << "    -s Refine Quadrants intersecting the input surface.\n";
-    cout << "       Parameter ref_level is the refinement level\n";
-    cout << "    -a Refine all elements in the input domain.\n";
-    cout << "       Parameter ref_level is the refinement level\n";
-	cout << "    -b Refine block regions provided in file file.reg\n";
-    cout << "    -r Refine surface region. Will refine all the elements\n";
-    cout << "       in the provided input_surface at level rl\n";
-    cout << "    -g save output mesh in GetFem format (gmf) \n";
-    cout << "    -v save output mesh in VTK ASCII format (vtk)\n";
-    cout << "    -m save output mesh in M3D ASCII format (m3d)\n";
-    cout << "    -i save output mesh in MVM ASCII format (mvm)\n";
-    cout << "    -o save output mesh in OFF ASCII format (off)\n";
+    cout << std::flush;
+    cerr << "use: ./mesher [-p] input.poly [-u] output\n";
+    cerr << "              [-s] ref_level [-a] ref_level [-b] file.reg\n";
+    cerr << "              [-r] input_surface rl [-g] [-v]\n";
+    cerr << "where:\n";
+    cerr << "  one of the parameters must be an input surface mesh in\n";
+    cerr << "  mdl or off format. If output name is not provided it\n";
+    cerr << "  will be saved in input_name.m3d. Options:\n";
+    cerr << "    -s Refine Quadrants intersecting the input surface.\n";
+    cerr << "       Parameter ref_level is the refinement level\n";
+    cerr << "    -a Refine all elements in the input domain.\n";
+    cerr << "       Parameter ref_level is the refinement level\n";
+    cerr << "    -b Refine block regions provided in file file.reg\n";
+    cerr << "    -r Refine surface region. Will refine all the elements\n";
+    cerr << "       in the provided input_surface at level rl\n";
+    cerr << "    -q if supported (only VTK by now), write quality attributes to output file.\n";
+    cerr << "    -g save output mesh in GetFem format (gmf) \n";
+    cerr << "    -v save output mesh + input in VTK ASCII format (vtk)\n";
+    cerr << "    -m save output mesh in M3D ASCII format (m3d)\n";
+    cerr << "    -i save output mesh in MVM ASCII format (mvm)\n";
+    cerr << "    -o save output mesh in OFF ASCII format (off)\n";
 }
 
 //-------------------------------------------------------------------
@@ -85,7 +87,7 @@ int main(int argc,char** argv){
 	
     if (argc<4) {
         endMsg();
-        return 0;
+        return EXIT_FAILURE;
     }
     
 	//const int n_meshes = 1;
@@ -112,6 +114,7 @@ int main(int argc,char** argv){
     
     bool getfem=false, vtkformat=false, Quadrant_start=false, m3dfor=false;
     bool mvmfor=false, offfor=false;
+    bool decoration=false; //if supported, write quality attributes to output file
     
     //for reading an Quadrant mesh as starting point.
     vector<MeshPoint> oct_points;
@@ -125,23 +128,15 @@ int main(int argc,char** argv){
 		if (argv[i][0]!='-') {
 			cout << "Error: expected option -X and got " << argv[i] << "\n";
 			endMsg();
-			return 0;
+            return EXIT_FAILURE;
 		}
         
         bool inout = false;
         switch (argv[i][1]) {
             case 'g':
-                inout = true;
-                break;
             case 'v':
-                inout = true;
-                break;
             case 'm':
-                inout = true;
-                break;
             case 'i':
-                inout = true;
-                break;
             case 'o':
                 inout = true;
                 break;
@@ -150,9 +145,9 @@ int main(int argc,char** argv){
         }
         
         if (argc==i+1 && !inout) {
-			cout << "Error: expected argument for option " << argv[i] << "\n";
+            std::cerr << "Error: expected argument for option " << argv[i] << "\n" << std::flush;
 			endMsg();
-			return 0;
+            exit (EXIT_FAILURE);
 		}
         switch (argv[i][1]) {
             case 't': //test polyline
@@ -185,7 +180,7 @@ int main(int argc,char** argv){
 
                 if (!Services::ReadMdlMesh(in_name,inputs)) {
                     std::cerr << "couldn't read file " << argv[i+1] << std::endl;
-                    return 1;
+                    return EXIT_FAILURE;
                 }
                 in_name_given = true;
                 i++;
@@ -195,7 +190,7 @@ int main(int argc,char** argv){
 
                 if (!Services::ReadPolyFile(in_name,inputs)) {
                     std::cerr << "couldn't read file " << argv[i+1] << std::endl;
-                    return 1;
+                    return EXIT_FAILURE;
                 }
                 in_name_given = true;
                 i++;
@@ -210,6 +205,9 @@ int main(int argc,char** argv){
                 break;
             case 'v':
                 vtkformat = true;
+                break;
+            case 'q':
+                decoration = true;
                 break;
             case 'm':
                 m3dfor = true;
@@ -324,7 +322,7 @@ int main(int argc,char** argv){
     Clobscode::FEMesh output;
     
     if (!Quadrant_start) {
-        output = mesher.generateMesh(inputs.at(0),ref_level,out_name,all_regions);
+        output = mesher.generateMesh(inputs.at(0),ref_level,out_name,all_regions,decoration);
     }
     else {
         mesher.setInitialState(oct_points,oct_Quadrants,oct_edges);
@@ -332,7 +330,7 @@ int main(int argc,char** argv){
             omaxrl = ref_level;
         }
         output = mesher.refineMesh(inputs.at(0),ref_level,out_name,roctli,
-                                   all_regions,gt,cminrl,omaxrl);
+                                   all_regions,gt,cminrl,omaxrl,decoration);
     }
     
     
@@ -364,6 +362,6 @@ int main(int argc,char** argv){
         delete *rriter;
     }
     
-	return 0;
+	return EXIT_SUCCESS;
 }
 

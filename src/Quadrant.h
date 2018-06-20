@@ -101,7 +101,7 @@ namespace Clobscode
 		
         virtual double getMaxDistance() const;
         
-        virtual bool badAngle(const unsigned int &nIdx, vector<MeshPoint> &mp) const;
+        virtual bool badAngle(unsigned int nIdx, const vector<MeshPoint> &mp) const;
 		
 		//flag for inside Quadrants that due to "inside node" moved
 		//to the input domain, it must be treated as a surface
@@ -222,6 +222,6 @@ namespace Clobscode
         intersected_edges = iedges;
 	}
 	
-	std::ostream& operator<<(ostream& o,Quadrant &e);
+    std::ostream& operator<<(ostream& o,Quadrant &q);
 }
 #endif

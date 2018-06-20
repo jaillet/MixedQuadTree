@@ -40,6 +40,9 @@ using Clobscode::Polyline;
 
 namespace Clobscode
 {	
+    double toDegrees(double rad);
+    double toRadians(double deg);
+
 	class GeometricTransform{
 		
 	public:
@@ -79,9 +82,6 @@ namespace Clobscode
         virtual double &getZAxis();
         
         virtual bool Default();
-
-        virtual double toDegrees(double rad) { return rad*57.2957795; }
-        virtual double toRadians(double deg) { return deg/57.2957795; }
 
 	protected:
 		
