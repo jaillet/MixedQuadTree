@@ -157,7 +157,7 @@ namespace Clobscode
 
         projectCloseToBoundaryNodes(input);
         //removeOnSurface(input);
-        
+        /*
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
         Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
@@ -171,7 +171,7 @@ namespace Clobscode
         
         //apply the surface Patterns
         applySurfacePatterns(input);
-        removeOnSurface(input);
+        removeOnSurface(input);*/
 
         if (rotated) {
             // rotate the mesh
@@ -1067,11 +1067,15 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     void Mesher::detectFeatureQuadrants(Polyline &input) {
+        
+        unsigned int featCount = 0;
         for (unsigned int i=0; i<Quadrants.size(); i++) {
             if (input.hasFeature(Quadrants[i],points)) {
                 Quadrants[i].setFeature();
+                featCount++;
             }
         }
+        cout << "number of quadrants with features: " << featCount << "\n";
     }
     
     //--------------------------------------------------------------------------------
@@ -1116,15 +1120,12 @@ namespace Clobscode
                 }
                 // append qedges to p_edges
                 p_edges.insert(p_edges.end(),qedges.begin(),qedges.end());
-//                for (qe_iter=qedges.begin(); qe_iter!=qedges.end(); ++qe_iter) {
-//                    p_edges.push_back(*qe_iter);
-//                }
             }
 
             p_edges.sort();
             p_edges.unique();
 
-            // p_edges = edges intersected
+            // p_edges: edges intersected
             if (p_edges.empty() || input.pointIsInMesh(points[i].getPoint(),p_edges)) {
                 points[i].setInside();
             }
