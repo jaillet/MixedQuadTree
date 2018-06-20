@@ -831,7 +831,10 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
         fprintf(f,"\nLOOKUP_TABLE min");
         for (unsigned int i=0; i<minAngles.size(); i++) {
             if (i%30==0) {fprintf(f,"\n");}
-            fprintf(f," %d", (int) toDegrees(minAngles[i]));
+            if (elements[i].size()==3) //triangle
+                fprintf(f," %d", (int) (60.-toDegrees(minAngles[i])));
+            else //quad
+                fprintf(f," %d", (int) (90.-toDegrees(minAngles[i])));
         }
     }
 

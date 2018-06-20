@@ -331,7 +331,7 @@ namespace Clobscode
                     projWhere=projWhere_tmp;
                     found = true;
                     if (isOn) // lies on edge, no need to continue
-                        break;
+                        return false; //break;
                 }
             }
         }
