@@ -52,13 +52,11 @@ namespace Clobscode
         void setPoints(vector<MeshPoint> &meshpts);
         void setNewPoints(list<MeshPoint> &newpts);
         void setInput(Polyline &input);
-        void setIdx(unsigned int &e_idx);
 
     private:
         vector<MeshPoint> *meshpts;
         list<MeshPoint> *newpts;
         Polyline *input;
-        unsigned int *e_idx;
 
         bool applyHexSurfaceTemplates(Quadrant *o,
                                       vector<unsigned int> &inpts,

@@ -31,7 +31,6 @@ namespace Clobscode
         meshpts = NULL;
         //newpts = NULL;
         input = NULL;
-        e_idx = NULL;
     }
 
 
@@ -46,10 +45,6 @@ namespace Clobscode
 
     void SurfaceTemplatesVisitor::setInput(Polyline &input) {
         this->input = &input;
-    }
-
-    void SurfaceTemplatesVisitor::setIdx(unsigned int &e_idx) {
-        this->e_idx = &e_idx;
     }
 
     bool SurfaceTemplatesVisitor::visit(Quadrant *o) {

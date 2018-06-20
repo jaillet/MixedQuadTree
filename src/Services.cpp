@@ -844,9 +844,9 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
 //-------------------------------------------------------------------
 bool Services::WriteOFF(std::string name, FEMesh &output){
 
-    const vector<Point3D> points = output.getPoints();
-    const vector<vector<unsigned int> > elements = output.getElements();
-    const vector<unsigned int> colored = output.getColoredCells();
+    const vector<Point3D> &points = output.getPoints();
+    const vector<vector<unsigned int> > &elements = output.getElements();
+    const vector<unsigned int> &colored = output.getColoredCells();
 
     if (elements.empty()) {
         std::cout << "no output elements\n";
