@@ -57,7 +57,7 @@ namespace Clobscode
                               const string &name, list<unsigned int> &roctli,
                               list<RefinementRegion *> &all_reg,
                               GeometricTransform &gt, const unsigned short &minrl,
-                              const unsigned short &omaxrl){
+                              const unsigned short &omaxrl, bool decoration){
 
         //Note: rotation are not enabled when refining an already produced mesh.
         bool rotated = !gt.Default();
@@ -113,7 +113,7 @@ namespace Clobscode
         FEMesh mesh;
 
         //save the data of the mesh
-        saveOutputMesh(mesh);
+        saveOutputMesh(mesh,decoration);
 
         return mesh;
     }
@@ -127,7 +127,7 @@ namespace Clobscode
     //Then split each initial element 8^rl times (where rl stands
     //for Refinement Level).
     FEMesh Mesher::generateMesh(Polyline &input, const unsigned short &rl,
-                                const string &name, list<RefinementRegion *> &all_reg){
+                                const string &name, list<RefinementRegion *> &all_reg, bool decoration){
 
         //ATTENTION: geometric transform causes invalid input rotation when the
         //input is a cube.
@@ -188,7 +188,7 @@ namespace Clobscode
         FEMesh mesh;
 
         //save the data of the mesh in its final state
-        saveOutputMesh(mesh);
+        saveOutputMesh(mesh,decoration);
         
         
         //Debugging:
@@ -271,6 +271,7 @@ namespace Clobscode
                 Quadrants.push_back(o);
             }
         }
+        /* debug log
         std::cerr << "QuadEdges cont:";
         for (auto it=QuadEdges.begin(); it!=QuadEdges.end(); ++it)
             std::cerr << " -" << *it;
@@ -278,7 +279,7 @@ namespace Clobscode
         std::cerr << "Quadrants contains:";
         for (auto it=Quadrants.begin(); it!=Quadrants.end(); ++it)
             std::cerr << " -" << *it;
-        std::cerr << '\n'<< std::flush;
+        std::cerr << '\n'<< std::flush; */
 
     }
 
@@ -970,11 +971,11 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
-    unsigned int Mesher::saveOutputMesh(FEMesh &mesh){
+    unsigned int Mesher::saveOutputMesh(FEMesh &mesh,bool decoration){
 
-        vector<Point3D> out_pts;
         vector<vector<unsigned int> > out_els;
-        list<vector<unsigned int> >tmp_els;
+        vector<unsigned short > out_els_ref_level;
+        vector<double > out_els_min_angle;
 
         //new_idxs will hold the index of used nodes in the outside vector for points.
         //If the a node is not used by any element, its index will be 0 in this vector,
@@ -982,7 +983,7 @@ namespace Clobscode
         //and node n is node n+1.
         vector<unsigned int> new_idxs (points.size(),0);
         unsigned int out_node_count = 0;
-        list<Point3D> out_points_tmp;
+        vector<Point3D> out_pts;
 
         //recompute node indexes and update elements with them.
         for (unsigned int i=0; i<Quadrants.size(); i++) {
@@ -997,32 +998,36 @@ namespace Clobscode
                     if (new_idxs[p_idx]==0) {
                         sub_ele_new_idxs[k] = out_node_count++;
                         new_idxs[p_idx]=out_node_count;
-                        out_points_tmp.push_back(points[p_idx].getPoint());
+                        out_pts.push_back(points[p_idx].getPoint());
                     }
                     else {
                         sub_ele_new_idxs[k] = new_idxs[p_idx]-1;
                     }
                 }
-                tmp_els.push_back(sub_ele_new_idxs);
+                if (decoration) {
+                    //refinment level herited from quad
+                    out_els_ref_level.push_back(Quadrants[i].getRefinementLevel());
+                    //compute minAngle
+                    int np=sub_ele_new_idxs.size(); //nb points of the element
+                    double minAngle=std::numeric_limits<double>::infinity();
+                    for (int i=0; i<np; ++i) {
+
+                        const Point3D &P0 = out_pts[sub_ele_new_idxs[(i-1+np)%np]];
+                        const Point3D &P1 = out_pts[sub_ele_new_idxs[i]];
+                        const Point3D &P2 = out_pts[sub_ele_new_idxs[(i+1)%np]];
+
+                        minAngle=std::min(minAngle, P1.angle3Points(P0,P2));
+                    }
+                    out_els_min_angle.push_back(minAngle);
+                }
+                out_els.push_back(sub_ele_new_idxs);
             }
-        }
-
-        //write output elements
-        out_els.reserve(tmp_els.size());
-        list<vector<unsigned int> >::iterator iter;
-        for (iter=tmp_els.begin(); iter!=tmp_els.end(); ++iter) {
-            out_els.push_back(*iter);
-        }
-
-        //write output points
-        list<Point3D>::iterator opi;
-        out_pts.reserve(out_points_tmp.size());
-        for (opi=out_points_tmp.begin(); opi!=out_points_tmp.end(); opi++) {
-            out_pts.push_back(*opi);
         }
 
         mesh.setPoints(out_pts);
         mesh.setElements(out_els);
+        mesh.setRefLevels(out_els_ref_level);
+        mesh.setMinAngles(out_els_min_angle);
         return out_els.size();
     }
 
@@ -1167,16 +1172,16 @@ namespace Clobscode
                     newele.push_back(Quadrants[i]);
                 }
             }
-        
+            else { //FJA add a "else" here as somme quadrants are inserted twice
 
-            //if (Quadrants[i].removeOutsideSubElements(points)) {
-            if (Quadrants[i].accept(&rsv)) {
-                removed.push_back(Quadrants[i]);
+                //if (Quadrants[i].removeOutsideSubElements(points)) {
+                if (Quadrants[i].accept(&rsv)) {
+                    removed.push_back(Quadrants[i]);
+                }
+                else {
+                    newele.push_back(Quadrants[i]);
+                }
             }
-            else {
-                newele.push_back(Quadrants[i]);
-            }
-
             /*bool onein = false;
              vector<unsigned int> epts = Quadrants[i].getPoints();
 
@@ -1215,7 +1220,7 @@ namespace Clobscode
 
     void Mesher::applySurfacePatterns(Polyline &input){
         
-        //apply patters to avoid flat, invalid and
+        //apply patterns to avoid flat, invalid and
         //poor quality elements.
         SurfaceTemplatesVisitor stv;
         stv.setPoints(points);
@@ -1246,7 +1251,7 @@ namespace Clobscode
                 }
             }
             else {
-                unsigned int inNod = 0, oneN=0, oneF;
+                unsigned int inNod = 0, oneN=0, oneF=100001;
                 
                 vector<unsigned int> octIndx = Quadrants[i].getPointIndex();
                 
@@ -1273,10 +1278,10 @@ namespace Clobscode
                         Quadrants[i].accept(&stv);
                     }
                 }
-                if (inNod==3) {
-                    if (Quadrants[i].badAngle(oneF,points)) {
-                        //cout << " surface 3In";
-                        //Quadrants[i].accept(&stv);
+                else if (inNod==3) {
+                    if (Quadrants[i].badAngle(oneF, points)) {
+                        cout << " surface 3In";
+                        Quadrants[i].accept(&stv);
                     }
                 }
                 

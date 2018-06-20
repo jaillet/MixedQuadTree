@@ -24,19 +24,9 @@
 **/
 
 #include "Services.h"
-#include "FEMesh.h"
-#include "RefinementCubeRegion.h"
-#include "RefinementSurfaceRegion.h"
-#include "RefinementInputSurfaceRegion.h"
-#include "RefinementAllRegion.h"
-#include "MeshPoint.h"
-#include "Quadrant.h"
-#include "QuadEdge.h"
-#include "Visitors/EdgeVisitor.h"
-#include <stdlib.h>
+#include <string.h>
 #include <iostream>
 #include <fstream>
-#include <set>
 #include <algorithm>    // std::find_if
 
 using Clobscode::Point3D;
@@ -46,7 +36,6 @@ using Clobscode::Quadrant;
 using Clobscode::QuadEdge;
 using std::vector;
 using std::string;
-using std::set;
 
 namespace Clobscode
 {
@@ -406,14 +395,14 @@ bool Services::ReadPolyFile(std::string name,
             }
             for (int j=0; j<nattribs;++j) {
                 std::fscanf(file,"%s",word);
-                std::cerr << "Skipping this node attribute " << word << "\n";
+                //std::cerr << "Skipping this node attribute " << word << "\n";
             }
             for (int j=0; j<nmarkers;++j) {
                 std::fscanf(file,"%s",word);
-                std::cerr << "Skipping this node marker " << word << "\n";
+                //std::cerr << "Skipping this node marker " << word << "\n";
             }
-            Point3D p (x,y,z);
-            pts.push_back(p);
+
+            pts.push_back( Point3D(x,y,z));
 
             ++i;
         }
@@ -464,7 +453,7 @@ bool Services::ReadPolyFile(std::string name,
             //read some unnecessary for the moment integers
             for(int j=0;j<nmarkers;j++) {
                 std::fscanf(file,"%s",word);
-                std::cerr << "Skipping this edge marker " << word << "\n";
+                //std::cerr << "Skipping this edge marker " << word << "\n";
             }
             alledges.push_back(edgpts);
             ++i;
@@ -488,7 +477,7 @@ bool Services::ReadPolyFile(std::string name,
     }
     cant=atoi(word);
     if (cant>0) {
-        std::cerr << "ReadPolyFile(): feature not yet supported... "
+        std::cerr << "ReadPolyFile(): hole feature not yet supported... "
                   << cant << " hole(s) skipped.\n";
         std::cerr << "  and possibly some regions too.\n";
     }
@@ -795,15 +784,6 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
         unsigned int np = epts.size();
         fprintf(f,"%i", np);
 
-        //                if (np==6) {
-        //                    unsigned int aux = epts[1];
-        //                    epts[1] = epts[2];
-        //                    epts[2] = aux;
-        //                    aux = epts[4];
-        //                    epts[4] = epts[5];
-        //                    epts[5] = aux;
-        //                }
-
         for (unsigned int j= 0; j<np; j++) {
             fprintf(f," %i", epts.at(j));
         }
@@ -811,8 +791,9 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
         fprintf(f,"\n");
     }
 
-    fprintf(f,"\nCELL_TYPES %i\n",(int)elements.size());
+    fprintf(f,"\nCELL_TYPES %i",(int)elements.size());
     for (unsigned int i=0; i<elements.size(); i++) {
+        if (i%30==0) {fprintf(f,"\n"); }
         unsigned int np = elements[i].size();
         if (np == 3) {
             fprintf(f," 5"); //VTK_TRIANGLE
@@ -820,23 +801,39 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
         else if (np == 4){ //VTK_QUAD
             fprintf(f," 9");
         }
-        if (i%10==0) {
-            fprintf(f,"\n");
-        }
     }
 
     fprintf(f,"\nCELL_DATA %i\n",(int)elements.size());
-    fprintf(f,"SCALARS lut int 1\n");
-    fprintf(f,"LOOKUP_TABLE my_table\n");
+    fprintf(f,"SCALARS elemType int 1\n");
+    fprintf(f,"LOOKUP_TABLE my_color");
     for (unsigned int i=0; i<elements.size(); i++) {
-        fprintf(f," %i",elements[i].size()-3);
-        if (i%10==0) {
-            fprintf(f,"\n");
-        }
+        if (i%30==0) {fprintf(f,"\n");}
+        fprintf(f," %lu",elements[i].size()-3);
     }
-    fprintf(f,"LOOKUP_TABLE my_table 2\n");
+    fprintf(f,"\nLOOKUP_TABLE my_color 2\n");
     fprintf(f,"1.0 0.0 1.0 1.0\n");
     fprintf(f,"0.0 1.0 1.0 1.0\n");
+
+    //write refinement levels if computed before (-q option, decoration==true)
+    const vector <unsigned short> &reflevels= output.getRefLevels();
+    if (reflevels.size()>0) {
+        fprintf(f,"\nSCALARS refLevel int 1");
+        fprintf(f,"\nLOOKUP_TABLE default");
+        for (unsigned int i=0; i<reflevels.size(); i++) {
+            if (i%30==0) {fprintf(f,"\n");}
+            fprintf(f," %u",reflevels[i]);
+        }
+    }
+    //write minAngles if computed before (-q option, decoration==true)
+    const vector <double> &minAngles= output.getMinAngles();
+    if (minAngles.size()>0) {
+        fprintf(f,"\n\nSCALARS minAngle int 1");
+        fprintf(f,"\nLOOKUP_TABLE min");
+        for (unsigned int i=0; i<minAngles.size(); i++) {
+            if (i%30==0) {fprintf(f,"\n");}
+            fprintf(f," %d", (int) toDegrees(minAngles[i]));
+        }
+    }
 
     fclose(f);
 
@@ -847,9 +844,9 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
 //-------------------------------------------------------------------
 bool Services::WriteOFF(std::string name, FEMesh &output){
 
-    vector<Point3D> points = output.getPoints();
-    vector<vector<unsigned int> > elements = output.getElements();
-    vector<unsigned int> colored = output.getColoredCells();
+    const vector<Point3D> points = output.getPoints();
+    const vector<vector<unsigned int> > elements = output.getElements();
+    const vector<unsigned int> colored = output.getColoredCells();
 
     if (elements.empty()) {
         std::cout << "no output elements\n";
@@ -874,7 +871,7 @@ bool Services::WriteOFF(std::string name, FEMesh &output){
 
     if (colored.empty()) {
         for (unsigned int i=0; i<elements.size(); i++) {
-            std::vector<unsigned int> epts = elements[i];
+            const std::vector<unsigned int> &epts = elements[i];
             unsigned int np = epts.size();
             fprintf(f,"%i", np);
 
@@ -893,7 +890,7 @@ bool Services::WriteOFF(std::string name, FEMesh &output){
 
     //get all the elements in a std::vector
     for (unsigned int i=0; i<elements.size(); i++) {
-        std::vector<unsigned int> epts = elements[i];
+        const std::vector<unsigned int> &epts = elements[i];
         unsigned int np = epts.size();
         fprintf(f,"%i", np);
 

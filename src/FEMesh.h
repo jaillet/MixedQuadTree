@@ -59,15 +59,30 @@ namespace Clobscode
         
         virtual const vector<unsigned int> &getColoredCells();
 
+        //For decoration
+        virtual const vector<unsigned short> &getRefLevels() const;
+        virtual void setRefLevels(const vector<unsigned short> &rl);
+
+        virtual const vector <double> &getMinAngles() const;
+        virtual void setMinAngles(const vector<double> &ma);
+
 	protected:
 		
 		vector<Point3D> points;
-		vector<vector<unsigned int> > elements;
+        vector<vector<unsigned int> > elements;
+        vector <unsigned short> ref_levels;
+        vector <double> min_angles;
         vector<unsigned int> color;
 		list<unsigned int> outpts;
 		
 	};
     
+    inline const vector<unsigned short> &FEMesh::getRefLevels() const {return ref_levels;}
+    inline void FEMesh::setRefLevels(const vector<unsigned short> &rl) {ref_levels=rl;}
+
+    inline const vector<double> &FEMesh::getMinAngles() const {return min_angles;}
+    inline void FEMesh::setMinAngles(const vector<double> &ma) {min_angles=ma;}
+
     inline void FEMesh::setColoredCells(const vector<unsigned int> &colored) {
         color = colored;
     }

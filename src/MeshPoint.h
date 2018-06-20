@@ -52,9 +52,10 @@ namespace Clobscode
 		
 		virtual void setPoint(Point3D &p);
 		
-		//acces method:
-		virtual Point3D &getPoint();
-		
+        //acces method:
+        virtual Point3D &getPoint();
+        virtual const Point3D &getPoint() const;
+
 		virtual void addElement(unsigned int idx);
 		
 		virtual list<unsigned int> &getElements();
@@ -176,10 +177,13 @@ namespace Clobscode
         return feature;
     }
 	
-	inline Point3D &MeshPoint::getPoint(){
-		return point;
-	}
-	
+    inline Point3D &MeshPoint::getPoint(){
+        return point;
+    }
+    inline const Point3D &MeshPoint::getPoint() const {
+        return point;
+    }
+
 	inline void MeshPoint::setPoint(Point3D &p){
 		point = p;
 	}

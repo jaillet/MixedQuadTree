@@ -24,7 +24,7 @@
 **/
 
 #include "Quadrant.h"
-
+#include "GeometricTransform.h"
 
 namespace Clobscode
 {
@@ -35,7 +35,7 @@ namespace Clobscode
 	Quadrant::Quadrant(vector<unsigned int> &epts, 
                    const unsigned short &ref_level)
         :pointindex(epts),ref_level(ref_level),
-          n_influences(0),influence_commit(false),surface(false),max_dis(numeric_limits<double>::infinity()),feature(false) {
+          n_influences(0),influence_commit(false),surface(false),feature(false),max_dis(numeric_limits<double>::infinity()) {
         
 		sub_elements.assign(1,pointindex);
 	}
@@ -45,25 +45,19 @@ namespace Clobscode
 	Quadrant::~Quadrant(){
 		
 	}
-	
-    //--------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------
-    bool Quadrant::badAngle(const unsigned int &nIdx, vector<MeshPoint> &mp) const {
-        
-        
-        unsigned int i0, i2;
-        Point3D P1 = mp[nIdx].getPoint(), P0, P2;
 
-        P0 = mp[(4+nIdx-1)%4].getPoint();
-        P2 = mp[(nIdx+1)%4].getPoint();
-        
-        Point3D V1 = P0-P1, V2 = P2-P1;
-        V1.normalize();
-        V2.normalize();
-        double angle = acos(V1.dot(V2));
-        /*if (angle<2.61799 || angle>3.66519) {
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    bool Quadrant::badAngle(unsigned int nIdx, const vector<MeshPoint> &mp) const {
+
+        const Point3D &P0 = mp[pointindex[(nIdx+3)%4]].getPoint(); //previous point
+        const Point3D &P1 = mp[pointindex[nIdx]].getPoint();       //mid point
+        const Point3D &P2 = mp[pointindex[(nIdx+1)%4]].getPoint(); //next point
+
+        double angle = toDegrees( P1.angle3Points(P0,P2));
+        if (angle<150. || angle>210.) {
             return true;
-        }*/
+        }
         return false;
         
     }
@@ -96,8 +90,8 @@ namespace Clobscode
 
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-	std::ostream& operator<<(std::ostream& o,Quadrant &e){
-        std::vector<unsigned int> points = e.getPointIndex();
+    std::ostream& operator<<(std::ostream& o,Quadrant &q){
+        std::vector<unsigned int> points = q.getPointIndex();
 		for (unsigned int i=0; i<points.size(); i++)
 			o << " " << points[i];
 		return o;

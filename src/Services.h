@@ -26,7 +26,6 @@
 #ifndef Services_h
 #define Services_h 1
 
-#include <string.h>
 #include "Polyline.h"
 #include "FEMesh.h"
 #include "RefinementCubeRegion.h"
@@ -36,12 +35,7 @@
 #include "MeshPoint.h"
 #include "Quadrant.h"
 #include "QuadEdge.h"
-#include "Visitors/EdgeVisitor.h"
 #include <stdlib.h>
-#include <iostream>
-#include <fstream>
-#include <set>
-#include <algorithm>    // std::find_if
 
 using Clobscode::Point3D;
 using Clobscode::Polyline;
@@ -49,8 +43,6 @@ using Clobscode::MeshPoint;
 using Clobscode::Quadrant;
 using Clobscode::QuadEdge;
 using std::vector;
-using std::string;
-using std::set;
 
 namespace Clobscode
 {

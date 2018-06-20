@@ -24,6 +24,7 @@
 **/
 
 #include "Polyline.h"
+#include "GeometricTransform.h"
 
 namespace Clobscode
 {
@@ -145,10 +146,7 @@ namespace Clobscode
             P0 = mVertices[i0];
             P2 = mVertices[i2];
             
-            Point3D V1 = P0-P1, V2 = P2-P1;
-            V1.normalize();
-            V2.normalize();
-            mVerticesAngles[i] = acos(V1.dot(V2));
+            mVerticesAngles[i]= P1.angle3Points(P0,P2);
             //normalize
             //mVerticePseudoNormals[i].normalize();
         }
@@ -356,7 +354,8 @@ namespace Clobscode
 
             const Point3D &P0=mVertices[mEdges[closestEdge[iClosest]][0]];
             const Point3D &P1=mVertices[mEdges[closestEdge[iClosest]][1]];
-            bIsIn = (pPoint.isLeft(P0,P1)>=0); // pPoint left of the closest edge
+            //bIsIn = (pPoint.isLeft(P0,P1)>=0); // pPoint left of the closest edge, "in" if "on"
+            bIsIn = (pPoint.isLeft(P0,P1)>0); // pPoint left of the closest edge, "out" if "on"
             //                std::cerr << pPoint << "  e:" << mEdges[closestEdge[0]] << " dot: " << dot0 << "  -  " << mEdges[closestEdge[1]] << " dot: " << dot1 << "->" << (fabs(dot0)>=fabs(dot1))
             //                          << " -- " << bIsIn << "=" << windingNumber(pPoint) << "\n" << std::flush;
 
@@ -443,7 +442,7 @@ namespace Clobscode
         
         for (auto iNd:iCommonNodes) {
             //if angle is between 150 and 210 grades, then is not a sharp feature:
-            if (mVerticesAngles[iNd]<2.61799 || mVerticesAngles[iNd]>3.66519) {
+            if (mVerticesAngles[iNd]<toRadians(150.) || mVerticesAngles[iNd]>toRadians(210.)) {
                 //std::cout << " " << iNd << std::flush;
                 return q.pointInside(mp,mVertices[iNd]);
             }
