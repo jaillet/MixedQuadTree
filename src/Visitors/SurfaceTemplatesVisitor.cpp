@@ -59,7 +59,7 @@ namespace Clobscode
         //that intersect one surface or all of them. In both cases
         //at least one element node should be outside the sum of
         //input surfaces
-        vector<vector<unsigned int> > &sub_elements = o->sub_elements;
+        vector<vector<unsigned int> > subels; // = o->sub_elements;
         vector<bool> in(pointindex.size(),true);
         unsigned int nin = 0;
 
@@ -74,16 +74,22 @@ namespace Clobscode
         }
         
         QuadSurfTemplate st;
-        
+        bool res;
         switch (nin) {
             case 0:
                 return true;
             case 1:
-                return st.one(pointindex,in,sub_elements);
+                res = st.one(pointindex,in,subels);
+                o->updateSubElements(subels);
+                return res;
             case 2:
-                return st.two(pointindex,in,sub_elements);
+                res = st.two(pointindex,in,subels);
+                o->updateSubElements(subels);
+                return res;
             case 3:
-                return st.three(pointindex,in,sub_elements);
+                res = st.three(pointindex,in,subels);
+                o->updateSubElements(subels);
+                return res;
             default:
                 return true;
         }

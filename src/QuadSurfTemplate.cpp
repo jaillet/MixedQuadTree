@@ -29,10 +29,9 @@ namespace Clobscode
         
 	}
 	
-	bool QuadSurfTemplate::one(const vector<unsigned int> &nodes, vector<bool> &in,
-                               vector<vector<unsigned int> > &newsubs){
-		
-        //cout << "\n\n QuadSurfTemplate::one\n";
+    const bool QuadSurfTemplate::one(const vector<unsigned int> &nodes, vector<bool> &in,
+                                     vector<vector<unsigned int> > &newsubs) const {
+        
         vector<unsigned int> rotated=nodes;
 
         unsigned int rotation = 0;
@@ -44,7 +43,6 @@ namespace Clobscode
         }
                 
         if (rotation!=0) {
-//            rotated = rotate(nodes,rotation);
             std::rotate(rotated.begin(),rotated.begin()+rotation,rotated.end());
         }
 
@@ -54,10 +52,9 @@ namespace Clobscode
 		return true;
 	}
     
-    bool QuadSurfTemplate::two(const vector<unsigned int> &nodes, vector<bool> &in,
-                               vector<vector<unsigned int> > &newsubs){
+     const bool QuadSurfTemplate::two(const vector<unsigned int> &nodes, vector<bool> &in,
+                                      vector<vector<unsigned int> > &newsubs) const {
         
-        //cout << "\n\n QuadSurfTemplate::two\n";
         vector<unsigned int> rotated=nodes;
 
         unsigned int rotation = 0;
@@ -70,13 +67,14 @@ namespace Clobscode
         
         //case: two consecutive nodes in: we return the same element.
         if (in[(rotation+1)%4] || in[(rotation+3)%4]) {
-            //FJA newsubs already contains nodes
-//            newsubs.push_back(nodes);
+            
+            //new subs is not the original Quadrant sub elements.
+            newsubs.push_back(nodes);
             return true;
         }
         
         if (rotation!=0) {
-//            rotated = rotate(nodes,rotation);
+//          rotated = rotate(nodes,rotation);
             std::rotate(rotated.begin(),rotated.begin()+rotation,rotated.end());
         }
 
@@ -84,13 +82,12 @@ namespace Clobscode
         newsubs[0]= {rotated[0],rotated[1],rotated[3]} ;
         newsubs[1]= {rotated[1],rotated[2],rotated[3]} ;
 
-            return true;
+        return true;
     }
     
-    bool QuadSurfTemplate::three(const vector<unsigned int> &nodes, vector<bool> &in,
-                                 vector<vector<unsigned int> > &newsubs){
-        
-        //cout << "\n\n QuadSurfTemplate::three\n";
+     const bool QuadSurfTemplate::three(const vector<unsigned int> &nodes, vector<bool> &in,
+                                        vector<vector<unsigned int> > &newsubs) const {
+
         vector<unsigned int> rotated= nodes;
 
         unsigned int rotation = 0;
@@ -102,7 +99,6 @@ namespace Clobscode
         }
         
         if (rotation!=0) {
-//            rotated = rotate(nodes,rotation);
             std::rotate(rotated.begin(),rotated.begin()+rotation,rotated.end());
         }
 

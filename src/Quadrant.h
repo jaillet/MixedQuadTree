@@ -96,6 +96,8 @@ namespace Clobscode
         virtual const list<unsigned int> &getIntersectedEdges() const; //read only
 		
         virtual const vector<vector<unsigned int> > &getSubElements() const; //read only
+        
+        virtual void updateSubElements(vector<vector <unsigned int> > &nsubs);
 		
         virtual void computeMaxDistance(vector<MeshPoint> &mp);
 		
@@ -205,6 +207,20 @@ namespace Clobscode
         Point3D p1 = mp[pointindex[2]].getPoint();
 		max_dis = 0.3 * (p0 - p1).Norm();
 	}
+    
+    inline void Quadrant::updateSubElements(vector<vector <unsigned int> > &nsubs) {
+        
+        sub_elements = nsubs;
+        return;
+        
+        cout << "updateSubElements: " << sub_elements.size();
+        sub_elements.clear();
+        sub_elements.reserve(nsubs.size());
+        for (auto ne:nsubs) {
+            sub_elements.push_back(ne);
+        }
+        cout << " -> " << sub_elements.size() << "\n";
+    }
 	
     inline double Quadrant::getMaxDistance() const {
 		return max_dis;

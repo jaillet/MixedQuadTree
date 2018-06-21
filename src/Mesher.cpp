@@ -1228,7 +1228,7 @@ namespace Clobscode
         stv.setPoints(points);
         stv.setInput(input);
 
-        for (auto q:Quadrants) {
+        for (auto &q:Quadrants) {
             
             if (q.getPointIndex().size()!=4) {
                 continue;

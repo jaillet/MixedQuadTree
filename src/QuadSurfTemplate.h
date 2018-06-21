@@ -38,14 +38,16 @@ class QuadSurfTemplate {
 
     virtual ~QuadSurfTemplate();
 
-    virtual bool one(const vector<unsigned int> &all, vector<bool> &in,
-                     vector<vector<unsigned int> > &newsubs);
+    virtual const bool one(const vector<unsigned int> &all, vector<bool> &in,
+                           vector<vector<unsigned int> > &newsubs) const;
 
-    virtual bool two(const vector<unsigned int> &all, vector<bool> &in,
-                     vector<vector<unsigned int> > &newsubs);
+    virtual const bool two(const vector<unsigned int> &all, vector<bool> &in,
+                           vector<vector<unsigned int> > &newsubs) const;
+
     
-    virtual bool three(const vector<unsigned int> &all, vector<bool> &in,
-                       vector<vector<unsigned int> > &newsubs);
+    virtual const bool three(const vector<unsigned int> &all, vector<bool> &in,
+                             vector<vector<unsigned int> > &newsubs) const;
+
     
 protected:
     
