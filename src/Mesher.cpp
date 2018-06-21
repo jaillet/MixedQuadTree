@@ -163,7 +163,7 @@ namespace Clobscode
         Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
 
         //update element and node info.
-        linkElementsToNodes();
+        //linkElementsToNodes();
         detectInsideNodes(input);
 
         //shrink outside nodes to the input domain boundary
@@ -971,7 +971,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
-    unsigned int Mesher::saveOutputMesh(FEMesh &mesh,bool decoration){
+    unsigned int Mesher::saveOutputMesh(FEMesh &mesh, bool decoration){
 
         vector<vector<unsigned int> > out_els;
         vector<unsigned short > out_els_ref_level;
@@ -984,9 +984,27 @@ namespace Clobscode
         vector<unsigned int> new_idxs (points.size(),0);
         unsigned int out_node_count = 0;
         vector<Point3D> out_pts;
+        
+        
+        /*Begin debugging:*/
+        for (auto q:Quadrants) {
+            for (auto el:q.getSubElements()) {
+                out_els.push_back(el);
+            }
+        }
+        for (auto p:points) {
+            out_pts.push_back(p.getPoint());
+        }
+        
+        mesh.setPoints(out_pts);
+        mesh.setElements(out_els);
+        return out_els.size();
+        /*End debugging:*/
+        
+        
 
         //recompute node indexes and update elements with them.
-        for (unsigned int i=0; i<Quadrants.size(); i++) {
+        /*for (unsigned int i=0; i<Quadrants.size(); i++) {
             vector<vector<unsigned int> > sub_els= Quadrants[i].getSubElements();
             for (unsigned int j=0; j<sub_els.size(); j++) {
 
@@ -1008,13 +1026,13 @@ namespace Clobscode
                     //refinment level herited from quad
                     out_els_ref_level.push_back(Quadrants[i].getRefinementLevel());
                     //compute minAngle
-                    int np=sub_ele_new_idxs.size(); //nb points of the element
+                    unsigned int np=sub_ele_new_idxs.size(); //nb points of the element
                     double minAngle=std::numeric_limits<double>::infinity();
-                    for (int i=0; i<np; ++i) {
+                    for (unsigned int k=0; k<np; ++k) {
 
-                        const Point3D &P0 = out_pts[sub_ele_new_idxs[(i-1+np)%np]];
-                        const Point3D &P1 = out_pts[sub_ele_new_idxs[i]];
-                        const Point3D &P2 = out_pts[sub_ele_new_idxs[(i+1)%np]];
+                        const Point3D &P0 = out_pts[sub_ele_new_idxs[(k-1+np)%np]];
+                        const Point3D &P1 = out_pts[sub_ele_new_idxs[k]];
+                        const Point3D &P2 = out_pts[sub_ele_new_idxs[(k+1)%np]];
 
                         minAngle=std::min(minAngle, P1.angle3Points(P0,P2));
                     }
@@ -1028,7 +1046,7 @@ namespace Clobscode
         mesh.setElements(out_els);
         mesh.setRefLevels(out_els_ref_level);
         mesh.setMinAngles(out_els_min_angle);
-        return out_els.size();
+        return out_els.size();*/
     }
 
     //--------------------------------------------------------------------------------
@@ -1080,7 +1098,7 @@ namespace Clobscode
                 featCount++;
             }
         }
-        cout << "number of quadrants with features: " << featCount << "\n";
+        //cout << "number of quadrants with features: " << featCount << "\n";
     }
     
     //--------------------------------------------------------------------------------
@@ -1183,24 +1201,6 @@ namespace Clobscode
                     newele.push_back(Quadrants[i]);
                 }
             }
-
-            /*bool onein = false;
-             vector<unsigned int> epts = Quadrants[i].getPoints();
-
-             for (unsigned int j=0; j< epts.size(); j++) {
-             if (points.at(epts[j]).isInside()) {// &&
-             //!points.at(epts[j]).wasProjected()) {
-             onein = true;
-             break;
-             }
-             }
-
-             if (onein) {
-             newele.push_back(Quadrants[i]);
-             }
-             else {
-             removed.push_back(Quadrants[i]);
-             }*/
         }
 
         if (removed.empty()) {
@@ -1277,12 +1277,34 @@ namespace Clobscode
                     if (!points[octIndx[(oneN+2)%4]].isFeature()) {
                         cout << " surface Pat";
                         q.accept(&stv);
+                        cout << " nelem " << q.getSubElements().size();
+                        for (auto sns:q.getSubElements()) {
+                            cout << "\n";
+                            for (auto nt:sns) {
+                                cout << " " << nt;
+                            }
+                        }
+                        cout << "\n QNds:";
+                        for (auto nIdx:q.getPointIndex()) {
+                            cout << " " << nIdx;
+                        }
                     }
                 }
                 else if (inNod==3) {
                     if (q.badAngle(oneF,points)) {
                         cout << " surface 3In";
                         q.accept(&stv);
+                        cout << " nelem " << q.getSubElements().size();
+                        for (auto sns:q.getSubElements()) {
+                            cout << "\n";
+                            for (auto nt:sns) {
+                                cout << " " << nt;
+                            }
+                        }
+                        cout << "\n QNds:";
+                        for (auto nIdx:q.getPointIndex()) {
+                            cout << " " << nIdx;
+                        }
                     }
                 }
                 
@@ -1309,14 +1331,26 @@ namespace Clobscode
         
         //Manage Quadrants with Features first
         for (auto q:Quadrants) {
+            if (q.isInside()) {
+                continue;
+            }
+            
             if (!q.hasFeature()) {
+                //Save outside nodes and manage them after
+                //dealing with all features quadrants.
+                for (auto pIdx:q.getPointIndex()) {
+                    if (points[pIdx].isOutside()) {
+                        out_nodes.push_back(pIdx);
+                    }
+                }
                 continue;
             }
             
             list<Point3D> fs = input.getFeatureProjection(q,points);
             
             if (fs.empty()) {
-                cout << "wtf!!\n";
+                cerr << "Error at Mesher::shrinkToBoundary";
+                cerr << " Quadrant labeled with feature has none\n";
                 continue;
             }
             
@@ -1359,6 +1393,8 @@ namespace Clobscode
                 if (push) {
                     points[pos].setProjected();
                     points[pos].setPoint(projected);
+                    //Feature projected flag will be used later to
+                    //apply surface patterns.
                     points[pos].featureProjected();
                     for (auto pe:points[pos].getElements()) {
                         
@@ -1371,51 +1407,19 @@ namespace Clobscode
                 }
             }
         }
-    
+
         //Manage non Feature Quadrants.
-        for (auto q:Quadrants) {
-            if (q.isInside()) {
-                continue;
-            }
-
-            //Put in a std::list inside nodes of boundary elements that
-            //may be projected to the input domain.
-            const vector<unsigned int> &epts = q.getPointIndex();
-            for (auto pIdx:q.getPointIndex()) {
-                
-                if (points[pIdx].wasProjected()) {
-                    continue;
-                }
-
-                if (!points[pIdx].wasOutsideChecked()) {
-                    cout << "error!!! in Mesher::shrinkToBoundary\n";
-                    cout << "  some nodes were not outside checked (";
-                    cout << q.getPointIndex().size() << "): " << pIdx << "\n";
-
-                    points[pIdx].outsideChecked();
-                    Point3D oct_p = points[pIdx].getPoint();
-                    if (input.pointIsInMesh(oct_p,q.getIntersectedEdges())) {
-                        points[pIdx].setInside();
-                    }
-                }
-
-                if (points[pIdx].isOutside()) {
-                    out_nodes.push_back(pIdx);
-                }
-            }
-        }
-
         out_nodes.sort();
         out_nodes.unique();
 
         for (auto p:out_nodes) {
 
-            //get the faces of Quadrants sharing this node
-            list<unsigned int> p_qInterEdges;
-            
             if (points.at(p).wasProjected()) {
                 continue;
             }
+            
+            //get the faces of Quadrants sharing this node
+            list<unsigned int> p_qInterEdges;
 
             for (auto pe:points[p].getElements()) { //elements containing p
                 //append this to the list of edges
@@ -1459,29 +1463,38 @@ namespace Clobscode
         list<unsigned int> in_nodes;
 
         for (auto q:Quadrants) {
+            
             if (!q.isSurface()) {
                 continue;
             }
+            
             q.computeMaxDistance(points);
-        }
+            
+            //If we do not update Max Distance information for the nodes here
+            //then it won't work in the next cicle. Why??? I don't know.
+            double md = q.getMaxDistance();
+            for (auto pIdx:q.getPointIndex()) {
+                points[pIdx].setMaxDistance(md);
+            }
         
-        //Manage Quadrants with Features first
-        for (auto q:Quadrants) {
+            //If the quadrant don't have a Feature, save the intern nodes
+            //to a list to manage them later and continue the process just
+            //for feature quadrants first.
             if (!q.hasFeature()) {
+                for (auto pIdx:q.getPointIndex()) {
+                    if (points[pIdx].isInside()) {
+                        in_nodes.push_back(pIdx);
+                    }
+                }
                 continue;
             }
-            
+        
+            //Manage Quadrants with Features
             list<Point3D> fs = input.getFeatureProjection(q,points);
-            const vector<unsigned int> &epts = q.getPointIndex();
-            double md = q.getMaxDistance();
-            
-            for (auto pIdx:epts) {
-                points.at(pIdx).setMaxDistance(md);
-            }
             
             unsigned int fsNum = fs.size();
             
-            for (auto pIdx:epts) {
+            for (auto pIdx:q.getPointIndex()) {
                 if (fsNum==0) {
                     break;
                 }
@@ -1511,6 +1524,8 @@ namespace Clobscode
                         fs.erase(bIter);
                         points[pIdx].setProjected();
                         points[pIdx].setPoint(candidate);
+                        //Feature projected flag will be used later to
+                        //apply surface patterns.
                         points[pIdx].featureProjected();
                         for (auto pe:points[pIdx].getElements()) {
                             //this should be studied further.
@@ -1523,44 +1538,7 @@ namespace Clobscode
                 }
             }
         }
-
-        //Manage non Feature Quadrants.
-        for (unsigned int i=0; i<Quadrants.size(); i++) {
-            if (Quadrants[i].isInside() || Quadrants[i].hasFeature()) {
-                continue;
-            }
-
-            //Put in a std::list inside nodes of boundary elements that
-            //may be projected to the input domain.
-            const vector<unsigned int> &epts = Quadrants.at(i).getPointIndex();
-            double md = Quadrants[i].getMaxDistance();
-            
-            for (unsigned int j=0; j < epts.size(); j++) {
-
-                if (!points[epts[j]].wasOutsideChecked()) {
-                    cerr << "Warning in Mesher::projectCloseToBoundaryNodes\n";
-                    cerr << "  point wasn't outside checked >>> Managed\n";
-
-                    points[epts[j]].outsideChecked();
-                    Point3D oct_p = points.at(epts[j]).getPoint();
-
-                    if (input.pointIsInMesh(oct_p,Quadrants[i].getIntersectedEdges())) {
-                        points[epts[j]].setInside();
-                    }
-                }
-                if (points[epts[j]].isInside()) {
-                    in_nodes.push_back(epts[j]);
-                    /*cerr << "warning!! in Mesher::projectCloseToBoundaryNodes\n";
-                    cerr << "  hard coded test for Octree j>7 ???\n";
-                    if (j>7) {
-                        md*=0.5;
-                    }*/
-                    points[epts[j]].setMaxDistance(md);
-                }
-            }
-
-        }
-
+        
         in_nodes.sort();
         in_nodes.unique(); //need to be sorted to call this function
 

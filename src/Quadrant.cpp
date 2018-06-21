@@ -50,6 +50,12 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     bool Quadrant::badAngle(unsigned int nIdx, const vector<MeshPoint> &mp) const {
 
+        if (pointindex.size()!=4) {
+            cerr << "Warning in Quadrant::badAngle";
+            cerr << " Splitted quadant not managed yet\n";
+            return false;
+        }
+        
         unsigned int i0 = (4+nIdx-1)%4, i2=(nIdx+1)%4;
         cout << nIdx << "(" << pointindex.at(nIdx) << ") -> ";
         cout <<  i0 << " " << i2;
@@ -61,10 +67,10 @@ namespace Clobscode
         double angle = toDegrees( P1.angle3Points(P0,P2));
         cout << " " << angle;
 
-        //if the angle is smoth, then it is bad angle that should be
-        //managed with transition patterns
+        //if the angle is smoth (close to 180) or if it is going to produce inverted
+        //elements in a quad (>180), then it must be managed with transition patterns
         //if (angle>2.61799 && angle<3.66519) {
-        if (angle>150. || angle<210.) {
+        if (angle>150.0) {//. || angle<210.) {
             return true;
         }
         return false;

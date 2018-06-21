@@ -88,13 +88,6 @@ namespace Clobscode
                 return true;
         }
 
-        /*if (pointindex.size()==4 && sub_elements.size()==1) {
-
-            //if we are here, the "inside" projected nodes will count as
-            //outside nodes.
-            return applyHexSurfaceTemplates(o,in);
-        }*/
-
         return false;
 
     }
