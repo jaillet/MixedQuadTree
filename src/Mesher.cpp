@@ -987,7 +987,7 @@ namespace Clobscode
         
         
         /*Begin debugging:*/
-        for (auto q:Quadrants) {
+        /*for (auto q:Quadrants) {
             for (auto el:q.getSubElements()) {
                 out_els.push_back(el);
             }
@@ -998,13 +998,13 @@ namespace Clobscode
         
         mesh.setPoints(out_pts);
         mesh.setElements(out_els);
-        return out_els.size();
+        return out_els.size();*/
         /*End debugging:*/
         
         
 
         //recompute node indexes and update elements with them.
-        /*for (unsigned int i=0; i<Quadrants.size(); i++) {
+        for (unsigned int i=0; i<Quadrants.size(); i++) {
             vector<vector<unsigned int> > sub_els= Quadrants[i].getSubElements();
             for (unsigned int j=0; j<sub_els.size(); j++) {
 
@@ -1046,7 +1046,7 @@ namespace Clobscode
         mesh.setElements(out_els);
         mesh.setRefLevels(out_els_ref_level);
         mesh.setMinAngles(out_els_min_angle);
-        return out_els.size();*/
+        return out_els.size();
     }
 
     //--------------------------------------------------------------------------------
@@ -1462,7 +1462,7 @@ namespace Clobscode
         //surface" and "outside" nodes, remove it.
         list<unsigned int> in_nodes;
 
-        for (auto q:Quadrants) {
+        for (auto &q:Quadrants) {
             
             if (!q.isSurface()) {
                 continue;

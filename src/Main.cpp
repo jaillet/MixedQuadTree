@@ -138,6 +138,7 @@ int main(int argc,char** argv){
             case 'm':
             case 'i':
             case 'o':
+            case 'q':
                 inout = true;
                 break;
             default:
