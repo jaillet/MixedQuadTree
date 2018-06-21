@@ -447,8 +447,8 @@ bool Services::ReadPolyFile(std::string name,
             //read each edge (assuming they have 2 endpoints)
             std::vector<unsigned int> edgpts(2,0);
             for(unsigned int j=0;j<2;j++){
-                std::fscanf(file,"%u",&edgpts[j]);
-                edgpts[j]-=shift;
+                std::fscanf(file,"%u",&edgpts[j]); // 1-j if inverted edges
+                edgpts[j]-=shift;                  // 1-j if inverted edges
             }
             //read some unnecessary for the moment integers
             for(int j=0;j<nmarkers;j++) {
@@ -466,7 +466,7 @@ bool Services::ReadPolyFile(std::string name,
     while(true) {
         if(std::fscanf(file,"%s",word)==EOF){
             fclose(file);
-            return false;
+            return true;
         }
         if(!strncmp(word,"#",1)) {
             //skip end of line
@@ -959,7 +959,7 @@ bool Services::WritePolyVTK(std::string name, vector<Polyline> inputs) {
     //tricky part to recover connected subpolylines (polygons) in a polyline
     vector <vector< unsigned int> > polygons;
     uint iPly=0, noEdgesTot=0;
-    for (auto ply:inputs) {
+    for (const Polyline &ply:inputs) {
         // get connected polylines from input, assumming they are in order
         // make a copy of edges
         list<PolyEdge> edges(ply.getEdges().begin(),ply.getEdges().end());
@@ -996,6 +996,68 @@ bool Services::WritePolyVTK(std::string name, vector<Polyline> inputs) {
         }
         fprintf(f,"\n");
     }
+
+    fclose(f);
+
+    return true;
+}
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+bool Services::WritePolyFile(std::string name, vector<Polyline> inputs) {
+
+    string vol_name = name+".poly.poly";
+
+    //write the volume mesh
+    FILE *f = fopen(vol_name.c_str(),"wt");
+
+    // count the total number of Points, if many Polylines in Input
+    vector <unsigned int> noPts(inputs.size());
+    unsigned int noPtsTot=0, shiftNoPts=0;
+    for (unsigned int i=0;i<inputs.size();i++) {
+        noPts[i]=inputs[i].getPoints().size();
+        noPtsTot+=noPts[i];
+    }
+    if (noPtsTot==0) {
+        std::cout << "How strange, no inputs points to write...\n";
+        return false;
+    }
+
+    fprintf(f,"# Triangle\n# %s\n",name.c_str());
+    fprintf(f,"%u 2 0 0\n", noPtsTot);
+
+    //for each input polyline
+    for (const Polyline& ply:inputs) {
+
+        //write points
+        const vector<Point3D> &points=ply.getPoints();
+        for(unsigned int i=0;i<points.size();i++){
+            fprintf(f," %u",i);
+            fprintf(f," %+1.8E",points[i][0]);
+            fprintf(f," %+1.8E\n",points[i][1]);
+            //fprintf(f," %+1.8E",points[i][2]);
+        }
+    }
+
+    uint noEdgesTot=0;
+    for (const Polyline &ply:inputs) {
+        noEdgesTot+=ply.getEdges().size(); //data used at final to write VTK info
+    }
+
+    fprintf(f,"%u 0\n",noEdgesTot);
+
+    //tricky part to recover connected subpolylines (polygons) in a polyline
+    vector <vector< unsigned int> > polygons;
+    for (const Polyline &ply:inputs) {
+        const vector<PolyEdge> &qedges = ply.getEdges();
+        for (unsigned int i=0; i<qedges.size(); ++i) {
+            fprintf(f," %u",i);
+            fprintf(f," %u",shiftNoPts+qedges[i].getKey());
+            fprintf(f," %u\n",shiftNoPts+qedges[i].getVal());
+        }
+        shiftNoPts+=ply.getPoints().size(); //don't forget to shift local numbering to global
+    }
+
+    fprintf(f,"0\n"); //no holes
 
     fclose(f);
 
