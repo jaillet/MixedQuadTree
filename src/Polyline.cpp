@@ -486,7 +486,7 @@ namespace Clobscode
         // closest point on the edge (on edge, or vertice)
         Point3D pProjP_tmp,pProjP;
         // -1 if projection on edge, index of the point if projection on an extremity
-        int projWhere, projWhere_tmp;
+        int projWhere_tmp;
         // distance to this closest point (always positive)
         double pDist;
         //current closest distance: positive infinity
@@ -595,15 +595,15 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     ostream& operator<<(ostream& os, const Polyline &ply){
-        for (auto &v:ply.getPoints()) {
+        for (const auto &v:ply.getPoints()) {
             os << v << "; ";
         }
         os << std::endl;
-        for (auto &n:ply.getNormals()) {
+        for (const auto &n:ply.getNormals()) {
             os << n << "; ";
         }
         os << std::endl;
-        for (auto &e:ply.getEdges()) {
+        for (const auto &e:ply.getEdges()) {
             os << e << " ";
         }
         os << std::endl;

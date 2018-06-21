@@ -105,7 +105,7 @@ namespace Clobscode
 
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    std::ostream& operator<<(std::ostream& o,Quadrant &q){
+    std::ostream& operator<<(std::ostream& o, const Quadrant &q){
         std::vector<unsigned int> points = q.getPointIndex();
 		for (unsigned int i=0; i<points.size(); i++)
 			o << " " << points[i];

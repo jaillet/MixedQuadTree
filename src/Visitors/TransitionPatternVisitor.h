@@ -28,8 +28,6 @@
 
 #include "../QuadEdge.h"
 #include "../MeshPoint.h"
-#include "../TriMesh.h"
-
 #include "../QuadTransition.h"
 
 #include "Visitor.h"
@@ -41,7 +39,6 @@
 
 using Clobscode::MeshPoint;
 using Clobscode::QuadEdge;
-using Clobscode::TriMesh;
 using Clobscode::EdgeVisitor;
 using std::list;
 using std::set;

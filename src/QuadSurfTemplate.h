@@ -23,7 +23,6 @@
 #include <vector>
 #include <algorithm>    // std::rotate_copy
 #include <iostream>
-#include "HexRotation.h"
 
 using std::vector;
 using std::cout;

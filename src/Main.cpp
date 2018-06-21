@@ -315,6 +315,9 @@ int main(int argc,char** argv){
 		unsigned int last_point = in_name.find_last_of(".");
 		out_name = in_name.substr(0,last_point);
 	}
+
+    // Uncomment this if you want to export input as .poly file
+    //Services::WritePolyFile(out_name,inputs);
 	
     auto start_time = chrono::high_resolution_clock::now();
     

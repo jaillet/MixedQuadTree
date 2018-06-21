@@ -29,10 +29,7 @@
 #include "../MeshPoint.h"
 #include "../QuadEdge.h"
 #include "../Point3D.h"
-#include "../SurfTriangle.h"
-#include "../TriMesh.h"
 
-#include <list>
 #include <set>
 #include <vector>
 

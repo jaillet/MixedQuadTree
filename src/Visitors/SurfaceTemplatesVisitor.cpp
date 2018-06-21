@@ -27,21 +27,13 @@ namespace Clobscode
      quadrants that presents both, surface and transition patterns.
      */
     
-    SurfaceTemplatesVisitor::SurfaceTemplatesVisitor() {
-        meshpts = NULL;
-        //newpts = NULL;
-        input = NULL;
+    SurfaceTemplatesVisitor::SurfaceTemplatesVisitor():meshpts(NULL),input(NULL) {
     }
 
 
     void SurfaceTemplatesVisitor::setPoints(vector<MeshPoint> &meshpts) {
         this->meshpts = &meshpts;
     }
-
-    //This will probably needed later
-    /*void SurfaceTemplatesVisitor::setNewPoints(list<MeshPoint> &newpts) {
-        this->newpts = &newpts;
-    }*/
 
     void SurfaceTemplatesVisitor::setInput(Polyline &input) {
         this->input = &input;

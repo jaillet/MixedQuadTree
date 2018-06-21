@@ -26,7 +26,6 @@
 #ifndef RefinementRegion_h
 #define RefinementRegion_h 1
 
-#include "SurfTriangle.h"
 #include "MeshPoint.h"
 #include "GeometricTransform.h"
 #include "Quadrant.h"

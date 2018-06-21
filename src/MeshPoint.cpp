@@ -27,33 +27,22 @@
 
 namespace Clobscode
 {
-	MeshPoint::MeshPoint(){
-		//we assume that every point is outisde by default.
-		inside = false;
-		//checking if a point is outside or not is a very expensive 
-		//operation, so we try to do it only once
-		outsidechecked = false;
-		projected = false;
-        feature = false;
-		maxdistance = 0;
+
+    MeshPoint::MeshPoint():outsidechecked(false), projected(false),feature(false),inside(false),maxdistance(0.0){
+        //we assume that every point is outside by default.(inside)
+        //checking if a point is outside or not is a very expensive 
+        //operation, so we try to do it only once (outsidechecked)
 	}
 	
-	MeshPoint::MeshPoint(const Point3D &p){
-		point = p;
-		//we assume that every point is outisde by default.
-		inside = false;
-		//checking if a point is outside or not is a very expensive 
-		//operation, so we try to do it only once
-		outsidechecked = false;
-		projected = false;
-		maxdistance = 0;
-	}
+    MeshPoint::MeshPoint(const Point3D &p):outsidechecked(false), projected(false),feature(false),inside(false),maxdistance(0.0){
+        point = p;
+    }
 	
 	MeshPoint::~MeshPoint(){
 		
 	}
 		
-	std::ostream& operator<<(std::ostream& o,MeshPoint &p){
+    std::ostream& operator<<(std::ostream& o, const MeshPoint &p){
 		o << p.getPoint();
 		return o;
 	}

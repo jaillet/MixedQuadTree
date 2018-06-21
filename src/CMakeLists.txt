@@ -14,22 +14,22 @@ endif()
 
 set(SOURCE_FILES Main MeshPoint Point3D Polyline PolyEdge  Quadrant QuadEdge
 	QuadTransition QuadSurfTemplate 
-	HexRotation
-        SurfTemplate1 SurfTemplate2 SurfTemplate3 SurfTemplate4
-        SurfTemplate5 SurfTemplate6 SurfTemplate7
         Mesher GridMesher TransitionPoint PatternFactory TransitionTemplate
-        TransitionCube SurfPair SurfEdgeContainer
+        TransitionCube
         RefinementRegion RefinementCubeRegion RefinementSurfaceRegion
         RefinementInputSurfaceRegion RefinementAllRegion
-        FaceDiagonal SurfPrism SurfPyramid SurfHexahedron SurfTetrahedron 
+        FaceDiagonal
          GeometricTransform Services
         Visitors/Visitor Visitors/SplitVisitor Visitors/EdgeVisitor 
 	Visitors/IntersectionsVisitor
         Visitors/OneIrregularVisitor Visitors/PointMovedVisitor
         Visitors/TransitionPatternVisitor Visitors/SurfaceTemplatesVisitor
         Visitors/RemoveSubElementsVisitor
-
-        SurfEdge SurfTriangle )
-
+        )
 
 add_executable(mesher_roi ${SOURCE_FILES})
+
+# obsolete 3D files that have been removed
+#SurfTemplate1 SurfTemplate2 SurfTemplate3 SurfTemplate4
+#SurfTemplate5 SurfTemplate6 SurfTemplate7 TriMesh HexRotation
+#SurfPrism SurfPyramid SurfHexahedron SurfTetrahedron SurfEdge SurfTriangle SurfEdgeContainer SurfPair

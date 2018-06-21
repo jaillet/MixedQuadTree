@@ -22,7 +22,6 @@
 
 #include "../QuadEdge.h"
 #include "../MeshPoint.h"
-#include "../TriMesh.h"
 #include "../Polyline.h"
 #include "../Quadrant.h"
 #include "../QuadSurfTemplate.h"
@@ -30,14 +29,11 @@
 #include "Visitor.h"
 #include "EdgeVisitor.h"
 
-#include <list>
 #include <set>
 #include <vector>
 
 using Clobscode::MeshPoint;
 using Clobscode::QuadEdge;
-using Clobscode::TriMesh;
-using std::list;
 using std::set;
 using std::vector;
 
@@ -50,17 +46,12 @@ namespace Clobscode
         bool visit(Quadrant *o) override;
 
         void setPoints(vector<MeshPoint> &meshpts);
-        void setNewPoints(list<MeshPoint> &newpts);
         void setInput(Polyline &input);
 
     private:
         vector<MeshPoint> *meshpts;
-        list<MeshPoint> *newpts;
         Polyline *input;
 
-        bool applyHexSurfaceTemplates(Quadrant *o,
-                                      vector<unsigned int> &inpts,
-                                      vector<unsigned int> &outpts);
     };
 }
 

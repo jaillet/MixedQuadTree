@@ -51,21 +51,6 @@ namespace PolyMesh
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-
-//    Point3D SurfTriangle::projection(const Point3D &p1, const Point3D &p2) const{
-
-
-//        double d1 = distance(p1), d2 = distance(p2), s;
-//        s = d1/(d1-d2);
-
-//        Point3D dif = p2 - p1;
-//        dif *= s;
-
-//        return p1 - dif;
-//    }
-
-    //--------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------
     inline unsigned int &PolyEdge::operator[](unsigned int pos){
         //return inodes.at(pos);
         return inodes[pos];

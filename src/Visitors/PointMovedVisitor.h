@@ -23,8 +23,6 @@
 #include "../MeshPoint.h"
 #include "../QuadEdge.h"
 #include "../Point3D.h"
-#include "../SurfTriangle.h"
-#include "../TriMesh.h"
 
 #include <list>
 #include <set>
@@ -33,11 +31,9 @@
 #include "Visitor.h"
 #include "EdgeVisitor.h"
 
-using Clobscode::TriMesh;
 using Clobscode::Point3D;
 using Clobscode::MeshPoint;
 using Clobscode::QuadEdge;
-using SurfMesh::SurfTriangle;
 using std::list;
 using std::vector;
 using std::set;

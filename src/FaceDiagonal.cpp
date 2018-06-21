@@ -74,7 +74,6 @@ namespace Clobscode
         
         if (n_in == 2) {
             //two possible cases
-            unsigned int n_in1, n_in2;
             for (unsigned int i=0; i<points.size(); i++) {
                 if (inside_state[points[i]]) {
                     if (inside_state[points[(i+1)%4]]) {

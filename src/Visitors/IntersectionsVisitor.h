@@ -31,27 +31,12 @@
 #include "../QuadEdge.h"
 #include "../Point3D.h"
 #include "../Polyline.h"
-#include "../TriMesh.h"
 
 #include <list>
 #include <set>
 #include <vector>
 
 #include "Visitor.h"
-
-/* Since checkIntersections was an overloaded function,
- * visitor behavior depends on the select_faces parameter.
- * The parameter with which the visitor is created should
- * match the references given to the visitor, else, it will
- * throw an exception.
- *
- * check intersections with selected input faces: needs mesh, faces, coords.
- * checkIntersections(TriMesh &mesh,list<unsigned int> &faces,vector<Point3D> &coords);
- *
- * check intersections with all input faces: needs mesh, points.
- * checkIntersections(TriMesh &mesh, vector<MeshPoint> &pts)
- */
-
 
 namespace Clobscode
 {
@@ -80,9 +65,6 @@ namespace Clobscode
         bool intersectsEdge(const PolyEdge &pEdge, const vector<Point3D> &input_pts, const Point3D &pmin, const Point3D &pmax) const;
 
         bool clipGeneralCase(const Point3D &p1, const Point3D &p2, const Point3D &pmin, const Point3D &pmax) const;
-
-        bool edgeTriangleIntersection(const PolyEdge &st, const vector<Point3D> &input_pts,
-                                      const Point3D &pmin, const Point3D &pmax) const;
 
         unsigned int computePosition(const Point3D &p, const Point3D &pmin, const Point3D &pmax) const;
 

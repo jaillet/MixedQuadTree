@@ -28,23 +28,13 @@
 
 namespace Clobscode
 {
-//vector<MeshPoint> points;
-//vector<Quadrant> Quadrants;
-//set<QuadEdge> QuadEdges;
-//list<RefinementRegion *> regions;
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    Mesher::Mesher() {}
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    Mesher::Mesher(){
-
-    }
-
-    //--------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------
-
-    Mesher::~Mesher(){
-
-    }
+    Mesher::~Mesher() {}
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
@@ -1005,7 +995,7 @@ namespace Clobscode
 
         //recompute node indexes and update elements with them.
         for (unsigned int i=0; i<Quadrants.size(); i++) {
-            vector<vector<unsigned int> > sub_els= Quadrants[i].getSubElements();
+            const vector<vector<unsigned int> > &sub_els= Quadrants[i].getSubElements();
             for (unsigned int j=0; j<sub_els.size(); j++) {
 
                 vector<unsigned int> sub_ele_new_idxs = sub_els[j];
@@ -1235,7 +1225,7 @@ namespace Clobscode
             }
             
             bool feature = false;
-            for (auto octNo:q.getPointIndex()) {
+            for (unsigned int octNo:q.getPointIndex()) {
                 if (points[octNo].isFeature()) {
                     feature = true;
                     break;
@@ -1254,7 +1244,7 @@ namespace Clobscode
             else {
                 unsigned int inNod = 0, oneN=0, oneF=0;
                 
-                vector<unsigned int> octIndx = q.getPointIndex();
+                const vector<unsigned int> &octIndx = q.getPointIndex();
                 
                 cout << "Feature Octant: ";
                 for (unsigned int j=0; j<4; j++) {
@@ -1330,7 +1320,7 @@ namespace Clobscode
         
         
         //Manage Quadrants with Features first
-        for (auto q:Quadrants) {
+        for (const auto &q:Quadrants) {
             if (q.isInside()) {
                 continue;
             }

@@ -44,11 +44,9 @@ namespace Clobscode
 		
 		MeshPoint();
 		
-		MeshPoint(const Point3D &p);
+        MeshPoint(const Point3D &p);
 		
-		//MeshPoint(const Point3D p, const un
-		
-		virtual ~MeshPoint();
+        virtual ~MeshPoint();
 		
 		virtual void setPoint(Point3D &p);
 		
@@ -58,23 +56,23 @@ namespace Clobscode
 
 		virtual void addElement(unsigned int idx);
 		
-		virtual list<unsigned int> &getElements();
+        virtual const list<unsigned int> &getElements() const;
 		
-		virtual void clearElements();
+        virtual void clearElements();
 		
-		virtual bool wasOutsideChecked();
+        virtual bool wasOutsideChecked() const;
 		
 		virtual void outsideChecked();
 		
 		virtual void setMaxDistance(double md);
 		
-		virtual double getMaxDistance();
+        virtual double getMaxDistance() const;
 		
 		virtual void updateMaxDistanceByFactor(const double &per);
 		
 		virtual void setProjected();
 		
-		virtual bool wasProjected();
+        virtual bool wasProjected() const;
 		
 		//state methods
 		virtual void setOutside();
@@ -82,14 +80,14 @@ namespace Clobscode
 		virtual void setInside();
 		
 		//returns true if node is inside any input mesh
-		virtual bool isInside();
+        virtual bool isInside() const;
 		
 		//returns true if node is outside every input mesh
-		virtual bool isOutside();
+        virtual bool isOutside() const;
 		
 		virtual void setIOState(bool state);
 		
-		virtual bool getIOState();
+        virtual bool getIOState() const;
         
         virtual void featureProjected();
         
@@ -115,7 +113,7 @@ namespace Clobscode
 		outsidechecked = true;
 	}
 	
-	inline bool MeshPoint::wasOutsideChecked(){
+    inline bool MeshPoint::wasOutsideChecked() const{
 		return outsidechecked;
 	}
 	
@@ -126,7 +124,7 @@ namespace Clobscode
 		maxdistance = md;
 	}
 	
-	inline double MeshPoint::getMaxDistance(){
+    inline double MeshPoint::getMaxDistance() const{
 		return maxdistance;
 	}
 	
@@ -146,17 +144,17 @@ namespace Clobscode
 		inside = state;
 	}
 	
-	inline bool MeshPoint::getIOState(){
+    inline bool MeshPoint::getIOState() const {
 		return inside;
 	}
 	
 	//returns true if node is inside any input mesh
-	inline bool MeshPoint::isInside(){
+    inline bool MeshPoint::isInside() const {
 		return inside;
 	}
 	
 	//returns true if node is outside every input mesh
-	inline bool MeshPoint::isOutside(){
+    inline bool MeshPoint::isOutside() const{
 		return !inside;
 	}
 	
@@ -165,7 +163,7 @@ namespace Clobscode
         inside = false;
 	}
 	
-	inline bool MeshPoint::wasProjected(){
+    inline bool MeshPoint::wasProjected() const {
 		return projected;
 	}
     
@@ -196,11 +194,11 @@ namespace Clobscode
 		elements.clear();
 	}
 	
-	inline list<unsigned int> &MeshPoint::getElements(){
+    inline const list<unsigned int> &MeshPoint::getElements() const {
 		return elements;
 	}
 	
-	std::ostream& operator<<(std::ostream& o,MeshPoint &p);
+    std::ostream& operator<<(std::ostream& o, const MeshPoint &p);
 	
 }
 #endif

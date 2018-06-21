@@ -41,7 +41,6 @@
 using Clobscode::MeshPoint;
 using Clobscode::QuadEdge;
 using Clobscode::Point3D;
-//using SurfMesh::SurfTriangle;
 using std::vector;
 using std::list;
 using std::set;
@@ -238,6 +237,6 @@ namespace Clobscode
         intersected_edges = iedges;
 	}
 	
-    std::ostream& operator<<(ostream& o,Quadrant &q);
+    std::ostream& operator<<(ostream& o, const Quadrant &q);
 }
 #endif

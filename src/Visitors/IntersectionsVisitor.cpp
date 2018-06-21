@@ -357,30 +357,6 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
-    bool IntersectionsVisitor::edgeTriangleIntersection(const PolyMesh::PolyEdge &st,
-                                                   const vector<Point3D> &input_pts,
-                                                   const Point3D &pmin,
-                                                   const Point3D &pmax) const {
-        std::cerr << "Warning IntersectionsVisitor::edgeTriangleIntersection()\n";
-        std::cerr << "  FJA: I didn't checked this function in 2D yet! And you, Claudio?\n";
-
-        //compute the coords of all Quadrant edges
-        const vector<vector<Point3D> > &oct_edges = getEdges(pmin,pmax);
-
-        //test each edge against the triangle
-        for (unsigned int i=0; i<oct_edges.size(); i++) {
-
-            if (st.segmentIntersection(input_pts,oct_edges[i][0],oct_edges[i][1])) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    //--------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------
-
     vector<vector<Point3D>> IntersectionsVisitor::getEdges(const Point3D &pmin,
                                                       const Point3D &pmax) const {
         vector<vector<Point3D> > edges;
