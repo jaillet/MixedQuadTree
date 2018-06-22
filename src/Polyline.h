@@ -89,7 +89,7 @@ namespace Clobscode
 
         //projection of a Point to a list of Edges, identified by index
 		virtual Point3D getProjection(const Point3D & pPoint, 
-                                   list<unsigned int> &lEdges) const;
+                                   const list<unsigned int> &lEdges) const;
 								 
         virtual void update();
 

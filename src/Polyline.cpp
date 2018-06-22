@@ -387,7 +387,7 @@ namespace Clobscode
         }
         
         vector<unsigned int> iNodes;
-        for (const auto iEdg:iEdges) {
+        for (unsigned int iEdg:iEdges) {
             iNodes.push_back(mEdges[iEdg][0]);
             iNodes.push_back(mEdges[iEdg][1]);
         }
@@ -403,9 +403,9 @@ namespace Clobscode
             }
         }
         
-        for (auto iNd:iCommonNodes) {
+        for (unsigned int iNd:iCommonNodes) {
             //if angle is between 150 and 210 grades, then is not a sharp feature:
-            if (mVerticesAngles[iNd]<2.61799 || mVerticesAngles[iNd]>3.66519) {
+            if (mVerticesAngles[iNd]<toRadians(150.) || mVerticesAngles[iNd]>toRadians(210.)) {
                 //std::cout << " " << iNd << std::flush;
                 fes.push_back(mVertices[iNd]);
             }
@@ -522,7 +522,7 @@ namespace Clobscode
 	
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    Point3D Polyline::getProjection(const Point3D & pPoint, list<unsigned int> &lEdges) const{
+    Point3D Polyline::getProjection(const Point3D & pPoint, const list<unsigned int> &lEdges) const{
 
         // closest point on the edge (on edge, or vertice)
         Point3D pProjP_tmp,pProjP;
