@@ -310,7 +310,7 @@ namespace Clobscode
 		
         if (mEdges.empty() || lEdges.empty()) {
             std::cerr << "Error at Polyline::pointIsInMesh, nowhere to project a point\n";
-            exit(1); //or: return false;
+            exit(EXIT_FAILURE); //or: return false;
         }
 		
         bool found=false;
@@ -364,7 +364,7 @@ namespace Clobscode
                 std::cerr << "big bug here\n";
                 //FJA in case this is not working, back to the computation for the whole polyline ;o(
                 //return(pointIsInMesh(pPoint));
-                exit(4);
+                exit(EXIT_FAILURE);
             }
 
             return bIsIn;
@@ -494,7 +494,7 @@ namespace Clobscode
 
         if (mEdges.empty()) {
             cerr << "Error at Polyline::getProjection nowhere to project a point\n";
-            exit(1); //or: return pProjP;
+            exit(EXIT_FAILURE); //or: return pProjP;
         }
 
         bool found = false;
@@ -535,7 +535,7 @@ namespace Clobscode
 
         if (mEdges.empty() || lEdges.empty()) {
             std::cerr << "Error at Polyline::getProjection nowhere to project a point\n";
-            exit(1); //or: return pProjP;
+            exit(EXIT_FAILURE); //or: return pProjP;
         }
 
         bool found = false;
@@ -576,7 +576,7 @@ namespace Clobscode
         if ( ! W.is3DCollinear(Point3D(0.0,0.0,1.0)) ) {
             std::cerr << "warning Polyline::computeNormalToPlane()\n";
             std::cerr << "Polyline not aligned to XY plane\n";
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         return (W);
     }

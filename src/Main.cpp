@@ -174,7 +174,6 @@ int main(int argc,char** argv){
                     std::cerr << inputs[i].getProjection(Point3D(0.9999999999,0.999999999,0.0)) << std::endl;
                     std::cerr << inputs[i].getCentroid() << std::endl;
                 }
-//                exit(3);
                 break;
             case 'd':
                 in_name = argv[i+1];
@@ -307,7 +306,7 @@ int main(int argc,char** argv){
         for (rriter = all_regions.begin(); rriter!=all_regions.end(); rriter++) {
             delete *rriter;
         }
-        exit (1);
+        exit (EXIT_FAILURE);
     }
 	
 	//give default output name if non is provided
