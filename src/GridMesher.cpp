@@ -30,14 +30,14 @@ namespace Clobscode
 	
 	/***********************************************
 	 This class will compute the starting grid elements
-	 that will be split following the octree technique.
-	 The Octree works fine over domains that present a 
-	 bounding box that is close to a cube, but it produces
+     that will be split following the quadtree technique.
+     The Quadtree works fine over domains that present a
+     bounding box that is close to a square, but it produces
 	 several unnecessary elements in stick like domains or
-	 3D domains that are close to be in 2D.
+     2D domains that are close to be in 1D.
 	 In order to do so, it will find the smallest edge
 	 of the bounding box and will use it in other axis
-	 to build cubes.
+     to build squares.
 	***********************************************/
 	GridMesher::GridMesher(){
 

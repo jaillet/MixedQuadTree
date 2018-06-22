@@ -608,7 +608,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
         opts.reserve(nop);
 
         if (nop!=4) {
-            cerr << "warning at Services::ReadOctreeMesh\n";
+            cerr << "warning at Services::ReadQuadMesh\n";
             cerr << "         Quadrant hasn't 4 nodes: " << nop << "\n";
             cout << "Quadrant index " << i << "\n";
             continue;
@@ -708,7 +708,7 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
         const vector<unsigned int> &opts = Quadrants[i].getPointIndex();
         unsigned int nopts = opts.size();
         if (nopts<4) {
-            cerr << "warning at Services::WriteOctreeMesh\n";
+            cerr << "warning at Services::WriteQuadMesh\n";
             cerr << "        Quadrant has less than 4 nodes\n";
             fprintf(f,"%u ",nopts);
         }

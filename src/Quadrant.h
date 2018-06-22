@@ -124,7 +124,7 @@ namespace Clobscode
 		vector<vector<unsigned int> > sub_elements, possibles, continuity;
         list<unsigned int> intersected_edges;
 		//the level at which this Quadrant is found in the
-		//the tree structure (octree). Used for optimization
+        //the tree structure (Quadtree). Used for optimization
 		unsigned short ref_level;
 		
 		Point3D projection_influence;

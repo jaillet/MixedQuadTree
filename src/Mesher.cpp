@@ -630,7 +630,7 @@ namespace Clobscode
         for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
 
             if (!(*iter).accept(&tpv)) {
-                std::cerr << "Error at Mesher::generateOctreeMesh";
+                std::cerr << "Error at Mesher::generateQuadtreeMesh";
                 std::cerr << " Transition Pattern not found\n";
             }
         }
@@ -804,7 +804,7 @@ namespace Clobscode
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
             if (new_pts.empty()) {
-                cout << "warning at Mesher::generateOctreeMesh no new points!!!\n";
+                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
                 break;
             }
             //add the new points to the vector
@@ -924,7 +924,7 @@ namespace Clobscode
 
         for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
             if (!(*iter).accept(&tpv)) {
-                std::cerr << "Error at Mesher::generateOctreeMesh";
+                std::cerr << "Error at Mesher::generateQuadtreeMesh";
                 std::cerr << " Transition Pattern not found\n";
             }
         }

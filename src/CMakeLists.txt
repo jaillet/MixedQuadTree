@@ -12,14 +12,13 @@ endif()
 
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
-set(SOURCE_FILES Main MeshPoint Point3D Polyline PolyEdge  Quadrant QuadEdge
+set(SOURCE_FILES Main
+        Point3D Polyline PolyEdge  Quadrant QuadEdge
 	QuadTransition QuadSurfTemplate 
-        Mesher GridMesher TransitionPoint PatternFactory TransitionTemplate
-        TransitionCube
+        Mesher GridMesher MeshPoint
         RefinementRegion RefinementCubeRegion RefinementSurfaceRegion
         RefinementInputSurfaceRegion RefinementAllRegion
-        FaceDiagonal
-         GeometricTransform Services
+        GeometricTransform Services
         Visitors/Visitor Visitors/SplitVisitor Visitors/EdgeVisitor 
 	Visitors/IntersectionsVisitor
         Visitors/OneIrregularVisitor Visitors/PointMovedVisitor
@@ -29,7 +28,12 @@ set(SOURCE_FILES Main MeshPoint Point3D Polyline PolyEdge  Quadrant QuadEdge
 
 add_executable(mesher_roi ${SOURCE_FILES})
 
-# obsolete 3D files that have been removed
+# obsolete 3D files to be removed
+
+# obsolete 3D files already been removed
+#TransitionPoint TransitionCube
+#FaceDiagonal Prism Octant OctreeEdge
+#PatternFactory TransitionTemplate
 #SurfTemplate1 SurfTemplate2 SurfTemplate3 SurfTemplate4
 #SurfTemplate5 SurfTemplate6 SurfTemplate7 TriMesh HexRotation
 #SurfPrism SurfPyramid SurfHexahedron SurfTetrahedron SurfEdge SurfTriangle SurfEdgeContainer SurfPair
