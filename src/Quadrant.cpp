@@ -57,15 +57,12 @@ namespace Clobscode
         }
         
         unsigned int i0 = (4+nIdx-1)%4, i2=(nIdx+1)%4;
-        cout << nIdx << "(" << pointindex.at(nIdx) << ") -> ";
-        cout <<  i0 << " " << i2;
 
         const Point3D &P0 = mp[pointindex[(nIdx+3)%4]].getPoint(); //previous point
         const Point3D &P1 = mp[pointindex[nIdx]].getPoint();       //mid point
         const Point3D &P2 = mp[pointindex[(nIdx+1)%4]].getPoint(); //next point
 
         double angle = toDegrees( P1.angle3Points(P0,P2));
-        cout << " " << angle;
 
         //if the angle is smoth (close to 180) or if it is going to produce inverted
         //elements in a quad (>180), then it must be managed with transition patterns

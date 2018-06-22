@@ -75,7 +75,7 @@ namespace Clobscode
         detectInsideNodes(input);
 
         projectCloseToBoundaryNodes(input);
-        removeOnSurface(input);
+        removeOnSurfaceSafe(input);
 
         //apply the surface Patterns
         applySurfacePatterns(input);
@@ -146,22 +146,21 @@ namespace Clobscode
         detectInsideNodes(input);
 
         projectCloseToBoundaryNodes(input);
-        //removeOnSurface(input);
+        removeOnSurfaceSafe(input);
         
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
         Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
 
         //update element and node info.
-        //linkElementsToNodes();
-        detectInsideNodes(input);
+        linkElementsToNodes();
 
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
         
         //apply the surface Patterns
         applySurfacePatterns(input);
-        removeOnSurface(input);
+        //removeOnSurface(input);
 
         if (rotated) {
             // rotate the mesh
@@ -1144,12 +1143,12 @@ namespace Clobscode
             }
         }
     }
-
+    
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-
+    
     void Mesher::removeOnSurface(Polyline &input){
-
+        
         list<Quadrant> newele,removed;
         RemoveSubElementsVisitor rsv;
         rsv.setPoints(points);
@@ -1159,7 +1158,7 @@ namespace Clobscode
                 newele.push_back(Quadrants[i]);
                 continue;
             }
-        
+            
             if (Quadrants[i].hasFeature()) {
                 if (Quadrants[i].accept(&rsv)) {
                     //Quadrant with feature to be removed
@@ -1182,7 +1181,7 @@ namespace Clobscode
                 }
             }
             else { //FJA add a "else" here as some quadrants are inserted twice
-
+                
                 //if (Quadrants[i].removeOutsideSubElements(points)) {
                 if (Quadrants[i].accept(&rsv)) {
                     removed.push_back(Quadrants[i]);
@@ -1190,6 +1189,87 @@ namespace Clobscode
                 else {
                     newele.push_back(Quadrants[i]);
                 }
+            }
+        }
+        
+        if (removed.empty()) {
+            return;
+        }
+        
+        //clear removed elements
+        removed.clear();
+        //now element std::list from Vomule mesh can be cleared, as all remaining
+        //elements are still in use and attached to newele std::list.
+        Quadrants.clear();
+        for (auto eiter = newele.begin(); eiter!=newele.end(); ++eiter) {
+            Quadrants.push_back(*eiter);
+        }
+    }
+
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+
+    void Mesher::removeOnSurfaceSafe(Polyline &input){
+
+        list<Quadrant> newele,removed;
+
+        //Keep all inside quads and all of th
+        for (auto q:Quadrants) {
+            if (q.isInside()) {
+                newele.push_back(q);
+                continue;
+            }
+
+            bool onein = false;
+            bool feaProj = false;
+            Point3D avg;
+            for (auto quaNoIdx:q.getPointIndex()) {
+                avg+=points[quaNoIdx].getPoint();
+                if (points[quaNoIdx].isInside()) {
+                    onein = true;
+                    break;
+                }
+                if (points[quaNoIdx].isInside()) {
+                    feaProj = true;
+                }
+            }
+            
+            //if it has at least one node inside
+            //we don't remove it.
+            if (onein) {
+                newele.push_back(q);
+                continue;
+            }
+            
+            //now we now the Quad has no node inside.
+            if (q.hasFeature()) {
+                if (feaProj) {
+                    //if their nodes were projected onto
+                    //input features, the Quad is now outside.
+                    removed.push_back(q);
+                }
+                else {
+                    newele.push_back(q);
+                }
+            }
+            
+            //the most expensive case: regarding
+            //the original intersected edges, does
+            //this quad still have a node inside?
+            //if yes we keep it. It means that all
+            //of its nodes are outside or projected
+            //onto the boundary so if we erase it we
+            //will loose boundary representation.
+            bool border = false;
+            for (auto qp:q.getPointIndex()) {
+                if (input.pointIsInMesh(points[qp].getPoint(),q.getIntersectedEdges())) {
+                    newele.push_back(q);
+                    border = true;
+                    break;
+                }
+            }
+            if (!border) {
+                removed.push_back(q);
             }
         }
 
@@ -1243,62 +1323,35 @@ namespace Clobscode
             }
             else {
                 unsigned int inNod = 0, oneN=0, oneF=0;
-                
                 const vector<unsigned int> &octIndx = q.getPointIndex();
                 
-                cout << "Feature Octant: ";
                 for (unsigned int j=0; j<4; j++) {
                     if (points[octIndx[j]].isInside()) {
-                        cout << "I";
                         inNod++;
                         oneN = j;
                     }
-                    else {
-                        cout << "O";
-                    }
                     if (points[octIndx[j]].isFeature()) {
-                        cout << "F";
                         oneF = j;
-                    }
-                    cout << " ";
-                }
-                if (inNod==1) {
-                    cout << "1I";
-                    if (!points[octIndx[(oneN+2)%4]].isFeature()) {
-                        cout << " surface Pat";
-                        q.accept(&stv);
-                        cout << " nelem " << q.getSubElements().size();
-                        for (auto sns:q.getSubElements()) {
-                            cout << "\n";
-                            for (auto nt:sns) {
-                                cout << " " << nt;
-                            }
-                        }
-                        cout << "\n QNds:";
-                        for (auto nIdx:q.getPointIndex()) {
-                            cout << " " << nIdx;
-                        }
-                    }
-                }
-                else if (inNod==3) {
-                    if (q.badAngle(oneF,points)) {
-                        cout << " surface 3In";
-                        q.accept(&stv);
-                        cout << " nelem " << q.getSubElements().size();
-                        for (auto sns:q.getSubElements()) {
-                            cout << "\n";
-                            for (auto nt:sns) {
-                                cout << " " << nt;
-                            }
-                        }
-                        cout << "\n QNds:";
-                        for (auto nIdx:q.getPointIndex()) {
-                            cout << " " << nIdx;
-                        }
                     }
                 }
                 
-                cout << "\n";
+                switch (inNod) {
+                    case 0:
+                        q.accept(&stv);
+                        break;
+                    case 1:
+                        if (!points[octIndx[(oneN+2)%4]].isFeature()) {
+                            q.accept(&stv);
+                        }
+                        break;
+                    case 3:
+                        if (q.badAngle(oneF,points)) {
+                            q.accept(&stv);
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
@@ -1325,14 +1378,18 @@ namespace Clobscode
                 continue;
             }
             
-            if (!q.hasFeature()) {
-                //Save outside nodes and manage them after
-                //dealing with all features quadrants.
-                for (auto pIdx:q.getPointIndex()) {
-                    if (points[pIdx].isOutside()) {
-                        out_nodes.push_back(pIdx);
-                    }
+            //Save all outside nodes and manage them after
+            //dealing with all features quadrants.
+            //if a node was projected to a feature
+            //it will be skipped during the rest of
+            //node projection.
+            for (auto pIdx:q.getPointIndex()) {
+                if (points[pIdx].isOutside()) {
+                    out_nodes.push_back(pIdx);
                 }
+            }
+            
+            if (!q.hasFeature()) {
                 continue;
             }
             
@@ -1348,7 +1405,7 @@ namespace Clobscode
             
             unsigned int fsNum = fs.size(), outNo = 0;
             for (auto pIdx:epts) {
-                if (points[pIdx].isOutside()) {
+                if (points[pIdx].isOutside() && !points[pIdx].wasProjected()) {
                     outNo++;
                 }
             }
@@ -1367,7 +1424,7 @@ namespace Clobscode
                 bool push = false;
                 
                 for (auto pIdx:epts) {
-                    if (points[pIdx].isOutside()) {
+                    if (points[pIdx].isOutside() && !points[pIdx].wasProjected()) {
                         
                         const Point3D &current = points[pIdx].getPoint();
                         double dis = (current - projected).Norm();

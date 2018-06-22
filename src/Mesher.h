@@ -110,6 +110,8 @@ namespace Clobscode
         virtual void detectInsideNodes(Polyline &input);
 
 		virtual void removeOnSurface(Polyline &input);
+        
+        virtual void removeOnSurfaceSafe(Polyline &input);
 		
         virtual void applySurfacePatterns(Polyline &input);
 

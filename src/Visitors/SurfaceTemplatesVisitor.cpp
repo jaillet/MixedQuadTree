@@ -65,6 +65,46 @@ namespace Clobscode
             }
         }
         
+        if (nin==0) {
+            //All the nodes of the octant were projected onto the
+            //boundary however it is not outside.
+            //Every node witn angle below 150 will be considered
+            //as inside, while the rest as outside. The same logic
+            //as the rest of the octant will be employed after this
+            //step.
+            unsigned int bAnNo = 0;
+            
+            for (unsigned int i=0; i<pointindex.size(); i++) {
+                if (!o->badAngle(i,*meshpts)) {
+                    in[i]=true;
+                    nin++;
+                }
+                else {
+                    bAnNo = i;
+                }
+            }
+            
+            if (nin==4) {
+                //nothing to do, the element will
+                return true;
+            }
+            if (nin==3) {
+                //it should be replaced by 1 or 2 triangles.
+                vector<unsigned int> t;
+                t.reserve(3);
+                for (unsigned int i=0; i<4; i++) {
+                    if (in[i]) {
+                        t.push_back(pointindex[i]);
+                    }
+                }
+                subels.push_back(t);
+                o->updateSubElements(subels);
+                return true;
+            }
+            
+        }
+        
+        
         QuadSurfTemplate st;
         bool res;
         switch (nin) {
