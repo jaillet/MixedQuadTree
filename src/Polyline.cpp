@@ -377,11 +377,11 @@ namespace Clobscode
         return bIsIn;
     }
     
-    list<Point3D> Polyline::getFeatureProjection(const Quadrant &q,
+    list<unsigned int> Polyline::getFeatureProjection(const Quadrant &q,
                                                  vector<MeshPoint> &mp) {
         
         list<unsigned int> iEdges = q.getIntersectedEdges();
-        list<Point3D> fes;
+        list<unsigned int> fes;
         if (iEdges.size()<2) {
             return fes;
         }
@@ -405,9 +405,9 @@ namespace Clobscode
         
         for (unsigned int iNd:iCommonNodes) {
             //if angle is between 150 and 210 grades, then is not a sharp feature:
-            if (mVerticesAngles[iNd]<toRadians(150.) || mVerticesAngles[iNd]>toRadians(210.)) {
+            if (mVerticesAngles[iNd]<150. || mVerticesAngles[iNd]>210.) {
                 //std::cout << " " << iNd << std::flush;
-                fes.push_back(mVertices[iNd]);
+                fes.push_back(iNd);
             }
         }
         return fes;
@@ -442,7 +442,7 @@ namespace Clobscode
         
         for (auto iNd:iCommonNodes) {
             //if angle is between 150 and 210 grades, then is not a sharp feature:
-            if (mVerticesAngles[iNd]<toRadians(150.) || mVerticesAngles[iNd]>toRadians(210.)) {
+            if (mVerticesAngles[iNd]<150. || mVerticesAngles[iNd]>210.) {
                 //std::cout << " " << iNd << std::flush;
                 return q.pointInside(mp,mVertices[iNd]);
             }

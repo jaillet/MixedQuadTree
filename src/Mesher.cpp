@@ -976,28 +976,28 @@ namespace Clobscode
         vector<Point3D> out_pts;
         
         /*Begin debugging:*/
-        for (auto q:Quadrants) {
-            for (auto el:q.getSubElements()) {
-                if (decoration) {
-                    if (q.isDebugging()) {
-                        out_els_ref_level.push_back(1);
-                    }
-                    else {
-                        out_els_ref_level.push_back(3);
-                    }
-                }
-                out_els.push_back(el);
-            }
-        }
-        for (auto p:points) {
-            out_pts.push_back(p.getPoint());
-        }
+//        for (auto q:Quadrants) {
+//            for (auto el:q.getSubElements()) {
+//                if (decoration) {
+//                    if (q.isDebugging()) {
+//                        out_els_ref_level.push_back(1);
+//                    }
+//                    else {
+//                        out_els_ref_level.push_back(3);
+//                    }
+//                }
+//                out_els.push_back(el);
+//            }
+//        }
+//        for (auto p:points) {
+//            out_pts.push_back(p.getPoint());
+//        }
         
-        mesh.setPoints(out_pts);
-        mesh.setElements(out_els);
-        mesh.setRefLevels(out_els_ref_level);
+//        mesh.setPoints(out_pts);
+//        mesh.setElements(out_els);
+//        mesh.setRefLevels(out_els_ref_level);
         
-        return out_els.size();
+//        return out_els.size();
         /*End debugging:*/
         
         
@@ -1365,7 +1365,7 @@ namespace Clobscode
                         /***** BEGIN Debugging state *******/
                         else {
                             
-                            if (q.getAngle(opo,points)<150) {
+                            if (q.getAngle(opo,points)<150.) {
                                 q.setDebugging();
                                 cout << " smooth\n";
                             }
@@ -1425,7 +1425,7 @@ namespace Clobscode
                 continue;
             }
             
-            list<Point3D> fs = input.getFeatureProjection(q,points);
+            list<unsigned int> fs = input.getFeatureProjection(q,points);
             
             if (fs.empty()) {
                 cerr << "Error at Mesher::shrinkToBoundary";
@@ -1442,7 +1442,7 @@ namespace Clobscode
                 }
             }
             
-            list<Point3D>::const_iterator iter;
+            list<unsigned int>::const_iterator iter;
             
             for (iter=fs.begin(); iter!=fs.end(); ++iter) {
                 
@@ -1451,7 +1451,7 @@ namespace Clobscode
                 }
                 
                 double best = std::numeric_limits<double>::infinity();
-                Point3D projected = *iter;
+                Point3D projected = input.getPoints()[*iter];
                 unsigned int pos = 0;
                 bool push = false;
                 
@@ -1541,16 +1541,17 @@ namespace Clobscode
         //surface" and "outside" nodes, remove it.
         list<unsigned int> in_nodes;
 
+        //FJA compute everything before to project anything
         for (auto &q:Quadrants) {
-            
+            q.computeMaxDistance(points);
+        }
+
+        for (auto &q:Quadrants) {
+
             if (!q.isSurface()) {
                 continue;
             }
             
-            q.computeMaxDistance(points);
-            
-            //If we do not update Max Distance information for the nodes here
-            //then it won't work in the next cicle. Why??? I don't know.
             double md = q.getMaxDistance();
             for (auto pIdx:q.getPointIndex()) {
                 points[pIdx].setMaxDistance(md);
@@ -1569,22 +1570,22 @@ namespace Clobscode
             }
         
             //Manage Quadrants with Features
-            list<Point3D> fs = input.getFeatureProjection(q,points);
+            list<unsigned int> fs = input.getFeatureProjection(q,points);
             
             unsigned int fsNum = fs.size();
             //we use a list and interator to erase the projected node
             //from the list of features.
-            list<Point3D>::iterator iter;
-            for (iter=fs.begin(); iter!=fs.end(); ++iter) {
+            list<unsigned int>::const_iterator itFs;
+            for (itFs=fs.begin(); itFs!=fs.end(); ++itFs) {
 
                 if (fsNum==0) {
                     break;
                 }
 
-                Point3D projected = *iter;
-                
+                Point3D featProjected = input.getPoints()[*itFs];
+
                 double best = std::numeric_limits<double>::infinity();
-                unsigned int candidate=0;
+                unsigned int candidate=-1;
                 
                 bool push = false;
                 for (auto pIdx:q.getPointIndex()) {
@@ -1594,8 +1595,12 @@ namespace Clobscode
                     }
                     
                     const Point3D &current = points[pIdx].getPoint();
-                    double dis = (current - projected).Norm();
-                    
+                    double dis = (current - featProjected).Norm();
+//FJA better to check distance to projection on the polyline?
+//                    Point3D currProjected = input.getProjection(current,q.getIntersectedEdges());
+//                    double dis = (currProjected - featProjected).Norm();
+
+
                     //if(points[pIdx].getMaxDistance()>dis && best>dis){
                     if(best>dis) {
                         best = dis;
@@ -1606,16 +1611,35 @@ namespace Clobscode
                 
                 if (push) {
                     points[candidate].setProjected();
-                    points[candidate].setPoint(projected);
+                    points[candidate].setPoint(featProjected);
                     //Feature projected flag will be used later to
                     //apply surface patterns.
                     points[candidate].featureProjected();
+
+                    // First, get index of the feature edges. Will be added next
+                    // to intersecting edges of the quads sharing the candidate node
+                    // find first edge
+//                    vector<PolyEdge>::iterator it=std::find_if(input.getEdges().begin(), input.getEdges().end(),
+//                                      [itFs] (const PolyEdge& pe) -> bool {return ((pe.getKey() == *itFs)||(pe.getVal()== *itFs)) ; });
+//                    unsigned ie1=std::distance(input.getEdges().begin(),it);
+//                    // find second edge
+//                    it = std::find_if(++it, input.getEdges().end(),
+//                                      [itFs] (const PolyEdge& pe) -> bool {return ((pe.getKey() == *itFs)||(pe.getVal()== *itFs)) ; });
+//                    unsigned ie2=std::distance(input.getEdges().begin(),it);
+
                     for (auto pe:points[candidate].getElements()) {
                         //this should be studied further.
                         if (Quadrants.at(pe).intersectsSurface()) {
                             Quadrants[pe].setSurface();
                         }
+//                        // add feature edges to the intersected list
+//                        Quadrants[pe].getIntersectedEdges().push_back(ie1);
+//                        Quadrants[pe].getIntersectedEdges().push_back(ie2);
+//                        // remove duplicates
+//                        Quadrants[pe].getIntersectedEdges().sort();
+//                        Quadrants[pe].getIntersectedEdges().unique();
                     }
+
                     fsNum--;
                 }
             }
@@ -1660,7 +1684,7 @@ namespace Clobscode
                 //sharing this node must be set as a border element in order
                 //to avoid topological problems. And if this node belonged
                 //to a feature Quadrants, all the quadrants sharing the node
-                //will labeled as Feature Quadrants too.
+                //will be labeled as Feature Quadrants too.
                 //points.at(*piter).setOutside();
                 points[p].setProjected();
                 points[p].setPoint(projected);

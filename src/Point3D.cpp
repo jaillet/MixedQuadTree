@@ -24,6 +24,7 @@
 **/
 
 #include "Point3D.h"
+#include "GeometricTransform.h"
 
 namespace Clobscode
 {
@@ -95,11 +96,10 @@ namespace Clobscode
         //To be removed when projection of two outside nodes onto the
         //same input place is managed:
         
-        double result = acos(V2.dot(V1));
-        result*=57.2957795;
-        double add = V2[0]*V1[1]-V2[1]*V1[0];
-        if (add<0) {
-            result+=180;
+        double result = toDegrees(acos(V2.dot(V1)));
+        if (V2.isCounterClockWise(V1))
+        {
+            result+=180.;
         }
         
         if (V1.Norm()<10E-6) {

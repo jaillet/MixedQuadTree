@@ -832,9 +832,9 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
         for (unsigned int i=0; i<minAngles.size(); i++) {
             if (i%30==0) {fprintf(f,"\n");}
             if (elements[i].size()==3) //triangle
-                fprintf(f," %d", (int) (60.-toDegrees(minAngles[i])));
+                fprintf(f," %d", (int) (60.-minAngles[i]));
             else //quad
-                fprintf(f," %d", (int) (90.-toDegrees(minAngles[i])));
+                fprintf(f," %d", (int) (90.-minAngles[i]));
         }
     }
 

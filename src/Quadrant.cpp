@@ -56,7 +56,7 @@ namespace Clobscode
 
         if (pointindex.size()!=4) {
             cerr << "Warning in Quadrant::badAngle";
-            cerr << " Splitted quadant not managed yet\n";
+            cerr << " Splitted quadrant not managed yet\n";
             return false;
         }
         
@@ -106,8 +106,8 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     bool Quadrant::pointInside(vector<MeshPoint> &mp, const Point3D &p) const {
-        Point3D minp = mp[pointindex[0]].getPoint();
-        Point3D maxp = mp[pointindex[2]].getPoint();
+        const Point3D &minp = mp[pointindex[0]].getPoint();
+        const Point3D &maxp = mp[pointindex[2]].getPoint();
         if (minp[0]>p[0] || maxp[0]<p[0]) {
             return false;
         }

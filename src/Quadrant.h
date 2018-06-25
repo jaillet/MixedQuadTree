@@ -93,7 +93,8 @@ namespace Clobscode
 		virtual void resetProjectionInfluence();
 
         virtual const list<unsigned int> &getIntersectedEdges() const; //read only
-		
+        virtual list<unsigned int> &getIntersectedEdges() ; //modification
+
         virtual const vector<vector<unsigned int> > &getSubElements() const; //read only
         
         virtual void updateSubElements(vector<vector <unsigned int> > &nsubs);
@@ -185,8 +186,11 @@ namespace Clobscode
 	
     inline const list<unsigned int> &Quadrant::getIntersectedEdges() const {
         return intersected_edges;
-	}
-	
+    }
+    inline list<unsigned int> &Quadrant::getIntersectedEdges() {
+        return intersected_edges;
+    }
+
 	inline unsigned short &Quadrant::getRefinementLevel() {
 		return ref_level;
 	}
@@ -226,8 +230,8 @@ namespace Clobscode
 	}
 
     inline void Quadrant::computeMaxDistance(vector<MeshPoint> &mp){
-		Point3D p0 = mp[pointindex[0]].getPoint();
-        Point3D p1 = mp[pointindex[2]].getPoint();
+        const Point3D &p0 = mp[pointindex[0]].getPoint();
+        const Point3D &p1 = mp[pointindex[2]].getPoint();
 		max_dis = 0.3 * (p0 - p1).Norm();
 	}
     

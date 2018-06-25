@@ -78,7 +78,7 @@ namespace Clobscode
         //returns true if the list of edges containts at least one feature.
         virtual bool hasFeature(const Quadrant &q, vector<MeshPoint> &mp) const;
         
-        virtual list<Point3D> getFeatureProjection(const Quadrant &q,
+        virtual list<unsigned int> getFeatureProjection(const Quadrant &q,
                                                    vector<MeshPoint> &mp);
 
         //projection of a Point to Edge iedg
