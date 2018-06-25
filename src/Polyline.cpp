@@ -360,12 +360,12 @@ namespace Clobscode
             //                          << " -- " << bIsIn << "=" << windingNumber(pPoint) << "\n" << std::flush;
 
             //FJA temporary test to get removed once one is sure this is working
-            if (bIsIn != pointIsInMesh(pPoint)) {
+            /*if (bIsIn != pointIsInMesh(pPoint)) {
                 std::cerr << "big bug here\n";
                 //FJA in case this is not working, back to the computation for the whole polyline ;o(
                 //return(pointIsInMesh(pPoint));
                 exit(EXIT_FAILURE);
-            }
+            }*/
 
             return bIsIn;
         }

@@ -37,6 +37,10 @@ namespace Clobscode
         :pointindex(epts),ref_level(ref_level),
           n_influences(0),influence_commit(false),surface(false),feature(false),max_dis(numeric_limits<double>::infinity()) {
         
+              
+        /***** BEGIN Debugging variables *******/
+              debugging = false;
+        /***** END Debugging variables *******/
 		sub_elements.assign(1,pointindex);
 	}
 	
@@ -48,7 +52,7 @@ namespace Clobscode
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    bool Quadrant::badAngle(unsigned int nIdx, const vector<MeshPoint> &mp) const {
+    bool Quadrant::badAngle(unsigned int &nIdx, const vector<MeshPoint> &mp) const {
 
         if (pointindex.size()!=4) {
             cerr << "Warning in Quadrant::badAngle";
@@ -62,8 +66,9 @@ namespace Clobscode
         const Point3D &P1 = mp[pointindex[nIdx]].getPoint();       //mid point
         const Point3D &P2 = mp[pointindex[(nIdx+1)%4]].getPoint(); //next point
 
-        double angle = toDegrees( P1.angle3Points(P0,P2));
-
+        //double angle = toDegrees( P1.angle3Points(P0,P2));
+        double angle = P1.angle3Points(P0,P2);
+        
         //if the angle is smoth (close to 180) or if it is going to produce inverted
         //elements in a quad (>180), then it must be managed with transition patterns
         //if (angle>2.61799 && angle<3.66519) {
@@ -71,6 +76,30 @@ namespace Clobscode
             return true;
         }
         return false;
+        
+    }
+    
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    double Quadrant::getAngle(unsigned int &nIdx, const vector<MeshPoint> &mp) const {
+        
+        if (pointindex.size()!=4) {
+            cerr << "Warning in Quadrant::badAngle";
+            cerr << " Splitted quadant not managed yet\n";
+            return false;
+        }
+        
+        unsigned int i0 = (4+nIdx-1)%4, i2=(nIdx+1)%4;
+        
+        const Point3D &P0 = mp[pointindex[(nIdx+3)%4]].getPoint(); //previous point
+        const Point3D &P1 = mp[pointindex[nIdx]].getPoint();       //mid point
+        const Point3D &P2 = mp[pointindex[(nIdx+1)%4]].getPoint(); //next point
+        
+        //double angle = toDegrees( P1.angle3Points(P0,P2));
+        //function angle returns degrees in 360.
+        double angle = P1.angle3Points(P0,P2);
+        
+        return angle;
         
     }
     

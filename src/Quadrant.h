@@ -102,7 +102,7 @@ namespace Clobscode
 		
         virtual double getMaxDistance() const;
         
-        virtual bool badAngle(unsigned int nIdx, const vector<MeshPoint> &mp) const;
+        virtual bool badAngle(unsigned int &nIdx, const vector<MeshPoint> &mp) const;
 		
 		//flag for inside Quadrants that due to "inside node" moved
 		//to the input domain, it must be treated as a surface
@@ -116,6 +116,15 @@ namespace Clobscode
         virtual void setFeature();
         
         virtual bool hasFeature() const;
+        
+        
+        /***** BEGIN Debugging methods *******/
+        virtual void setDebugging();
+        
+        virtual bool isDebugging() const;
+        
+        virtual double getAngle(unsigned int &nIdx, const vector<MeshPoint> &mp) const;
+        /***** END Debugging methods *******/
 
     protected:
         
@@ -133,9 +142,24 @@ namespace Clobscode
 		bool surface;
         bool feature;
 		
+        /***** BEGIN Debugging variables *******/
+        bool debugging;
+        /***** END Debugging variables *******/
+        
 		double max_dis;
 	};
 	
+    /***** BEGIN Debugging methods *******/
+    inline void Quadrant::setDebugging() {
+        debugging = true;
+    }
+    
+    inline bool Quadrant::isDebugging() const {
+        return debugging;
+    }
+    /***** END Debugging methods *******/
+    
+    
     inline void Quadrant::setFeature() {
         feature = true;
     }
@@ -212,13 +236,13 @@ namespace Clobscode
         sub_elements = nsubs;
         return;
         
-        cout << "updateSubElements: " << sub_elements.size();
+        /*cout << "updateSubElements: " << sub_elements.size();
         sub_elements.clear();
         sub_elements.reserve(nsubs.size());
         for (auto ne:nsubs) {
             sub_elements.push_back(ne);
         }
-        cout << " -> " << sub_elements.size() << "\n";
+        cout << " -> " << sub_elements.size() << "\n";*/
     }
 	
     inline double Quadrant::getMaxDistance() const {

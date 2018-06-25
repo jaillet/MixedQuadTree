@@ -85,12 +85,34 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     // Compute Angle at P0P1-P1P2 in radians
     // P0 previous, this=P1 mid, P2 next point
-    double Point3D::angle3Points(const Point3D &P0, const Point3D &P2) const {
+    double Point3D::angle3Points(const Point3D &prev, const Point3D &next) const {
 
-        Point3D V1 = P0-(*this), V2 = P2-(*this);
+        Point3D V1 = prev-(*this), V2 = next-(*this);
         V1.normalize();
         V2.normalize();
-        return (acos(V1.dot(V2)));
+        
+        //CL:
+        //To be removed when projection of two outside nodes onto the
+        //same input place is managed:
+        
+        double result = acos(V2.dot(V1));
+        result*=57.2957795;
+        double add = V2[0]*V1[1]-V2[1]*V1[0];
+        if (add<0) {
+            result+=180;
+        }
+        
+        if (V1.Norm()<10E-6) {
+            cerr << "Warning Point3D::angle3Points V1 " << V1 << "\nangle: ";
+            cerr << result << "\n";
+        }
+        
+        if (V2.Norm()<10E-6) {
+            cerr << "Warning Point3D::angle3Points V2 " << V2 << "\nangle: ";
+            cerr << result << "\n";
+        }
+        
+        return result;
 
     }
 

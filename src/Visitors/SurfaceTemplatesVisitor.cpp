@@ -84,6 +84,7 @@ namespace Clobscode
                 }
             }
             
+            //NOTE: nin was updated with badAngles.
             if (nin==4) {
                 //nothing to do, the element will
                 return true;

@@ -69,13 +69,13 @@ namespace Clobscode
         const vector<MeshPoint> &oct_points = points;
 
         //link element and node info for code optimization.
-        /*
+        
         detectFeatureQuadrants(input);
         linkElementsToNodes();
         detectInsideNodes(input);
 
         projectCloseToBoundaryNodes(input);
-        removeOnSurfaceSafe(input);
+        /*removeOnSurfaceSafe(input);
 
         //apply the surface Patterns
         applySurfacePatterns(input);
@@ -181,17 +181,18 @@ namespace Clobscode
         
         
         //Debugging:
-        /*vector<unsigned int> color (Quadrants.size(),0);
-        for (unsigned int i=0; i<Quadrants.size(); i++) {
-            
-            if (Quadrants[i].isSurface()) {
-                
-                if (input.hasFeature()) {
-                    color[i]=1;
+        /*vector<unsigned int> color (Quadrants.size(),0);*/
+        /*for (auto q:Quadrants) {
+            if (q.isDebugging()) {
+                cout << "For Quadrant " << q << " elements (" << q.getSubElements().size() << ")\n";
+                for (auto se:q.getSubElements()) {
+                    for (auto nIdx:se) {
+                        cout << " " << nIdx;
+                    }
+                    cout << "\n";
                 }
             }
-        }
-        mesh.setColoredCells(color);*/
+        }*/
 
         return mesh;
     }
@@ -974,10 +975,17 @@ namespace Clobscode
         unsigned int out_node_count = 0;
         vector<Point3D> out_pts;
         
-        
         /*Begin debugging:*/
-        /*for (auto q:Quadrants) {
+        for (auto q:Quadrants) {
             for (auto el:q.getSubElements()) {
+                if (decoration) {
+                    if (q.isDebugging()) {
+                        out_els_ref_level.push_back(1);
+                    }
+                    else {
+                        out_els_ref_level.push_back(3);
+                    }
+                }
                 out_els.push_back(el);
             }
         }
@@ -987,7 +995,9 @@ namespace Clobscode
         
         mesh.setPoints(out_pts);
         mesh.setElements(out_els);
-        return out_els.size();*/
+        mesh.setRefLevels(out_els_ref_level);
+        
+        return out_els.size();
         /*End debugging:*/
         
         
@@ -1229,7 +1239,7 @@ namespace Clobscode
                     onein = true;
                     break;
                 }
-                if (points[quaNoIdx].isInside()) {
+                if (points[quaNoIdx].isFeature()) {
                     feaProj = true;
                 }
             }
@@ -1240,17 +1250,13 @@ namespace Clobscode
                 newele.push_back(q);
                 continue;
             }
-            
+            avg/=q.getPointIndex().size();
             //now we now the Quad has no node inside.
-            if (q.hasFeature()) {
-                if (feaProj) {
-                    //if their nodes were projected onto
-                    //input features, the Quad is now outside.
-                    removed.push_back(q);
-                }
-                else {
-                    newele.push_back(q);
-                }
+            if (input.pointIsInMesh(avg,q.getIntersectedEdges())) {
+                newele.push_back(q);
+            }
+            else {
+                removed.push_back(q);
             }
             
             //the most expensive case: regarding
@@ -1260,7 +1266,7 @@ namespace Clobscode
             //of its nodes are outside or projected
             //onto the boundary so if we erase it we
             //will loose boundary representation.
-            bool border = false;
+            /*bool border = false;
             for (auto qp:q.getPointIndex()) {
                 if (input.pointIsInMesh(points[qp].getPoint(),q.getIntersectedEdges())) {
                     newele.push_back(q);
@@ -1270,7 +1276,7 @@ namespace Clobscode
             }
             if (!border) {
                 removed.push_back(q);
-            }
+            }*/
         }
 
         if (removed.empty()) {
@@ -1322,7 +1328,7 @@ namespace Clobscode
                 }
             }
             else {
-                unsigned int inNod = 0, oneN=0, oneF=0;
+                unsigned int inNod = 0, oneN=0, oneF=0, opo=0;
                 const vector<unsigned int> &octIndx = q.getPointIndex();
                 
                 for (unsigned int j=0; j<4; j++) {
@@ -1340,9 +1346,32 @@ namespace Clobscode
                         q.accept(&stv);
                         break;
                     case 1:
-                        if (!points[octIndx[(oneN+2)%4]].isFeature()) {
+                        opo = (oneN+2)%4;
+                        
+                        /***** BEGIN Debugging state *******/
+                        cout << "bad angle? " << q.getAngle(opo,points);
+                        /***** END Debugging state *******/
+                        
+                        if (!points[octIndx[opo]].isFeature() ||
+                            q.badAngle(opo,points) ) {
+                            
+                            /***** BEGIN Debugging state *******/
+                            cout << " Feature or badAngle\n";
+                            /***** END Debugging state *******/
+                            
                             q.accept(&stv);
                         }
+                        
+                        /***** BEGIN Debugging state *******/
+                        else {
+                            
+                            if (q.getAngle(opo,points)<150) {
+                                q.setDebugging();
+                                cout << " smooth\n";
+                            }
+                        }
+                        /***** END Debugging state *******/
+                        
                         break;
                     case 3:
                         if (q.badAngle(oneF,points)) {
@@ -1389,7 +1418,10 @@ namespace Clobscode
                 }
             }
             
-            if (!q.hasFeature()) {
+            /*
+             All features were already managed.
+             
+             if (!q.hasFeature()) {
                 continue;
             }
             
@@ -1452,7 +1484,7 @@ namespace Clobscode
                     }
                     outNo--;
                 }
-            }
+            }*/
         }
 
         //Manage non Feature Quadrants.
@@ -1540,48 +1572,51 @@ namespace Clobscode
             list<Point3D> fs = input.getFeatureProjection(q,points);
             
             unsigned int fsNum = fs.size();
-            
-            for (auto pIdx:q.getPointIndex()) {
+            //we use a list and interator to erase the projected node
+            //from the list of features.
+            list<Point3D>::iterator iter;
+            for (iter=fs.begin(); iter!=fs.end(); ++iter) {
+
                 if (fsNum==0) {
                     break;
                 }
-                if (points[pIdx].isInside()) {
+
+                Point3D projected = *iter;
                 
+                double best = std::numeric_limits<double>::infinity();
+                unsigned int candidate=0;
+                
+                bool push = false;
+                for (auto pIdx:q.getPointIndex()) {
+                    
+                    if (points[pIdx].wasProjected()) {
+                        continue;
+                    }
+                    
                     const Point3D &current = points[pIdx].getPoint();
-                    double best = std::numeric_limits<double>::infinity();
-                    Point3D candidate;
+                    double dis = (current - projected).Norm();
                     
-                    //we use a list and interator to erase the projected node
-                    //from the list of features.
-                    list<Point3D>::iterator iter, bIter;
-                    bool push = false;
-                    for (iter=fs.begin(); iter!=fs.end(); ++iter) {
-                        Point3D projected = *iter;
-                        double dis = (current - projected).Norm();
-                        
-                        if(points[pIdx].getMaxDistance()>dis && best>dis){
-                            best = dis;
-                            candidate = projected;
-                            bIter = iter;
-                            push = true;
+                    //if(points[pIdx].getMaxDistance()>dis && best>dis){
+                    if(best>dis) {
+                        best = dis;
+                        candidate = pIdx;
+                        push = true;
+                    }
+                }
+                
+                if (push) {
+                    points[candidate].setProjected();
+                    points[candidate].setPoint(projected);
+                    //Feature projected flag will be used later to
+                    //apply surface patterns.
+                    points[candidate].featureProjected();
+                    for (auto pe:points[candidate].getElements()) {
+                        //this should be studied further.
+                        if (Quadrants.at(pe).intersectsSurface()) {
+                            Quadrants[pe].setSurface();
                         }
                     }
-                    
-                    if (push) {
-                        fs.erase(bIter);
-                        points[pIdx].setProjected();
-                        points[pIdx].setPoint(candidate);
-                        //Feature projected flag will be used later to
-                        //apply surface patterns.
-                        points[pIdx].featureProjected();
-                        for (auto pe:points[pIdx].getElements()) {
-                            //this should be studied further.
-                            if (Quadrants.at(pe).intersectsSurface()) {
-                                Quadrants[pe].setSurface();
-                            }
-                        }
-                        fsNum--;
-                    }
+                    fsNum--;
                 }
             }
         }
