@@ -76,6 +76,7 @@ void endMsg(){
     cerr << "    -g save output mesh in GetFem format (gmf) \n";
     cerr << "    -v save output mesh + input in VTK ASCII format (vtk)\n";
     cerr << "    -m save output mesh in M3D ASCII format (m3d)\n";
+    cerr << "    -x save output mesh in GMSH ASCII format (gmsh)\n";
     cerr << "    -i save output mesh in MVM ASCII format (mvm)\n";
     cerr << "    -o save output mesh in OFF ASCII format (off)\n";
 }
@@ -112,7 +113,7 @@ int main(int argc,char** argv){
 //    inputs.reserve(4);
     //Clobscode::Services io;
     
-    bool getfem=false, vtkformat=false, Quadrant_start=false, m3dfor=false;
+    bool getfem=false, gmshformat=false, vtkformat=false, Quadrant_start=false, m3dfor=false;
     bool mvmfor=false, offfor=false;
     bool decoration=false; //if supported, write quality attributes to output file
     
@@ -136,6 +137,7 @@ int main(int argc,char** argv){
             case 'g':
             case 'v':
             case 'm':
+            case 'x':
             case 'i':
             case 'o':
             case 'q':
@@ -202,6 +204,9 @@ int main(int argc,char** argv){
                 break;
             case 'g':
                 getfem = true;
+                break;
+            case 'x':
+                gmshformat = true;
                 break;
             case 'v':
                 vtkformat = true;
@@ -339,6 +344,10 @@ int main(int argc,char** argv){
     
     if (getfem) {
         Services::WriteMeshGetfem(out_name,output);
+    }
+
+    if (gmshformat) {
+        Services::WriteGMSH(out_name,output);
     }
 
     if (vtkformat) {

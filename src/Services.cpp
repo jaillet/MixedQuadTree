@@ -741,6 +741,62 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
 }
 
 //-------------------------------------------------------------------
+// http://gmsh.info/doc/texinfo/gmsh.html#MSH-ASCII-file-format
+//-------------------------------------------------------------------
+bool Services::WriteGMSH(std::string name, FEMesh &output){
+
+    vector<Point3D> points = output.getPoints();
+    vector<vector<unsigned int> > elements = output.getElements();
+
+    if (elements.empty()) {
+        std::cout << "no output elements\n";
+        return false;
+    }
+
+    string vol_name = name+".gmsh";
+
+    //write the volume mesh
+    FILE *f = fopen(vol_name.c_str(),"wt");
+
+    fprintf(f,"$MeshFormat\n2.2 0 8\n$EndMeshFormat\n");
+
+    fprintf(f,"$Nodes\n%i",(int)points.size());
+
+    //write points
+    for(unsigned int i=0;i<points.size();i++){
+        fprintf(f,"\n%i",i+1);
+        fprintf(f," %+1.8E",points[i][0]);
+        fprintf(f," %+1.8E",points[i][1]);
+        fprintf(f," %+1.8E",points[i][2]);
+    }
+    fprintf(f,"\n$EndNodes\n");
+
+    fprintf(f,"$Elements\n%i",(int)elements.size());
+
+    //get all the elements in a std::vector
+    for (unsigned int i=0; i<elements.size(); i++) {
+        fprintf(f,"\n%i",i+1);
+        std::vector<unsigned int> epts = elements[i];
+        unsigned int np = epts.size();
+        if (np == 3) {
+            fprintf(f," 2 2 99 2"); //TRIANGLE
+        }
+        else if (np == 4){ //QUAD
+            fprintf(f," 3 2 99 2");
+        }
+
+        for (unsigned int j= 0; j<np; j++) {
+            fprintf(f," %i", epts[j]+1);
+        }
+    }
+    fprintf(f,"\n$EndElements\n");
+
+    fclose(f);
+
+    return true;
+}
+
+//-------------------------------------------------------------------
 //-------------------------------------------------------------------
 bool Services::WriteVTK(std::string name, FEMesh &output){
 
@@ -757,7 +813,7 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
     //write the volume mesh
     FILE *f = fopen(vol_name.c_str(),"wt");
 
-    fprintf(f,"# vtk DataFile Version 2.0\nUnstructured Grid %s\nASCII",name.c_str());
+    fprintf(f,"# vtk DataFile Version 2.0\nvtk file: 2D Unstructured Grid %s\nASCII",name.c_str());
     fprintf(f,"\n\nDATASET UNSTRUCTURED_GRID\nPOINTS %i float",(int)points.size());
 
     //write points
