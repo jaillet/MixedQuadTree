@@ -60,7 +60,7 @@ namespace Clobscode
 	
 	//--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-	bool RefinementInputSurfaceRegion::intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)
+    bool RefinementInputSurfaceRegion::intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &oct) const
     {
         return !oct.getIntersectedEdges().empty();
 	}

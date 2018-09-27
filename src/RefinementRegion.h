@@ -61,7 +61,7 @@ namespace Clobscode
         
         virtual GeometricTransform rotateWithinYou(Polyline &input)=0;
         
-        virtual bool intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)=0;
+        virtual bool intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &oct) const =0;
         
         virtual bool needsLocalRotation();
         

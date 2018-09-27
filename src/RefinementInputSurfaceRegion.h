@@ -50,7 +50,7 @@ namespace Clobscode
 		
         virtual void rotate(GeometricTransform &gt);
 		
-        virtual bool intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct);
+        virtual bool intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &oct) const override;
 	};
 	
 }

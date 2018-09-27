@@ -71,7 +71,7 @@ namespace Clobscode
 	
 	//--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-	bool RefinementCubeRegion::intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)
+    bool RefinementCubeRegion::intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &oct) const
     {
         
         Point3D p1 = points[oct.getPointIndex()[0]].getPoint();

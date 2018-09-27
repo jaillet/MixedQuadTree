@@ -67,7 +67,7 @@ namespace Clobscode
     	
 	//--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-	bool RefinementAllRegion::intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)
+    bool RefinementAllRegion::intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &oct) const
     {
         return true;
 	}

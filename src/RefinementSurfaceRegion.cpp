@@ -85,7 +85,7 @@ namespace Clobscode
 	//--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
 
-	bool RefinementSurfaceRegion::intersectsQuadrant(vector<MeshPoint> &points, Quadrant &oct)
+    bool RefinementSurfaceRegion::intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &oct) const
     {
         
         //test if any node of the Quadrant is Inside the Mesh.
