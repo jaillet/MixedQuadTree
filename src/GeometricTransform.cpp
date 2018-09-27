@@ -195,7 +195,7 @@ namespace Clobscode
 	}
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    void GeometricTransform::apply(Point3D &p) {
+    void GeometricTransform::apply(Point3D &p) const {
         p -= centroid;
         p.xAxisRotation(x);
         p.yAxisRotation(y);
@@ -205,7 +205,7 @@ namespace Clobscode
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    void GeometricTransform::applyInverse(Point3D &p) {
+    void GeometricTransform::applyInverse(Point3D &p) const {
        
         p.zAxisRotation(-z);
         p.yAxisRotation(-y);

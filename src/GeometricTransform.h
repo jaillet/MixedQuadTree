@@ -61,9 +61,9 @@ namespace Clobscode
         
         virtual void calculateAnglesAndCentroid(Polyline &tm);
         
-        virtual void apply(Point3D &p);
+        virtual void apply(Point3D &p) const;
         
-        virtual void applyInverse(Point3D &p);
+        virtual void applyInverse(Point3D &p) const;
 		
 		virtual void setCentroid(Point3D &p);
         
