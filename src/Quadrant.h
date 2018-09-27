@@ -84,7 +84,7 @@ namespace Clobscode
         
         virtual bool pointInside(vector<MeshPoint> &mp, const Point3D &p) const;
 		
-		virtual unsigned short &getRefinementLevel();
+        virtual unsigned short getRefinementLevel() const;
 		
         virtual bool wasShrink() const;
 		
@@ -191,7 +191,7 @@ namespace Clobscode
         return intersected_edges;
     }
 
-	inline unsigned short &Quadrant::getRefinementLevel() {
+    inline unsigned short Quadrant::getRefinementLevel() const {
 		return ref_level;
 	}
 	
