@@ -35,9 +35,8 @@ namespace Clobscode
 	Quadrant::Quadrant(vector<unsigned int> &epts, 
                    const unsigned short &ref_level)
         :pointindex(epts),ref_level(ref_level),
-          n_influences(0),influence_commit(false),surface(false),feature(false),max_dis(numeric_limits<double>::infinity()) {
+          surface(false),feature(false),max_dis(numeric_limits<double>::infinity()) {
         
-              
         /***** BEGIN Debugging variables *******/
               debugging = false;
         /***** END Debugging variables *******/

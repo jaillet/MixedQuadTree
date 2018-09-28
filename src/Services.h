@@ -36,6 +36,7 @@
 #include "Quadrant.h"
 #include "QuadEdge.h"
 #include <stdlib.h>
+#include <memory>
 
 using Clobscode::Point3D;
 using Clobscode::Polyline;
@@ -108,18 +109,18 @@ public:
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
     static bool WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &points,
-                                  vector<Quadrant> &Quadrants,
-                                  set<QuadEdge> &edges,
+                                  const vector<Quadrant> &Quadrants,
+                                  const set<QuadEdge> &edges,
                                   unsigned int nels,
-                                  GeometricTransform &gt);
+                                  const GeometricTransform &gt);
 
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
-    static bool WriteGMSH(std::string name, FEMesh &output);
+    static bool WriteGMSH(std::string name, const shared_ptr<FEMesh> &output);
 
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
-    static bool WriteVTK(std::string name, FEMesh &output);
+    static bool WriteVTK(std::string name, const shared_ptr<FEMesh> &output);
 
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
@@ -131,19 +132,19 @@ public:
 
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
-    static bool WriteOFF(std::string name, FEMesh &output);
+    static bool WriteOFF(std::string name, const shared_ptr<FEMesh> &output);
 
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
-    static bool WriteMixedVolumeMesh(std::string name, FEMesh &output);
+    static bool WriteMixedVolumeMesh(std::string name, const shared_ptr<FEMesh> &output);
 
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
-    static bool WriteOutputMesh(std::string name, FEMesh &output);
+    static bool WriteOutputMesh(std::string name, const shared_ptr<FEMesh> &output);
 
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
-    static bool WriteMeshGetfem(std::string name, FEMesh &output);
+    static bool WriteMeshGetfem(std::string name, const std::shared_ptr<FEMesh> &output);
 };
 
 }

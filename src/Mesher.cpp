@@ -43,7 +43,7 @@ namespace Clobscode
     //This will produce several cubes as roots of an octree structure.
     //Then split each initial element 8^rl times (where rl stands
     //for Refinement Level).
-    FEMesh Mesher::refineMesh(Polyline &input, const unsigned short &rl,
+    std::shared_ptr<FEMesh> Mesher::refineMesh(Polyline &input, const unsigned short &rl,
                               const string &name, list<unsigned int> &roctli,
                               list<RefinementRegion *> &all_reg,
                               GeometricTransform &gt, const unsigned short &minrl,
@@ -100,7 +100,7 @@ namespace Clobscode
         }
 
         //the almighty output mesh
-        FEMesh mesh;
+        std::shared_ptr<FEMesh> mesh = std::make_shared<FEMesh> ();
 
         //save the data of the mesh
         saveOutputMesh(mesh,decoration);
@@ -116,7 +116,7 @@ namespace Clobscode
     //This will produce several cubes as roots of an octree structure.
     //Then split each initial element 8^rl times (where rl stands
     //for Refinement Level).
-    FEMesh Mesher::generateMesh(Polyline &input, const unsigned short &rl,
+    std::shared_ptr<FEMesh> Mesher::generateMesh(Polyline &input, const unsigned short &rl,
                                 const string &name, list<RefinementRegion *> &all_reg, bool decoration){
 
         //ATTENTION: geometric transform causes invalid input rotation when the
@@ -133,11 +133,6 @@ namespace Clobscode
         //split Quadrants until the refinement level (rl) is achieved.
         //The output will be a one-irregular mesh.
         generateQuadtreeMesh(rl,input,all_reg,name);
-
-        //The points of the Quadrant mesh must be saved at this point, otherwise node are
-        //projected onto the surface and causes further problems with knowing if nodes
-        //are inside, outside or projected.
-        vector<MeshPoint> oct_points = points;
 
         //link element and node info for code optimization, also
         //detect Quadrants with features.
@@ -174,7 +169,7 @@ namespace Clobscode
         }
 
         //the almighty output mesh
-        FEMesh mesh;
+        std::shared_ptr<FEMesh> mesh = std::make_shared<FEMesh>();
 
         //save the data of the mesh in its final state
         saveOutputMesh(mesh,decoration);
@@ -937,6 +932,7 @@ namespace Clobscode
         //necessary to continue the refinement.
         if (!new_pts.empty()) {
             //add the new points to the vector
+            points.reserve(points.size()+new_pts.size());
             points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
 
@@ -976,7 +972,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
-    unsigned int Mesher::saveOutputMesh(FEMesh &mesh, bool decoration){
+    unsigned int Mesher::saveOutputMesh(const shared_ptr<FEMesh> &mesh, bool decoration){
         auto start_time = chrono::high_resolution_clock::now();
 
         vector<vector<unsigned int> > out_els;
@@ -1016,8 +1012,6 @@ namespace Clobscode
 //        return out_els.size();
         /*End debugging:*/
         
-        
-
         //recompute node indexes and update elements with them.
         for (unsigned int i=0; i<Quadrants.size(); i++) {
             const vector<vector<unsigned int> > &sub_els= Quadrants[i].getSubElements();
@@ -1057,10 +1051,10 @@ namespace Clobscode
             }
         }
 
-        mesh.setPoints(out_pts);
-        mesh.setElements(out_els);
-        mesh.setRefLevels(out_els_ref_level);
-        mesh.setMinAngles(out_els_min_angle);
+        mesh->setPoints(out_pts);
+        mesh->setElements(out_els);
+        mesh->setRefLevels(out_els_ref_level);
+        mesh->setMinAngles(out_els_min_angle);
 
         auto end_time = chrono::high_resolution_clock::now();
         cout << "    * SaveOutputMesh in "
@@ -1074,7 +1068,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
-    unsigned int Mesher::saveOutputMesh(FEMesh &mesh,vector<MeshPoint> &tmp_points,
+    unsigned int Mesher::saveOutputMesh(const shared_ptr<FEMesh> &mesh, vector<MeshPoint> &tmp_points,
                                 list<Quadrant> &tmp_Quadrants){
         auto start_time = chrono::high_resolution_clock::now();
 
@@ -1105,8 +1099,8 @@ namespace Clobscode
             out_els.push_back(*e_iter);
         }
 
-        mesh.setPoints(out_pts);
-        mesh.setElements(out_els);
+        mesh->setPoints(out_pts);
+        mesh->setElements(out_els);
 
         auto end_time = chrono::high_resolution_clock::now();
         cout << "    * SaveOutputMesh in "
@@ -1123,6 +1117,7 @@ namespace Clobscode
         auto start_time = chrono::high_resolution_clock::now();
 
         unsigned int featCount = 0;
+
         for (unsigned int i=0; i<Quadrants.size(); i++) {
             if (input.hasFeature(Quadrants[i],points)) {
                 Quadrants[i].setFeature();
@@ -1263,9 +1258,8 @@ namespace Clobscode
         //now element std::list from Vomule mesh can be cleared, as all remaining
         //elements are still in use and attached to newele std::list.
         Quadrants.clear();
-        for (auto eiter = newele.begin(); eiter!=newele.end(); ++eiter) {
-            Quadrants.push_back(*eiter);
-        }
+        Quadrants.assign(newele.begin(),newele.end());
+
         auto end_time = chrono::high_resolution_clock::now();
         cout << "    * RemoveOnSurface in "
              << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();

@@ -327,7 +327,7 @@ int main(int argc,char** argv){
     
     //Generate the mesh following the above constraints.
 	Clobscode::Mesher mesher;
-    Clobscode::FEMesh output;
+    std::shared_ptr<Clobscode::FEMesh> output;
     
     if (!Quadrant_start) {
         output = mesher.generateMesh(inputs.at(0),ref_level,out_name,all_regions,decoration);

@@ -68,12 +68,6 @@ namespace Clobscode
 
         bool accept(Visitor *v);
 		
-		virtual void addProjectionInfluence(const Point3D &dir);
-		
-        virtual const Point3D &getProjectionInfluence() const;
-		
-        virtual void noMoreProjectionInfluences();
-				
 		//access methods
         virtual const vector<unsigned int> &getPointIndex() const; // read only
         virtual unsigned int getPointIndex(unsigned int i) const;
@@ -86,12 +80,6 @@ namespace Clobscode
 		
         virtual unsigned short getRefinementLevel() const;
 		
-        virtual bool wasShrink() const;
-		
-        virtual bool wasConsideredInProjection() const;
-		
-		virtual void resetProjectionInfluence();
-
         virtual const list<unsigned int> &getIntersectedEdges() const; //read only
         virtual list<unsigned int> &getIntersectedEdges() ; //modification
 
@@ -131,15 +119,12 @@ namespace Clobscode
         
 		//protected:
 		vector<unsigned int> pointindex;
-		vector<vector<unsigned int> > sub_elements, possibles, continuity;
+        vector<vector<unsigned int> > sub_elements; //, possibles, continuity;
         list<unsigned int> intersected_edges;
 		//the level at which this Quadrant is found in the
         //the tree structure (Quadtree). Used for optimization
 		unsigned short ref_level;
 		
-		Point3D projection_influence;
-		unsigned short n_influences;
-		bool influence_commit;
 		bool surface;
         bool feature;
 		
@@ -199,36 +184,6 @@ namespace Clobscode
 		return sub_elements;
 	}
 	
-	inline void Quadrant::addProjectionInfluence(const Point3D &dir) {
-		projection_influence += dir;
-		n_influences++;
-	}
-	
-    inline bool Quadrant::wasShrink() const {
-		return n_influences!=0;
-	}
-	
-    inline const Point3D &Quadrant::getProjectionInfluence() const {
-		return projection_influence;
-	}
-	
-    inline void Quadrant::noMoreProjectionInfluences() {
-		if (n_influences==0) {
-			return;
-		}
-		influence_commit = true;
-		projection_influence = projection_influence / n_influences;
-	}
-	
-	inline void Quadrant::resetProjectionInfluence() {
-		projection_influence = projection_influence * 0;
-		n_influences = 0;
-	}
-	
-    inline bool Quadrant::wasConsideredInProjection() const {
-		return influence_commit;
-	}
-
     inline void Quadrant::computeMaxDistance(vector<MeshPoint> &mp){
         const Point3D &p0 = mp[pointindex[0]].getPoint();
         const Point3D &p1 = mp[pointindex[2]].getPoint();

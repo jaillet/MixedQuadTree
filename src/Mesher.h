@@ -69,10 +69,10 @@ namespace Clobscode
 		
 		virtual ~Mesher();
 				
-        virtual FEMesh generateMesh(Polyline &input, const unsigned short &rl,
+        virtual std::shared_ptr<FEMesh> generateMesh(Polyline &input, const unsigned short &rl,
                                     const string &name, list<RefinementRegion *> &all_reg, bool decoration=false);
 		
-        virtual FEMesh refineMesh(Polyline &input, const unsigned short &rl,
+        virtual std::shared_ptr<FEMesh> refineMesh(Polyline &input, const unsigned short &rl,
                                   const string &name, list<unsigned int> &roctli,
                                   list<RefinementRegion *> &all_reg,
                                   GeometricTransform &gt, const unsigned short &minrl,
@@ -118,11 +118,11 @@ namespace Clobscode
 
         virtual void shrinkToBoundary(Polyline &input);
 
-        virtual unsigned int saveOutputMesh(FEMesh &mesh, bool decoration=false);
+        virtual unsigned int saveOutputMesh(const shared_ptr<FEMesh> &mesh, bool decoration=false);
 		
-		virtual unsigned int saveOutputMesh(FEMesh &mesh,
-									vector<MeshPoint> &points, 
-									list<Quadrant> &elements);
+        virtual unsigned int saveOutputMesh(const shared_ptr<FEMesh> &mesh,
+                                    vector<MeshPoint> &points,
+                                    list<Quadrant> &elements);
         
         virtual void projectCloseToBoundaryNodes(Polyline &input);
 

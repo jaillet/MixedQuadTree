@@ -670,10 +670,10 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &points,
-                                 vector<Quadrant> &Quadrants,
-                                 set<QuadEdge> &edges,
+                                 const vector<Quadrant> &Quadrants,
+                                 const set<QuadEdge> &edges,
                                  unsigned int nels,
-                                 GeometricTransform &gt){
+                                 const GeometricTransform &gt){
 
     auto start_time = chrono::high_resolution_clock::now();
 
@@ -758,10 +758,10 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
 //-------------------------------------------------------------------
 // http://gmsh.info/doc/texinfo/gmsh.html#MSH-ASCII-file-format
 //-------------------------------------------------------------------
-bool Services::WriteGMSH(std::string name, FEMesh &output){
+bool Services::WriteGMSH(std::string name, const shared_ptr<FEMesh> &output){
 
-    vector<Point3D> points = output.getPoints();
-    vector<vector<unsigned int> > elements = output.getElements();
+    vector<Point3D> points = output->getPoints();
+    vector<vector<unsigned int> > elements = output->getElements();
 
     if (elements.empty()) {
         std::cout << "no output elements\n";
@@ -813,10 +813,10 @@ bool Services::WriteGMSH(std::string name, FEMesh &output){
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-bool Services::WriteVTK(std::string name, FEMesh &output){
+bool Services::WriteVTK(std::string name, const shared_ptr<FEMesh> &output){
 
-    vector<Point3D> points = output.getPoints();
-    vector<vector<unsigned int> > elements = output.getElements();
+    vector<Point3D> points = output->getPoints();
+    vector<vector<unsigned int> > elements = output->getElements();
 
     if (elements.empty()) {
         std::cout << "no output elements\n";
@@ -886,7 +886,7 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
     fprintf(f,"0.0 1.0 1.0 1.0\n");
 
     //write refinement levels if computed before (-q option, decoration==true)
-    const vector <unsigned short> &reflevels= output.getRefLevels();
+    const vector <unsigned short> &reflevels= output->getRefLevels();
     if (reflevels.size()>0) {
         fprintf(f,"\nSCALARS refLevel int 1");
         fprintf(f,"\nLOOKUP_TABLE default");
@@ -896,7 +896,7 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
         }
     }
     //write minAngles if computed before (-q option, decoration==true)
-    const vector <double> &minAngles= output.getMinAngles();
+    const vector <double> &minAngles= output->getMinAngles();
     if (minAngles.size()>0) {
         fprintf(f,"\n\nSCALARS minAngle int 1");
         fprintf(f,"\nLOOKUP_TABLE min");
@@ -916,11 +916,11 @@ bool Services::WriteVTK(std::string name, FEMesh &output){
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-bool Services::WriteOFF(std::string name, FEMesh &output){
+bool Services::WriteOFF(std::string name, const shared_ptr<FEMesh> &output){
 
-    const vector<Point3D> &points = output.getPoints();
-    const vector<vector<unsigned int> > &elements = output.getElements();
-    const vector<unsigned int> &colored = output.getColoredCells();
+    const vector<Point3D> &points = output->getPoints();
+    const vector<vector<unsigned int> > &elements = output->getElements();
+    const vector<unsigned int> &colored = output->getColoredCells();
 
     if (elements.empty()) {
         std::cout << "no output elements\n";
@@ -1137,10 +1137,10 @@ bool Services::WritePolyFile(std::string name, vector<Polyline> inputs) {
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-bool Services::WriteMixedVolumeMesh(std::string name, FEMesh &output){
+bool Services::WriteMixedVolumeMesh(std::string name, const shared_ptr<FEMesh> &output){
 
-    const vector<Point3D> &points = output.getPoints();
-    const vector<vector<unsigned int> > &elements = output.getElements();
+    const vector<Point3D> &points = output->getPoints();
+    const vector<vector<unsigned int> > &elements = output->getElements();
 
     if (elements.empty()) {
         std::cout << "no output elements\n";
@@ -1187,10 +1187,10 @@ bool Services::WriteMixedVolumeMesh(std::string name, FEMesh &output){
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-bool Services::WriteOutputMesh(std::string name, FEMesh &output){
+bool Services::WriteOutputMesh(std::string name, const shared_ptr<FEMesh> &output){
 
-    vector<Point3D> points = output.getPoints();
-    vector<vector<unsigned int> > elements = output.getElements();
+    vector<Point3D> points = output->getPoints();
+    vector<vector<unsigned int> > elements = output->getElements();
 
     if (elements.empty()) {
         std::cout << "no output elements\n";
@@ -1245,12 +1245,12 @@ bool Services::WriteOutputMesh(std::string name, FEMesh &output){
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-bool Services::WriteMeshGetfem(std::string name, FEMesh &output){
+bool Services::WriteMeshGetfem(std::string name, const std::shared_ptr<FEMesh> &output){
 
     /* 2D file */
 
-    vector<Point3D> points = output.getPoints();
-    vector<vector<unsigned int> > elements = output.getElements();
+    vector<Point3D> points = output->getPoints();
+    vector<vector<unsigned int> > elements = output->getElements();
 
     if (elements.empty()) {
         std::cout << "no output elements\n";

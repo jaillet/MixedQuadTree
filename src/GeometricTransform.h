@@ -73,13 +73,13 @@ namespace Clobscode
         
         virtual void setZAxis(double z);
         
-        virtual Point3D &getCentroid();
+        virtual const Point3D &getCentroid() const;
         
-        virtual double &getXAxis();
+        virtual double getXAxis() const;
         
-        virtual double &getYAxis();
+        virtual double getYAxis() const;
         
-        virtual double &getZAxis();
+        virtual double getZAxis() const;
         
         virtual bool Default();
 
@@ -106,23 +106,23 @@ namespace Clobscode
         this->z = z;
     }
     
-    inline Point3D &GeometricTransform::getCentroid() {
+    inline const Point3D &GeometricTransform::getCentroid() const {
         return centroid;
     }
     
-    inline double &GeometricTransform::getXAxis() {
+    inline double GeometricTransform::getXAxis() const {
         return x;
     }
     
-    inline double &GeometricTransform::getYAxis() {
+    inline double GeometricTransform::getYAxis() const {
         return y;
     }
     
-    inline double &GeometricTransform::getZAxis() {
+    inline double GeometricTransform::getZAxis() const {
         return z;
     }
     
-    inline bool largestNormal (Point3D n1, Point3D n2){
+    inline bool largestNormal (Point3D n1, Point3D n2) {
 		 return (n1.Norm() > n2.Norm()); 
 	}
 
