@@ -238,6 +238,8 @@ namespace Clobscode
         vector<double> all_x, all_y;
         vector<vector<unsigned int> > elements;
 
+        auto start_time = chrono::high_resolution_clock::now();
+
         GridMesher gm;
         gm.generatePoints(input.getBounds(),all_x,all_y);
         gm.generateMesh(all_x,all_y,points,elements);
@@ -271,6 +273,10 @@ namespace Clobscode
             std::cerr << " -" << *it;
         std::cerr << '\n'<< std::flush; */
 
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * generateGridMesh in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
     }
 
     //--------------------------------------------------------------------------------
@@ -309,7 +315,8 @@ namespace Clobscode
         if (!roctli.empty()) {
             list<unsigned int>::iterator octidx = roctli.begin();
             
-            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
+            while (!tmp_Quadrants.empty()) {
+                iter=tmp_Quadrants.begin();
                 if (octidx!=roctli.end() && cindex==(*octidx)) {
                     
                     octidx++;
@@ -372,20 +379,17 @@ namespace Clobscode
                 else {
                     new_Quadrants.push_back(*iter);
                 }
+                // remove yet processed Quad
+                tmp_Quadrants.pop_front();
                 cindex++;
             }
             
-            
-            tmp_Quadrants.clear();
-            tmp_Quadrants = new_Quadrants;
-            new_Quadrants.clear();
+            // dont' forget to update list
+            std::swap(tmp_Quadrants,new_Quadrants);
             
             //add the new points to the vector
-            list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
-                points.push_back(MeshPoint (*piter));
-            }
+            points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
 
         //----------------------------------------------------------
@@ -405,8 +409,8 @@ namespace Clobscode
             list<RefinementRegion *>::iterator reg_iter;
 
             //split the Quadrants as needed
-            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
-
+            while(!tmp_Quadrants.empty()) {
+                iter=tmp_Quadrants.begin();
                 bool to_refine = false;
 
                 for (reg_iter=all_reg.begin(); reg_iter!=all_reg.end(); ++reg_iter) {
@@ -501,23 +505,20 @@ namespace Clobscode
                         }
                     }
                 }
+                // remove yet processed quad
+                tmp_Quadrants.pop_front();
             }
             
+            // don't forget to update list
+            std::swap(tmp_Quadrants,new_Quadrants);
+
             if (!changed) {
                 continue;
             }
 
-            //remove the old Quadrants
-            tmp_Quadrants.clear();
-            tmp_Quadrants = new_Quadrants;
-            new_Quadrants.clear();
-
             //add the new points to the vector
-            list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
-                points.push_back(MeshPoint (*piter));
-            }
+            points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
 
         //----------------------------------------------------------
@@ -540,7 +541,8 @@ namespace Clobscode
             one_irregular = true;
             new_pts.clear();
             //refine until the mesh is one-irregular
-            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
+            while(!tmp_Quadrants.empty()) {
+                iter=tmp_Quadrants.begin();
                 if (!(*iter).accept(&oiv)) {
                     //split this Quadrant
                     vector<vector<Point3D> > clipping_coords;
@@ -587,16 +589,16 @@ namespace Clobscode
                     irroct++;
                     new_Quadrants.push_back(*iter);
                 }
+                // remove yet processed quad
+                tmp_Quadrants.pop_front();
             }
+
+            // don't forget to update list
+            std::swap(tmp_Quadrants,new_Quadrants);
 
             if (one_irregular) {
                 break;
             }
-
-            //remove the old Quadrants
-            tmp_Quadrants.clear();
-            tmp_Quadrants = new_Quadrants;
-            new_Quadrants.clear();
 
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
@@ -605,11 +607,8 @@ namespace Clobscode
             }
 
             //add the new points to the vector
-            list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
-                points.push_back(MeshPoint (*piter));
-            }
+            points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
 
         //----------------------------------------------------------
@@ -639,11 +638,8 @@ namespace Clobscode
         //necessary to continue the refinement.
         if (!new_pts.empty()) {
             //add the new points to the vector
-            list<Point3D>::iterator piter;
             points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
-                points.push_back(MeshPoint (*piter));
-            }
+            points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
 
         /*{
@@ -655,12 +651,11 @@ namespace Clobscode
             Services::WriteMixedVolumeMesh(tmp_name,pure_octree);
         }*/
 
-        //put the Quadrants in a vector
-        Quadrants.clear();
-        Quadrants.reserve(tmp_Quadrants.size());
-        for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
-            Quadrants.push_back(*iter);
-        }
+        // put (move!) the Quadrants in a vector
+        Quadrants.clear(); //insert will reserve space as well
+        Quadrants.insert(Quadrants.end(),make_move_iterator(tmp_Quadrants.begin()),make_move_iterator(tmp_Quadrants.end()));
+        tmp_Quadrants.erase(tmp_Quadrants.begin(),tmp_Quadrants.end()); // better to erase as let in a indeterminate state by move
+
     }
 
 
@@ -670,6 +665,8 @@ namespace Clobscode
     void Mesher::generateQuadtreeMesh(const unsigned short &rl, Polyline &input,
                                     const list<RefinementRegion *> &all_reg,
                                     const string &name){
+
+        auto start_time = chrono::high_resolution_clock::now();
 
         //to save m3d files per stage
         Clobscode::Services io;
@@ -682,9 +679,6 @@ namespace Clobscode
 
         //initialize list with vector, FJA: sure we want a list?
         tmp_Quadrants.assign(Quadrants.begin(),Quadrants.end());
-//        for (unsigned int i=0; i<Quadrants.size(); i++) {
-//            tmp_Quadrants.push_back(Quadrants[i]); //push_back is slow...
-//        }
 
         //create visitors and give them variables
         SplitVisitor sv;
@@ -696,6 +690,8 @@ namespace Clobscode
         //refine each Quadrant until the Refinement Level is reached
         //----------------------------------------------------------
 
+        auto start_refine_quad_time = chrono::high_resolution_clock::now();
+
         for (unsigned short i=0; i<rl; i++) {
 
             //the new_pts is a list that holds the coordinates of
@@ -706,7 +702,8 @@ namespace Clobscode
             list<RefinementRegion *>::const_iterator reg_iter;
 
             //split the Quadrants as needed
-            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
+            while (!tmp_Quadrants.empty()) {
+                iter=tmp_Quadrants.begin();
 
                 bool to_refine = false;
 
@@ -794,12 +791,12 @@ namespace Clobscode
                         }
                     }
                 }
-            }
+                // remove yet processed Quad
+                tmp_Quadrants.pop_front();
+            } // while
 
-            //remove the old Quadrants
-            tmp_Quadrants.clear();
-            tmp_Quadrants = new_Quadrants;
-            new_Quadrants.clear();
+            // don't forget to update list
+            std::swap(tmp_Quadrants,new_Quadrants);
 
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
@@ -808,12 +805,14 @@ namespace Clobscode
                 break;
             }
             //add the new points to the vector
-            list<Point3D>::const_iterator piter;
             points.reserve(points.size() + new_pts.size());
-            for (piter=new_pts.begin(); piter!=new_pts.end(); ++piter) {
-                points.push_back(MeshPoint (*piter));
-            }
+            points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
+
+        auto end_refine_quad_time = chrono::high_resolution_clock::now();
+        cout << "       * Refine Quad in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_refine_quad_time-start_refine_quad_time).count();
+        cout << " ms"<< endl;
 
         //----------------------------------------------------------
         //produce a one-irregular mesh
@@ -842,7 +841,8 @@ namespace Clobscode
             one_irregular = true;
             new_pts.clear();
             //refine until the mesh is one-irregular
-            for (iter=tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
+            while (!tmp_Quadrants.empty()) {
+                iter=tmp_Quadrants.begin();
                 if (!(*iter).accept(&oiv)){
                     //split this Quadrant
                     vector<vector<Point3D> > clipping_coords;
@@ -854,8 +854,7 @@ namespace Clobscode
 
                     //(*iter).split(points,new_pts,QuadEdges,split_elements,clipping_coords);
                     //split the Quadrant
-                    iter->accept(&sv);
-
+                    (*iter).accept(&sv);
 
                     unsigned short prl = (*iter).getRefinementLevel();
                     //insert the new elements
@@ -888,16 +887,17 @@ namespace Clobscode
                 else {
                     new_Quadrants.push_back(*iter);
                 }
-            }
+                // remove yet processed Quad
+                tmp_Quadrants.pop_front();
+
+            } //while
+
+            // don't forget to update list
+            std::swap(tmp_Quadrants,new_Quadrants);
 
             if (one_irregular) {
                 break;
             }
-
-            //remove the old Quadrants
-            tmp_Quadrants.clear();
-            tmp_Quadrants = new_Quadrants;
-            new_Quadrants.clear();
 
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
@@ -906,9 +906,13 @@ namespace Clobscode
             }
             //add the new points to the vector
             points.reserve(points.size() + new_pts.size());
-            // append new_points to points
             points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
+
+        auto end_balanced_time = chrono::high_resolution_clock::now();
+        cout << "       * Balanced mesh in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_balanced_time-end_refine_quad_time).count();
+        cout << " ms"<< endl;
 
          //----------------------------------------------------------
          // apply transition patterns
@@ -936,8 +940,19 @@ namespace Clobscode
             points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
 
-        //put the Quadrants in a vector
-        Quadrants.assign(tmp_Quadrants.begin(),tmp_Quadrants.end());
+        // put (move!) the Quadrants into a vector
+        //        Quadrants.assign(tmp_Quadrants.begin(),tmp_Quadrants.end());
+        Quadrants.clear(); //insert will reserve space as well
+        Quadrants.insert(Quadrants.end(),make_move_iterator(tmp_Quadrants.begin()),make_move_iterator(tmp_Quadrants.end()));
+        tmp_Quadrants.erase(tmp_Quadrants.begin(),tmp_Quadrants.end()); // better to erase as let in a indeterminate state by move
+
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "       * Transition Patterns in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-end_balanced_time).count();
+        cout << " ms"<< endl;
+        cout << "    * generateQuadtreeMesh in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count() ;
+        cout << " ms"<< endl;
     }
     
     //--------------------------------------------------------------------------------
@@ -962,6 +977,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 
     unsigned int Mesher::saveOutputMesh(FEMesh &mesh, bool decoration){
+        auto start_time = chrono::high_resolution_clock::now();
 
         vector<vector<unsigned int> > out_els;
         vector<unsigned short > out_els_ref_level;
@@ -1045,6 +1061,13 @@ namespace Clobscode
         mesh.setElements(out_els);
         mesh.setRefLevels(out_els_ref_level);
         mesh.setMinAngles(out_els_min_angle);
+
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * SaveOutputMesh in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
+
+
         return out_els.size();
     }
 
@@ -1053,6 +1076,7 @@ namespace Clobscode
 
     unsigned int Mesher::saveOutputMesh(FEMesh &mesh,vector<MeshPoint> &tmp_points,
                                 list<Quadrant> &tmp_Quadrants){
+        auto start_time = chrono::high_resolution_clock::now();
 
         vector<Point3D> out_pts;
         list<vector<unsigned int> > tmp_elements;
@@ -1064,7 +1088,7 @@ namespace Clobscode
             out_pts.push_back(points[i].getPoint());
         }
 
-        list<Quadrant>::iterator o_iter;
+        list<Quadrant>::const_iterator o_iter;
 
         for (o_iter=tmp_Quadrants.begin(); o_iter!=tmp_Quadrants.end(); ++o_iter) {
 
@@ -1075,7 +1099,7 @@ namespace Clobscode
         }
 
         out_els.reserve(tmp_elements.size());
-        list<vector<unsigned int> >::iterator e_iter;
+        list<vector<unsigned int> >::const_iterator e_iter;
 
         for (e_iter=tmp_elements.begin(); e_iter!=tmp_elements.end(); ++e_iter) {
             out_els.push_back(*e_iter);
@@ -1083,6 +1107,12 @@ namespace Clobscode
 
         mesh.setPoints(out_pts);
         mesh.setElements(out_els);
+
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * SaveOutputMesh in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
+
         return out_els.size();
     }
 
@@ -1090,6 +1120,8 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     void Mesher::detectFeatureQuadrants(Polyline &input) {
         
+        auto start_time = chrono::high_resolution_clock::now();
+
         unsigned int featCount = 0;
         for (unsigned int i=0; i<Quadrants.size(); i++) {
             if (input.hasFeature(Quadrants[i],points)) {
@@ -1098,11 +1130,20 @@ namespace Clobscode
             }
         }
         //cout << "number of quadrants with features: " << featCount << "\n";
+
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * detectFeatureQuadrants in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
+
     }
     
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     void Mesher::linkElementsToNodes(){
+
+        auto start_time = chrono::high_resolution_clock::now();
+
         //clear previous information
         for (unsigned int i=0; i<points.size(); i++) {
             points[i].clearElements();
@@ -1117,12 +1158,18 @@ namespace Clobscode
                 points.at(q_indpts[j]).addElement(i);
             }
         }
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * linkElementsToNodes in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
     }
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
     void Mesher::detectInsideNodes(Polyline &input){
+        auto start_time = chrono::high_resolution_clock::now();
+
         for (unsigned int i=0; i<points.size(); i++) {
             if (points[i].wasOutsideChecked()) {
                 continue;
@@ -1152,13 +1199,18 @@ namespace Clobscode
                 points[i].setInside();
             }
         }
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * detectInsideNodes in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
     }
     
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     
     void Mesher::removeOnSurface(Polyline &input){
-        
+        auto start_time = chrono::high_resolution_clock::now();
+
         list<Quadrant> newele,removed;
         RemoveSubElementsVisitor rsv;
         rsv.setPoints(points);
@@ -1214,12 +1266,17 @@ namespace Clobscode
         for (auto eiter = newele.begin(); eiter!=newele.end(); ++eiter) {
             Quadrants.push_back(*eiter);
         }
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * RemoveOnSurface in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
     }
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
     void Mesher::removeOnSurfaceSafe(Polyline &input){
+        auto start_time = chrono::high_resolution_clock::now();
 
         list<Quadrant> newele,removed;
 
@@ -1291,13 +1348,18 @@ namespace Clobscode
         for (auto eiter = newele.begin(); eiter!=newele.end(); ++eiter) {
             Quadrants.push_back(*eiter);
         }
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * RemoveOnSurfaceSafe in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
     }
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
     void Mesher::applySurfacePatterns(Polyline &input){
-        
+        auto start_time = chrono::high_resolution_clock::now();
+
         //apply patterns to avoid flat, invalid and
         //poor quality elements.
         SurfaceTemplatesVisitor stv;
@@ -1383,6 +1445,10 @@ namespace Clobscode
                 }
             }
         }
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * ApplySurfacePatterns in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
     }
 
 
@@ -1392,6 +1458,7 @@ namespace Clobscode
     //input surfaces
 
     void Mesher::shrinkToBoundary(Polyline &input){
+        auto start_time = chrono::high_resolution_clock::now();
 
         //Slow element removed (but works): from elements intersecting the
         //input domain, detect inner nodes. Project this nodes onto the
@@ -1527,6 +1594,10 @@ namespace Clobscode
             points[p].setPoint(projected);
             points[p].setProjected();
         }
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * ShrinkToBoundary in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
     }
 
 
@@ -1534,6 +1605,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 
     void Mesher::projectCloseToBoundaryNodes(Polyline &input){
+        auto start_time = chrono::high_resolution_clock::now();
 
         //Slow element removed (but works): from elements intersecting the
         //input domain, detect inner nodes. Project this nodes onto the
@@ -1699,5 +1771,10 @@ namespace Clobscode
                 }
             }
         }
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * ProjectCloseToBoundary in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
+
     }
 }

@@ -28,6 +28,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>    // std::find_if
+#include <chrono>
 
 using Clobscode::Point3D;
 using Clobscode::Polyline;
@@ -535,6 +536,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
                             GeometricTransform &gt,
                             unsigned short &minrl,
                             unsigned short &maxrl) {
+    auto start_time = chrono::high_resolution_clock::now();
 
     char word [256];
     double x,y,z;
@@ -656,6 +658,12 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
     gt.setZAxis(z);
 
     fclose(file);
+
+    auto end_time = chrono::high_resolution_clock::now();
+    cout << "    * ReadQuadtreeMesh in "
+         << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count() ;
+    cout << " ms"<< endl;
+
     return true;
 }
 
@@ -666,6 +674,8 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
                                  set<QuadEdge> &edges,
                                  unsigned int nels,
                                  GeometricTransform &gt){
+
+    auto start_time = chrono::high_resolution_clock::now();
 
     //            QuadEdge qe;
     set<QuadEdge>::const_iterator my_edge;
@@ -736,6 +746,11 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
     fprintf(f,"%f %f %f\n",gt.getXAxis(),gt.getYAxis(),gt.getZAxis());
 
     fclose(f);
+
+    auto end_time = chrono::high_resolution_clock::now();
+    cout << "    * WriteQuadtreeMesh in "
+         << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count() ;
+    cout << " ms"<< endl;
 
     return true;
 }

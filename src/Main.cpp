@@ -341,6 +341,9 @@ int main(int argc,char** argv){
                                    all_regions,gt,cminrl,omaxrl,decoration);
     }
     
+    auto gen_time = chrono::high_resolution_clock::now();
+    cout << "  Generation done in " << std::chrono::duration_cast<chrono::milliseconds>(gen_time-start_time).count();
+    cout << " ms"<< endl;
     
     if (getfem) {
         Services::WriteMeshGetfem(out_name,output);
@@ -366,6 +369,8 @@ int main(int argc,char** argv){
     }
 
     auto end_time = chrono::high_resolution_clock::now();
+    cout << "  Write done in " << std::chrono::duration_cast<chrono::milliseconds>(end_time-gen_time).count();
+    cout << " ms"<< endl;
     cout << "  All done in " << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
     cout << " ms"<< endl;
 	
