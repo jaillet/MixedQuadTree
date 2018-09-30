@@ -50,7 +50,7 @@ namespace Clobscode
 				
 		virtual ~RefinementRegion();
 
-		virtual vector<Point3D> &getPoints();
+        virtual const vector<Point3D> &getPoints() const;
         
         virtual void updatePoints(vector<Point3D> &npts);
         
@@ -83,7 +83,7 @@ namespace Clobscode
 		return refine_level;
 	}
     
-    inline vector<Point3D> &RefinementRegion::getPoints() {
+    inline const vector<Point3D> &RefinementRegion::getPoints() const {
         return pts;
     }
     

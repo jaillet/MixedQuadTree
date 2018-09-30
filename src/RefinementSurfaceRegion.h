@@ -54,11 +54,11 @@ namespace Clobscode
 		
 		virtual ~RefinementSurfaceRegion();
         
-        virtual GeometricTransform rotateWithinYou(Polyline &input);
+        virtual GeometricTransform rotateWithinYou(Polyline &input) override;
 		
-        virtual void rotate(GeometricTransform &gt);
+        virtual void rotate(GeometricTransform &gt) override;
         
-        virtual vector<Point3D> &getPoints();
+        virtual const vector<Point3D> &getPoints() const override;
 		
         virtual bool intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &oct) const override;
         
@@ -76,7 +76,7 @@ namespace Clobscode
         Polyline ply;
 	};
 	
-	inline vector<Point3D> &RefinementSurfaceRegion::getPoints(){
+    inline const vector<Point3D> &RefinementSurfaceRegion::getPoints() const{
         return ply.getPoints();
 	}
 	

@@ -41,9 +41,9 @@ namespace Clobscode
 				
 		virtual ~RefinementCubeRegion();
         
-        virtual GeometricTransform rotateWithinYou(Polyline &input);
+        virtual GeometricTransform rotateWithinYou(Polyline &input) override;
 		
-        virtual void rotate(GeometricTransform &gt);
+        virtual void rotate(GeometricTransform &gt) override;
 		
         virtual bool intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &oct) const override;
 
