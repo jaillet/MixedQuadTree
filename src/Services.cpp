@@ -693,7 +693,7 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
     //write points
     for(unsigned int i=0;i<np;i++){
         Point3D p = points[i].getPoint();
-        fprintf(f,"%+1.8E  %+1.8E  %+1.8E\n",p[0],p[1],p[2]);
+        fprintf(f,"%+1.8E %+1.8E %+1.8E\n",p[0],p[1],p[2]);
     }
     fprintf(f,"\n");
 
@@ -1279,8 +1279,6 @@ bool Services::WriteMeshGetfem(std::string name, const std::shared_ptr<FEMesh> &
 
     fprintf(f,"\n%s\n\n\n\n","END POINTS LIST");
     fprintf(f,"%s\n\n","BEGIN MESH STRUCTURE DESCRIPTION");
-
-    unsigned int aux;
 
     //get all the elements in a std::vector
     for (unsigned int i=0; i<n; i++) {
