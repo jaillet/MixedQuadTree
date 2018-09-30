@@ -61,7 +61,7 @@ namespace Clobscode
     bool SplitVisitor::visit(Quadrant *o)
     {
         //getting variables for modification
-        //preferably by reference, to avoid unnecesary copying
+        //preferably by reference, to avoid unnecessary copying
         const vector<unsigned int> &pi = o->pointindex;
 
         new_eles->reserve(4);
@@ -70,13 +70,13 @@ namespace Clobscode
         //the vector containing all nodes of this Quadrant (and sons)
         vector<unsigned int> all_pts(9,0);
 
-        //save the eight nodes of this cube first
+        //save the four nodes of this square first
         for (unsigned int i=0; i< pi.size(); i++) {
             all_pts[i] = pi[i];
         }
 
-        const Point3D min = points->at(pi[0]).getPoint();
-        const Point3D max = points->at(pi[2]).getPoint();
+        const Point3D &min = points->at(pi[0]).getPoint();
+        const Point3D &max = points->at(pi[2]).getPoint();
         const Point3D avg = (max-min)/2 + min;
 
         //inserting node 4 between nodes 0 and 1

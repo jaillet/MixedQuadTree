@@ -34,18 +34,19 @@ namespace Clobscode
 		info.assign(3,0);
 	}
 	
-    QuadEdge::QuadEdge(unsigned int point1, unsigned int point2){
-		info.assign(3,0);
-		if (point1<point2) {
-			info[0]=point1;
-			info[1]=point2;
-		}
-		else {
-			info[1]=point1;
-			info[0]=point2;
-		}
-	}
-	
+    QuadEdge::QuadEdge(unsigned int point1, unsigned int point2, unsigned int mid){
+        info.resize(3);
+        if (point1<point2) {
+            info[0]=point1;
+            info[1]=point2;
+        }
+        else {
+            info[1]=point1;
+            info[0]=point2;
+        }
+        info[2]=mid;
+    }
+
 	QuadEdge::~QuadEdge(){
 		
 	}
