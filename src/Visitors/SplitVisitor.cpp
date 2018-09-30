@@ -157,23 +157,23 @@ namespace Clobscode
         vector<Point3D> extreme_nodes(2, Point3D ());
 
         //bottom/left son is defined by nodes 0 and 8
-        extreme_nodes[0] = Point3D (min[0],min[1],avg[2]);
-        extreme_nodes[1] = Point3D (avg[0],avg[1],avg[2]);
+        extreme_nodes[0] = Point3D (min.X(),min.Y(),avg.Z());
+        extreme_nodes[1] = Point3D (avg.X(),avg.Y(),avg.Z());
         clipping->push_back(extreme_nodes);
 
         //bottom/right son is defined by nodes 4 and 5
-        extreme_nodes[0] = Point3D (avg[0],min[1],avg[2]);
-        extreme_nodes[1] = Point3D (max[0],avg[1],avg[2]);
+        extreme_nodes[0] = Point3D (avg.X(),min.Y(),avg.Z());
+        extreme_nodes[1] = Point3D (max.X(),avg.Y(),avg.Z());
         clipping->push_back(extreme_nodes);
 
         //top/right son is defined by nodes 8 and 2
-        extreme_nodes[0] = Point3D (avg[0],avg[1],avg[2]);
-        extreme_nodes[1] = Point3D (max[0],max[1],avg[2]);
+        extreme_nodes[0] = Point3D (avg.X(),avg.Y(),avg.Z());
+        extreme_nodes[1] = Point3D (max.X(),max.Y(),avg.Z());
         clipping->push_back(extreme_nodes);
 
         //bottom/left son is defined by nodes 7 and 6
-        extreme_nodes[0] = Point3D (min[0],avg[1],avg[2]);
-        extreme_nodes[1] = Point3D (avg[0],max[1],avg[2]);
+        extreme_nodes[0] = Point3D (min.X(),avg.Y(),avg.Z());
+        extreme_nodes[1] = Point3D (avg.X(),max.Y(),avg.Z());
         clipping->push_back(extreme_nodes);
 
         return true;

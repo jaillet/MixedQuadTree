@@ -378,7 +378,7 @@ int main(int argc,char** argv){
     for (rriter = all_regions.begin(); rriter!=all_regions.end(); rriter++) {
         delete *rriter;
     }
-    
+
 	return EXIT_SUCCESS;
 }
 

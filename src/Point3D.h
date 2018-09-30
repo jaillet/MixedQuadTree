@@ -107,7 +107,7 @@ namespace Clobscode
         //only access
 		virtual double operator[](int pos) const;
 		
-        virtual Point3D& operator=(const Point3D& p);
+//        virtual Point3D& operator=(const Point3D& p);
 								
 		virtual void xAxisRotation(double angle);
 		
@@ -244,39 +244,39 @@ namespace Clobscode
     inline bool Point3D::is2DCollinear(const Point3D &p) const {
         // A^B = 0
         // rq in XY plane, only first test is required
-        return ( fabs(x*p[1]- y*p[0]) < 1E-8 );
+        return ( fabs(x*p.y- y*p.x) < 1E-8 );
     }
 
     inline bool Point3D::is3DCollinear(const Point3D &p) const {
         // A^B = 0
-        return (fabs(x*p[1] - y*p[0])<1E-8 &&
-                fabs(z*p[0] - x*p[2])<1E-8 &&
-                fabs(y*p[2] - z*p[1])<1E-8 );
+        return (fabs(x*p.y - y*p.x)<1E-8 &&
+                fabs(z*p.x - x*p.z)<1E-8 &&
+                fabs(y*p.z - z*p.y)<1E-8 );
     }
 
     inline Point3D Point3D::cross(const Point3D &p) const {
         Point3D ret;
-        ret[0]=y*p[2] - z*p[1];
-        ret[1]=z*p[0] - x*p[2];
-        ret[2]=x*p[1] - y*p[0];
+        ret.x=y*p.z - z*p.y;
+        ret.y=z*p.x - x*p.z;
+        ret.z=x*p.y - y*p.x;
         return ret;
     }
 
 
 	inline Point3D Point3D::operator^(const Point3D &p) const {
 		Point3D ret;
-		ret[0]=y*p[2] - z*p[1];
-		ret[1]=z*p[0] - x*p[2];
-		ret[2]=x*p[1] - y*p[0];
+        ret.x=y*p.z - z*p.y;
+        ret.y=z*p.x - x*p.z;
+        ret.z=x*p.y - y*p.x;
 		return ret;
 	}
 
     inline double Point3D::dot(const Point3D &p) const{
-        return x*p[0] + y*p[1] + z*p[2];
+        return x*p.x + y*p.y + z*p.z;
     }
 
 	inline double Point3D::operator*(const Point3D &p) const {
-		return x*p[0]+y*p[1]+z*p[2];
+        return x*p.x+y*p.y+z*p.z;
 	}
 	
 	inline Point3D Point3D::operator/(double div) const {
@@ -284,7 +284,7 @@ namespace Clobscode
 	}
 	
 	inline Point3D Point3D::operator-(const Point3D &p) const {
-		return Point3D(x-p[0],y-p[1],z-p[2]);
+        return Point3D(x-p.x,y-p.y,z-p.z);
 	}
 	
 	inline Point3D Point3D::operator-() const {
@@ -292,16 +292,16 @@ namespace Clobscode
 	}
 
 	inline Point3D Point3D::operator+(const Point3D &p) const {
-		return Point3D(x+p[0],y+p[1],z+p[2]);
+        return Point3D(x+p.x,y+p.y,z+p.z);
 	}
 	
 	inline const Point3D &Point3D::operator+=(const Point3D &p) {
-		x+=p[0]; y+=p[1]; z+=p[2];
+        x+=p.x; y+=p.y; z+=p.z;
 		return *this;
 	}
 	
 	inline const Point3D &Point3D::operator-=(const Point3D &p) {
-		x-=p[0]; y-=p[1]; z-=p[2];
+        x-=p.x; y-=p.y; z-=p.z;
 		return *this;
 	}
 	
@@ -343,12 +343,12 @@ namespace Clobscode
 		return z;
 	}
 
-    inline Point3D& Point3D::operator=(const Point3D& p) {
-        x=p[0];
-        y=p[1];
-        z=p[2];
-        return *this;
-    }
+//    inline Point3D& Point3D::operator=(const Point3D& p) {
+//        x=p[0];
+//        y=p[1];
+//        z=p[2];
+//        return *this;
+//    }
 
 	inline void Point3D::xAxisRotation(double angle){
         double oy = y, oz = z;
