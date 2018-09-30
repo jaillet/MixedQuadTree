@@ -688,6 +688,7 @@ namespace Clobscode
         auto start_refine_quad_time = chrono::high_resolution_clock::now();
 
         for (unsigned short i=0; i<rl; i++) {
+            auto start_refine_rl_time = chrono::high_resolution_clock::now();
 
             //the new_pts is a list that holds the coordinates of
             //new points inserted at this iteration. At the end of
@@ -802,6 +803,11 @@ namespace Clobscode
             //add the new points to the vector
             points.reserve(points.size() + new_pts.size());
             points.insert(points.end(),new_pts.begin(),new_pts.end());
+
+            auto end_refine_rl_time = chrono::high_resolution_clock::now();
+            cout << "         * level " << i << " in "
+                 << std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time-start_refine_rl_time).count();
+            cout << " ms"<< endl;
         }
 
         auto end_refine_quad_time = chrono::high_resolution_clock::now();
@@ -949,6 +955,7 @@ namespace Clobscode
         cout << "    * generateQuadtreeMesh in "
              << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count() ;
         cout << " ms"<< endl;
+
     }
     
     //--------------------------------------------------------------------------------
@@ -958,6 +965,7 @@ namespace Clobscode
         //this method is meant to be used by Quadrants that don't
         //intersect input domains. If they are inside of at least
         //one input mesh, then they must remain in the output mesh.
+
         bool first = mesh.pointIsInMesh(coords[0],faces);
         bool second = mesh.pointIsInMesh(coords[1],faces);
         if (first==second) {
