@@ -49,7 +49,7 @@ namespace Clobscode
 
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    void GeometricTransform::rotatePolyline(Polyline &ply) {
+    void GeometricTransform::rotatePolyline(Polyline &ply) const {
         //calculateAnglesAndCentroid(ply);
 		
         for (unsigned int i=0; i<ply.getPoints().size(); i++){
@@ -72,7 +72,7 @@ namespace Clobscode
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    void GeometricTransform::rotatePolylineInverse(Polyline &ply) {
+    void GeometricTransform::rotatePolylineInverse(Polyline &ply) const {
         //to implement here
         std::cerr << "warning at GeometricTransform::rotateSurfaceMeshInverse(Polyline &ply)\n";
         std::cerr << "not implemented yet...\n";
@@ -96,6 +96,7 @@ namespace Clobscode
         double maxNorm = 0.0;
         int maxIndex = 0;
         
+        maxNormals.reserve(normals.size());
         maxNormals.push_back(normals[0]);
         //getting a distribution of mean maximum normals
         for (unsigned int i=1; i<normals.size(); i++){
@@ -120,7 +121,7 @@ namespace Clobscode
         std::sort (maxNormals.begin(), maxNormals.end(), largestNormal);
         
         Point3D xAxis (1., 0., 0.);
-        Point3D zAxis (0., 0., 1.);
+//        Point3D zAxis (0., 0., 1.);
         Point3D yAxis (0., 1., 0.);
         Point3D aux =  maxNormals[0];
         //finding a orthogonal maxnormal for the greatest maxnormal

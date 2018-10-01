@@ -55,9 +55,9 @@ namespace Clobscode
 		virtual ~GeometricTransform();
         
         //to implement
-        virtual void rotatePolyline(Polyline &ply);
+        virtual void rotatePolyline(Polyline &ply) const;
         
-        virtual void rotatePolylineInverse(Polyline &ply);
+        virtual void rotatePolylineInverse(Polyline &ply) const;
         
         virtual void calculateAnglesAndCentroid(Polyline &tm);
         
