@@ -540,7 +540,6 @@ namespace Clobscode
 
         bool found = false;
         // browsing all the surface faces for min distance.
-//FJA BUG was here!!!        for (unsigned int iEdge = 0; iEdge < lEdges.size(); iEdge++) {
         for (unsigned int iEdge:lEdges) {
             // computing the distance for this edge (segment)
             bool isOn=closestPointToEdge(pPoint,iEdge,pDist,pProjP_tmp,projWhere_tmp);

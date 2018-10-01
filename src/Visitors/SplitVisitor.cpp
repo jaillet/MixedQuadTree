@@ -109,17 +109,20 @@ namespace Clobscode
         new_pts->push_back(Point3D (avg[0],avg[1],avg[2]));
         all_pts[8] = n_pts;
 
-        QuadEdge intern_edge1 (all_pts[4],all_pts[6]);
-        intern_edge1.updateMidPoint(all_pts[8]);
-        QuadEdge intern_edge2 (all_pts[5],all_pts[7]);
-        intern_edge2.updateMidPoint(all_pts[8]);
-        edges->insert(intern_edge1);
-        edges->insert(intern_edge2);
+//        QuadEdge intern_edge1 (all_pts[4],all_pts[6]);
+//        intern_edge1.updateMidPoint(all_pts[8]);
+//        QuadEdge intern_edge2 (all_pts[5],all_pts[7]);
+//        intern_edge2.updateMidPoint(all_pts[8]);
+//        edges->insert(intern_edge1);
+//        edges->insert(intern_edge2);
 
-        edges->insert(QuadEdge (all_pts[4],all_pts[8]));
-        edges->insert(QuadEdge (all_pts[6],all_pts[8]));
-        edges->insert(QuadEdge (all_pts[5],all_pts[8]));
-        edges->insert(QuadEdge (all_pts[7],all_pts[8]));
+        edges->emplace(all_pts[4],all_pts[6],all_pts[8]);
+        edges->emplace(all_pts[5],all_pts[7],all_pts[8]);
+
+        edges->emplace(all_pts[4],all_pts[8]);
+        edges->emplace(all_pts[6],all_pts[8]);
+        edges->emplace(all_pts[5],all_pts[8]);
+        edges->emplace(all_pts[7],all_pts[8]);
         
         //now that all edges were inserted, the elements can be easily built
         vector<unsigned int> son_element (4,0);
@@ -206,12 +209,16 @@ namespace Clobscode
         //splitting process of the current edge). Note that c_n_pts will be
         //increased for next splitting process of another edge.
 
+        // std::set doesn't permit to update an element
+        // we should erase and reinsert...
         this_edge.updateMidPoint(c_n_pts++);
-        edges->erase(found);
-        QuadEdge e1(this_edge[0],this_edge[2]), e2 (this_edge[2],this_edge[1]);
-        edges->insert(this_edge);
-        edges->insert(e1);
-        edges->insert(e2);
+        found = edges->erase(found);
+        edges->insert(found,this_edge); //using found as hint for insertion
+
+        // bulding and inserting, with hint if possible
+        edges->emplace_hint(found, this_edge[0],this_edge[2]);
+        edges->emplace_hint(found, this_edge[2],this_edge[1]);
+
         mid_idx = this_edge[2];
         return true;
     }
