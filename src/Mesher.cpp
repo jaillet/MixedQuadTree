@@ -290,9 +290,6 @@ namespace Clobscode
                                 const unsigned short &minrl, const unsigned short &omaxrl){
         auto start_time = chrono::high_resolution_clock::now();
 
-        //to save m3d files per stage
-        Clobscode::Services io;
-
         //list of temp Quadrants
         list<Quadrant> tmp_Quadrants, new_Quadrants;
         //list of the points added at this refinement iteration:
