@@ -323,6 +323,7 @@ int main(int argc,char** argv){
     // Uncomment this if you want to export input as .poly file
     //Services::WritePolyFile(out_name,inputs);
 	
+    cout << "  Starting generation/refinement\n";
     auto start_time = chrono::high_resolution_clock::now();
     
     //Generate the mesh following the above constraints.

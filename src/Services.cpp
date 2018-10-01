@@ -660,7 +660,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
     fclose(file);
 
     auto end_time = chrono::high_resolution_clock::now();
-    cout << "    * ReadQuadtreeMesh in "
+    cout << "  Read  done in "
          << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count() ;
     cout << " ms"<< endl;
 
