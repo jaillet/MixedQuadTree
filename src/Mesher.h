@@ -50,10 +50,12 @@
 #include <ctime>
 #include <string.h>
 #include <chrono>
+#include <map>
 
 using std::vector;
 using std::list;
 using std::set;
+using std::map;
 using Clobscode::QuadEdge;
 using Clobscode::Polyline;
 using Clobscode::RefinementRegion;
@@ -120,9 +122,11 @@ namespace Clobscode
 
         virtual unsigned int saveOutputMesh(FEMesh &mesh, bool decoration=false);
 		
-		virtual unsigned int saveOutputMesh(FEMesh &mesh,
-									vector<MeshPoint> &points, 
+		virtual unsigned int saveOutputMesh(FEMesh &mesh, vector<MeshPoint> &points,
 									list<Quadrant> &elements);
+        
+        virtual unsigned int saveOutputMesh(FEMesh &mesh, vector<MeshPoint> &points,
+                                            vector<Quadrant> &elements);
         
         virtual void projectCloseToBoundaryNodes(Polyline &input);
 

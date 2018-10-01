@@ -46,11 +46,9 @@ namespace Clobscode
         bool visit(Quadrant *o) override;
 
         void setPoints(vector<MeshPoint> &meshpts);
-        void setInput(Polyline &input);
 
     private:
         vector<MeshPoint> *meshpts;
-        Polyline *input;
 
     };
 }

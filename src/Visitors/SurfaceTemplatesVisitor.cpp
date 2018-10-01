@@ -27,7 +27,7 @@ namespace Clobscode
      quadrants that presents both, surface and transition patterns.
      */
     
-    SurfaceTemplatesVisitor::SurfaceTemplatesVisitor():meshpts(NULL),input(NULL) {
+    SurfaceTemplatesVisitor::SurfaceTemplatesVisitor():meshpts(NULL) {
     }
 
 
@@ -35,14 +35,10 @@ namespace Clobscode
         this->meshpts = &meshpts;
     }
 
-    void SurfaceTemplatesVisitor::setInput(Polyline &input) {
-        this->input = &input;
-    }
-
     bool SurfaceTemplatesVisitor::visit(Quadrant *o) {
         
         const vector<unsigned int> &pointindex = o->pointindex;
-        if (pointindex.size()>4) {
+        if (pointindex.size()!=4) {
             return true;
         }
         
@@ -51,16 +47,16 @@ namespace Clobscode
         //that intersect one surface or all of them. In both cases
         //at least one element node should be outside the sum of
         //input surfaces
+        
         vector<vector<unsigned int> > subels; // = o->sub_elements;
-        vector<bool> in(pointindex.size(),true);
-        unsigned int nin = 0;
-
+        vector<bool> in(pointindex.size(),false);
+        unsigned int nin = 0, onei=0;
+        
         for (unsigned int i=0; i<pointindex.size(); i++) {
-
-            if (meshpts->at(pointindex[i]).isOutside()) {
-                in[i] = false;
-            }
-            else {
+            
+            if (!meshpts->at(pointindex[i]).isOutside()){
+                in[i] = true;
+                onei = i;
                 nin++;
             }
         }
@@ -78,9 +74,6 @@ namespace Clobscode
                 if (!o->badAngle(i,*meshpts)) {
                     in[i]=true;
                     nin++;
-                }
-                else {
-                    bAnNo = i;
                 }
             }
             
@@ -104,7 +97,15 @@ namespace Clobscode
             }
             
         }
+        else {
         
+            if (nin==1) {
+                unsigned int op = (onei+2)%4;
+                if (!o->badAngle(op,*meshpts)) {
+                    return true;
+                }
+            }
+        }
         
         QuadSurfTemplate st;
         bool res;
@@ -126,8 +127,8 @@ namespace Clobscode
             default:
                 return true;
         }
-
+        
         return false;
-
+        
     }
 }
