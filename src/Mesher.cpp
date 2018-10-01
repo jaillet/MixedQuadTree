@@ -41,7 +41,7 @@ namespace Clobscode
 
     //Create a grid mesh regarding the Bounding Box of input mesh.
     //This will produce several cubes as roots of an octree structure.
-    //Then split each initial element 8^rl times (where rl stands
+    //Then split each initial element 4^rl times (where rl stands
     //for Refinement Level).
     std::shared_ptr<FEMesh> Mesher::refineMesh(Polyline &input, const unsigned short &rl,
                               const string &name, list<unsigned int> &roctli,
@@ -63,35 +63,29 @@ namespace Clobscode
         //The output will be a one-irregular mesh.
         splitQuadrants(rl,input,roctli,all_reg,name,minrl,omaxrl);
 
-        //The points of the Quadrant mesh must be saved at this point, otherwise node are
-        //projected onto the surface and causes further problems with knowing if nodes
-        //are inside, outside or projected.
-        const vector<MeshPoint> &oct_points = points;
-
         //link element and node info for code optimization.
-        
+        //detect Quadrants with features.
         detectFeatureQuadrants(input);
         linkElementsToNodes();
         detectInsideNodes(input);
 
         projectCloseToBoundaryNodes(input);
-        /*removeOnSurfaceSafe(input);
-
-        //apply the surface Patterns
-        applySurfacePatterns(input);
-        removeOnSurface(input);*/
+        removeOnSurfaceSafe(input);
 
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
-        Services::WriteQuadtreeMesh(name,oct_points,Quadrants,QuadEdges,nels,gt);
-
-        /*detectInsideNodes(input);
+        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
 
         //update element and node info.
         linkElementsToNodes();
 
         //shrink outside nodes to the input domain boundary
-        shrinkToBoundary(input);*/
+        shrinkToBoundary(input);
+
+        //apply the surface Patterns
+        //FJAXAV        applySurfacePatterns(input);
+        applySurfacePatterns(input);
+        //removeOnSurface(input);
 
         if (rotated) {
             for (unsigned int i=0; i<points.size(); i++) {
@@ -140,12 +134,14 @@ namespace Clobscode
         linkElementsToNodes();
         detectInsideNodes(input);
 
+//FJAXAV        projectCloseToBoundaryNodes(input);
+//FJAXAV        removeOnSurfaceSafe(input);
         projectCloseToBoundaryNodes(input);
         
         //Debbuging
         {
             //save pure octree mesh
-            FEMesh pure_octree;
+            std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
             saveOutputMesh(pure_octree,points,Quadrants);
             string tmp_name = name + "_remSur";
             Services::WriteVTK(tmp_name,pure_octree);
@@ -292,6 +288,7 @@ namespace Clobscode
                                 list<unsigned int> &roctli,
                                 list<RefinementRegion *> &all_reg, const string &name,
                                 const unsigned short &minrl, const unsigned short &omaxrl){
+        auto start_time = chrono::high_resolution_clock::now();
 
         //to save m3d files per stage
         Clobscode::Services io;
@@ -317,7 +314,9 @@ namespace Clobscode
         //refine once each Quadrant in the list
         //----------------------------------------------------------
         unsigned int cindex = 0;
-        
+
+        auto start_refine_once_quad_time = chrono::high_resolution_clock::now();
+
         if (!roctli.empty()) {
             list<unsigned int>::iterator octidx = roctli.begin();
             
@@ -398,11 +397,18 @@ namespace Clobscode
             points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
 
+        auto end_refine_once_quad_time = chrono::high_resolution_clock::now();
+        cout << "       * Refine Once Quad in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_refine_once_quad_time-start_refine_once_quad_time).count();
+        cout << " ms"<< endl;
+
         //----------------------------------------------------------
         //refine each Quadrant until the Refinement Level is reached
         //----------------------------------------------------------
-        
+        auto start_refine_quad_time = chrono::high_resolution_clock::now();
+
         for (unsigned short i=minrl; i<rl; i++) {
+            auto start_refine_rl_time = chrono::high_resolution_clock::now();
 
             bool changed = false;
             unsigned int refoct_int = 0, refoct_ext = 0;
@@ -445,6 +451,8 @@ namespace Clobscode
                 //now if refinement is not needed, we add the Quadrant as it was.
                 if (!to_refine) {
                     new_Quadrants.push_back(*iter);
+                    // remove yet processed quad
+                    tmp_Quadrants.pop_front();
                     continue;
                 }
                 else {
@@ -525,14 +533,24 @@ namespace Clobscode
             //add the new points to the vector
             points.reserve(points.size() + new_pts.size());
             points.insert(points.end(),new_pts.begin(),new_pts.end());
+
+            auto end_refine_rl_time = chrono::high_resolution_clock::now();
+            cout << "         * level " << i << " in "
+                 << std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time-start_refine_rl_time).count();
+            cout << " ms"<< endl;
         }
+
+        auto end_refine_quad_time = chrono::high_resolution_clock::now();
+        cout << "       * Refine Quad in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_refine_quad_time-start_refine_quad_time).count();
+        cout << " ms"<< endl;
 
         //----------------------------------------------------------
         //produce a one-irregular mesh
         //----------------------------------------------------------
 
         bool one_irregular = false;
-        new_Quadrants.clear();
+//        new_Quadrants.clear();
 
         //visitante oneIrregular
         OneIrregularVisitor oiv;
@@ -617,6 +635,11 @@ namespace Clobscode
             points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
 
+        auto end_balanced_time = chrono::high_resolution_clock::now();
+        cout << "       * Balanced mesh in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_balanced_time-end_refine_quad_time).count();
+        cout << " ms"<< endl;
+
         //----------------------------------------------------------
         // apply transition patterns
         //----------------------------------------------------------
@@ -662,6 +685,13 @@ namespace Clobscode
         Quadrants.insert(Quadrants.end(),make_move_iterator(tmp_Quadrants.begin()),make_move_iterator(tmp_Quadrants.end()));
         tmp_Quadrants.erase(tmp_Quadrants.begin(),tmp_Quadrants.end()); // better to erase as let in a indeterminate state by move
 
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "       * Transition Patterns in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-end_balanced_time).count();
+        cout << " ms"<< endl;
+        cout << "    * splitQuadrants in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
     }
 
 
@@ -742,7 +772,7 @@ namespace Clobscode
                     continue;
                 }
                 else {
-                    list<unsigned int> inter_edges = iter->getIntersectedEdges();
+                    list<unsigned int> &inter_edges = iter->getIntersectedEdges();
 
                     vector<vector<Point3D> > clipping_coords;
                     sv.setClipping(clipping_coords);
@@ -1144,6 +1174,57 @@ namespace Clobscode
 
         return out_els.size();
     }
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+
+    unsigned int Mesher::saveOutputMesh(const shared_ptr<FEMesh> &mesh, const vector<MeshPoint> &tmp_points,
+                                        const vector<Quadrant> &tmp_Quadrants){
+        auto start_time = chrono::high_resolution_clock::now();
+
+        vector<Point3D> out_pts;
+        list<vector<unsigned int> > tmp_elements;
+        vector<vector<unsigned int> > out_els;
+
+        unsigned int n = tmp_points.size();
+        out_pts.reserve(n);
+        for (unsigned int i=0; i<n; i++) {
+            out_pts.push_back(points[i].getPoint());
+        }
+
+        //list<Quadrant>::const_iterator o_iter;
+
+        for (unsigned int i=0; i<tmp_Quadrants.size(); i++) {
+            vector<vector<unsigned int> > sub_els= tmp_Quadrants[i].getSubElements();
+            for (unsigned int j=0; j<sub_els.size(); j++) {
+                tmp_elements.push_back(sub_els[j]);
+            }
+        }
+
+        /*for (o_iter=tmp_Quadrants.begin(); o_iter!=tmp_Quadrants.end(); ++o_iter) {
+
+            vector<vector<unsigned int> > sub_els= o_iter->getSubElements();
+            for (unsigned int j=0; j<sub_els.size(); j++) {
+                tmp_elements.push_back(sub_els[j]);
+            }
+        }*/
+
+        out_els.reserve(tmp_elements.size());
+        list<vector<unsigned int> >::const_iterator e_iter;
+
+        for (e_iter=tmp_elements.begin(); e_iter!=tmp_elements.end(); ++e_iter) {
+            out_els.push_back(*e_iter);
+        }
+
+        mesh->setPoints(out_pts);
+        mesh->setElements(out_els);
+
+        auto end_time = chrono::high_resolution_clock::now();
+        cout << "    * SaveOutputMesh in "
+        << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+        cout << " ms"<< endl;
+
+        return out_els.size();
+    }
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
@@ -1373,7 +1454,7 @@ namespace Clobscode
         //now element std::list from Vomule mesh can be cleared, as all remaining
         //elements are still in use and attached to newele std::list.
         Quadrants.clear();
-        Quadrants(make_move_iterator(newele.begin()),make_move_iterator(newele.end()));
+        Quadrants.assign(std::make_move_iterator(newele.begin()),std::make_move_iterator(newele.end()));
         
         auto end_time = chrono::high_resolution_clock::now();
         cout << "    * RemoveOnSurfaceSafe in "

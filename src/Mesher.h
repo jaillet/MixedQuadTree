@@ -121,9 +121,13 @@ namespace Clobscode
         virtual unsigned int saveOutputMesh(const shared_ptr<FEMesh> &mesh, bool decoration=false);
 		
         virtual unsigned int saveOutputMesh(const shared_ptr<FEMesh> &mesh,
-                                    vector<MeshPoint> &points,
-                                    list<Quadrant> &elements);
+                                            vector<MeshPoint> &points,
+                                            list<Quadrant> &elements);
         
+        virtual unsigned int saveOutputMesh(const shared_ptr<FEMesh> &mesh,
+                                            const vector<MeshPoint> &points,
+                                            const vector<Quadrant> &elements);
+
         virtual void projectCloseToBoundaryNodes(Polyline &input);
 
 
