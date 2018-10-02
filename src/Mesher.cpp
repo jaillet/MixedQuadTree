@@ -139,10 +139,6 @@ namespace Clobscode
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
         Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
-
-//FJAXAV        projectCloseToBoundaryNodes(input);
-//FJAXAV        removeOnSurfaceSafe(input);
-        projectCloseToBoundaryNodes(input);
         
         //Debbuging
         {
@@ -151,11 +147,13 @@ namespace Clobscode
             saveOutputMesh(pure_octree,points,Quadrants);
             string tmp_name = name + "_remSur";
             Services::WriteVTK(tmp_name,pure_octree);
-            //Services::WriteMixedVolumeMesh(tmp_name,pure_octree);
         }
+
+//FJAXAV        projectCloseToBoundaryNodes(input);
+//FJAXAV        removeOnSurfaceSafe(input);
+        projectCloseToBoundaryNodes(input);
         
         removeOnSurfaceSafe(input);
-        
 
         //update element and node info.
         linkElementsToNodes();
@@ -1039,8 +1037,14 @@ namespace Clobscode
         auto start_time = chrono::high_resolution_clock::now();
 
         vector<vector<unsigned int> > out_els;
-        vector<unsigned short > out_els_ref_level;
+        vector<unsigned short > out_els_ref_level, out_els_surf;
         vector<double > out_els_min_angle;
+        
+        //even if we don't know the quantity of elements, it will be at least the
+        //number of quadrants, so we reserve for the vectors of VTK decoration.
+        out_els_min_angle.reserve(Quadrants.size());
+        out_els_ref_level.reserve(Quadrants.size());
+        out_els_surf.reserve(Quadrants.size());
 
         //new_idxs will hold the index of used nodes in the outside vector for points.
         //If the a node is not used by any element, its index will be 0 in this vector,
@@ -1097,6 +1101,14 @@ namespace Clobscode
                     }
                 }
                 if (decoration) {
+                    //surface regardring quad
+                    if (Quadrants[i].isSurface()) {
+                        out_els_surf.push_back(1);
+                    }
+                    else {
+                        out_els_surf.push_back(0);
+                    }
+                    
                     //refinment level herited from quad
                     out_els_ref_level.push_back(Quadrants[i].getRefinementLevel());
                     //compute minAngle
@@ -1120,6 +1132,7 @@ namespace Clobscode
         mesh->setElements(out_els);
         mesh->setRefLevels(out_els_ref_level);
         mesh->setMinAngles(out_els_min_angle);
+        mesh->setSurfState(out_els_surf);
 
         auto end_time = chrono::high_resolution_clock::now();
         cout << "    * SaveOutputMesh in "
@@ -1472,6 +1485,7 @@ namespace Clobscode
         //poor quality elements.
         SurfaceTemplatesVisitor stv;
         stv.setPoints(points);
+        stv.setPolyline(input);
 
 
         for (auto &q:Quadrants) {

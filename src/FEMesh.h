@@ -65,12 +65,15 @@ namespace Clobscode
 
         virtual const vector <double> &getMinAngles() const;
         virtual void setMinAngles(const vector<double> &ma);
+        
+        virtual const vector<unsigned short> &getSurfState() const;
+        virtual void setSurfState(const vector<unsigned short> &surf);
 
 	protected:
 		
 		vector<Point3D> points;
         vector<vector<unsigned int> > elements;
-        vector <unsigned short> ref_levels;
+        vector <unsigned short> ref_levels, surf_state;
         vector <double> min_angles;
         vector<unsigned int> color;
 		list<unsigned int> outpts;
@@ -82,6 +85,9 @@ namespace Clobscode
 
     inline const vector<double> &FEMesh::getMinAngles() const {return min_angles;}
     inline void FEMesh::setMinAngles(const vector<double> &ma) {min_angles=ma;}
+    
+    inline const vector<unsigned short> &FEMesh::getSurfState() const {return surf_state;}
+    inline void FEMesh::setSurfState(const vector<unsigned short> &surf) {surf_state=surf;}
 
     inline void FEMesh::setColoredCells(const vector<unsigned int> &colored) {
         color = colored;

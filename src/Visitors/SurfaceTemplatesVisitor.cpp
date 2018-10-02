@@ -30,11 +30,6 @@ namespace Clobscode
     SurfaceTemplatesVisitor::SurfaceTemplatesVisitor():meshpts(NULL) {
     }
 
-
-    void SurfaceTemplatesVisitor::setPoints(vector<MeshPoint> &meshpts) {
-        this->meshpts = &meshpts;
-    }
-
     bool SurfaceTemplatesVisitor::visit(Quadrant *o) {
         
         const vector<unsigned int> &pointindex = o->pointindex;
@@ -98,11 +93,35 @@ namespace Clobscode
             
         }
         else {
-        
             if (nin==1) {
                 unsigned int op = (onei+2)%4;
+                bool good_angle = false;
+                //test if opposed node has acceptable angle.
                 if (!o->badAngle(op,*meshpts)) {
-                    return true;
+                    op = (onei+1)%4;
+                    //if we are here we must also test the direct
+                    //neighbors of the inside node. They may cause
+                    //concave elements due to feature projection.
+                    if (!o->badAngle(op,*meshpts)) {
+                        op = (onei+3)%4;
+                        if (!o->badAngle(op,*meshpts)) {
+                            good_angle = true;
+                        }
+                    }
+                }
+                if (good_angle) {
+                    //If the angles are acceptable, test if the center
+                    //of the triangle formed by projected nodes (not the
+                    //inside one) is outside the domain. In this case,
+                    //we must replace the quadrant with a triangle.
+                    const Point3D &P0 = meshpts->at(pointindex[(onei+1)%4]).getPoint();
+                    const Point3D &P1 = meshpts->at(pointindex[(onei+2)%4]).getPoint();
+                    const Point3D &P2 = meshpts->at(pointindex[(onei+3)%4]).getPoint();
+                    Point3D centroid = (P0+P1+P2)/3;
+                    
+                    if (polyline->pointIsInMesh(centroid,o->getIntersectedEdges())) {
+                        return true;
+                    }
                 }
             }
         }

@@ -885,6 +885,18 @@ bool Services::WriteVTK(std::string name, const shared_ptr<FEMesh> &output){
     fprintf(f,"1.0 0.0 1.0 1.0\n");
     fprintf(f,"0.0 1.0 1.0 1.0\n");
 
+    
+    //write surface state if computed before (-q option, decoration==true)
+    const vector <unsigned short> &surfele= output->getSurfState();
+    if (surfele.size()>0) {
+        fprintf(f,"\nSCALARS surfState int 1");
+        fprintf(f,"\nLOOKUP_TABLE default");
+        for (unsigned int i=0; i<surfele.size(); i++) {
+            if (i%30==0) {fprintf(f,"\n");}
+            fprintf(f," %u",surfele[i]);
+        }
+    }
+    
     //write refinement levels if computed before (-q option, decoration==true)
     const vector <unsigned short> &reflevels= output->getRefLevels();
     if (reflevels.size()>0) {
