@@ -156,9 +156,6 @@ namespace Clobscode
         
         removeOnSurfaceSafe(input);
         
-        //Now that we have all the elements, we can save the Quadrant mesh.
-        unsigned int nels = Quadrants.size();
-        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
 
         //update element and node info.
         linkElementsToNodes();
