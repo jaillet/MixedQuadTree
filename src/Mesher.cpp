@@ -69,12 +69,14 @@ namespace Clobscode
         linkElementsToNodes();
         detectInsideNodes(input);
 
-        projectCloseToBoundaryNodes(input);
-        removeOnSurfaceSafe(input);
-
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
         Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
+
+//FJAXAV        projectCloseToBoundaryNodes(input);
+//FJAXAV        removeOnSurfaceSafe(input);
+        projectCloseToBoundaryNodes(input);
+        removeOnSurfaceSafe(input);
 
         //update element and node info.
         linkElementsToNodes();
@@ -133,6 +135,10 @@ namespace Clobscode
         detectFeatureQuadrants(input);
         linkElementsToNodes();
         detectInsideNodes(input);
+
+        //Now that we have all the elements, we can save the Quadrant mesh.
+        unsigned int nels = Quadrants.size();
+        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
 
 //FJAXAV        projectCloseToBoundaryNodes(input);
 //FJAXAV        removeOnSurfaceSafe(input);
@@ -297,9 +303,9 @@ namespace Clobscode
 
         list<Quadrant>::iterator iter;
 
-        for (unsigned int i=0; i<Quadrants.size(); i++) {
-            tmp_Quadrants.push_back(Quadrants[i]);
-        }
+        //initialising, moving quadrants to save memory
+        tmp_Quadrants.assign(make_move_iterator(Quadrants.begin()),make_move_iterator(Quadrants.end()));
+        Quadrants.clear();
 
         //create visitors and give them variables
         SplitVisitor sv;
