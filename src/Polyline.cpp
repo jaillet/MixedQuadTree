@@ -79,17 +79,17 @@ namespace Clobscode
         bounds.resize(6,0.0);
 
         // .at(0) throw exception if empty polyline
-        bounds[0]=bounds[3]=mVertices.at(0)[0];
-        bounds[1]=bounds[4]=mVertices.at(0)[1];
-        bounds[2]=bounds[5]=mVertices.at(0)[2];
+        bounds[0]=bounds[3]=mVertices[0].X();
+        bounds[1]=bounds[4]=mVertices[0].Y();
+        bounds[2]=bounds[5]=mVertices[0].Z();
 
         // search for max and min coodinates in X, Y and Z.
         double x,y,z;
         for (unsigned int i=1; i< mVertices.size(); ++i) {
 
-            x = mVertices[i][0];
-            y = mVertices[i][1];
-            z = mVertices[i][2];
+            x = mVertices[i].X();
+            y = mVertices[i].Y();
+            z = mVertices[i].Z();
 
             if(bounds[0]>x)
                 bounds[0]=x;
