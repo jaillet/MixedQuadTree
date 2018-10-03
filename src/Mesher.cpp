@@ -71,10 +71,16 @@ namespace Clobscode
 
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
-        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
+        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
 
-//FJAXAV        projectCloseToBoundaryNodes(input);
-//FJAXAV        removeOnSurfaceSafe(input);
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
+            saveOutputMesh(pure_octree,points,Quadrants);
+            string tmp_name = name + "_remSur";
+            Services::WriteVTK(tmp_name,pure_octree);
+        }
+
         projectCloseToBoundaryNodes(input);
         removeOnSurfaceSafe(input);
 
@@ -85,7 +91,6 @@ namespace Clobscode
         shrinkToBoundary(input);
 
         //apply the surface Patterns
-        //FJAXAV        applySurfacePatterns(input);
         applySurfacePatterns(input);
         //removeOnSurface(input);
 
@@ -149,8 +154,6 @@ namespace Clobscode
             Services::WriteVTK(tmp_name,pure_octree);
         }
 
-//FJAXAV        projectCloseToBoundaryNodes(input);
-//FJAXAV        removeOnSurfaceSafe(input);
         projectCloseToBoundaryNodes(input);
         
         removeOnSurfaceSafe(input);
