@@ -1247,8 +1247,8 @@ namespace Clobscode
 
         unsigned int featCount = 0;
         for (unsigned int i=0; i<Quadrants.size(); i++) {
-            if (input.hasFeature(Quadrants[i],points)) {
-                Quadrants[i].setFeature();
+            if (input.getNbFeatures(Quadrants[i],points)>0) {
+                //Quadrants[i].setFeature(); now set by Polyline::getNbFeatures()
                 featCount++;
             }
         }
@@ -1690,7 +1690,7 @@ namespace Clobscode
                 points[pIdx].setMaxDistance(md);
             }
         
-            //If the quadrant don't have a Feature, save the intern nodes
+            //If the quadrant doesn't have a Feature, save the intern nodes
             //to a list to manage them later and continue the process just
             //for feature quadrants first.
             if (!q.hasFeature()) {
@@ -1729,10 +1729,6 @@ namespace Clobscode
                     
                     const Point3D &current = points[pIdx].getPoint();
                     double dis = (current - featProjected).Norm();
-//FJA better to check distance to projection on the polyline?
-//                    Point3D currProjected = input.getProjection(current,q.getIntersectedEdges());
-//                    double dis = (currProjected - featProjected).Norm();
-
 
                     //if(points[pIdx].getMaxDistance()>dis && best>dis){
                     if(best>dis) {
@@ -1783,17 +1779,12 @@ namespace Clobscode
 
         //move (when possible) all inner points to surface
         for (auto p:in_nodes) {
-
             
             if (points[p].wasProjected()) {
                 //projected due to a feature => already managed.
                 continue;
             }
             
-            //if this node is attached to a Quadrant which was split in
-            //mixed-elements due to transition patterns, avoid the
-            //displacement.
-
             //get the faces of Quadrants sharing this node
             list<unsigned int> p_qInterEdges;
 
@@ -1815,10 +1806,7 @@ namespace Clobscode
             if(dis<points[p].getMaxDistance()){
                 //this node has been moved to boundary, thus every element
                 //sharing this node must be set as a border element in order
-                //to avoid topological problems. And if this node belonged
-                //to a feature Quadrants, all the quadrants sharing the node
-                //will be labeled as Feature Quadrants too.
-                //points.at(*piter).setOutside();
+                //to avoid topological problems.
                 points[p].setProjected();
                 points[p].setPoint(projected);
                 for (auto pe:points[p].getElements()) {

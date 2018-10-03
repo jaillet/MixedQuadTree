@@ -75,9 +75,10 @@ namespace Clobscode
 		virtual bool pointIsInMesh(const Point3D & pPoint, 
                                    const list<unsigned int> &lEdges) const;
 		
-        //returns true if the list of edges containts at least one feature.
-        virtual bool hasFeature(const Quadrant &q, vector<MeshPoint> &mp) const;
-        
+        //returns the number of features of the list of edges contained by this quad
+        //and update the quad accordingly
+        virtual unsigned int getNbFeatures(Quadrant &q, vector<MeshPoint> &mp) const;
+
         virtual list<unsigned int> getFeatureProjection(const Quadrant &q,
                                                    vector<MeshPoint> &mp);
 

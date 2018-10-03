@@ -64,6 +64,8 @@ namespace Clobscode
         const Point3D &P2 = mp[pointindex[(nIdx+1)%4]].getPoint(); //next point
         
         double angle = P1.angle3Points(P0,P2);
+
+        cerr << "Angle " << angle << "\n";
         
         if (isnan(angle)) {
             return true;
@@ -72,7 +74,7 @@ namespace Clobscode
         //if the angle is smoth (close to 180) or if it is going to produce inverted
         //elements in a quad (>180), then it must be managed with transition patterns
         //if (angle>2.61799 && angle<3.66519) {
-        if (angle>150.0) {//. || angle<210.) {
+        if (angle>150.0) { // || angle<5.) {
             return true;
         }
         return false;

@@ -99,9 +99,10 @@ namespace Clobscode
         double result = toDegrees(acos(V2.dot(V1)));
         if (V2.isCounterClockWise(V1))
         {
-            result+=180.;
+//            result+=180.;
+            result=360.-result;
         }
-        
+
         if (V1.Norm()<10E-6) {
             cerr << "Warning Point3D::angle3Points V1 " << V1 << "\nangle: ";
             cerr << result << "\n";

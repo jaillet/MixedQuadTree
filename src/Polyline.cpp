@@ -134,19 +134,20 @@ namespace Clobscode
                 continue;
             }
             unsigned int i0, i2;
-            i0 = mEdges[seg_per_node[i][0]][0];
-            if (i==i0) {
-                i0 = mEdges[seg_per_node[i][0]][1];
-            }
+            i0 = mEdges[seg_per_node[i][0]][1];
             i2 = mEdges[seg_per_node[i][1]][0];
-            if (i==i2) {
-                i2 = mEdges[seg_per_node[i][1]][1];
+            if (i2==i0) {
+                i0 = mEdges[seg_per_node[i][1]][1];
+                i2 = mEdges[seg_per_node[i][0]][0];
             }
             const Point3D &P1 = mVertices[i],
                     &P0 = mVertices[i0],
                     &P2 = mVertices[i2];
             
-            mVerticesAngles[i]= P1.angle3Points(P0,P2);
+            // take care, polyline is oriented reversely to quadrant ;o(
+            mVerticesAngles[i]= P1.angle3Points(P2,P0);
+
+            cerr << "Poly[" << i << "] angle = " << i0  << " " << i  << " " << i2 << " " << mVerticesAngles[i] << "\n";
             //normalize
             //mVerticePseudoNormals[i].normalize();
         }
@@ -177,6 +178,8 @@ namespace Clobscode
 			}
 			//normalize
 			mVerticePseudoNormals[i].normalize();
+
+            cerr << "Poly[" << i << "] normal = " << mVerticePseudoNormals[i] << "\n";
 		}
 	}
 	
@@ -415,8 +418,9 @@ namespace Clobscode
     
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    bool Polyline::hasFeature(const Quadrant &q, vector<MeshPoint> &mp) const {
-        
+    unsigned int Polyline::getNbFeatures(Quadrant &q, vector<MeshPoint> &mp) const {
+        unsigned int nbFeat=0;
+
         list<unsigned int> iEdges = q.getIntersectedEdges();
         
         if (iEdges.size()<2) {
@@ -444,10 +448,12 @@ namespace Clobscode
             //if angle is between 150 and 210 grades, then is not a sharp feature:
             if (mVerticesAngles[iNd]<175. || mVerticesAngles[iNd]>185.) {
                 //std::cout << " " << iNd << std::flush;
-                return q.pointInside(mp,mVertices[iNd]);
+                if (q.pointInside(mp,mVertices[iNd]))
+                        ++nbFeat;
             }
         }
-        return false;
+        q.setFeature(nbFeat);
+        return nbFeat;
     }
     
     //--------------------------------------------------------------------------------

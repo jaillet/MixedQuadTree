@@ -102,8 +102,8 @@ namespace Clobscode
 		
         virtual void setIntersectedEdges(list<unsigned int> &iedges);
         
-        virtual void setFeature();
-        
+        virtual void setFeature(unsigned int nb);
+        virtual unsigned int getFeature() const;
         virtual bool hasFeature() const;
         
         
@@ -126,7 +126,7 @@ namespace Clobscode
 		unsigned short ref_level;
 		
 		bool surface;
-        bool feature;
+        unsigned int feature;
 		
         /***** BEGIN Debugging variables *******/
         bool debugging;
@@ -146,14 +146,18 @@ namespace Clobscode
     /***** END Debugging methods *******/
     
     
-    inline void Quadrant::setFeature() {
-        feature = true;
+    inline void Quadrant::setFeature(unsigned int nb) {
+        feature = nb;
     }
     
-    inline bool Quadrant::hasFeature() const {
+    inline unsigned int Quadrant::getFeature() const {
         return feature;
     }
-	
+
+    inline bool Quadrant::hasFeature() const {
+        return (feature>0);
+    }
+
     inline const vector<unsigned int> &Quadrant::getPointIndex() const{
 		return pointindex;
 	}
