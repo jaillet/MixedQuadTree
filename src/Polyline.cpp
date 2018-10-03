@@ -147,7 +147,7 @@ namespace Clobscode
             // take care, polyline is oriented reversely to quadrant ;o(
             mVerticesAngles[i]= P1.angle3Points(P2,P0);
 
-            cerr << "Poly[" << i << "] angle = " << i0  << " " << i  << " " << i2 << " " << mVerticesAngles[i] << "\n";
+//            cerr << "Poly[" << i << "] angle = " << i0  << " " << i  << " " << i2 << " " << mVerticesAngles[i] << "\n";
             //normalize
             //mVerticePseudoNormals[i].normalize();
         }
@@ -179,7 +179,7 @@ namespace Clobscode
 			//normalize
 			mVerticePseudoNormals[i].normalize();
 
-            cerr << "Poly[" << i << "] normal = " << mVerticePseudoNormals[i] << "\n";
+//            cerr << "Poly[" << i << "] normal = " << mVerticePseudoNormals[i] << "\n";
 		}
 	}
 	
