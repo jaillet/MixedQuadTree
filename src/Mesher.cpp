@@ -770,6 +770,7 @@ namespace Clobscode
                 //now if refinement is not needed, we add the Quadrant as it was.
                 if (!to_refine) {
                     new_Quadrants.push_back(*iter);
+                    tmp_Quadrants.pop_front();
                     continue;
                 }
                 else {
