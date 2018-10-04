@@ -73,13 +73,11 @@ namespace Clobscode
         unsigned int nels = Quadrants.size();
         Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
 
-        
-        //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
             saveOutputMesh(pure_octree,points,Quadrants);
-            string tmp_name = name + "_quads";
+            string tmp_name = name + "_remSur";
             Services::WriteVTK(tmp_name,pure_octree);
         }
 
@@ -88,16 +86,6 @@ namespace Clobscode
 
         //update element and node info.
         linkElementsToNodes();
-        
-        
-        //CL Debbuging
-        {
-            //save pure octree mesh
-            std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
-            saveOutputMesh(pure_octree,points,Quadrants);
-            string tmp_name = name + "_remSur";
-            Services::WriteVTK(tmp_name,pure_octree);
-        }
 
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
@@ -157,25 +145,7 @@ namespace Clobscode
         unsigned int nels = Quadrants.size();
         Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);
         
-        //CL Debbuging
-        {
-            //save pure octree mesh
-            std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
-            saveOutputMesh(pure_octree,points,Quadrants);
-            string tmp_name = name + "_quads";
-            Services::WriteVTK(tmp_name,pure_octree);
-        }
-        
-
-        projectCloseToBoundaryNodes(input);
-        
-        removeOnSurfaceSafe(input);
-
-        //update element and node info.
-        linkElementsToNodes();
-
-        
-        //CL Debbuging
+        //Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
@@ -183,8 +153,19 @@ namespace Clobscode
             string tmp_name = name + "_remSur";
             Services::WriteVTK(tmp_name,pure_octree);
         }
+
+<<<<<<< HEAD
+//FJAXAV        projectCloseToBoundaryNodes(input);
+//FJAXAV        removeOnSurfaceSafe(input);
+=======
+>>>>>>> 0de3598e759aff54c45dbeffa7465e5e5e161ef9
+        projectCloseToBoundaryNodes(input);
         
-        
+        removeOnSurfaceSafe(input);
+
+        //update element and node info.
+        linkElementsToNodes();
+
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
         
@@ -1458,23 +1439,11 @@ namespace Clobscode
                 continue;
             }
             avg/=q.getPointIndex().size();
-            //Sometimes the avg node is just over domain's boundary,
-            //despite the fact that a (big) portion of it's still
-            //inside the domain and no other Quad will cover this
-            //section. For this reason the mid nove between the average
-            //point and every node of the Quad is tested to be inside.
-            //This implies 8 point sums and 5 division. Better than 12 point
-            //sums and 4 divisions.
-            bool accepted = false;
-            for (auto quaNoIdx:q.getPointIndex()) {
-                Point3D test = (avg + points[quaNoIdx].getPoint())/2;
-                if (input.pointIsInMesh(test,q.getIntersectedEdges())) {
-                    newele.push_back(q);
-                    accepted = true;
-                    break;
-                }
+            //now we now the Quad has no node inside.
+            if (input.pointIsInMesh(avg,q.getIntersectedEdges())) {
+                newele.push_back(q);
             }
-            if (!accepted) {
+            else {
                 removed.push_back(q);
             }
             

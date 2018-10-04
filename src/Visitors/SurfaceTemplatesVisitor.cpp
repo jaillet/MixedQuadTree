@@ -63,12 +63,19 @@ namespace Clobscode
             //as inside, while the rest as outside. The same logic
             //as the rest of the octant will be employed after this
             //step.
-            unsigned int bAnNo = 0;
+            bool tri = false;
+            
             
             for (unsigned int i=0; i<pointindex.size(); i++) {
-                if (!o->badAngle(i,*meshpts)) {
+                double angle = o->getAngle(i,*meshpts);
+                if (angle<=150.0) {
                     in[i]=true;
                     nin++;
+                }
+                else {
+                    if (angle>175. && angle<185.) {
+                        tri = true;
+                    }
                 }
             }
             
@@ -77,7 +84,7 @@ namespace Clobscode
                 //nothing to do, the element will
                 return true;
             }
-            if (nin==3) {
+            if (nin==3 && tri) {
                 //it should be replaced by 1 or 2 triangles.
                 vector<unsigned int> t;
                 t.reserve(3);
@@ -90,7 +97,6 @@ namespace Clobscode
                 o->updateSubElements(subels);
                 return true;
             }
-            
         }
         else {
             if (nin==1) {

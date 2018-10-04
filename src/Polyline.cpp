@@ -446,7 +446,7 @@ namespace Clobscode
         
         for (auto iNd:iCommonNodes) {
             //if angle is between 150 and 210 grades, then is not a sharp feature:
-            if (mVerticesAngles[iNd]<175. || mVerticesAngles[iNd]>185.) {
+            if (mVerticesAngles[iNd]<150. || mVerticesAngles[iNd]>210.) {
                 //std::cout << " " << iNd << std::flush;
                 if (q.pointInside(mp,mVertices[iNd]))
                         ++nbFeat;
