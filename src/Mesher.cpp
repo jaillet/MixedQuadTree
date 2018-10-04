@@ -678,8 +678,6 @@ namespace Clobscode
         tpv.setEdges(QuadEdges);
         tpv.setMaxRefLevel(omaxrl);
         
-        unsigned int cl3=0;
-
         for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
 
             if (!(*iter).accept(&tpv)) {
@@ -728,9 +726,6 @@ namespace Clobscode
                                     const string &name){
 
         auto start_time = chrono::high_resolution_clock::now();
-
-        //to save m3d files per stage
-        Clobscode::Services io;
 
         //list of temp Quadrants
         list<Quadrant> tmp_Quadrants, new_Quadrants;
@@ -1372,7 +1367,7 @@ namespace Clobscode
                 continue;
             }
             
-            if (Quadrants[i].hasFeature()) {
+            if (Quadrants[i].hasIntersectedFeatures()) {
                 if (Quadrants[i].accept(&rsv)) {
                     //Quadrant with feature to be removed
                     //only if average node is outside the
@@ -1733,7 +1728,7 @@ namespace Clobscode
             //If the quadrant doesn't have a Feature, save the intern nodes
             //to a list to manage them later and continue the process just
             //for feature quadrants first.
-            if (!q.hasFeature()) {
+            if (!q.hasIntersectedFeatures()) {
                 for (auto pIdx:q.getPointIndex()) {
                     if (points[pIdx].isInside()) {
                         in_nodes.push_back(pIdx);

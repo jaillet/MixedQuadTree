@@ -35,7 +35,7 @@ namespace Clobscode
 	Quadrant::Quadrant(vector<unsigned int> &epts, 
                    const unsigned short &ref_level)
         :pointindex(epts),ref_level(ref_level),
-          surface(false),feature(false),max_dis(numeric_limits<double>::infinity()) {
+          surface(false),max_dis(numeric_limits<double>::infinity()) {
         
         /***** BEGIN Debugging variables *******/
               debugging = false;
@@ -91,7 +91,7 @@ namespace Clobscode
             return false;
         }
         
-        unsigned int i0 = (4+nIdx-1)%4, i2=(nIdx+1)%4;
+//        unsigned int i0 = (4+nIdx-1)%4, i2=(nIdx+1)%4;
         
         const Point3D &P0 = mp[pointindex[(nIdx+3)%4]].getPoint(); //previous point
         const Point3D &P1 = mp[pointindex[nIdx]].getPoint();       //mid point
@@ -107,7 +107,7 @@ namespace Clobscode
     
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    bool Quadrant::pointInside(vector<MeshPoint> &mp, const Point3D &p) const {
+    bool Quadrant::pointInside(const vector<MeshPoint> &mp, const Point3D &p) const {
         const Point3D &minp = mp[pointindex[0]].getPoint();
         const Point3D &maxp = mp[pointindex[2]].getPoint();
         if (minp[0]>p[0] || maxp[0]<p[0]) {

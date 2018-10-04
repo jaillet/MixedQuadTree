@@ -76,7 +76,7 @@ namespace Clobscode
 		
         virtual bool intersectsSurface() const;
         
-        virtual bool pointInside(vector<MeshPoint> &mp, const Point3D &p) const;
+        virtual bool pointInside(const vector<MeshPoint> &mp, const Point3D &p) const;
 		
         virtual unsigned short getRefinementLevel() const;
 		
@@ -102,9 +102,10 @@ namespace Clobscode
 		
         virtual void setIntersectedEdges(list<unsigned int> &iedges);
         
-        virtual void setFeature(unsigned int nb);
-        virtual unsigned int getFeature() const;
-        virtual bool hasFeature() const;
+        virtual void setIntersectedFeatures(const list<unsigned int> &iFeatures);
+        virtual const list<unsigned int>& getIntersectedFeatures() const;
+        virtual list<unsigned int> getIntersectedFeatures();
+        virtual bool hasIntersectedFeatures() const;
         
         
         /***** BEGIN Debugging methods *******/
@@ -121,12 +122,12 @@ namespace Clobscode
 		vector<unsigned int> pointindex;
         vector<vector<unsigned int> > sub_elements; //, possibles, continuity;
         list<unsigned int> intersected_edges;
-		//the level at which this Quadrant is found in the
+        list<unsigned int> intersected_features;
+        //the level at which this Quadrant is found in the
         //the tree structure (Quadtree). Used for optimization
 		unsigned short ref_level;
 		
 		bool surface;
-        unsigned int feature;
 		
         /***** BEGIN Debugging variables *******/
         bool debugging;
@@ -146,16 +147,19 @@ namespace Clobscode
     /***** END Debugging methods *******/
     
     
-    inline void Quadrant::setFeature(unsigned int nb) {
-        feature = nb;
+    inline void Quadrant::setIntersectedFeatures(const list<unsigned int> &iFeatures) {
+        intersected_features = iFeatures;
     }
     
-    inline unsigned int Quadrant::getFeature() const {
-        return feature;
+    inline const list<unsigned int>& Quadrant::getIntersectedFeatures() const {
+        return intersected_features;
+    }
+    inline list<unsigned int> Quadrant::getIntersectedFeatures() {
+        return intersected_features;
     }
 
-    inline bool Quadrant::hasFeature() const {
-        return (feature>0);
+    inline bool Quadrant::hasIntersectedFeatures() const {
+        return (intersected_features.size()>0);
     }
 
     inline const vector<unsigned int> &Quadrant::getPointIndex() const{

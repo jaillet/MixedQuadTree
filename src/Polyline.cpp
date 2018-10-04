@@ -418,11 +418,12 @@ namespace Clobscode
     
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    unsigned int Polyline::getNbFeatures(Quadrant &q, vector<MeshPoint> &mp) const {
+    unsigned int Polyline::getNbFeatures(Quadrant &q, const vector<MeshPoint> &mp) const {
         unsigned int nbFeat=0;
 
         list<unsigned int> iEdges = q.getIntersectedEdges();
-        
+        list<unsigned int> iFeatures;
+
         if (iEdges.size()<2) {
             return false;
         }
@@ -448,11 +449,13 @@ namespace Clobscode
             //if angle is between 150 and 210 grades, then is not a sharp feature:
             if (mVerticesAngles[iNd]<150. || mVerticesAngles[iNd]>210.) {
                 //std::cout << " " << iNd << std::flush;
-                if (q.pointInside(mp,mVertices[iNd]))
-                        ++nbFeat;
+                if (q.pointInside(mp,mVertices[iNd])) {
+                    iFeatures.push_back(iNd);
+                    ++nbFeat;
+                }
             }
         }
-        q.setFeature(nbFeat);
+        q.setIntersectedFeatures(iFeatures);
         return nbFeat;
     }
     

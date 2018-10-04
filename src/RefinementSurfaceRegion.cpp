@@ -29,13 +29,14 @@ namespace Clobscode
 {	
 	//--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    RefinementSurfaceRegion::RefinementSurfaceRegion(Polyline &input, const unsigned short &level)
+    RefinementSurfaceRegion::RefinementSurfaceRegion(const Polyline &input, const unsigned short &level)
+        :RefinementRegion(level,true,true),ply(input)
 	{
-        this->ply = input;
-		refine_level = level;
+//        this->ply = input;
+//		refine_level = level;
         
-        local_rot = true;
-        input_rot = true;
+//        local_rot = true;
+//        input_rot = true;
 	}
 
 	//--------------------------------------------------------------------------------

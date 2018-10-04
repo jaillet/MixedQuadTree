@@ -33,7 +33,7 @@ namespace Clobscode
     bool SurfaceTemplatesVisitor::visit(Quadrant *o) {
         
         const vector<unsigned int> &pointindex = o->pointindex;
-        if (pointindex.size()!=4) {
+        if (pointindex.size()!=4 /*|| o->getSubElements().size()>1*/) {
             return true;
         }
         
