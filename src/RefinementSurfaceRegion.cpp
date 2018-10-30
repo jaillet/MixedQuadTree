@@ -121,17 +121,140 @@ namespace Clobscode
         for (auto &edge:ply.getEdges()) {
             const Point3D &p3 = ply.getPoints()[edge[0]];
             const Point3D &p4 = ply.getPoints()[edge[1]];
-            if (edgeIntersection(p1,p2,p3,p4)) {
+            if (edgeClipping(p1,p2,p3,p4)) {
                 return true;
             }
         }
                 
         return false;
 	}
+
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    bool RefinementSurfaceRegion::edgeIntersection(const Point3D &oct_p1, const Point3D &oct_p2,
+                                            const Point3D &seg_p1, const Point3D &seg_p2) const
+    {
+        //compute the parametric equations of the given segment
+        double dx = seg_p2[0]-seg_p1[0];
+        double dy = seg_p2[1]-seg_p1[1];
+        double dz = seg_p2[2]-seg_p1[2];
+        double X,Y,Z,t;
+
+        //Each 't' value is computed regarding a particular
+        //plane. For instance, X_min (pmin[0]) is YZ plane
+        //defined at X_min. When the 't' value is between 0
+        //and 1, it means that the point where the segment
+        //cuts the plane is between the two points that define
+        //the segment. In any other case, the intersection is
+        //produced at some other point outside the limits of
+        //this segment (p1,p2), therefore the clipping can be
+        //directly discard.
+
+
+
+        ////////////////////////////////////////////////////
+        // Important note: if tangent segment should be   //
+        // considered as intersecting the Quadrant, replace //
+        // each < by a <= from this point to the end of   //
+        // this method.                                   //
+        ////////////////////////////////////////////////////
+
+        //test X axis over X_min
+        t = (oct_p1[0]-seg_p1[0])/dx;
+
+        if (0<=t && t<=1) {
+            //test Y axis for this 't'
+            Y = seg_p1[1] + t*dy;
+            if (oct_p1[1]<=Y && Y<=oct_p2[1]) {
+                //test Z axis for this 't'
+                Z = seg_p1[2] + t*dz;
+                if (oct_p1[2]<=Z && Z<=oct_p2[2]) {
+                    return true;
+                }
+            }
+        }
+
+        //test X axis over X_max
+        t = (oct_p2[0]-seg_p1[0])/dx;
+
+        if (0<=t && t<=1) {
+            //test Y axis for this 't'
+            Y = seg_p1[1] + t*dy;
+            if (oct_p1[1]<=Y && Y<=oct_p2[1]) {
+                //test Z axis for this 't'
+                Z = seg_p1[2] + t*dz;
+                if (oct_p1[2]<=Z && Z<=oct_p2[2]) {
+                    return true;
+                }
+            }
+        }
+
+
+        //test Y axis over Y_min
+        t = (oct_p1[1]-seg_p1[1])/dy;
+
+        if (0<=t && t<=1) {
+            //test Y axis for this 't'
+            X = seg_p1[0] + t*dx;
+            if (oct_p1[0]<=X && X<=oct_p2[0]) {
+                //test Z axis for this 't'
+                Z = seg_p1[2] + t*dz;
+                if (oct_p1[2]<=Z && Z<=oct_p2[2]) {
+                    return true;
+                }
+            }
+        }
+
+        //test Y axis over Y_max
+        t = (oct_p2[1]-seg_p1[1])/dy;
+        if (0<=t && t<=1) {
+            //test Y axis for this 't'
+            X = seg_p1[0] + t*dx;
+            if (oct_p1[0]<=X && X<=oct_p2[0]) {
+                //test Z axis for this 't'
+                Z = seg_p1[2] + t*dz;
+                if (oct_p1[2]<=Z && Z<=oct_p2[2]) {
+                    return true;
+                }
+            }
+        }
+
+        //test Z axis over Z_min
+        t = (oct_p1[2]-seg_p1[2])/dz;
+        if (0<=t && t<=1) {
+            //test Y axis for this 't'
+            X = seg_p1[0] + t*dx;
+            if (oct_p1[0]<=X && X<=oct_p2[0]) {
+                //test Z axis for this 't'
+                Y = seg_p1[1] + t*dy;
+                if (oct_p1[1]<=Y && Y<=oct_p2[1]) {
+                    return true;
+                }
+            }
+        }
+
+        //test Z axis over Z_max
+        t = (oct_p2[2]-seg_p1[2])/dz;
+        if (0<=t && t<=1) {
+            //test Y axis for this 't'
+            X = seg_p1[0] + t*dx;
+            if (oct_p1[0]<=X && X<=oct_p2[0]) {
+                //test Z axis for this 't'
+                Y = seg_p1[1] + t*dy;
+                if (oct_p1[1]<=Y && Y<=oct_p2[1]) {
+                    return true;
+                }
+            }
+        }
+
+        //If the above test didn't succeed, the segment
+        //is not intersected by this Quadrant
+        return false;
+    }
     
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    bool RefinementSurfaceRegion::edgeIntersection(const Point3D &oct_p1, const Point3D &oct_p2,
+    bool RefinementSurfaceRegion::edgeClipping(const Point3D &oct_p1, const Point3D &oct_p2,
                                                    const Point3D &seg_p1, const Point3D &seg_p2) const
 	{
         //This code is based on the Cohen-Sutherland algorithm
@@ -203,125 +326,8 @@ namespace Clobscode
 			}
 		}*/
         
-        
-        
         //compute the parametric equations of the given segment
-		double dx = seg_p2[0]-seg_p1[0];
-		double dy = seg_p2[1]-seg_p1[1];
-		double dz = seg_p2[2]-seg_p1[2];
-		double X,Y,Z,t;
-		
-		//Each 't' value is computed regarding a particular
-		//plane. For instance, X_min (pmin[0]) is YZ plane
-		//defined at X_min. When the 't' value is between 0
-		//and 1, it means that the point where the segment
-		//cuts the plane is between the two points that define
-		//the segment. In any other case, the intersection is
-		//produced at some other point outside the limits of
-		//this segment (p1,p2), therefore the clipping can be
-		//directly discard.
-		
-		
-		
-		////////////////////////////////////////////////////
-		// Important note: if tangent segment should be   //
-		// considered as intersecting the Quadrant, replace //
-		// each < by a <= from this point to the end of   //
-		// this method.                                   //
-		////////////////////////////////////////////////////
-		
-		//test X axis over X_min
-		t = (oct_p1[0]-seg_p1[0])/dx;
-		
-		if (0<=t && t<=1) {
-			//test Y axis for this 't'
-			Y = seg_p1[1] + t*dy;
-			if (oct_p1[1]<=Y && Y<=oct_p2[1]) {
-				//test Z axis for this 't'
-				Z = seg_p1[2] + t*dz;
-				if (oct_p1[2]<=Z && Z<=oct_p2[2]) {
-					return true;
-				}
-			}
-		}
-		
-		//test X axis over X_max
-		t = (oct_p2[0]-seg_p1[0])/dx;
-		
-		if (0<=t && t<=1) {
-			//test Y axis for this 't'
-			Y = seg_p1[1] + t*dy;
-			if (oct_p1[1]<=Y && Y<=oct_p2[1]) {
-				//test Z axis for this 't'
-				Z = seg_p1[2] + t*dz;
-				if (oct_p1[2]<=Z && Z<=oct_p2[2]) {
-					return true;
-				}
-			}
-		}
-		
-		
-		//test Y axis over Y_min
-		t = (oct_p1[1]-seg_p1[1])/dy;
-		
-		if (0<=t && t<=1) {
-			//test Y axis for this 't'
-			X = seg_p1[0] + t*dx;
-			if (oct_p1[0]<=X && X<=oct_p2[0]) {
-				//test Z axis for this 't'
-				Z = seg_p1[2] + t*dz;
-				if (oct_p1[2]<=Z && Z<=oct_p2[2]) {
-					return true;
-				}
-			}
-		}
-		
-		//test Y axis over Y_max
-		t = (oct_p2[1]-seg_p1[1])/dy;
-		if (0<=t && t<=1) {
-			//test Y axis for this 't'
-			X = seg_p1[0] + t*dx;
-			if (oct_p1[0]<=X && X<=oct_p2[0]) {
-				//test Z axis for this 't'
-				Z = seg_p1[2] + t*dz;
-				if (oct_p1[2]<=Z && Z<=oct_p2[2]) {
-					return true;
-				}
-			}
-		}
-		
-		//test Z axis over Z_min
-		t = (oct_p1[2]-seg_p1[2])/dz;
-		if (0<=t && t<=1) {
-			//test Y axis for this 't'
-			X = seg_p1[0] + t*dx;
-			if (oct_p1[0]<=X && X<=oct_p2[0]) {
-				//test Z axis for this 't'
-				Y = seg_p1[1] + t*dy;
-				if (oct_p1[1]<=Y && Y<=oct_p2[1]) {
-					return true;
-				}
-			}
-		}
-		
-		//test Z axis over Z_max
-		t = (oct_p2[2]-seg_p1[2])/dz;
-		if (0<=t && t<=1) {
-			//test Y axis for this 't'
-			X = seg_p1[0] + t*dx;
-			if (oct_p1[0]<=X && X<=oct_p2[0]) {
-				//test Z axis for this 't'
-				Y = seg_p1[1] + t*dy;
-				if (oct_p1[1]<=Y && Y<=oct_p2[1]) {
-					return true;
-				}
-			}
-		}
-
-		//If the above test didn't succeed, the segment
-		//is not intersected by this Quadrant
-		return false;
-
+        return edgeIntersection(oct_p1, oct_p2, seg_p1, seg_p2);
     }
     
     //--------------------------------------------------------------------------------

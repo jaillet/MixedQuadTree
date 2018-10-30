@@ -66,6 +66,9 @@ namespace Clobscode
         
         virtual bool edgeIntersection(const Point3D &oct_p1, const Point3D &oct_p2,
                                       const Point3D &seg_p1, const Point3D &seg_p2) const;
+
+        virtual bool edgeClipping(const Point3D &oct_p1, const Point3D &oct_p2,
+                                      const Point3D &seg_p1, const Point3D &seg_p2) const;
         
         virtual unsigned int computePosition(const Point3D &p, const Point3D &pmin,
                                              const Point3D &pmax) const;

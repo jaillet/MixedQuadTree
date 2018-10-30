@@ -742,21 +742,18 @@ namespace Clobscode
         sv.setEdges(QuadEdges);
         sv.setNewPts(new_pts);
 
-        //----------------------------------------------------------
-        //refine each Quadrant until the Refinement Level is reached
-        //----------------------------------------------------------
-
         auto start_refine_quad_time = chrono::high_resolution_clock::now();
 
-        for (unsigned short i=0; i<rl; i++) {
-            auto start_refine_rl_time = chrono::high_resolution_clock::now();
+        //------------------------------------------------------------
+        //refine each Quadrant until the Boundary is correctly handled
+        //------------------------------------------------------------
 
-            //the new_pts is a list that holds the coordinates of
-            //new points inserted at this iteration. At the end of
-            //this bucle, they are inserted in the point vector
+        auto start_refine_rl_time = chrono::high_resolution_clock::now();
+
+//        list<RefinementRegion *>::const_iterator reg_iter=all_reg.begin();;
+        unsigned int i=0;
+        do {
             new_pts.clear();
-
-            list<RefinementRegion *>::const_iterator reg_iter;
 
             //split the Quadrants as needed
             while (!tmp_Quadrants.empty()) {
@@ -764,26 +761,9 @@ namespace Clobscode
 
                 bool to_refine = false;
 
-                for (reg_iter=all_reg.begin(); reg_iter!=all_reg.end(); ++reg_iter) {
-
-                    unsigned short region_rl = (*reg_iter)->getRefinementLevel();
-                    if (region_rl<i) {
-                        continue;
-                    }
-
-                    //If the Quadrant has a greater RL than the region needs, continue
-                    if (region_rl<=(*iter).getRefinementLevel()) {
-                        continue;
-                    }
-
-                    //Get the two extreme nodes of the Quadrant to test intersection with
-                    //this RefinementRegion. If not, conserve it as it is.
-                    //unsigned int n_idx1 = (*iter).getPoints()[0];
-                    //unsigned int n_idx2 = (*iter).getPoints()[2];
-
-                    if ((*reg_iter)->intersectsQuadrant(points,*iter)) {
-                        to_refine = true;
-                    }
+                iter->computeMaxDistance(points);
+                if ((*all_reg.begin())->intersectsQuadrant(points,*iter)) {
+                    to_refine = true;
                 }
 
                 //now if refinement is not needed, we add the Quadrant as it was.
@@ -866,6 +846,149 @@ namespace Clobscode
             points.reserve(points.size() + new_pts.size());
             points.insert(points.end(),new_pts.begin(),new_pts.end());
 
+            //CL Debbuging
+            {
+                //save pure octree mesh
+                std::shared_ptr<FEMesh> bound_octree=make_shared<FEMesh>();
+                saveOutputMesh(bound_octree,points,tmp_Quadrants);
+                string tmp_name = name + "_bound";
+                Services::WriteVTK(tmp_name,bound_octree);
+            }
+
+            ++i;
+        } while (!new_pts.empty());
+
+        unsigned short max_rl=i-1;
+
+        auto end_refine_rl_time = chrono::high_resolution_clock::now();
+        cout << "         * boundary max " << i << " in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time-start_refine_rl_time).count();
+        cout << " ms"<< endl;
+
+        //----------------------------------------------------------
+        //refine each Quadrant until the Refinement Level is reached
+        //----------------------------------------------------------
+
+
+        for (unsigned short i=0; i<rl; i++) {
+            auto start_refine_rl_time = chrono::high_resolution_clock::now();
+
+            //the new_pts is a list that holds the coordinates of
+            //new points inserted at this iteration. At the end of
+            //this bucle, they are inserted in the point vector
+            new_pts.clear();
+
+            list<RefinementRegion *>::const_iterator reg_iter;
+
+            //split the Quadrants as needed
+            while (!tmp_Quadrants.empty()) {
+                iter=tmp_Quadrants.begin();
+
+                bool to_refine = false;
+
+                for (reg_iter=all_reg.begin(),reg_iter++; reg_iter!=all_reg.end(); ++reg_iter) {
+
+                    unsigned short region_rl = (*reg_iter)->getRefinementLevel();
+                    if (region_rl<i) {
+                        continue;
+                    }
+
+                    //If the Quadrant has a greater RL than the region needs, continue
+                    if (region_rl<= (*iter).getRefinementLevel()) {
+                        continue;
+                    }
+
+                    //Get the two extreme nodes of the Quadrant to test intersection with
+                    //this RefinementRegion. If not, conserve it as it is.
+                    //unsigned int n_idx1 = (*iter).getPoints()[0];
+                    //unsigned int n_idx2 = (*iter).getPoints()[2];
+
+                    if ((*reg_iter)->intersectsQuadrant(points,*iter)) {
+                        to_refine = true;
+                    }
+                }
+
+                //now if refinement is not needed, we add the Quadrant as it was.
+                if (!to_refine) {
+                    new_Quadrants.push_back(*iter);
+                    tmp_Quadrants.pop_front();
+                    continue;
+                }
+                else {
+                    list<unsigned int> &inter_edges = iter->getIntersectedEdges();
+                    unsigned short qrl = (*iter).getRefinementLevel();
+
+                    vector<vector<Point3D> > clipping_coords;
+                    sv.setClipping(clipping_coords);
+
+                    vector<vector<unsigned int> > split_elements;
+                    sv.setNewEles(split_elements);
+
+                    //iter->split(points,new_pts,QuadEdges,split_elements,clipping_coords);
+                    //cout << "Accept" << endl;
+                    iter->accept(&sv);
+
+                    if (inter_edges.empty()) {
+                        for (unsigned int j=0; j<split_elements.size(); j++) {
+                            Quadrant o (split_elements[j],qrl+1);
+                            new_Quadrants.push_back(o);
+                        }
+                    }
+                    else {
+                        for (unsigned int j=0; j<split_elements.size(); j++) {
+                            Quadrant o (split_elements[j],qrl+1);
+                            //the new points are inserted in bash at the end of this
+                            //iteration. For this reason, the coordinates must be passed
+                            //"manually" at this point (clipping_coords).
+
+                            //select_faces = true
+                            IntersectionsVisitor iv(true);
+                            //if (o.checkIntersections(input,inter_faces,clipping_coords[j]))
+                            iv.setPolyline(input);
+                            iv.setEdges(inter_edges);
+                            iv.setCoords(clipping_coords[j]);
+
+                            if (o.accept(&iv)) {
+                                new_Quadrants.push_back(o);
+                            }
+                            else {
+                                //The element doesn't intersect any input face.
+                                //It must be checked if it's inside or outside.
+                                //Only in the first case add it to new_Quadrants.
+                                //Test this with parent Quadrant faces only.
+
+                                //Comment the following lines of this 'else' if
+                                //only intersecting Quadrants are meant to be
+                                //displayed.
+
+                                //note: inter_edges is quite enough to check if
+                                //element is inside input, no Quadrant needed,
+                                //so i moved the method to mesher  --setriva
+
+                                if (isItIn(input,inter_edges,clipping_coords[j])) {
+                                    new_Quadrants.push_back(o);
+                                }
+                            }
+                        }
+                    }
+                }
+                // remove yet processed Quad
+                tmp_Quadrants.pop_front();
+            } // while
+
+            // don't forget to update list
+            std::swap(tmp_Quadrants,new_Quadrants);
+
+            //if no points were added at this iteration, it is no longer
+            //necessary to continue the refinement.
+            if (new_pts.empty()) {
+                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                break;
+            }
+            //add the new points to the vector
+            points.reserve(points.size() + new_pts.size());
+            points.insert(points.end(),new_pts.begin(),new_pts.end());
+
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             cout << "         * level " << i << " in "
                  << std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time-start_refine_rl_time).count();
@@ -878,19 +1001,19 @@ namespace Clobscode
         cout << " ms"<< endl;
 
         //----------------------------------------------------------
-        //produce a one-irregular mesh
+        //produce a balanced mesh
         //----------------------------------------------------------
 
-        //cout << "  > producing one-irregular mesh ...";
+        //cout << "  > producing balanced mesh ...";
         //cout.flush();
 
-        bool one_irregular = false;
+        bool balanced = false;
         new_Quadrants.clear();
 
         //visitante oneIrregular
         OneIrregularVisitor oiv;
         oiv.setEdges(QuadEdges);
-        oiv.setMaxRefLevel(rl);
+        oiv.setMaxRefLevel(max_rl);
 
         /* //if pointMoved is ever needed, uncomment this:
          * PointMovedVisitor pmv;
@@ -900,10 +1023,10 @@ namespace Clobscode
          * //haven't tested it, but if it's like the others,
          * //it should work right out of the box
          */
-        while (!one_irregular) {
-            one_irregular = true;
+        while (!balanced) {
+            balanced = true;
             new_pts.clear();
-            //refine until the mesh is one-irregular
+            //refine until the mesh is balanced
             while (!tmp_Quadrants.empty()) {
                 iter=tmp_Quadrants.begin();
                 if (!(*iter).accept(&oiv)){
@@ -945,7 +1068,7 @@ namespace Clobscode
                             }
                         }
                     }
-                    one_irregular = false;
+                    balanced = false;
                 }
                 else {
                     new_Quadrants.push_back(*iter);
@@ -958,7 +1081,7 @@ namespace Clobscode
             // don't forget to update list
             std::swap(tmp_Quadrants,new_Quadrants);
 
-            if (one_irregular) {
+            if (balanced) {
                 break;
             }
 

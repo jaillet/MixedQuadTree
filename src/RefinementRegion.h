@@ -69,7 +69,7 @@ namespace Clobscode
         
         virtual void forceInputRotation();
 		
-		virtual unsigned short getRefinementLevel();
+        virtual unsigned short getRefinementLevel() const;
 		
 	protected:
 		// Data
@@ -79,7 +79,7 @@ namespace Clobscode
         GeometricTransform gt;
 	};
 	
-	inline unsigned short RefinementRegion::getRefinementLevel(){
+    inline unsigned short RefinementRegion::getRefinementLevel() const{
 		return refine_level;
 	}
     

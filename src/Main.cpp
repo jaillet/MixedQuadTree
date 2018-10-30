@@ -332,16 +332,17 @@ int main(int argc,char** argv){
 	Clobscode::Mesher mesher;
     std::shared_ptr<Clobscode::FEMesh> output;
     
-    // add in first position a Region dedicated to handle correctly the boundary
-    //see if force rotation enable
-    RefinementBoundaryRegion *rb =new RefinementBoundaryRegion(inputs.at(0),10);
-//    if (argv[i][2]=='r') {
-//        rb->forceInputRotation();
-//    }
-    all_regions.push_front(rb);
-    ref_level=10;
     // and next proceed with mesh generation or refinement
     if (!Quadrant_start) {
+
+        //Boundary: add in first position a Region dedicated to handle correctly the boundary
+        //see if force rotation enable
+        RefinementBoundaryRegion *rb =new RefinementBoundaryRegion(inputs.at(0),std::numeric_limits<unsigned short>::max());
+        //    if (argv[i][2]=='r') {
+        //        rb->forceInputRotation();
+        //    }
+        all_regions.push_front(rb);
+
         output = mesher.generateMesh(inputs.at(0),ref_level,out_name,all_regions,decoration);
     }
     else {

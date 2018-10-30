@@ -380,6 +380,8 @@ namespace Clobscode
         return bIsIn;
     }
     
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
     list<unsigned int> Polyline::getFeatureProjection(const Quadrant &q,
                                                  vector<MeshPoint> &mp) {
         
@@ -421,7 +423,7 @@ namespace Clobscode
     unsigned int Polyline::getNbFeatures(Quadrant &q, const vector<MeshPoint> &mp) const {
         unsigned int nbFeat=0;
 
-        list<unsigned int> iEdges = q.getIntersectedEdges();
+        const list<unsigned int> &iEdges = q.getIntersectedEdges();
         list<unsigned int> iFeatures;
 
         if (iEdges.size()<2) {
