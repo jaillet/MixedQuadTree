@@ -143,6 +143,15 @@ namespace Clobscode
         //generate root Quadrants
         generateGridMesh(input);
 
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> grid_octree=make_shared<FEMesh>();
+            saveOutputMesh(grid_octree,points,Quadrants);
+            string tmp_name = name + "_grid";
+            Services::WriteVTK(tmp_name,grid_octree);
+        }
+
         //split Quadrants until the refinement level (rl) is achieved.
         //The output will be a one-irregular mesh.
         generateQuadtreeMesh(rl,input,all_reg,name);
@@ -168,7 +177,16 @@ namespace Clobscode
         
 
         projectCloseToBoundaryNodes(input);
-        
+
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> closeto_octree=make_shared<FEMesh>();
+            saveOutputMesh(closeto_octree,points,Quadrants);
+            string tmp_name = name + "_closeto";
+            Services::WriteVTK(tmp_name,closeto_octree);
+        }
+
         removeOnSurfaceSafe(input);
 
         //update element and node info.
@@ -187,6 +205,15 @@ namespace Clobscode
         
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
+
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> shrink_octree=make_shared<FEMesh>();
+            saveOutputMesh(shrink_octree,points,Quadrants);
+            string tmp_name = name + "_shrink";
+            Services::WriteVTK(tmp_name,shrink_octree);
+        }
         
         //apply the surface Patterns
         applySurfacePatterns(input);
@@ -995,6 +1022,15 @@ namespace Clobscode
             cout << " ms"<< endl;
         }
 
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> refined_octree=make_shared<FEMesh>();
+            saveOutputMesh(refined_octree,points,tmp_Quadrants);
+            string tmp_name = name + "_refined";
+            Services::WriteVTK(tmp_name,refined_octree);
+        }
+
         auto end_refine_quad_time = chrono::high_resolution_clock::now();
         cout << "       * Refine Quad in "
              << std::chrono::duration_cast<chrono::milliseconds>(end_refine_quad_time-start_refine_quad_time).count();
@@ -1095,6 +1131,15 @@ namespace Clobscode
             points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
 
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> balanced_octree=make_shared<FEMesh>();
+            saveOutputMesh(balanced_octree,points,tmp_Quadrants);
+            string tmp_name = name + "_balanced";
+            Services::WriteVTK(tmp_name,balanced_octree);
+        }
+
         auto end_balanced_time = chrono::high_resolution_clock::now();
         cout << "       * Balanced mesh in "
              << std::chrono::duration_cast<chrono::milliseconds>(end_balanced_time-end_refine_quad_time).count();
@@ -1109,7 +1154,7 @@ namespace Clobscode
          TransitionPatternVisitor tpv;
          tpv.setPoints(points);
          tpv.setEdges(QuadEdges);
-         tpv.setMaxRefLevel(rl);
+         tpv.setMaxRefLevel(max_rl);
          new_pts.clear();
 
         for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
@@ -1119,7 +1164,15 @@ namespace Clobscode
             }
         }
 
-        
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> transition_octree=make_shared<FEMesh>();
+            saveOutputMesh(transition_octree,points,tmp_Quadrants);
+            string tmp_name = name + "_transition";
+            Services::WriteVTK(tmp_name,transition_octree);
+        }
+
         
         //Debbuging
         /*{
@@ -1421,7 +1474,7 @@ namespace Clobscode
         //link element info to nodes
         for (unsigned int i=0; i<Quadrants.size(); i++) {
             
-            const vector <unsigned int> &q_indpts = Quadrants[i].getPointIndex();
+            const vector <unsigned int> &q_indpts = Quadrants[i].getSubPointIndex();
 
             for (unsigned int j=0; j<q_indpts.size(); j++) {
                 points.at(q_indpts[j]).addElement(i);
@@ -1494,7 +1547,7 @@ namespace Clobscode
                 if (Quadrants[i].accept(&rsv)) {
                     //Quadrant with feature to be removed
                     //only if average node is outside the
-                    //the edeges it intersects.
+                    //the edges it intersects.
                     Point3D avg;
                     for (auto quaNoIdx:Quadrants[i].getPointIndex()) {
                         avg+=points[quaNoIdx].getPoint();
@@ -1698,7 +1751,7 @@ namespace Clobscode
             //if a node was projected to a feature
             //it will be skipped during the rest of
             //node projection.
-            for (auto pIdx:q.getPointIndex()) {
+            for (auto pIdx:q.getSubPointIndex()) {
                 if (points[pIdx].isOutside()) {
                     out_nodes.push_back(pIdx);
                 }
@@ -1844,7 +1897,8 @@ namespace Clobscode
             }
             
             double md = q.getMaxDistance();
-            for (auto pIdx:q.getPointIndex()) {
+            const vector<unsigned int> subpointindex=q.getSubPointIndex();
+            for (auto pIdx:subpointindex) {
                 points[pIdx].setMaxDistance(md);
             }
         
@@ -1852,7 +1906,7 @@ namespace Clobscode
             //to a list to manage them later and continue the process just
             //for feature quadrants first.
             if (!q.hasIntersectedFeatures()) {
-                for (auto pIdx:q.getPointIndex()) {
+                for (auto pIdx:subpointindex) {
                     if (points[pIdx].isInside()) {
                         in_nodes.push_back(pIdx);
                     }
@@ -1873,13 +1927,13 @@ namespace Clobscode
                     break;
                 }
 
-                Point3D featProjected = input.getPoints()[*itFs];
+                const Point3D &featProjected = input.getPoints()[*itFs];
 
                 double best = std::numeric_limits<double>::infinity();
                 unsigned int candidate=-1;
                 
                 bool push = false;
-                for (auto pIdx:q.getPointIndex()) {
+                for (auto pIdx:subpointindex) {
                     
                     if (points[pIdx].wasProjected()) {
                         continue;

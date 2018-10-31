@@ -48,7 +48,7 @@ namespace Clobscode
 		
         virtual ~MeshPoint();
 		
-		virtual void setPoint(Point3D &p);
+        virtual void setPoint(const Point3D &p);
 		
         //acces method:
         virtual Point3D &getPoint();
@@ -182,7 +182,7 @@ namespace Clobscode
         return point;
     }
 
-	inline void MeshPoint::setPoint(Point3D &p){
+    inline void MeshPoint::setPoint(const Point3D &p){
 		point = p;
 	}
 	

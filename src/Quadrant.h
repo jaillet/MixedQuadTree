@@ -31,6 +31,7 @@
 #include <list>
 #include <set>
 #include <limits>
+#include <algorithm>    // std::sort
 
 #include "Visitors/Visitor.h"
 
@@ -71,6 +72,8 @@ namespace Clobscode
 		//access methods
         virtual const vector<unsigned int> &getPointIndex() const; // read only
         virtual unsigned int getPointIndex(unsigned int i) const;
+
+        virtual const vector<unsigned int> getSubPointIndex() const; // read only
 
         virtual bool isInside() const;
 		
@@ -167,6 +170,26 @@ namespace Clobscode
 	}
     inline unsigned int Quadrant::getPointIndex(unsigned int i) const {
         return pointindex[i];
+    }
+
+    inline const vector<unsigned int> Quadrant::getSubPointIndex() const{
+        vector<unsigned int> subpointindex;
+
+        if (sub_elements.size()==1) { //not subdivided, return corners
+            return getPointIndex();
+        } else {
+            //go through each subelement, construct inner node list
+            for (const auto & subelem:sub_elements ) {
+                subpointindex.insert(subpointindex.end(),subelem.begin(),subelem.end());
+            }
+            //remove duplicate
+            sort(subpointindex.begin(),subpointindex.end());
+            auto it=unique(subpointindex.begin(),subpointindex.end());
+            subpointindex.resize( std::distance(subpointindex.begin(),it) );
+            subpointindex.shrink_to_fit();
+
+            return subpointindex;
+        }
     }
 
     inline bool Quadrant::isInside() const {
