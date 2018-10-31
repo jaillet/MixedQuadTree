@@ -885,7 +885,7 @@ namespace Clobscode
             ++i;
         } while (!new_pts.empty());
 
-        unsigned short max_rl=i-1;
+        unsigned short max_rl=i;
 
         auto end_refine_rl_time = chrono::high_resolution_clock::now();
         cout << "         * boundary max " << i << " in "
