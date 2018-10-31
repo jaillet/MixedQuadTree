@@ -1491,6 +1491,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
+    //WARNING: linkElementsToNodes() must be called before
     void Mesher::computeNodeMaxDist() {
         for (auto &q:Quadrants) {
             q.computeMaxDistance(points);
