@@ -107,7 +107,7 @@ namespace Clobscode
         
         virtual void setIntersectedFeatures(const list<unsigned int> &iFeatures);
         virtual const list<unsigned int>& getIntersectedFeatures() const;
-        virtual list<unsigned int> getIntersectedFeatures();
+        virtual list<unsigned int>& getIntersectedFeatures();
         virtual bool hasIntersectedFeatures() const;
         
         
@@ -157,7 +157,7 @@ namespace Clobscode
     inline const list<unsigned int>& Quadrant::getIntersectedFeatures() const {
         return intersected_features;
     }
-    inline list<unsigned int> Quadrant::getIntersectedFeatures() {
+    inline list<unsigned int>& Quadrant::getIntersectedFeatures() {
         return intersected_features;
     }
 

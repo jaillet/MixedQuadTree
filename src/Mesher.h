@@ -106,7 +106,9 @@ namespace Clobscode
         
         virtual void detectFeatureQuadrants(Polyline &input);
 		
-		virtual void linkElementsToNodes();
+        virtual void linkElementsToNodes();
+
+        virtual void computeNodeMaxDist();
 
         virtual void detectInsideNodes(Polyline &input);
 

@@ -68,6 +68,7 @@ namespace Clobscode
         detectFeatureQuadrants(input);
         linkElementsToNodes();
         detectInsideNodes(input);
+        computeNodeMaxDist();
 
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
@@ -161,6 +162,7 @@ namespace Clobscode
         detectFeatureQuadrants(input);
         linkElementsToNodes();
         detectInsideNodes(input);
+        computeNodeMaxDist();
 
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
@@ -778,8 +780,8 @@ namespace Clobscode
         auto start_refine_rl_time = chrono::high_resolution_clock::now();
 
 //        list<RefinementRegion *>::const_iterator reg_iter=all_reg.begin();;
-        unsigned int i=0;
-        do {
+        unsigned int i=0; //current quad level
+        do { // until no new quads are created
             new_pts.clear();
 
             //split the Quadrants as needed
@@ -788,7 +790,7 @@ namespace Clobscode
 
                 bool to_refine = false;
 
-                iter->computeMaxDistance(points);
+                iter->computeMaxDistance(points); //TODO, avoid recompute if already checked
                 if ((*all_reg.begin())->intersectsQuadrant(points,*iter)) {
                     to_refine = true;
                 }
@@ -812,7 +814,7 @@ namespace Clobscode
                     //cout << "Accept" << endl;
                     iter->accept(&sv);
 
-                    if (inter_edges.empty()) {
+                    if (inter_edges.empty()) { //inner quad
                         for (unsigned int j=0; j<split_elements.size(); j++) {
                             Quadrant o (split_elements[j],i+1);
                             new_Quadrants.push_back(o);
@@ -1489,6 +1491,20 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
+    void Mesher::computeNodeMaxDist() {
+        for (auto &q:Quadrants) {
+            q.computeMaxDistance(points);
+        }
+        for (auto& p:points) {
+            for (const auto &e:p.getElements()) {
+                p.updateMaxDistance(Quadrants[e].getMaxDistance());
+            }
+        }
+    }
+
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+
     void Mesher::detectInsideNodes(Polyline &input){
         auto start_time = chrono::high_resolution_clock::now();
 
@@ -1885,26 +1901,16 @@ namespace Clobscode
         //surface" and "outside" nodes, remove it.
         list<unsigned int> in_nodes;
 
-        //FJA compute everything before to project anything
-        for (auto &q:Quadrants) {
-            q.computeMaxDistance(points);
-        }
-
         for (auto &q:Quadrants) {
 
             if (!q.isSurface()) {
                 continue;
             }
             
-            double md = q.getMaxDistance();
-            const vector<unsigned int> subpointindex=q.getSubPointIndex();
-            for (auto pIdx:subpointindex) {
-                points[pIdx].setMaxDistance(md);
-            }
-        
             //If the quadrant doesn't have a Feature, save the intern nodes
             //to a list to manage them later and continue the process just
             //for feature quadrants first.
+            const vector<unsigned int> subpointindex(q.getSubPointIndex());
             if (!q.hasIntersectedFeatures()) {
                 for (auto pIdx:subpointindex) {
                     if (points[pIdx].isInside()) {

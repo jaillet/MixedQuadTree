@@ -28,13 +28,13 @@
 namespace Clobscode
 {
 
-    MeshPoint::MeshPoint():outsidechecked(false), projected(false),feature(false),inside(false),maxdistance(0.0){
+    MeshPoint::MeshPoint():outsidechecked(false), projected(false),feature(false),inside(false),maxdistance(std::numeric_limits<double>::max()){
         //we assume that every point is outside by default.(inside)
         //checking if a point is outside or not is a very expensive 
         //operation, so we try to do it only once (outsidechecked)
 	}
 	
-    MeshPoint::MeshPoint(const Point3D &p):outsidechecked(false), projected(false),feature(false),inside(false),maxdistance(0.0){
+    MeshPoint::MeshPoint(const Point3D &p):outsidechecked(false), projected(false),feature(false),inside(false),maxdistance(std::numeric_limits<double>::max()){
         point = p;
     }
 	
