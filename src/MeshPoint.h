@@ -31,6 +31,7 @@
 #include "Point3D.h"
 #include <vector>
 #include <list>
+#include <limits>
 
 using Clobscode::Point3D;
 using std::list;
@@ -48,7 +49,7 @@ namespace Clobscode
 		
         virtual ~MeshPoint();
 		
-		virtual void setPoint(Point3D &p);
+        virtual void setPoint(const Point3D &p);
 		
         //acces method:
         virtual Point3D &getPoint();
@@ -64,11 +65,15 @@ namespace Clobscode
 		
 		virtual void outsideChecked();
 		
+        //unconditionnal set
 		virtual void setMaxDistance(double md);
 		
         virtual double getMaxDistance() const;
 		
-		virtual void updateMaxDistanceByFactor(const double &per);
+        //set only if lower
+        virtual void updateMaxDistance(double md);
+
+        virtual void updateMaxDistanceByFactor(const double &per);
 		
 		virtual void setProjected();
 		
@@ -118,9 +123,6 @@ namespace Clobscode
 	}
 	
 	inline void MeshPoint::setMaxDistance(double md){
-		if (md<maxdistance) {
-			return;
-		}
 		maxdistance = md;
 	}
 	
@@ -128,10 +130,17 @@ namespace Clobscode
 		return maxdistance;
 	}
 	
-	inline void MeshPoint::updateMaxDistanceByFactor(const double &per){
-		maxdistance *= per;
-	}
-	
+    inline void MeshPoint::updateMaxDistance(double md){
+        if (maxdistance<md) {
+            return;
+        }
+        maxdistance = md;
+    }
+
+    inline void MeshPoint::updateMaxDistanceByFactor(const double &per){
+        maxdistance *= per;
+    }
+
 	inline void MeshPoint::setOutside(){
 		inside = false;
 	}
@@ -182,7 +191,7 @@ namespace Clobscode
         return point;
     }
 
-	inline void MeshPoint::setPoint(Point3D &p){
+    inline void MeshPoint::setPoint(const Point3D &p){
 		point = p;
 	}
 	

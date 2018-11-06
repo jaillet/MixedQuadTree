@@ -31,6 +31,7 @@
 #include <list>
 #include <set>
 #include <limits>
+#include <algorithm>    // std::sort
 
 #include "Visitors/Visitor.h"
 
@@ -72,11 +73,13 @@ namespace Clobscode
         virtual const vector<unsigned int> &getPointIndex() const; // read only
         virtual unsigned int getPointIndex(unsigned int i) const;
 
+        virtual const vector<unsigned int> getSubPointIndex() const; // read only
+
         virtual bool isInside() const;
 		
         virtual bool intersectsSurface() const;
         
-        virtual bool pointInside(vector<MeshPoint> &mp, const Point3D &p) const;
+        virtual bool pointInside(const vector<MeshPoint> &mp, const Point3D &p) const;
 		
         virtual unsigned short getRefinementLevel() const;
 		
@@ -102,9 +105,10 @@ namespace Clobscode
 		
         virtual void setIntersectedEdges(list<unsigned int> &iedges);
         
-        virtual void setFeature(unsigned int nb);
-        virtual unsigned int getFeature() const;
-        virtual bool hasFeature() const;
+        virtual void setIntersectedFeatures(const list<unsigned int> &iFeatures);
+        virtual const list<unsigned int>& getIntersectedFeatures() const;
+        virtual list<unsigned int>& getIntersectedFeatures();
+        virtual bool hasIntersectedFeatures() const;
         
         
         /***** BEGIN Debugging methods *******/
@@ -121,12 +125,12 @@ namespace Clobscode
 		vector<unsigned int> pointindex;
         vector<vector<unsigned int> > sub_elements; //, possibles, continuity;
         list<unsigned int> intersected_edges;
-		//the level at which this Quadrant is found in the
+        list<unsigned int> intersected_features;
+        //the level at which this Quadrant is found in the
         //the tree structure (Quadtree). Used for optimization
 		unsigned short ref_level;
 		
 		bool surface;
-        unsigned int feature;
 		
         /***** BEGIN Debugging variables *******/
         bool debugging;
@@ -146,16 +150,19 @@ namespace Clobscode
     /***** END Debugging methods *******/
     
     
-    inline void Quadrant::setFeature(unsigned int nb) {
-        feature = nb;
+    inline void Quadrant::setIntersectedFeatures(const list<unsigned int> &iFeatures) {
+        intersected_features = iFeatures;
     }
     
-    inline unsigned int Quadrant::getFeature() const {
-        return feature;
+    inline const list<unsigned int>& Quadrant::getIntersectedFeatures() const {
+        return intersected_features;
+    }
+    inline list<unsigned int>& Quadrant::getIntersectedFeatures() {
+        return intersected_features;
     }
 
-    inline bool Quadrant::hasFeature() const {
-        return (feature>0);
+    inline bool Quadrant::hasIntersectedFeatures() const {
+        return (intersected_features.size()>0);
     }
 
     inline const vector<unsigned int> &Quadrant::getPointIndex() const{
@@ -163,6 +170,26 @@ namespace Clobscode
 	}
     inline unsigned int Quadrant::getPointIndex(unsigned int i) const {
         return pointindex[i];
+    }
+
+    inline const vector<unsigned int> Quadrant::getSubPointIndex() const{
+        vector<unsigned int> subpointindex;
+
+        if (sub_elements.size()==1) { //not subdivided, return corners
+            return getPointIndex();
+        } else {
+            //go through each subelement, construct inner node list
+            for (const auto & subelem:sub_elements ) {
+                subpointindex.insert(subpointindex.end(),subelem.begin(),subelem.end());
+            }
+            //remove duplicate
+            sort(subpointindex.begin(),subpointindex.end());
+            auto it=unique(subpointindex.begin(),subpointindex.end());
+            subpointindex.resize( std::distance(subpointindex.begin(),it) );
+            subpointindex.shrink_to_fit();
+
+            return subpointindex;
+        }
     }
 
     inline bool Quadrant::isInside() const {
@@ -191,7 +218,7 @@ namespace Clobscode
     inline void Quadrant::computeMaxDistance(vector<MeshPoint> &mp){
         const Point3D &p0 = mp[pointindex[0]].getPoint();
         const Point3D &p1 = mp[pointindex[2]].getPoint();
-		max_dis = 0.3 * (p0 - p1).Norm();
+        max_dis = 0.3 * (p0 - p1).Norm();
 	}
     
     inline void Quadrant::updateSubElements(vector<vector <unsigned int> > &nsubs) {

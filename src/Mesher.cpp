@@ -68,6 +68,7 @@ namespace Clobscode
         detectFeatureQuadrants(input);
         linkElementsToNodes();
         detectInsideNodes(input);
+        computeNodeMaxDist();
 
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
@@ -143,6 +144,15 @@ namespace Clobscode
         //generate root Quadrants
         generateGridMesh(input);
 
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> grid_octree=make_shared<FEMesh>();
+            saveOutputMesh(grid_octree,points,Quadrants);
+            string tmp_name = name + "_grid";
+            Services::WriteVTK(tmp_name,grid_octree);
+        }
+
         //split Quadrants until the refinement level (rl) is achieved.
         //The output will be a one-irregular mesh.
         generateQuadtreeMesh(rl,input,all_reg,name);
@@ -152,6 +162,7 @@ namespace Clobscode
         detectFeatureQuadrants(input);
         linkElementsToNodes();
         detectInsideNodes(input);
+        computeNodeMaxDist();
 
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
@@ -168,7 +179,16 @@ namespace Clobscode
         
 
         projectCloseToBoundaryNodes(input);
-        
+
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> closeto_octree=make_shared<FEMesh>();
+            saveOutputMesh(closeto_octree,points,Quadrants);
+            string tmp_name = name + "_closeto";
+            Services::WriteVTK(tmp_name,closeto_octree);
+        }
+
         removeOnSurfaceSafe(input);
 
         //update element and node info.
@@ -187,6 +207,15 @@ namespace Clobscode
         
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
+
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> shrink_octree=make_shared<FEMesh>();
+            saveOutputMesh(shrink_octree,points,Quadrants);
+            string tmp_name = name + "_shrink";
+            Services::WriteVTK(tmp_name,shrink_octree);
+        }
         
         //apply the surface Patterns
         applySurfacePatterns(input);
@@ -678,8 +707,6 @@ namespace Clobscode
         tpv.setEdges(QuadEdges);
         tpv.setMaxRefLevel(omaxrl);
         
-        unsigned int cl3=0;
-
         for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
 
             if (!(*iter).accept(&tpv)) {
@@ -729,9 +756,6 @@ namespace Clobscode
 
         auto start_time = chrono::high_resolution_clock::now();
 
-        //to save m3d files per stage
-        Clobscode::Services io;
-
         //list of temp Quadrants
         list<Quadrant> tmp_Quadrants, new_Quadrants;
         //list of the points added at this refinement iteration:
@@ -747,21 +771,18 @@ namespace Clobscode
         sv.setEdges(QuadEdges);
         sv.setNewPts(new_pts);
 
-        //----------------------------------------------------------
-        //refine each Quadrant until the Refinement Level is reached
-        //----------------------------------------------------------
-
         auto start_refine_quad_time = chrono::high_resolution_clock::now();
 
-        for (unsigned short i=0; i<rl; i++) {
-            auto start_refine_rl_time = chrono::high_resolution_clock::now();
+        //------------------------------------------------------------
+        //refine each Quadrant until the Boundary is correctly handled
+        //------------------------------------------------------------
 
-            //the new_pts is a list that holds the coordinates of
-            //new points inserted at this iteration. At the end of
-            //this bucle, they are inserted in the point vector
+        auto start_refine_rl_time = chrono::high_resolution_clock::now();
+
+//        list<RefinementRegion *>::const_iterator reg_iter=all_reg.begin();;
+        unsigned int i=0; //current quad level
+        do { // until no new quads are created
             new_pts.clear();
-
-            list<RefinementRegion *>::const_iterator reg_iter;
 
             //split the Quadrants as needed
             while (!tmp_Quadrants.empty()) {
@@ -769,26 +790,9 @@ namespace Clobscode
 
                 bool to_refine = false;
 
-                for (reg_iter=all_reg.begin(); reg_iter!=all_reg.end(); ++reg_iter) {
-
-                    unsigned short region_rl = (*reg_iter)->getRefinementLevel();
-                    if (region_rl<i) {
-                        continue;
-                    }
-
-                    //If the Quadrant has a greater RL than the region needs, continue
-                    if (region_rl<=(*iter).getRefinementLevel()) {
-                        continue;
-                    }
-
-                    //Get the two extreme nodes of the Quadrant to test intersection with
-                    //this RefinementRegion. If not, conserve it as it is.
-                    //unsigned int n_idx1 = (*iter).getPoints()[0];
-                    //unsigned int n_idx2 = (*iter).getPoints()[2];
-
-                    if ((*reg_iter)->intersectsQuadrant(points,*iter)) {
-                        to_refine = true;
-                    }
+                iter->computeMaxDistance(points); //TODO, avoid recompute if already checked
+                if ((*all_reg.begin())->intersectsQuadrant(points,*iter)) {
+                    to_refine = true;
                 }
 
                 //now if refinement is not needed, we add the Quadrant as it was.
@@ -810,7 +814,7 @@ namespace Clobscode
                     //cout << "Accept" << endl;
                     iter->accept(&sv);
 
-                    if (inter_edges.empty()) {
+                    if (inter_edges.empty()) { //inner quad
                         for (unsigned int j=0; j<split_elements.size(); j++) {
                             Quadrant o (split_elements[j],i+1);
                             new_Quadrants.push_back(o);
@@ -871,10 +875,162 @@ namespace Clobscode
             points.reserve(points.size() + new_pts.size());
             points.insert(points.end(),new_pts.begin(),new_pts.end());
 
+            //CL Debbuging
+            {
+                //save pure octree mesh
+                std::shared_ptr<FEMesh> bound_octree=make_shared<FEMesh>();
+                saveOutputMesh(bound_octree,points,tmp_Quadrants);
+                string tmp_name = name + "_bound";
+                Services::WriteVTK(tmp_name,bound_octree);
+            }
+
+            ++i;
+        } while (!new_pts.empty());
+
+        unsigned short max_rl=i;
+
+        auto end_refine_rl_time = chrono::high_resolution_clock::now();
+        cout << "         * boundary max " << i << " in "
+             << std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time-start_refine_rl_time).count();
+        cout << " ms"<< endl;
+
+        //----------------------------------------------------------
+        //refine each Quadrant until the Refinement Level is reached
+        //----------------------------------------------------------
+
+
+        for (unsigned short i=0; i<rl; i++) {
+            auto start_refine_rl_time = chrono::high_resolution_clock::now();
+
+            //the new_pts is a list that holds the coordinates of
+            //new points inserted at this iteration. At the end of
+            //this bucle, they are inserted in the point vector
+            new_pts.clear();
+
+            list<RefinementRegion *>::const_iterator reg_iter;
+
+            //split the Quadrants as needed
+            while (!tmp_Quadrants.empty()) {
+                iter=tmp_Quadrants.begin();
+
+                bool to_refine = false;
+
+                for (reg_iter=all_reg.begin(),reg_iter++; reg_iter!=all_reg.end(); ++reg_iter) {
+
+                    unsigned short region_rl = (*reg_iter)->getRefinementLevel();
+                    if (region_rl<i) {
+                        continue;
+                    }
+
+                    //If the Quadrant has a greater RL than the region needs, continue
+                    if (region_rl<= (*iter).getRefinementLevel()) {
+                        continue;
+                    }
+
+                    //Get the two extreme nodes of the Quadrant to test intersection with
+                    //this RefinementRegion. If not, conserve it as it is.
+                    //unsigned int n_idx1 = (*iter).getPoints()[0];
+                    //unsigned int n_idx2 = (*iter).getPoints()[2];
+
+                    if ((*reg_iter)->intersectsQuadrant(points,*iter)) {
+                        to_refine = true;
+                    }
+                }
+
+                //now if refinement is not needed, we add the Quadrant as it was.
+                if (!to_refine) {
+                    new_Quadrants.push_back(*iter);
+                    tmp_Quadrants.pop_front();
+                    continue;
+                }
+                else {
+                    list<unsigned int> &inter_edges = iter->getIntersectedEdges();
+                    unsigned short qrl = (*iter).getRefinementLevel();
+
+                    vector<vector<Point3D> > clipping_coords;
+                    sv.setClipping(clipping_coords);
+
+                    vector<vector<unsigned int> > split_elements;
+                    sv.setNewEles(split_elements);
+
+                    //iter->split(points,new_pts,QuadEdges,split_elements,clipping_coords);
+                    //cout << "Accept" << endl;
+                    iter->accept(&sv);
+
+                    if (inter_edges.empty()) {
+                        for (unsigned int j=0; j<split_elements.size(); j++) {
+                            Quadrant o (split_elements[j],qrl+1);
+                            new_Quadrants.push_back(o);
+                        }
+                    }
+                    else {
+                        for (unsigned int j=0; j<split_elements.size(); j++) {
+                            Quadrant o (split_elements[j],qrl+1);
+                            //the new points are inserted in bash at the end of this
+                            //iteration. For this reason, the coordinates must be passed
+                            //"manually" at this point (clipping_coords).
+
+                            //select_faces = true
+                            IntersectionsVisitor iv(true);
+                            //if (o.checkIntersections(input,inter_faces,clipping_coords[j]))
+                            iv.setPolyline(input);
+                            iv.setEdges(inter_edges);
+                            iv.setCoords(clipping_coords[j]);
+
+                            if (o.accept(&iv)) {
+                                new_Quadrants.push_back(o);
+                            }
+                            else {
+                                //The element doesn't intersect any input face.
+                                //It must be checked if it's inside or outside.
+                                //Only in the first case add it to new_Quadrants.
+                                //Test this with parent Quadrant faces only.
+
+                                //Comment the following lines of this 'else' if
+                                //only intersecting Quadrants are meant to be
+                                //displayed.
+
+                                //note: inter_edges is quite enough to check if
+                                //element is inside input, no Quadrant needed,
+                                //so i moved the method to mesher  --setriva
+
+                                if (isItIn(input,inter_edges,clipping_coords[j])) {
+                                    new_Quadrants.push_back(o);
+                                }
+                            }
+                        }
+                    }
+                }
+                // remove yet processed Quad
+                tmp_Quadrants.pop_front();
+            } // while
+
+            // don't forget to update list
+            std::swap(tmp_Quadrants,new_Quadrants);
+
+            //if no points were added at this iteration, it is no longer
+            //necessary to continue the refinement.
+            if (new_pts.empty()) {
+                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                break;
+            }
+            //add the new points to the vector
+            points.reserve(points.size() + new_pts.size());
+            points.insert(points.end(),new_pts.begin(),new_pts.end());
+
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             cout << "         * level " << i << " in "
                  << std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time-start_refine_rl_time).count();
             cout << " ms"<< endl;
+        }
+
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> refined_octree=make_shared<FEMesh>();
+            saveOutputMesh(refined_octree,points,tmp_Quadrants);
+            string tmp_name = name + "_refined";
+            Services::WriteVTK(tmp_name,refined_octree);
         }
 
         auto end_refine_quad_time = chrono::high_resolution_clock::now();
@@ -883,19 +1039,19 @@ namespace Clobscode
         cout << " ms"<< endl;
 
         //----------------------------------------------------------
-        //produce a one-irregular mesh
+        //produce a balanced mesh
         //----------------------------------------------------------
 
-        //cout << "  > producing one-irregular mesh ...";
+        //cout << "  > producing balanced mesh ...";
         //cout.flush();
 
-        bool one_irregular = false;
+        bool balanced = false;
         new_Quadrants.clear();
 
         //visitante oneIrregular
         OneIrregularVisitor oiv;
         oiv.setEdges(QuadEdges);
-        oiv.setMaxRefLevel(rl);
+        oiv.setMaxRefLevel(max_rl);
 
         /* //if pointMoved is ever needed, uncomment this:
          * PointMovedVisitor pmv;
@@ -905,10 +1061,10 @@ namespace Clobscode
          * //haven't tested it, but if it's like the others,
          * //it should work right out of the box
          */
-        while (!one_irregular) {
-            one_irregular = true;
+        while (!balanced) {
+            balanced = true;
             new_pts.clear();
-            //refine until the mesh is one-irregular
+            //refine until the mesh is balanced
             while (!tmp_Quadrants.empty()) {
                 iter=tmp_Quadrants.begin();
                 if (!(*iter).accept(&oiv)){
@@ -950,7 +1106,7 @@ namespace Clobscode
                             }
                         }
                     }
-                    one_irregular = false;
+                    balanced = false;
                 }
                 else {
                     new_Quadrants.push_back(*iter);
@@ -963,7 +1119,7 @@ namespace Clobscode
             // don't forget to update list
             std::swap(tmp_Quadrants,new_Quadrants);
 
-            if (one_irregular) {
+            if (balanced) {
                 break;
             }
 
@@ -975,6 +1131,15 @@ namespace Clobscode
             //add the new points to the vector
             points.reserve(points.size() + new_pts.size());
             points.insert(points.end(),new_pts.begin(),new_pts.end());
+        }
+
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> balanced_octree=make_shared<FEMesh>();
+            saveOutputMesh(balanced_octree,points,tmp_Quadrants);
+            string tmp_name = name + "_balanced";
+            Services::WriteVTK(tmp_name,balanced_octree);
         }
 
         auto end_balanced_time = chrono::high_resolution_clock::now();
@@ -991,7 +1156,7 @@ namespace Clobscode
          TransitionPatternVisitor tpv;
          tpv.setPoints(points);
          tpv.setEdges(QuadEdges);
-         tpv.setMaxRefLevel(rl);
+         tpv.setMaxRefLevel(max_rl);
          new_pts.clear();
 
         for (iter = tmp_Quadrants.begin(); iter!=tmp_Quadrants.end(); ++iter) {
@@ -1001,7 +1166,15 @@ namespace Clobscode
             }
         }
 
-        
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> transition_octree=make_shared<FEMesh>();
+            saveOutputMesh(transition_octree,points,tmp_Quadrants);
+            string tmp_name = name + "_transition";
+            Services::WriteVTK(tmp_name,transition_octree);
+        }
+
         
         //Debbuging
         /*{
@@ -1303,7 +1476,7 @@ namespace Clobscode
         //link element info to nodes
         for (unsigned int i=0; i<Quadrants.size(); i++) {
             
-            const vector <unsigned int> &q_indpts = Quadrants[i].getPointIndex();
+            const vector <unsigned int> &q_indpts = Quadrants[i].getSubPointIndex();
 
             for (unsigned int j=0; j<q_indpts.size(); j++) {
                 points.at(q_indpts[j]).addElement(i);
@@ -1313,6 +1486,21 @@ namespace Clobscode
         cout << "    * linkElementsToNodes in "
              << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
         cout << " ms"<< endl;
+    }
+
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+
+    //WARNING: linkElementsToNodes() must be called before
+    void Mesher::computeNodeMaxDist() {
+        for (auto &q:Quadrants) {
+            q.computeMaxDistance(points);
+        }
+        for (auto& p:points) {
+            for (const auto &e:p.getElements()) {
+                p.updateMaxDistance(Quadrants[e].getMaxDistance());
+            }
+        }
     }
 
     //--------------------------------------------------------------------------------
@@ -1372,11 +1560,11 @@ namespace Clobscode
                 continue;
             }
             
-            if (Quadrants[i].hasFeature()) {
+            if (Quadrants[i].hasIntersectedFeatures()) {
                 if (Quadrants[i].accept(&rsv)) {
                     //Quadrant with feature to be removed
                     //only if average node is outside the
-                    //the edeges it intersects.
+                    //the edges it intersects.
                     Point3D avg;
                     for (auto quaNoIdx:Quadrants[i].getPointIndex()) {
                         avg+=points[quaNoIdx].getPoint();
@@ -1580,7 +1768,7 @@ namespace Clobscode
             //if a node was projected to a feature
             //it will be skipped during the rest of
             //node projection.
-            for (auto pIdx:q.getPointIndex()) {
+            for (auto pIdx:q.getSubPointIndex()) {
                 if (points[pIdx].isOutside()) {
                     out_nodes.push_back(pIdx);
                 }
@@ -1714,27 +1902,18 @@ namespace Clobscode
         //surface" and "outside" nodes, remove it.
         list<unsigned int> in_nodes;
 
-        //FJA compute everything before to project anything
-        for (auto &q:Quadrants) {
-            q.computeMaxDistance(points);
-        }
-
         for (auto &q:Quadrants) {
 
             if (!q.isSurface()) {
                 continue;
             }
             
-            double md = q.getMaxDistance();
-            for (auto pIdx:q.getPointIndex()) {
-                points[pIdx].setMaxDistance(md);
-            }
-        
             //If the quadrant doesn't have a Feature, save the intern nodes
             //to a list to manage them later and continue the process just
             //for feature quadrants first.
-            if (!q.hasFeature()) {
-                for (auto pIdx:q.getPointIndex()) {
+            const vector<unsigned int> subpointindex(q.getSubPointIndex());
+            if (!q.hasIntersectedFeatures()) {
+                for (auto pIdx:subpointindex) {
                     if (points[pIdx].isInside()) {
                         in_nodes.push_back(pIdx);
                     }
@@ -1755,13 +1934,13 @@ namespace Clobscode
                     break;
                 }
 
-                Point3D featProjected = input.getPoints()[*itFs];
+                const Point3D &featProjected = input.getPoints()[*itFs];
 
                 double best = std::numeric_limits<double>::infinity();
                 unsigned int candidate=-1;
                 
                 bool push = false;
-                for (auto pIdx:q.getPointIndex()) {
+                for (auto pIdx:subpointindex) {
                     
                     if (points[pIdx].wasProjected()) {
                         continue;

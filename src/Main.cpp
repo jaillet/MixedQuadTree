@@ -30,6 +30,7 @@
 #include "RefinementCubeRegion.h"
 #include "RefinementSurfaceRegion.h"
 #include "RefinementInputSurfaceRegion.h"
+#include "RefinementBoundaryRegion.h"
 #include "RefinementAllRegion.h"
 #include "Point3D.h"
 #include <string>
@@ -46,6 +47,7 @@ using std::endl;
 using Clobscode::RefinementRegion;
 using Clobscode::RefinementCubeRegion;
 using Clobscode::RefinementSurfaceRegion;
+using Clobscode::RefinementBoundaryRegion;
 using Clobscode::RefinementAllRegion;
 using Clobscode::RefinementInputSurfaceRegion;
 using Clobscode::Point3D;
@@ -330,7 +332,17 @@ int main(int argc,char** argv){
 	Clobscode::Mesher mesher;
     std::shared_ptr<Clobscode::FEMesh> output;
     
+    // and next proceed with mesh generation or refinement
     if (!Quadrant_start) {
+
+        //Boundary: add in first position a Region dedicated to handle correctly the boundary
+        //see if force rotation enable
+        RefinementBoundaryRegion *rb =new RefinementBoundaryRegion(inputs.at(0),std::numeric_limits<unsigned short>::max());
+        //    if (argv[i][2]=='r') {
+        //        rb->forceInputRotation();
+        //    }
+        all_regions.push_front(rb);
+
         output = mesher.generateMesh(inputs.at(0),ref_level,out_name,all_regions,decoration);
     }
     else {

@@ -33,7 +33,7 @@ namespace Clobscode
     bool SurfaceTemplatesVisitor::visit(Quadrant *o) {
         
         const vector<unsigned int> &pointindex = o->pointindex;
-        if (pointindex.size()!=4) {
+        if (pointindex.size()!=4 /*|| o->getSubElements().size()>1*/) {
             return true;
         }
         
@@ -62,7 +62,7 @@ namespace Clobscode
         if (nin==0) {
             //All the nodes of the octant were projected onto the
             //boundary however it is not outside.
-            //Every node witn angle below 150 will be considered
+            //Every node with angle below 150 will be considered
             //as inside, while the rest as outside. The same logic
             //as the rest of the octant will be employed after this
             //step.

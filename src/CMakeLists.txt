@@ -17,7 +17,7 @@ set(SOURCE_FILES Main
 	QuadTransition QuadSurfTemplate 
         Mesher GridMesher MeshPoint
         RefinementRegion RefinementCubeRegion RefinementSurfaceRegion
-        RefinementInputSurfaceRegion RefinementAllRegion
+        RefinementInputSurfaceRegion RefinementAllRegion RefinementBoundaryRegion
         GeometricTransform Services
         Visitors/Visitor Visitors/SplitVisitor Visitors/EdgeVisitor 
 	Visitors/IntersectionsVisitor

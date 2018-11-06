@@ -77,7 +77,7 @@ namespace Clobscode
 		
         //returns the number of features of the list of edges contained by this quad
         //and update the quad accordingly
-        virtual unsigned int getNbFeatures(Quadrant &q, vector<MeshPoint> &mp) const;
+        virtual unsigned int getNbFeatures(Quadrant &q, const vector<MeshPoint> &mp) const;
 
         virtual list<unsigned int> getFeatureProjection(const Quadrant &q,
                                                    vector<MeshPoint> &mp);
