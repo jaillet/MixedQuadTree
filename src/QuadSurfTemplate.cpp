@@ -98,7 +98,7 @@ namespace Clobscode
             rotation++;
         }
         
-                
+        
         if (rotation!=0) {
             std::rotate(rotated.begin(),rotated.begin()+rotation,rotated.end());
         }

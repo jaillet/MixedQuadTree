@@ -76,6 +76,11 @@ namespace Clobscode
                     nin++;
                 }
                 else {
+                    //if the angle is not good, this is the candidate (index)
+                    //to be used for splitting the Quad into two triangles.
+                    //this will be performed by the final switch of this method
+                    //in the case of 3 nodes in.
+                    oneo=i;
                     if (angle>175. && angle<185.) {
                         tri = true;
                     }
