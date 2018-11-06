@@ -21,19 +21,19 @@
 
 namespace Clobscode
 {
-	QuadSurfTemplate::QuadSurfTemplate(){
+    QuadSurfTemplate::QuadSurfTemplate(){
         
-	}
-	
-	QuadSurfTemplate::~QuadSurfTemplate(){
+    }
+    
+    QuadSurfTemplate::~QuadSurfTemplate(){
         
-	}
-	
+    }
+    
     const bool QuadSurfTemplate::one(const vector<unsigned int> &nodes, vector<bool> &in,
                                      vector<vector<unsigned int> > &newsubs) const {
         
         vector<unsigned int> rotated=nodes;
-
+        
         unsigned int rotation = 0;
         for (unsigned int i=0; i<4; i++) {
             if (in[i]) {
@@ -41,22 +41,22 @@ namespace Clobscode
             }
             rotation++;
         }
-                
+        
         if (rotation!=0) {
             std::rotate(rotated.begin(),rotated.begin()+rotation,rotated.end());
         }
-
+        
         newsubs.resize(1);
         newsubs[0]={rotated[0],rotated[1],rotated[3]};
-
-		return true;
-	}
+        
+        return true;
+    }
     
-     const bool QuadSurfTemplate::two(const vector<unsigned int> &nodes, vector<bool> &in,
-                                      vector<vector<unsigned int> > &newsubs) const {
+    const bool QuadSurfTemplate::two(const vector<unsigned int> &nodes, vector<bool> &in,
+                                     vector<vector<unsigned int> > &newsubs) const {
         
         vector<unsigned int> rotated=nodes;
-
+        
         unsigned int rotation = 0;
         for (unsigned int i=0; i<4; i++) {
             if (in[i]) {
@@ -74,22 +74,22 @@ namespace Clobscode
         }
         
         if (rotation!=0) {
-//          rotated = rotate(nodes,rotation);
+            //          rotated = rotate(nodes,rotation);
             std::rotate(rotated.begin(),rotated.begin()+rotation,rotated.end());
         }
-
+        
         newsubs.resize(2);
         newsubs[0]= {rotated[0],rotated[1],rotated[3]} ;
         newsubs[1]= {rotated[1],rotated[2],rotated[3]} ;
-
+        
         return true;
     }
     
-     const bool QuadSurfTemplate::three(const vector<unsigned int> &nodes, vector<bool> &in,
-                                        vector<vector<unsigned int> > &newsubs) const {
-
+    const bool QuadSurfTemplate::three(const vector<unsigned int> &nodes, vector<bool> &in,
+                                       vector<vector<unsigned int> > &newsubs) const {
+        
         vector<unsigned int> rotated= nodes;
-
+        
         unsigned int rotation = 0;
         for (unsigned int i=0; i<4; i++) {
             if (!in[(i+2)%4]) {
@@ -98,23 +98,24 @@ namespace Clobscode
             rotation++;
         }
         
+                
         if (rotation!=0) {
             std::rotate(rotated.begin(),rotated.begin()+rotation,rotated.end());
         }
-
+        
         newsubs.resize(2);
         newsubs[0]= {rotated[0],rotated[2],rotated[3]} ;
         newsubs[1]= {rotated[0],rotated[1],rotated[2]} ;
-
-        return true;
-
-    }
         
+        return true;
+        
+    }
+    
     vector<unsigned int> QuadSurfTemplate::rotated(const vector<unsigned int> &nodes,
-                                                      const unsigned int &times) {
-
+                                                   const unsigned int &times) {
+        
         std::cerr << "Obsolete: replaced by std::rotate(),"
-                  <<   " Since no need to copy the vector in QuadSurfTemplate::one(), two(), three() ! \n";
+        <<   " Since no need to copy the vector in QuadSurfTemplate::one(), two(), three() ! \n";
         
         /*
          0 1 2 3

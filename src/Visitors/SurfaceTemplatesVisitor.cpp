@@ -45,7 +45,7 @@ namespace Clobscode
         
         vector<vector<unsigned int> > subels; // = o->sub_elements;
         vector<bool> in(pointindex.size(),false);
-        unsigned int nin = 0, onei=0;
+        unsigned int nin = 0, onei=0, oneo=0;
         
         for (unsigned int i=0; i<pointindex.size(); i++) {
             
@@ -53,6 +53,9 @@ namespace Clobscode
                 in[i] = true;
                 onei = i;
                 nin++;
+            }
+            else {
+                oneo = i;
             }
         }
         
@@ -146,6 +149,11 @@ namespace Clobscode
                 o->updateSubElements(subels);
                 return res;
             case 3:
+                //if the angle at the outside node is not close to 180, it is not necessary
+                //to split the Quad into two triangles.
+                if (!o->badAngle(oneo,*meshpts)) {
+                    return true;
+                }
                 res = st.three(pointindex,in,subels);
                 o->updateSubElements(subels);
                 return res;
