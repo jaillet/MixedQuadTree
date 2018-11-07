@@ -42,15 +42,15 @@ using std::vector;
 namespace Clobscode
 {
 
-typedef enum {
-    STATEMASK = 0x0000,
-    INSIDE =  1,
-    FEATURE =  2,
-    PROJECTED =  4,
-    OUTCHECKED =  8,
-    ALL = 15
-} MeshPointStateType;
-typedef unsigned int MeshPointState;
+    typedef enum {
+        STATEMASK = 0x0000,
+        INSIDE =  1,
+        FEATURE =  2,
+        PROJECTED =  4,
+        OUTCHECKED =  8,
+        ALL = 15
+    } MeshPointStateType;
+    typedef unsigned int MeshPointState;
 
 	class MeshPoint{
 		
@@ -189,7 +189,7 @@ typedef unsigned int MeshPointState;
     
     inline void MeshPoint::featureProjected() {
         //feature = true;
-        BITMASK_SET(state,PROJECTED);
+        BITMASK_SET(state,FEATURE);
     }
     
     inline bool MeshPoint::isFeature() const {
