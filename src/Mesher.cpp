@@ -1962,7 +1962,7 @@ namespace Clobscode
                     points[candidate].setPoint(featProjected);
                     //Feature projected flag will be used later to
                     //apply surface patterns.
-                    points[candidate].featureProjected();
+                    points[candidate].setFeature();
 
                     // First, get index of the feature edges. Will be added next
                     // to intersecting edges of the quads sharing the candidate node

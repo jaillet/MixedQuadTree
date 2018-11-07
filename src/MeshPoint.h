@@ -103,7 +103,7 @@ namespace Clobscode
 		//returns true if node is outside every input mesh
         virtual bool isOutside() const;
 		
-        virtual void featureProjected();
+        virtual void setFeature();
         
         virtual bool isFeature() const;
 		
@@ -187,7 +187,7 @@ namespace Clobscode
         return BITMASK_CHECK(state,PROJECTED);
 	}
     
-    inline void MeshPoint::featureProjected() {
+    inline void MeshPoint::setFeature() {
         //feature = true;
         BITMASK_SET(state,FEATURE);
     }
