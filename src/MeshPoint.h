@@ -26,9 +26,11 @@
 #ifndef MeshPoint_h
 #define MeshPoint_h 1
 
+#include "Point3D.h"
+#include "Utils.h"
+
 #include <iostream>
 #include <math.h>
-#include "Point3D.h"
 #include <vector>
 #include <list>
 #include <limits>
@@ -38,7 +40,18 @@ using std::list;
 using std::vector;
 
 namespace Clobscode
-{	
+{
+
+typedef enum {
+    STATEMASK = 0x0000,
+    INSIDE =  1,
+    FEATURE =  2,
+    PROJECTED =  4,
+    OUTCHECKED =  8,
+    ALL = 15
+} MeshPointStateType;
+typedef unsigned int MeshPointState;
+
 	class MeshPoint{
 		
 	public:
@@ -90,10 +103,6 @@ namespace Clobscode
 		//returns true if node is outside every input mesh
         virtual bool isOutside() const;
 		
-		virtual void setIOState(bool state);
-		
-        virtual bool getIOState() const;
-        
         virtual void featureProjected();
         
         virtual bool isFeature() const;
@@ -103,11 +112,12 @@ namespace Clobscode
 		Point3D point;
 		//this flag avoids to re-check if node is inside, 
 		//which is an expensive task
-		bool outsidechecked, projected, feature;
+//		bool outsidechecked, projected, feature;
 		//inside is a flag to shrink elements to the surface.
 		//it is a vector to know the state w.r.t. every input
 		//geometry
-		bool inside;//, projected;
+//		bool inside;//, projected;
+        MeshPointState state;
 		list<unsigned int> elements;
 		
 		double maxdistance;
@@ -115,11 +125,13 @@ namespace Clobscode
 	};
 	
 	inline void MeshPoint::outsideChecked(){
-		outsidechecked = true;
+        //outsidechecked = true;
+        BITMASK_SET(state,OUTCHECKED);
 	}
 	
     inline bool MeshPoint::wasOutsideChecked() const{
-		return outsidechecked;
+        //return outsidechecked;
+        return BITMASK_CHECK(state,OUTCHECKED);
 	}
 	
 	inline void MeshPoint::setMaxDistance(double md){
@@ -142,46 +154,47 @@ namespace Clobscode
     }
 
 	inline void MeshPoint::setOutside(){
-		inside = false;
+        //inside = false;
+        BITMASK_CLEAR(state,INSIDE);
 	}
 	
 	inline void MeshPoint::setInside(){
-		inside = true;
-	}
-	
-	inline void MeshPoint::setIOState(bool state){
-		inside = state;
-	}
-	
-    inline bool MeshPoint::getIOState() const {
-		return inside;
-	}
+        //inside = true;
+        BITMASK_SET(state,INSIDE);
+    }
 	
 	//returns true if node is inside any input mesh
     inline bool MeshPoint::isInside() const {
-		return inside;
+        //return inside;
+        return BITMASK_CHECK(state,INSIDE);
 	}
 	
 	//returns true if node is outside every input mesh
     inline bool MeshPoint::isOutside() const{
-		return !inside;
+        //return !inside;
+        return !BITMASK_CHECK(state,INSIDE);
 	}
 	
 	inline void MeshPoint::setProjected(){
-		projected = true;
-        inside = false;
+        //projected = true;
+        //inside = false;
+        BITMASK_SET(state,PROJECTED);
+        BITMASK_CLEAR(state,INSIDE);
 	}
 	
     inline bool MeshPoint::wasProjected() const {
-		return projected;
+        //return projected;
+        return BITMASK_CHECK(state,PROJECTED);
 	}
     
     inline void MeshPoint::featureProjected() {
-        feature = true;
+        //feature = true;
+        BITMASK_SET(state,PROJECTED);
     }
     
     inline bool MeshPoint::isFeature() const {
-        return feature;
+        //return feature;
+        return BITMASK_CHECK(state,FEATURE);
     }
 	
     inline Point3D &MeshPoint::getPoint(){
