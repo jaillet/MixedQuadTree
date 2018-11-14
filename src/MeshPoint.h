@@ -61,26 +61,22 @@ namespace Clobscode
         MeshPoint(const Point3D &p);
 		
         virtual ~MeshPoint();
-		
-        virtual void setPoint(const Point3D &p);
-		
+				
         //acces method:
+        virtual void setPoint(const Point3D &p);
         virtual Point3D &getPoint();
         virtual const Point3D &getPoint() const;
 
 		virtual void addElement(unsigned int idx);
-		
         virtual const list<unsigned int> &getElements() const;
 		
         virtual void clearElements();
 		
         virtual bool wasOutsideChecked() const;
-		
 		virtual void outsideChecked();
 		
         //unconditionnal set
 		virtual void setMaxDistance(double md);
-		
         virtual double getMaxDistance() const;
 		
         //set only if lower
@@ -89,13 +85,11 @@ namespace Clobscode
         virtual void updateMaxDistanceByFactor(const double &per);
 		
 		virtual void setProjected();
-		
         virtual bool wasProjected() const;
 		
 		//state methods
 		virtual void setOutside();
-		
-		virtual void setInside();
+        virtual void setInside();
 		
 		//returns true if node is inside any input mesh
         virtual bool isInside() const;
@@ -104,7 +98,6 @@ namespace Clobscode
         virtual bool isOutside() const;
 		
         virtual void setFeature();
-        
         virtual bool isFeature() const;
 		
 	protected:

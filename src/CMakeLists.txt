@@ -18,7 +18,7 @@ set(SOURCE_FILES Main
         Mesher GridMesher MeshPoint
         RefinementRegion RefinementCubeRegion RefinementSurfaceRegion
         RefinementInputSurfaceRegion RefinementAllRegion RefinementBoundaryRegion
-        GeometricTransform Services Utils
+        GeometricTransform Services
         Visitors/Visitor Visitors/SplitVisitor Visitors/EdgeVisitor 
 	Visitors/IntersectionsVisitor
         Visitors/OneIrregularVisitor Visitors/PointMovedVisitor

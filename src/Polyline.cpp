@@ -379,7 +379,13 @@ namespace Clobscode
 
         return bIsIn;
     }
-    
+
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    inline bool Polyline::pointIsFeature(unsigned int i) const {
+        return (mVerticesAngles[i]<MinFeatureAngle || mVerticesAngles[i]>MaxFeatureAngle);
+    }
+
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     list<unsigned int> Polyline::getFeatureProjection(const Quadrant &q,
@@ -409,8 +415,8 @@ namespace Clobscode
         }
         
         for (unsigned int iNd:iCommonNodes) {
-            //if angle is between 150 and 210 grades, then is not a sharp feature:
-            if (mVerticesAngles[iNd]<175. || mVerticesAngles[iNd]>185.) {
+            //if angle is between 175 and 185 grades, then is not a sharp feature:
+            if ( pointIsFeature(iNd) ) {
                 //std::cout << " " << iNd << std::flush;
                 fes.push_back(iNd);
             }
@@ -438,7 +444,7 @@ namespace Clobscode
         std::sort(iNodes.begin(),iNodes.end());
 
         //FJA: we want to test only the intersection, not the extremities of the edges
-        // the feature should lies IN the quadrant
+        // the feature should lie IN the quadrant
         list<unsigned int> iCommonNodes;
         for (unsigned int i=1; i<iNodes.size(); ++i) {
             if (iNodes.at(i-1)==iNodes.at(i)){
@@ -448,8 +454,8 @@ namespace Clobscode
         }
         
         for (auto iNd:iCommonNodes) {
-            //if angle is between 150 and 210 grades, then is not a sharp feature:
-            if (mVerticesAngles[iNd]<150. || mVerticesAngles[iNd]>210.) {
+            //if angle is between 175 and 185 grades, then is not a sharp feature:
+            if ( pointIsFeature(iNd) ) {
                 //std::cout << " " << iNd << std::flush;
                 if (q.pointInside(mp,mVertices[iNd])) {
                     iFeatures.push_back(iNd);

@@ -1599,7 +1599,7 @@ namespace Clobscode
         
         //clear removed elements
         removed.clear();
-        //now element std::list from Vomule mesh can be cleared, as all remaining
+        //now element std::list from Surface mesh can be cleared, as all remaining
         //elements are still in use and attached to newele std::list.
         Quadrants.clear();
         Quadrants.assign(make_move_iterator(newele.begin()),make_move_iterator(newele.end()));
@@ -1649,7 +1649,7 @@ namespace Clobscode
             //Sometimes the avg node is just over domain's boundary,
             //despite the fact that a (big) portion of it's still
             //inside the domain and no other Quad will cover this
-            //section. For this reason the mid nove between the average
+            //section. For this reason the mid node between the average
             //point and every node of the Quad is tested to be inside.
             //This implies 8 point sums and 5 division. Better than 12 point
             //sums and 4 divisions.
@@ -1880,8 +1880,11 @@ namespace Clobscode
             const Point3D &current = points[p].getPoint();
             Point3D projected = input.getProjection(current,p_qInterEdges);
 
-            points[p].setPoint(projected);
-            points[p].setProjected();
+            //if ( current.distance(projected)< points[p].getMaxDistance() )
+            {
+                points[p].setPoint(projected);
+                points[p].setProjected();
+            }
         }
         auto end_time = chrono::high_resolution_clock::now();
         cout << "    * ShrinkToBoundary in "
@@ -1930,19 +1933,32 @@ namespace Clobscode
             list<unsigned int>::const_iterator itFs;
             for (itFs=fs.begin(); itFs!=fs.end(); ++itFs) {
 
-                if (fsNum==0) {
+//                if (fsNum==0) {
+//                    break;
+//                }
+                if ( input.featureHasProjectedPt(*itFs)) {
                     break;
                 }
 
                 const Point3D &featProjected = input.getPoints()[*itFs];
 
                 double best = std::numeric_limits<double>::infinity();
-                unsigned int candidate=-1;
+                unsigned int candidate;
                 
                 bool push = false;
                 for (auto pIdx:subpointindex) {
                     
                     if (points[pIdx].wasProjected()) {
+                        /* no more needed now we store a map Feature-ProjectedPt !!!
+                        // special case: when a Feature is right on an edge/node
+                        // and as already been treated in the neighboor quadrant
+                        //FJA: work only if ONLY ONE feature per quad
+                        // otherwise, should store the Feature number in the MeshPoint
+                        // but memory consuming...
+                        if (points[pIdx].isFeature()) {
+                            push=false;
+                            break;
+                        } */
                         continue;
                     }
                     
@@ -1963,6 +1979,7 @@ namespace Clobscode
                     //Feature projected flag will be used later to
                     //apply surface patterns.
                     points[candidate].setFeature();
+                    input.setFeatureIndexProjectedPt(*itFs,candidate);
 
                     // First, get index of the feature edges. Will be added next
                     // to intersecting edges of the quads sharing the candidate node

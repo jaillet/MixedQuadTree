@@ -74,6 +74,7 @@ namespace Clobscode
         virtual unsigned int getPointIndex(unsigned int i) const;
 
         virtual const vector<unsigned int> getSubPointIndex() const; // read only
+        virtual const vector<unsigned int> getSubPointIndexOnlyOnEdges() const; // read only
 
         virtual bool isInside() const;
 		
@@ -87,9 +88,12 @@ namespace Clobscode
         virtual list<unsigned int> &getIntersectedEdges() ; //modification
 
         virtual const vector<vector<unsigned int> > &getSubElements() const; //read only
-        
+        virtual const vector<unsigned int> &getSubElement(unsigned int) const; //read only
+        virtual       vector<unsigned int> &getSubElement(unsigned int); //modif
+
         virtual void updateSubElements(vector<vector <unsigned int> > &nsubs);
-		
+        virtual void removeSubElement(unsigned int i);
+
         virtual void computeMaxDistance(vector<MeshPoint> &mp);
 		
         virtual double getMaxDistance() const;
@@ -184,13 +188,33 @@ namespace Clobscode
             }
             //remove duplicate
             sort(subpointindex.begin(),subpointindex.end());
-            auto it=unique(subpointindex.begin(),subpointindex.end());
-            subpointindex.resize( std::distance(subpointindex.begin(),it) );
+//            auto it=unique(subpointindex.begin(),subpointindex.end());
+//            subpointindex.resize( std::distance(subpointindex.begin(),it) );
+            //std::unique doesn't remove duplicates, just throws them to the end
+            //that's the reason for std::erase...
+            subpointindex.erase(unique(subpointindex.begin(),subpointindex.end()),subpointindex.end());
             subpointindex.shrink_to_fit();
 
             return subpointindex;
         }
     }
+
+    inline const vector<unsigned int> Quadrant::getSubPointIndexOnlyOnEdges() const {
+
+        //first, get all index from subelems
+        vector<unsigned int> subpointindex(getSubPointIndex());
+
+        // next circulate the corner's index, and remove from
+        for (auto i:pointindex) {
+            //surprisingly, std::remove doesn't remove duplicates, just throws them to the end...
+            //that's the reason for std::erase...
+            subpointindex.erase(std::remove(subpointindex.begin(), subpointindex.end(), i),
+                                subpointindex.end());
+        }
+
+        return subpointindex;
+    }
+
 
     inline bool Quadrant::isInside() const {
         return intersected_edges.empty();
@@ -212,20 +236,27 @@ namespace Clobscode
 	}
 	
     inline const vector<vector<unsigned int> > &Quadrant::getSubElements() const {
-		return sub_elements;
-	}
-	
+        return sub_elements;
+    }
+    inline const vector<unsigned int> &Quadrant::getSubElement(unsigned int i) const {
+        return sub_elements[i];
+    }
+    inline vector<unsigned int> &Quadrant::getSubElement(unsigned int i) {
+        return sub_elements[i];
+    }
+
     inline void Quadrant::computeMaxDistance(vector<MeshPoint> &mp){
         const Point3D &p0 = mp[pointindex[0]].getPoint();
         const Point3D &p1 = mp[pointindex[2]].getPoint();
-        max_dis = 0.3 * (p0 - p1).Norm();
-	}
+        //max_dis = 0.3 * (p0 - p1).Norm();
+        max_dis = 0.3 * (p0 - p1).Norm() / getSubElements().size();
+    }
     
     inline void Quadrant::updateSubElements(vector<vector <unsigned int> > &nsubs) {
-        
+
         sub_elements = nsubs;
         return;
-        
+
         /*cout << "updateSubElements: " << sub_elements.size();
         sub_elements.clear();
         sub_elements.reserve(nsubs.size());
@@ -234,7 +265,12 @@ namespace Clobscode
         }
         cout << " -> " << sub_elements.size() << "\n";*/
     }
-	
+
+    inline void Quadrant::removeSubElement(unsigned int i) {
+
+        sub_elements.erase(sub_elements.begin()+i );
+    }
+
     inline double Quadrant::getMaxDistance() const {
 		return max_dis;
 	}
