@@ -97,11 +97,6 @@ show different steps of the method:
   }
  \nl Create balanced quadtree\; \label{alg:goto}
  \nl Apply Transition Patterns\;
- \nl Detect Features in Input\;
- Project Close to Boundary\;
- Remove on Input Surface\;
- Shrink to Boundary\;
- \nl Apply Surface Patterns\;
  \caption{Generation process}
  \label{alg:generate}
 \end{algorithm}
@@ -129,7 +124,7 @@ preprocess
 \end{figure}
 
 %---------------------------
-\subsection{Refinement level}
+\subsection{Refinement, Balancing and Transition steps}
 
 \begin{figure}[htb]
 \centering
@@ -138,37 +133,85 @@ preprocess
   \label{f:boundaryref3}
  }
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a5_boundary_refined.png}
-  \label{f:boundaryref5}
- }
- \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a7_boundary_refined.png}
-  \label{f:boundaryref7}
- }
- \caption{After refinement step, level 3, 5, 7.}
-\label{fig:refined}
-\end{figure}
-
-%---------------------------
-\subsection{Balanced mesh}
-
-\begin{figure}[htb]
-\centering
- \subfigure[~]{
   \includegraphics[width=0.3\textwidth]{a3_boundary_balanced.png}
   \label{f:boundarybal3}
  }
  \subfigure[~]{
+  \includegraphics[width=0.3\textwidth]{a3_boundary_transition.png}
+  \label{f:boundarytrans3}
+ }
+ \caption{After refinement, balancing and transition steps, level 3.}
+\label{fig:generate3}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.3\textwidth]{a5_boundary_refined.png}
+  \label{f:boundaryref5}
+ }
+  \subfigure[~]{
   \includegraphics[width=0.3\textwidth]{a5_boundary_balanced.png}
   \label{f:boundarybal5}
+ }
+ \subfigure[~]{
+  \includegraphics[width=0.3\textwidth]{a5_boundary_transition.png}
+  \label{f:boundarytrans5}
+ }
+ \caption{After refinement, balancing and transition steps, level 5.}
+\label{fig:generate5}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.3\textwidth]{a7_boundary_refined.png}
+  \label{f:boundaryref7}
  }
   \subfigure[~]{
   \includegraphics[width=0.3\textwidth]{a7_boundary_balanced.png}
   \label{f:boundarybal7}
  }
- \caption{After balancing step, level 3, 5, 7.}
-\label{fig:balanced}
+ \subfigure[~]{
+  \includegraphics[width=0.3\textwidth]{a7_boundary_transition.png}
+  \label{f:boundarytrans7}
+ }
+ \caption{After refinement, balancing and transition steps, level 7.}
+\label{fig:generate7}
 \end{figure}
+
+%---------------------------
+%---------------------------
+\section{Fitting quadrants to Input Surface}
+\label{sec:method}
+%---------------------------
+%---------------------------
+
+
+
+\begin{algorithm}[H]
+
+\SetAlgoLined
+\KwResult{A mixed-elements mesh}
+ \nl \ForEach{Quadrant}{
+ \Repeat {desired Refinement Level}{
+ \nl Subdivide Quadrant\;
+   \ForEach{ new Sub-Quadrant}{
+   \If{Intersects Input \textit{or} Is Inside}{Insert Sub-Quadrant}
+    }
+  }\label{alg:subdivide}
+  }
+ \nl Create balanced quadtree\; \label{alg:goto}
+ \nl Apply Transition Patterns\;
+ \nl Detect Features in Input\;
+ Project Close to Boundary\;
+ Remove on Input Surface\;
+ Shrink to Boundary\;
+ \nl Apply Surface Patterns\;
+ \caption{Generation process and Input surface fitting}
+ \label{alg:surfacefitting}
+\end{algorithm}
+
 
 
 %---------------------------
