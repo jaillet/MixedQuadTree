@@ -115,7 +115,14 @@ And finally, the \textbf{MeshPoint}:
 \item that is embedding a 3DPoint, as coordinates of the Quadrant's corners, referenced as indices.
 \item MeshPoint are conversely connected to Quadrant by an index map of \textit{elements}, referencing all the Quadrants having this point as corner.
 \item it also is the support for some crucial processing information on it's \textit{state}, merged in a single byte: the point is \verb?inside?, has been \verb?projected?, is representing a \verb?feature?, has been previously \verb?checked?, etc\ldots  
+\end{itemize}
 
+These three structures will be used together along with the Polyline by the \textbf{Mesher}, that will construct them gradually:
+\begin{itemize}
+\item a vector of \textbf{MeshPoint},
+\item a vector of \textbf{Quadrant},
+\item a set of \textbf{QuadEdge}. Note that this kind of structure is costly (quasi 30\% of the whole computation time), as insertion is done in a sorted container, but it guarantees uniqueness of the element, and reasonably fast access. By the way, it might not be exactly dapted to parallelism...
+\item It also contains a list of \textbf{Refinement Regions}, which usage will be presented later on.
 \end{itemize}
 
 %---------------------------
@@ -157,6 +164,119 @@ show different steps of the method:
 
 %---------------------------
 \subsection{Refinement, Balancing and Transition steps}
+
+\begin{figure}[htb]
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.14\textwidth]{pie_refined1.png}
+  \label{f:pieref1}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.14\textwidth]{pie_refined2.png}
+  \label{f:pieref2}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.14\textwidth]{pie_refined3.png}
+  \label{f:pieref3}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.14\textwidth]{pie_refined4.png}
+  \label{f:pieref4}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.14\textwidth]{pie_refined5.png}
+  \label{f:pieref5}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.14\textwidth]{pie_refined6.png}
+  \label{f:pieref6}
+ }
+ \caption{Effect of the refinement level applied on the complete structure (\texttt{-a} switch), (1 to 6)}
+\label{fig:pieref}
+\end{figure}
+
+
+\begin{figure}[htb]
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_refined2s3.png}
+  \label{f:pierefs3}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_refined2s4.png}
+  \label{f:pierefs4}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_refined2s5.png}
+  \label{f:pierefs5}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_refined2s6.png}
+  \label{f:pierefs6}
+ }
+ \caption{Effect of combined refinement levels, with level 2 applied on the complete structure (\texttt{-a} switch), and incremental refinement (3 to 6) only applied on surface quadrants (\texttt{-s} switch).}
+\label{fig:pierefs}
+\end{figure}
+
+
+\begin{figure}[htb]
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_balanced2s3.png}
+  \label{f:piebals3}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_balanced2s4.png}
+  \label{f:piebals4}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_balanced2s5.png}
+  \label{f:piebals5}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_balanced2s6.png}
+  \label{f:piebals6}
+ }
+ \caption{After the balancing step, note that in the first case, nothing is to be done.}
+\label{fig:pielabs}
+\end{figure}
+
+
+\begin{figure}[htb]
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_transition2s3.png}
+  \label{f:pietranss3}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_transition2s4.png}
+  \label{f:pietranss4}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_transition2s5.png}
+  \label{f:pietranss5}
+ }
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.22\textwidth]{pie_transition2s6.png}
+  \label{f:pietranss6}
+ }
+ \caption{After the transition step. Note that the more difference between levels, the more transition patterns are used\ldots}
+\label{fig:pielabs}
+\end{figure}
 
 %---------------------------
 %---------------------------
@@ -415,8 +535,10 @@ Let's fork the initial MEPP repository. So, once you're logged in on github
 $ git clone /https://github.com/jaillet/MixedQuadTree.git
 $ cd MixedQuadTree/
 $ git checkout branch develop
-$ cmake src -D_CMAKE_BUILD_TYPE=Debug (or Release) // Uppercase is important
-$ make
+$ mkdir build ; cd build
+$ cmake ../src -D_CMAKE_BUILD_TYPE=Debug (or Release) // Uppercase is important
+$ cmake .
+$ make -j#nproc
 \end{verbatim}
 }
 
@@ -425,7 +547,7 @@ This has been tested on Linux and Mac without any known error nor warning.
 \subsection{Git usage}
 At this point, you can edit and commit files using  the git workflow 
  
-\textbf{but only push to your own fork of MEPP (origin) !!!}\\
+\textbf{but only push to your own fork of MixedQuadTree (origin) !!!}\\
 
 The merge between the original repository is done by ANOTHER DEVELOPER after a \textbf{'pull request'}.
 To make a 'pull request', go to https://github.com/yourUsername/MixedQuadTree, click on 'Pull Request'. Then, choose the two branches you would like to merge (master in \textit{jaillet} and yourbranch in origin), write your comments and click on 'Send Pull Request'.

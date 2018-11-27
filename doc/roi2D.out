@@ -1,0 +1,16 @@
+\BOOKMARK [1][-]{section.1}{Data Structures and initialisation}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Polyline as Input boundary}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{Quadrant as support of surface mesh}{section.1}% 3
+\BOOKMARK [1][-]{section.2}{Main steps of the method}{}% 4
+\BOOKMARK [2][-]{subsection.2.1}{A quadtree-based method}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.2}{Refinement, Balancing and Transition steps}{section.2}% 6
+\BOOKMARK [1][-]{section.3}{Fitting quadrants to Input Surface}{}% 7
+\BOOKMARK [2][-]{subsection.3.1}{Boundary and sharp features handling}{section.3}% 8
+\BOOKMARK [2][-]{subsection.3.2}{Generating first quadrants over boundary prepared mesh}{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.3}{Handling Input surface}{section.3}% 10
+\BOOKMARK [1][-]{section.4}{Remeshing}{}% 11
+\BOOKMARK [1][-]{section.5}{Installing}{}% 12
+\BOOKMARK [2][-]{subsection.5.1}{Create an account on github.com}{section.5}% 13
+\BOOKMARK [2][-]{subsection.5.2}{Git Fork MixedQuadTree}{section.5}% 14
+\BOOKMARK [2][-]{subsection.5.3}{Compiling}{section.5}% 15
+\BOOKMARK [2][-]{subsection.5.4}{Git usage}{section.5}% 16

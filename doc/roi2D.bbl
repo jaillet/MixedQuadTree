@@ -1,0 +1,13 @@
+\begin{thebibliography}{1}
+
+\bibitem{Finkel1974}
+R.~A. Finkel and J.~L. Bentley.
+\newblock Quad trees a data structure for retrieval on composite keys.
+\newblock {\em Acta Inf.}, 4(1):1--9, March 1974.
+
+\bibitem{Yerry1983}
+M.~Yerry and M.~Shephard.
+\newblock A modified quadtree approach to finite element mesh generation.
+\newblock {\em IEEE Computer Graphics and Applications}, 3:39--46, 01 1983.
+
+\end{thebibliography}

@@ -1,0 +1,913 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.4.5)  27 NOV 2018 10:36
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**roi2D.tex
+(./roi2D.tex
+LaTeX2e <2017-04-15>
+Babel <3.12> and hyphenation patterns for 84 language(s) loaded.
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\@emptytoks=\toks14
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2016/11/05 v2.16a AMS math features
+\@mathmargin=\skip43
+
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01 AMS text
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks15
+\ex@=\dimen103
+))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen104
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2016/03/08 v2.02 operator names
+)
+\inf@bad=\count87
+LaTeX Info: Redefining \frac on input line 213.
+\uproot@=\count88
+\leftroot@=\count89
+LaTeX Info: Redefining \overline on input line 375.
+\classnum@=\count90
+\DOTSCASE@=\count91
+LaTeX Info: Redefining \ldots on input line 472.
+LaTeX Info: Redefining \dots on input line 475.
+LaTeX Info: Redefining \cdots on input line 596.
+\Mathstrutbox@=\box26
+\strutbox@=\box27
+\big@size=\dimen105
+LaTeX Font Info:    Redeclaring font encoding OML on input line 712.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 713.
+\macc@depth=\count92
+\c@MaxMatrixCols=\count93
+\dotsspace@=\muskip10
+\c@parentequation=\count94
+\dspbrk@lvl=\count95
+\tag@help=\toks16
+\row@=\count96
+\column@=\count97
+\maxfields@=\count98
+\andhelp@=\toks17
+\eqnshift@=\dimen106
+\alignsep@=\dimen107
+\tagshift@=\dimen108
+\tagwidth@=\dimen109
+\totwidth@=\dimen110
+\lineht@=\dimen111
+\@envbody=\toks18
+\multlinegap=\skip44
+\multlinetaggap=\skip45
+\mathdisplay@stack=\toks19
+LaTeX Info: Redefining \[ on input line 2817.
+LaTeX Info: Redefining \] on input line 2818.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2010/09/12 v5.6 Page Geometry
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks20
+)
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2017/03/15 v3.2 Provides the ifpdf switch
+)
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifvtex.sty
+Package: ifvtex 2016/05/16 v1.6 Detect VTeX and its facilities (HO)
+Package ifvtex Info: VTeX not detected.
+)
+(/usr/share/texlive/texmf-dist/tex/generic/ifxetex/ifxetex.sty
+Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
+)
+\Gm@cnth=\count99
+\Gm@cntv=\count100
+\c@Gm@tempcnt=\count101
+\Gm@bindingoffset=\dimen112
+\Gm@wd@mp=\dimen113
+\Gm@odd@mp=\dimen114
+\Gm@even@mp=\dimen115
+\Gm@layoutwidth=\dimen116
+\Gm@layoutheight=\dimen117
+\Gm@layouthoffset=\dimen118
+\Gm@layoutvoffset=\dimen119
+\Gm@dimlist=\toks21
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2017/06/01 v1.1a Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2017/06/25 v1.2c Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 99.
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2017/06/24 v1.0g Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen120
+\Gin@req@width=\dimen121
+)
+(/usr/share/texlive/texmf-dist/tex/latex/subfigure/subfigure.sty
+Package: subfigure 2002/03/15 v2.1.5 subfigure package
+\subfigtopskip=\skip46
+\subfigcapskip=\skip47
+\subfigcaptopadj=\dimen122
+\subfigbottomskip=\skip48
+\subfigcapmargin=\dimen123
+\subfiglabelskip=\skip49
+\c@subfigure=\count102
+\c@lofdepth=\count103
+\c@subtable=\count104
+\c@lotdepth=\count105
+
+****************************************
+* Local config file subfigure.cfg used *
+****************************************
+(/usr/share/texlive/texmf-dist/tex/latex/subfigure/subfigure.cfg)
+\subfig@top=\skip50
+\subfig@bottom=\skip51
+)
+(/usr/share/texlive/texmf-dist/tex/latex/multirow/multirow.sty
+Package: multirow 2016/11/25 v2.2 Span multiple rows of a table
+\multirow@colwidth=\skip52
+\multirow@cntb=\count106
+\multirow@dima=\skip53
+\bigstrutjot=\dimen124
+)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/longtable.sty
+Package: longtable 2014/10/28 v4.11 Multi-page Table package (DPC)
+\LTleft=\skip54
+\LTright=\skip55
+\LTpre=\skip56
+\LTpost=\skip57
+\LTchunksize=\count107
+\LTcapwidth=\dimen125
+\LT@head=\box28
+\LT@firsthead=\box29
+\LT@foot=\box30
+\LT@lastfoot=\box31
+\LT@cols=\count108
+\LT@rows=\count109
+\c@LT@tables=\count110
+\c@LT@chunks=\count111
+\LT@p@ftn=\toks22
+)
+(/usr/share/texlive/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count112
+\float@exts=\toks23
+\float@box=\box32
+\@float@everytoks=\toks24
+\@floatcapt=\box33
+)
+(/usr/share/texlive/texmf-dist/tex/latex/preprint/fullpage.sty
+Package: fullpage 1999/02/23 1.1 (PWD)
+\FP@margin=\skip58
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/eucal.sty
+Package: eucal 2009/06/22 v3.00 Euler Script fonts
+LaTeX Font Info:    Overwriting math alphabet `\EuScript' in version `bold'
+(Font)                  U/eus/m/n --> U/eus/b/n on input line 33.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/algorithm2e/algorithm2e.sty
+Package: algorithm2e 2017/07/18 v5.2 algorithms environments
+\c@AlgoLine=\count113
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
+)
+\algocf@hangindent=\skip59
+
+(/usr/share/texlive/texmf-dist/tex/latex/ifoddpage/ifoddpage.sty
+Package: ifoddpage 2016/04/23 v1.1 Conditionals for odd/even page detection
+\c@checkoddpage=\count114
+)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/xspace.sty
+Package: xspace 2014/10/28 v1.13 Space after command names (DPC,MH)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/relsize/relsize.sty
+Package: relsize 2013/03/29 ver 4.1
+)
+\skiptotal=\skip60
+\skiplinenumber=\skip61
+\skiprule=\skip62
+\skiphlne=\skip63
+\skiptext=\skip64
+\skiplength=\skip65
+\algomargin=\skip66
+\skipalgocfslide=\skip67
+\algowidth=\dimen126
+\inoutsize=\dimen127
+\inoutindent=\dimen128
+\interspacetitleruled=\dimen129
+\interspacealgoruled=\dimen130
+\interspacetitleboxruled=\dimen131
+\algocf@ruledwidth=\skip68
+\algocf@inoutbox=\box34
+\algocf@inputbox=\box35
+\AlCapSkip=\skip69
+\AlCapHSkip=\skip70
+\algoskipindent=\skip71
+\algocf@nlbox=\box36
+\algocf@hangingbox=\box37
+\algocf@untilbox=\box38
+\algocf@skipuntil=\skip72
+\algocf@capbox=\box39
+\algocf@lcaptionbox=\skip73
+\algoheightruledefault=\skip74
+\algoheightrule=\skip75
+\algotitleheightruledefault=\skip76
+\algotitleheightrule=\skip77
+\c@algocfline=\count115
+\c@algocfproc=\count116
+\c@algocf=\count117
+\algocf@algoframe=\box40
+\algocf@algobox=\box41
+)
+(/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2016/05/11 v2.12 LaTeX color extensions (UK)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: pdftex.def on input line 225.
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1348.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1352.
+Package xcolor Info: Model `RGB' extended on input line 1364.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1366.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1367.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1370.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2017/03/14 v6.85a Hypertext links for LaTeX
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/hobsub-hyperref.sty
+Package: hobsub-hyperref 2016/05/16 v1.14 Bundle oberdiek, subset hyperref (HO)
+
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/hobsub-generic.sty
+Package: hobsub-generic 2016/05/16 v1.14 Bundle oberdiek, subset generic (HO)
+Package: hobsub 2016/05/16 v1.14 Construct package bundles (HO)
+Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
+Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
+Package: ifluatex 2016/05/16 v1.4 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+Package hobsub Info: Skipping package `ifvtex' (already loaded).
+Package: intcalc 2016/05/16 v1.2 Expandable calculations with integers (HO)
+Package hobsub Info: Skipping package `ifpdf' (already loaded).
+Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
+Package: kvdefinekeys 2016/05/16 v1.4 Define keys (HO)
+Package: pdftexcmds 2017/03/19 v0.25 Utility functions of pdfTeX for LuaTeX (HO
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+Package: pdfescape 2016/05/16 v1.14 Implements pdfTeX's escape features (HO)
+Package: bigintcalc 2016/05/16 v1.4 Expandable calculations on big integers (HO
+)
+Package: bitset 2016/05/16 v1.2 Handle bit-vector datatype (HO)
+Package: uniquecounter 2016/05/16 v1.3 Provide unlimited unique counter (HO)
+)
+Package hobsub Info: Skipping package `hobsub' (already loaded).
+Package: letltxmacro 2016/05/16 v1.5 Let assignment for LaTeX macros (HO)
+Package: hopatch 2016/05/16 v1.3 Wrapper for package hooks (HO)
+Package: xcolor-patch 2016/05/16 xcolor patch
+Package: atveryend 2016/05/16 v1.9 Hooks at the very end of document (HO)
+Package atveryend Info: \enddocument detected (standard20110627).
+Package: atbegshi 2016/06/09 v1.18 At begin shipout hook (HO)
+Package: refcount 2016/05/16 v3.5 Data extraction from label references (HO)
+Package: hycolor 2016/05/16 v1.8 Color options for hyperref/bookmark (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/auxhook.sty
+Package: auxhook 2016/05/16 v1.4 Hooks for auxiliary files (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
+)
+\@linkdim=\dimen132
+\Hy@linkcounter=\count118
+\Hy@pagecounter=\count119
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2017/03/14 v6.85a Hyperref: PDFDocEncoding definition (HO)
+)
+\Hy@SavedSpaceFactor=\count120
+
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/hyperref.cfg
+File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
+)
+Package hyperref Info: Hyper figures OFF on input line 4498.
+Package hyperref Info: Link nesting OFF on input line 4503.
+Package hyperref Info: Hyper index ON on input line 4506.
+Package hyperref Info: Plain pages OFF on input line 4513.
+Package hyperref Info: Backreferencing OFF on input line 4518.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4751.
+\c@Hy@tempcnt=\count121
+
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip11
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 5104.
+\XeTeXLinkMargin=\dimen133
+\Fld@menulength=\count122
+\Field@Width=\dimen134
+\Fld@charsize=\dimen135
+Package hyperref Info: Hyper figures OFF on input line 6358.
+Package hyperref Info: Link nesting OFF on input line 6363.
+Package hyperref Info: Hyper index ON on input line 6366.
+Package hyperref Info: backreferencing OFF on input line 6373.
+Package hyperref Info: Link coloring OFF on input line 6378.
+Package hyperref Info: Link coloring with OCG OFF on input line 6383.
+Package hyperref Info: PDF/A mode OFF on input line 6388.
+LaTeX Info: Redefining \ref on input line 6428.
+LaTeX Info: Redefining \pageref on input line 6432.
+\Hy@abspage=\count123
+\c@Item=\count124
+\c@Hfootnote=\count125
+)
+
+Package hyperref Message: Driver (autodetected): hpdftex.
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2017/03/14 v6.85a Hyperref driver for pdfTeX
+\Fld@listcount=\count126
+\c@bookmark@seq@number=\count127
+
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
+Package: rerunfilecheck 2016/05/16 v1.8 Rerun checks for auxiliary files (HO)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
+82.
+)
+\Hy@SectionHShift=\skip78
+)
+(./roi2D.aux
+
+LaTeX Warning: Label `sec:method' multiply defined.
+
+
+LaTeX Warning: Label `alg:subdivide' multiply defined.
+
+
+LaTeX Warning: Label `alg:goto' multiply defined.
+
+
+LaTeX Warning: Label `fig:pielabs' multiply defined.
+
+
+LaTeX Warning: Label `fig:boundary' multiply defined.
+
+)
+\openout1 = `roi2D.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: <default>
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(92.14519pt, 430.00462pt, 92.14519pt)
+* v-part:(T,H,B)=(95.39737pt, 556.47656pt, 143.09605pt)
+* \paperwidth=614.295pt
+* \paperheight=794.96999pt
+* \textwidth=469.75502pt
+* \textheight=620.43001pt
+* \oddsidemargin=0.0pt
+* \evensidemargin=0.0pt
+* \topmargin=0.0pt
+* \headheight=0.0pt
+* \headsep=0.0pt
+* \topskip=10.0pt
+* \footskip=30.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
+* \columnsep=10.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count128
+\scratchdimen=\dimen136
+\scratchbox=\box42
+\nofMPsegments=\count129
+\nofMParguments=\count130
+\everyMPshowfont=\toks25
+\MPscratchCnt=\count131
+\MPscratchDim=\dimen137
+\MPnumerator=\count132
+\makeMPintoPDFobject=\count133
+\everyMPtoPDFconversion=\toks26
+) (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
+
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2016/05/16 v1.2 Manage graphics extensions (HO)
+)
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+38.
+Package grfext Info: Graphics extension search list:
+(grfext)             [.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 456.
+
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+\AtBeginShipoutBox=\box43
+Package hyperref Info: Link coloring OFF on input line 20.
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
+Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
+)
+\c@section@level=\count134
+)
+LaTeX Info: Redefining \ref on input line 20.
+LaTeX Info: Redefining \pageref on input line 20.
+LaTeX Info: Redefining \nameref on input line 20.
+
+(./roi2D.out) (./roi2D.out)
+\@outlinefile=\write3
+\openout3 = `roi2D.out'.
+
+LaTeX Font Info:    Try loading font information for U+msa on input line 39.
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 39.
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+<utfsm-all-oc.pdf, id=68, pagebox=cropbox, 1408.51488pt x 694.89998pt>
+File: utfsm-all-oc.pdf Graphic file (type pdf)
+<use utfsm-all-oc.pdf>
+Package pdftex.def Info: utfsm-all-oc.pdf  used on input line 42. on input line
+ 42.
+Package pdftex.def Info: Requested size: 131.53082pt x 64.88162pt on input line
+ 42.
+<logo_liris_160_0.png, id=69, 160.6pt x 72.27pt>
+File: logo_liris_160_0.png Graphic file (type png)
+<use logo_liris_160_0.png>
+Package pdftex.def Info: logo_liris_160_0.png  used on input line 43. on input 
+line 43.
+Package pdftex.def Info: Requested size: 131.53082pt x 59.19008pt on input line
+ 43.
+LaTeX Font Info:    Try loading font information for U+eus on input line 64.
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/ueus.fd
+File: ueus.fd 2013/01/14 v3.01 Euler Script
+)
+Underfull \hbox (badness 10000) in paragraph at lines 70--72
+
+ []
+
+<images/a_polyline_info.png, id=75, 491.8375pt x 482.80376pt>
+File: images/a_polyline_info.png Graphic file (type png)
+<use images/a_polyline_info.png>
+Package pdftex.def Info: images/a_polyline_info.png  used on input line 77. on 
+input line 77.
+Package pdftex.def Info: Requested size: 112.74377pt x 110.66681pt on input lin
+e 77.
+<images/a_grid.png, id=76, 1379.1525pt x 465.74pt>
+File: images/a_grid.png Graphic file (type png)
+<use images/a_grid.png>
+Package pdftex.def Info: images/a_grid.png  used on input line 80. on input lin
+e 80.
+Package pdftex.def Info: Requested size: 338.22418pt x 114.21744pt on input lin
+e 80.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 90.
+(/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 90.
+ [1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./utfsm-all-oc.pdf> <./log
+o_liris_160_0.png>]
+[2 <./images/a_polyline_info.png> <./images/a_grid.png>]
+<images/pie_refined1.png, id=124, 383.4325pt x 765.86125pt>
+File: images/pie_refined1.png Graphic file (type png)
+<use images/pie_refined1.png>
+Package pdftex.def Info: images/pie_refined1.png  used on input line 173. on in
+put line 173.
+Package pdftex.def Info: Requested size: 65.76541pt x 131.35161pt on input line
+ 173.
+<images/pie_refined2.png, id=125, 386.44376pt x 765.86125pt>
+File: images/pie_refined2.png Graphic file (type png)
+<use images/pie_refined2.png>
+Package pdftex.def Info: images/pie_refined2.png  used on input line 178. on in
+put line 178.
+Package pdftex.def Info: Requested size: 65.76541pt x 130.33492pt on input line
+ 178.
+<images/pie_refined3.png, id=126, 384.43625pt x 766.865pt>
+File: images/pie_refined3.png Graphic file (type png)
+<use images/pie_refined3.png>
+Package pdftex.def Info: images/pie_refined3.png  used on input line 183. on in
+put line 183.
+Package pdftex.def Info: Requested size: 65.76541pt x 131.18442pt on input line
+ 183.
+<images/pie_refined4.png, id=127, 386.44376pt x 767.86874pt>
+File: images/pie_refined4.png Graphic file (type png)
+<use images/pie_refined4.png>
+Package pdftex.def Info: images/pie_refined4.png  used on input line 188. on in
+put line 188.
+Package pdftex.def Info: Requested size: 65.76541pt x 130.67656pt on input line
+ 188.
+<images/pie_refined5.png, id=128, 385.44pt x 744.7825pt>
+File: images/pie_refined5.png Graphic file (type png)
+<use images/pie_refined5.png>
+Package pdftex.def Info: images/pie_refined5.png  used on input line 193. on in
+put line 193.
+Package pdftex.def Info: Requested size: 65.76541pt x 127.07729pt on input line
+ 193.
+<images/pie_refined6.png, id=129, 387.4475pt x 735.74875pt>
+File: images/pie_refined6.png Graphic file (type png)
+<use images/pie_refined6.png>
+Package pdftex.def Info: images/pie_refined6.png  used on input line 198. on in
+put line 198.
+Package pdftex.def Info: Requested size: 65.76541pt x 124.88478pt on input line
+ 198.
+<images/pie_refined2s3.png, id=130, 371.3875pt x 734.745pt>
+File: images/pie_refined2s3.png Graphic file (type png)
+<use images/pie_refined2s3.png>
+Package pdftex.def Info: images/pie_refined2s3.png  used on input line 209. on 
+input line 209.
+Package pdftex.def Info: Requested size: 103.34666pt x 204.46031pt on input lin
+e 209.
+<images/pie_refined2s4.png, id=131, 372.39125pt x 740.7675pt>
+File: images/pie_refined2s4.png Graphic file (type png)
+<use images/pie_refined2s4.png>
+Package pdftex.def Info: images/pie_refined2s4.png  used on input line 214. on 
+input line 214.
+Package pdftex.def Info: Requested size: 103.34666pt x 205.58237pt on input lin
+e 214.
+<images/pie_refined2s5.png, id=132, 372.39125pt x 716.6775pt>
+File: images/pie_refined2s5.png Graphic file (type png)
+<use images/pie_refined2s5.png>
+Package pdftex.def Info: images/pie_refined2s5.png  used on input line 219. on 
+input line 219.
+Package pdftex.def Info: Requested size: 103.34666pt x 198.89676pt on input lin
+e 219.
+<images/pie_refined2s6.png, id=133, 369.38pt x 704.6325pt>
+File: images/pie_refined2s6.png Graphic file (type png)
+<use images/pie_refined2s6.png>
+Package pdftex.def Info: images/pie_refined2s6.png  used on input line 224. on 
+input line 224.
+Package pdftex.def Info: Requested size: 103.34666pt x 197.14523pt on input lin
+e 224.
+<images/pie_balanced2s3.png, id=134, 373.395pt x 739.76375pt>
+File: images/pie_balanced2s3.png Graphic file (type png)
+<use images/pie_balanced2s3.png>
+Package pdftex.def Info: images/pie_balanced2s3.png  used on input line 235. on
+ input line 235.
+Package pdftex.def Info: Requested size: 103.34666pt x 204.7394pt on input line
+ 235.
+<images/pie_balanced2s4.png, id=135, 371.3875pt x 738.76pt>
+File: images/pie_balanced2s4.png Graphic file (type png)
+<use images/pie_balanced2s4.png>
+Package pdftex.def Info: images/pie_balanced2s4.png  used on input line 240. on
+ input line 240.
+Package pdftex.def Info: Requested size: 103.34666pt x 205.57758pt on input lin
+e 240.
+<images/pie_balanced2s5.png, id=136, 370.38374pt x 714.67pt>
+File: images/pie_balanced2s5.png Graphic file (type png)
+<use images/pie_balanced2s5.png>
+Package pdftex.def Info: images/pie_balanced2s5.png  used on input line 245. on
+ input line 245.
+Package pdftex.def Info: Requested size: 103.34666pt x 199.40831pt on input lin
+e 245.
+<images/pie_balanced2s6.png, id=137, 371.3875pt x 699.61375pt>
+File: images/pie_balanced2s6.png Graphic file (type png)
+<use images/pie_balanced2s6.png>
+Package pdftex.def Info: images/pie_balanced2s6.png  used on input line 250. on
+ input line 250.
+Package pdftex.def Info: Requested size: 103.34666pt x 194.6842pt on input line
+ 250.
+<images/pie_transition2s3.png, id=138, 372.39125pt x 736.7525pt>
+File: images/pie_transition2s3.png Graphic file (type png)
+<use images/pie_transition2s3.png>
+Package pdftex.def Info: images/pie_transition2s3.png  used on input line 261. 
+on input line 261.
+Package pdftex.def Info: Requested size: 103.34666pt x 204.4681pt on input line
+ 261.
+<images/pie_transition2s4.png, id=139, 374.39874pt x 741.77126pt>
+File: images/pie_transition2s4.png Graphic file (type png)
+<use images/pie_transition2s4.png>
+Package pdftex.def Info: images/pie_transition2s4.png  used on input line 266. 
+on input line 266.
+Package pdftex.def Info: Requested size: 103.34666pt x 204.75172pt on input lin
+e 266.
+<images/pie_transition2s5.png, id=140, 370.38374pt x 710.655pt>
+File: images/pie_transition2s5.png Graphic file (type png)
+<use images/pie_transition2s5.png>
+Package pdftex.def Info: images/pie_transition2s5.png  used on input line 271. 
+on input line 271.
+Package pdftex.def Info: Requested size: 103.34666pt x 198.28804pt on input lin
+e 271.
+<images/pie_transition2s6.png, id=141, 373.395pt x 701.62125pt>
+File: images/pie_transition2s6.png Graphic file (type png)
+<use images/pie_transition2s6.png>
+Package pdftex.def Info: images/pie_transition2s6.png  used on input line 276. 
+on input line 276.
+Package pdftex.def Info: Requested size: 103.34666pt x 194.18295pt on input lin
+e 276.
+ [3]
+<images/a_boundary.png, id=157, 495.8525pt x 465.74pt>
+File: images/a_boundary.png Graphic file (type png)
+<use images/a_boundary.png>
+Package pdftex.def Info: images/a_boundary.png  used on input line 326. on inpu
+t line 326.
+Package pdftex.def Info: Requested size: 140.92793pt x 132.36774pt on input lin
+e 326.
+<images/a3_boundary_refined.png, id=158, 718.685pt x 675.52374pt>
+File: images/a3_boundary_refined.png Graphic file (type png)
+<use images/a3_boundary_refined.png>
+Package pdftex.def Info: images/a3_boundary_refined.png  used on input line 349
+. on input line 349.
+Package pdftex.def Info: Requested size: 140.92793pt x 132.4636pt on input line
+ 349.
+<images/a3_boundary_balanced.png, id=159, 716.6775pt x 678.535pt>
+File: images/a3_boundary_balanced.png Graphic file (type png)
+<use images/a3_boundary_balanced.png>
+Package pdftex.def Info: images/a3_boundary_balanced.png  used on input line 35
+3. on input line 353.
+Package pdftex.def Info: Requested size: 140.92793pt x 133.4268pt on input line
+ 353.
+<images/a3_boundary_transition.png, id=160, 715.67375pt x 675.52374pt>
+File: images/a3_boundary_transition.png Graphic file (type png)
+<use images/a3_boundary_transition.png>
+Package pdftex.def Info: images/a3_boundary_transition.png  used on input line 
+357. on input line 357.
+Package pdftex.def Info: Requested size: 140.92793pt x 133.0202pt on input line
+ 357.
+ [4 <./images/pie_refined1.png> <./images/pie_refined2.png> <./images/pie_refin
+ed3.png> <./images/pie_refined4.png> <./images/pie_refined5.png> <./images/pie_
+refined6.png>]
+<images/a5_boundary_refined.png, id=185, 718.685pt x 677.53125pt>
+File: images/a5_boundary_refined.png Graphic file (type png)
+<use images/a5_boundary_refined.png>
+Package pdftex.def Info: images/a5_boundary_refined.png  used on input line 367
+. on input line 367.
+Package pdftex.def Info: Requested size: 140.92793pt x 132.85724pt on input lin
+e 367.
+<images/a5_boundary_balanced.png, id=186, 716.6775pt x 679.53876pt>
+File: images/a5_boundary_balanced.png Graphic file (type png)
+<use images/a5_boundary_balanced.png>
+Package pdftex.def Info: images/a5_boundary_balanced.png  used on input line 37
+1. on input line 371.
+Package pdftex.def Info: Requested size: 140.92793pt x 133.62418pt on input lin
+e 371.
+<images/a5_boundary_transition.png, id=187, 717.68124pt x 684.5575pt>
+File: images/a5_boundary_transition.png Graphic file (type png)
+<use images/a5_boundary_transition.png>
+Package pdftex.def Info: images/a5_boundary_transition.png  used on input line 
+375. on input line 375.
+Package pdftex.def Info: Requested size: 140.92793pt x 134.42303pt on input lin
+e 375.
+<images/a7_boundary_refined.png, id=188, 695.59875pt x 678.535pt>
+File: images/a7_boundary_refined.png Graphic file (type png)
+<use images/a7_boundary_refined.png>
+Package pdftex.def Info: images/a7_boundary_refined.png  used on input line 385
+. on input line 385.
+Package pdftex.def Info: Requested size: 140.92793pt x 137.4647pt on input line
+ 385.
+<images/a7_boundary_balanced.png, id=189, 700.6175pt x 677.53125pt>
+File: images/a7_boundary_balanced.png Graphic file (type png)
+<use images/a7_boundary_balanced.png>
+Package pdftex.def Info: images/a7_boundary_balanced.png  used on input line 38
+9. on input line 389.
+Package pdftex.def Info: Requested size: 140.92793pt x 136.27922pt on input lin
+e 389.
+<images/a7_boundary_transition.png, id=190, 697.60625pt x 676.5275pt>
+File: images/a7_boundary_transition.png Graphic file (type png)
+<use images/a7_boundary_transition.png>
+Package pdftex.def Info: images/a7_boundary_transition.png  used on input line 
+393. on input line 393.
+Package pdftex.def Info: Requested size: 140.92793pt x 136.66573pt on input lin
+e 393.
+<images/a3_boundary_projectinteriorcloseto.png, id=191, 717.68124pt x 679.53876
+pt>
+File: images/a3_boundary_projectinteriorcloseto.png Graphic file (type png)
+<use images/a3_boundary_projectinteriorcloseto.png>
+Package pdftex.def Info: images/a3_boundary_projectinteriorcloseto.png  used on
+ input line 407. on input line 407.
+Package pdftex.def Info: Requested size: 140.92793pt x 133.43755pt on input lin
+e 407.
+<images/a3_boundary_removesurface.png, id=192, 695.59875pt x 686.565pt>
+File: images/a3_boundary_removesurface.png Graphic file (type png)
+<use images/a3_boundary_removesurface.png>
+Package pdftex.def Info: images/a3_boundary_removesurface.png  used on input li
+ne 411. on input line 411.
+Package pdftex.def Info: Requested size: 140.92793pt x 139.0915pt on input line
+ 411.
+<images/a3_boundary_shrinkexterior.png, id=193, 685.56125pt x 669.50125pt>
+File: images/a3_boundary_shrinkexterior.png Graphic file (type png)
+<use images/a3_boundary_shrinkexterior.png>
+Package pdftex.def Info: images/a3_boundary_shrinkexterior.png  used on input l
+ine 415. on input line 415.
+Package pdftex.def Info: Requested size: 140.92793pt x 137.62662pt on input lin
+e 415.
+<images/a3_boundary_surfacepatterns.png, id=194, 684.5575pt x 669.50125pt>
+File: images/a3_boundary_surfacepatterns.png Graphic file (type png)
+<use images/a3_boundary_surfacepatterns.png>
+Package pdftex.def Info: images/a3_boundary_surfacepatterns.png  used on input 
+line 419. on input line 419.
+Package pdftex.def Info: Requested size: 140.92793pt x 137.82072pt on input lin
+e 419.
+<images/a5_boundary_projectinteriorcloseto.png, id=195, 723.70375pt x 681.54625
+pt>
+File: images/a5_boundary_projectinteriorcloseto.png Graphic file (type png)
+<use images/a5_boundary_projectinteriorcloseto.png>
+Package pdftex.def Info: images/a5_boundary_projectinteriorcloseto.png  used on
+ input line 429. on input line 429.
+Package pdftex.def Info: Requested size: 140.92793pt x 132.719pt on input line 
+429.
+<images/a5_boundary_removesurface.png, id=196, 686.565pt x 680.5425pt>
+File: images/a5_boundary_removesurface.png Graphic file (type png)
+<use images/a5_boundary_removesurface.png>
+Package pdftex.def Info: images/a5_boundary_removesurface.png  used on input li
+ne 433. on input line 433.
+Package pdftex.def Info: Requested size: 140.92793pt x 139.68864pt on input lin
+e 433.
+<images/a5_boundary_shrinkexterior.png, id=197, 686.565pt x 672.5125pt>
+File: images/a5_boundary_shrinkexterior.png Graphic file (type png)
+<use images/a5_boundary_shrinkexterior.png>
+Package pdftex.def Info: images/a5_boundary_shrinkexterior.png  used on input l
+ine 438. on input line 438.
+Package pdftex.def Info: Requested size: 140.92793pt x 138.04039pt on input lin
+e 438.
+<images/a5_boundary_surfacepatterns.png, id=198, 686.565pt x 670.505pt>
+File: images/a5_boundary_surfacepatterns.png Graphic file (type png)
+<use images/a5_boundary_surfacepatterns.png>
+Package pdftex.def Info: images/a5_boundary_surfacepatterns.png  used on input 
+line 442. on input line 442.
+Package pdftex.def Info: Requested size: 140.92793pt x 137.62834pt on input lin
+e 442.
+<images/a7_boundary_projectinteriorcloseto.png, id=199, 699.61375pt x 680.5425p
+t>
+File: images/a7_boundary_projectinteriorcloseto.png Graphic file (type png)
+<use images/a7_boundary_projectinteriorcloseto.png>
+Package pdftex.def Info: images/a7_boundary_projectinteriorcloseto.png  used on
+ input line 452. on input line 452.
+Package pdftex.def Info: Requested size: 140.92793pt x 137.0822pt on input line
+ 452.
+<images/a7_boundary_removesurface.png, id=200, 686.565pt x 670.505pt>
+File: images/a7_boundary_removesurface.png Graphic file (type png)
+<use images/a7_boundary_removesurface.png>
+Package pdftex.def Info: images/a7_boundary_removesurface.png  used on input li
+ne 456. on input line 456.
+Package pdftex.def Info: Requested size: 140.92793pt x 137.62834pt on input lin
+e 456.
+<images/a7_boundary_shrinkexterior.png, id=201, 685.56125pt x 671.50874pt>
+File: images/a7_boundary_shrinkexterior.png Graphic file (type png)
+<use images/a7_boundary_shrinkexterior.png>
+Package pdftex.def Info: images/a7_boundary_shrinkexterior.png  used on input l
+ine 460. on input line 460.
+Package pdftex.def Info: Requested size: 140.92793pt x 138.03929pt on input lin
+e 460.
+<images/a7_boundary_surfacepatterns.png, id=202, 685.56125pt x 670.505pt>
+File: images/a7_boundary_surfacepatterns.png Graphic file (type png)
+<use images/a7_boundary_surfacepatterns.png>
+Package pdftex.def Info: images/a7_boundary_surfacepatterns.png  used on input 
+line 464. on input line 464.
+Package pdftex.def Info: Requested size: 140.92793pt x 137.83296pt on input lin
+e 464.
+
+[5 <./images/pie_refined2s3.png> <./images/pie_refined2s4.png> <./images/pie_re
+fined2s5.png> <./images/pie_refined2s6.png>] [6 <./images/pie_balanced2s3.png> 
+<./images/pie_balanced2s4.png> <./images/pie_balanced2s5.png> <./images/pie_bal
+anced2s6.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 550--551
+
+ []
+
+[7 <./images/pie_transition2s3.png> <./images/pie_transition2s4.png> <./images/
+pie_transition2s5.png> <./images/pie_transition2s6.png> <./images/a_boundary.pn
+g>] (./roi2D.bbl)
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 884.
+ [8 <./images/a3_boundary_refined.png> <./images/a3_boundary_balanced.png> <./i
+mages/a3_boundary_transition.png> <./images/a5_boundary_refined.png> <./images/
+a5_boundary_balanced.png> <./images/a5_boundary_transition.png>] [9 <./images/a
+7_boundary_refined.png> <./images/a7_boundary_balanced.png> <./images/a7_bounda
+ry_transition.png> <./images/a3_boundary_projectinteriorcloseto.png> <./images/
+a3_boundary_removesurface.png> <./images/a3_boundary_shrinkexterior.png> <./ima
+ges/a3_boundary_surfacepatterns.png>] [10 <./images/a5_boundary_projectinterior
+closeto.png> <./images/a5_boundary_removesurface.png> <./images/a5_boundary_shr
+inkexterior.png> <./images/a5_boundary_surfacepatterns.png>]
+[11 <./images/a7_boundary_projectinteriorcloseto.png> <./images/a7_boundary_rem
+ovesurface.png> <./images/a7_boundary_shrinkexterior.png> <./images/a7_boundary
+_surfacepatterns.png>]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 884.
+ (./roi2D.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 884.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 884.
+Package rerunfilecheck Info: File `roi2D.out' has not changed.
+(rerunfilecheck)             Checksum: CAE992323CBBB8418ADA329740DC4669;1141.
+
+
+LaTeX Warning: There were multiply-defined labels.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 884.
+ ) 
+Here is how much of TeX's memory you used:
+ 8406 strings out of 492990
+ 125683 string characters out of 6135006
+ 238836 words of memory out of 5000000
+ 11701 multiletter control sequences out of 15000+600000
+ 10857 words of font info for 42 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 28i,18n,35p,1145b,475s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/font
+s/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cms
+y10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pf
+b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share
+/texlive/texmf-dist/fonts/type1/public/amsfonts/euler/eusm10.pfb>
+Output written on roi2D.pdf (11 pages, 1725287 bytes).
+PDF statistics:
+ 390 PDF objects out of 1000 (max. 8388607)
+ 270 compressed objects within 3 object streams
+ 105 named destinations out of 1000 (max. 500000)
+ 349 words of extra memory for PDF output out of 10000 (max. 10000000)
+
