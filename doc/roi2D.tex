@@ -12,6 +12,9 @@
 \parindent=0cm
 
 \usepackage[ruled,vlined]{algorithm2e}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
 \graphicspath{{images/}}
 
 \begin{document}
@@ -32,7 +35,7 @@
 {\large Fabrice Jaillet}
 
 \small \texttt{fabrice.jaillet@univ-lyon1.fr}\\
-\small Universit\'e Lyon 1 -- \textsc{LIRIS}  -- France.
+\small Universit\'e de Lyon, IUT Lyon~1 -- LIRIS CNRS UMR-5205  -- France.
 \end{minipage}
 \hfill
 \begin{minipage}{0.28\textwidth}
@@ -49,42 +52,85 @@ This document will show you how to obtain mixed--elements meshes with the provid
 
 %---------------------------
 %---------------------------
-\section{Data Structure}
+\section{Data Structures and initialisation}
 \label{sec:dataStruct}
 %---------------------------
 %---------------------------
 
-Quadrant, QuadEdge, Polyline
+\textcolor{red}{Quadrant, QuadEdge, Polyline}
+\textcolor{red}{Final resulting Mesh}
 
-Final resulting Mesh
+
+This mesh generator will allow you to create a mixed--element mesh starting from a boundary 2D mesh  (polyline) composed of edges (Fig.~\ref{f:polyline}). Let this input surface mesh be $\mathcal{S}$. Two constraints must be fulfilled by $\mathcal{S}$: it must be unfolded (no self--intersection), and the normal of the edges must be pointing outside.
+
+The algorithm will use $\mathcal{S}$ for two purposes: to find out if a point is inside or outside the domain and to project a point onto $\mathcal{S}$. Therefore, if you have two different meshes representing the exact same domain, you should use the one with less edges. The algorithm will compute faster the output mesh.
+
+The first step of the algorithm is to compute the Bounding box (Bbox) of $\mathcal{S}$. This Bbox will not necessarily be a perfect square. Therefore, an algorithm will be employed to automatically compute a set of squares containing $\mathcal{S}$ (Fig.~\ref{f:grid}).
+
+Now it is possible to introduce the other important input: the Refinement Level (\textit{rl}). This mesh generator is based on the  Quadtree technique introduced in \cite{Finkel1974}. This technique recursively split a Quadant in a finite number of equivalent sons. For instance if the Quadrant is a square, to refine it one level means that it will be replaced by 4 new QUadrants. All of them will be sons of the replaced Quadrant in the Quadtree structure. By allowing the use of quadrants with cut corners, this modeling technique overcomes some of the drawbacks of standard Quadtree encoding for finite element mesh generation \cite{Yerry1983}.
+In our case, Quadrants will continue to refine until a maximum provided level is reached. Quadrants lying completely outside $\mathcal{S}$ will be removed.\\
 
  \begin{figure}[htb]
 \centering
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a_polyline.png}
-  \label{f:polyline}
- }
-\caption{An example of complex polyline with holes and sharp features. This corresponds to the Input to be meshed.}
+  \includegraphics[width=0.24\textwidth]{a_polyline_info.png}
+  \label{f:polyline}}
+ \subfigure[~]{
+  \includegraphics[width=0.72\textwidth]{a_grid.png}
+  \label{f:grid}}
 \label{fig:boundary}
+\caption{ (a) An example of complex polyline with holes and sharp features. This corresponds to the Input to be meshed (\href{https://github.com/jaillet/MixedQuadTree/blob/master/data/a.poly}{source: a.poly}) . (b) The embedding (poorly defined...) initial quadrants }
 \end{figure}
 
+%---------------------------
+\subsection {Polyline as Input boundary}
+
+A \textbf{Polyline} is composed of (Fig.~\ref{f:polyline}):
+\begin{itemize}
+\item a vector of  \textbf{3DPoint}, with coordinates, that are all lying inside the \textbf{BoundingBox} of the Polyline,
+\item and their associated angle. If the angle is not lying in the range $[MinAngle=175,MaxAngle=185]$, then it's considered as a sharp point, and called  a \textbf{Feature} in the remaining.
+\item a vector of \textbf{PolyEdge}, each one defined by the indexes of the extremity' nodes, and a normal. By convention, the normal is not normed and is pointing out the Input. For an oriented edge $(i,j)$, its right side will be outside and its left side inside. Thus, the Input must be defined by closed sets of connecting edges with counter-clockwise orientation. This way, holes may be simply created.
+\end{itemize}
+The format for Input file might be either \verb?.poly? as described on the \href{https://www.cs.cmu.edu/~quake/triangle.poly.html}{ Triangle\_1.6 website}; find an example here: \href{https://github.com/jaillet/MixedQuadTree/blob/master/data/unit\_square.poly}{unit\_square.poly}.
+It could also be defined as \verb?.mdl? file, see \href{https://github.com/jaillet/MixedQuadTree/blob/master/data/unit\_square.mdl}{unit\_square.mdl}:
+
+%---------------------------
+\subsection{Quadrant as support of surface mesh}
+
+The other important structure is the \textbf{Quadrant}:
+\begin{itemize}
+\item is composed of a \textit{pointindex}, vector of 4 corner indices in a vector of \textbf{MeshPoint}: Note here that MeshPoint is embedding a previously seen \textbf{3DPoint}, as well as some information describing its state. More details below.
+\item When the Quadrant is subdived into non quadrant elements (in Transitions for example), it contains a vector of \textit{sub\_elements}, each one described by a vector of indices as presented right above.
+\item It also contains a list of intersecting \textbf{PolyEdges}, and intersecting \textbf{Features}. These informations are useful to speed up the inside/outside descrimination for the Quadrant or to better handle the boundary and surface elements, for example.
+\item and some additional data, for processing purpose that will be described later.
+\end{itemize}
+
+Along with the Quadrant, comes the \textbf{QuadEdge}:
+\begin{itemize}
+\item defined by 3 indices, the 2 extremities and potential \textit{midpoint} when this edge is split.
+\end{itemize}
+
+And finally, the \textbf{MeshPoint}:
+\begin{itemize}
+\item that is embedding a 3DPoint, as coordinates of the Quadrant's corners, referenced as indices.
+\item MeshPoint are conversely connected to Quadrant by an index map of \textit{elements}, referencing all the Quadrants having this point as corner.
+\item it also is the support for some crucial processing information on it's \textit{state}, merged in a single byte: the point is \verb?inside?, has been \verb?projected?, is representing a \verb?feature?, has been previously \verb?checked?, etc\ldots  
+
+\end{itemize}
 
 %---------------------------
 %---------------------------
-\section{A quadtree-based approach}
+\section{Main steps of the method}
 \label{sec:method}
 %---------------------------
 %---------------------------
 
-mixed-elements mesh generation, describe here the main steps method
+mixed-elements mesh generation, describe here the main steps of the method
 
-\subsection{a quadtree-based method}
+\subsection{A quadtree-based method}
 show different steps of the method: 
 
 \begin{algorithm}[H]
-
-
-
 \SetAlgoLined
 \KwResult{A mixed-elements mesh}
  \nl \ForEach{Quadrant}{
@@ -108,8 +154,47 @@ show different steps of the method:
 \item transition patterns (OMP)
 \end{enumerate}
 
+
 %---------------------------
-\subsection{Boundary handling}
+\subsection{Refinement, Balancing and Transition steps}
+
+%---------------------------
+%---------------------------
+\section{Fitting quadrants to Input Surface}
+\label{sec:method}
+%---------------------------
+%---------------------------
+
+
+
+\begin{algorithm}[H]
+
+\SetAlgoLined
+\KwResult{A mixed-elements mesh}
+ \tcc{Preprocess: handle boundary}
+ \tcc{Generate quadtree}
+\nl \ForEach{Quadrant}{
+ \Repeat {desired Refinement Level}{
+ \nl Subdivide Quadrant\;
+   \ForEach{ new Sub-Quadrant}{
+   \If{Intersects Input \textit{or} Is Inside}{Insert Sub-Quadrant}
+    }
+  }\label{alg:subdivide}
+  }
+ \nl Create balanced quadtree\; \label{alg:goto}
+ \nl Apply Transition Patterns\;
+ \tcc{Input surface fitting}
+ \nl Detect Features in Input\;
+ Project Close to Boundary\;
+ Remove on Input Surface\;
+ Shrink to Boundary\;
+ \nl Apply Surface Patterns\;
+ \caption{Generation process and Input surface fitting}
+ \label{alg:surfacefitting}
+\end{algorithm}
+
+%---------------------------
+\subsection{Boundary and sharp features handling}
 
 preprocess
 
@@ -123,8 +208,18 @@ preprocess
 \label{fig:boundary}
 \end{figure}
 
+The first step to 
+
+        // test1: if nb Features >= 2
+        // first condition is optimization if NbFeatures has been already computed
+        // test2: if distFProjectionFeature > distMax for each node
+        // done: compute distMax before...
+        // test3: if the number of intersection of the Polyline and Quadrant edge >= 3
+
+
 %---------------------------
-\subsection{Refinement, Balancing and Transition steps}
+\subsection{Generating first quadrants over boundary prepared mesh}
+
 
 \begin{figure}[htb]
 \centering
@@ -180,42 +275,9 @@ preprocess
 \label{fig:generate7}
 \end{figure}
 
-%---------------------------
-%---------------------------
-\section{Fitting quadrants to Input Surface}
-\label{sec:method}
-%---------------------------
-%---------------------------
-
-
-
-\begin{algorithm}[H]
-
-\SetAlgoLined
-\KwResult{A mixed-elements mesh}
- \nl \ForEach{Quadrant}{
- \Repeat {desired Refinement Level}{
- \nl Subdivide Quadrant\;
-   \ForEach{ new Sub-Quadrant}{
-   \If{Intersects Input \textit{or} Is Inside}{Insert Sub-Quadrant}
-    }
-  }\label{alg:subdivide}
-  }
- \nl Create balanced quadtree\; \label{alg:goto}
- \nl Apply Transition Patterns\;
- \nl Detect Features in Input\;
- Project Close to Boundary\;
- Remove on Input Surface\;
- Shrink to Boundary\;
- \nl Apply Surface Patterns\;
- \caption{Generation process and Input surface fitting}
- \label{alg:surfacefitting}
-\end{algorithm}
-
-
 
 %---------------------------
-\subsection{Project interior points close to boundary}
+\subsection{Handling Input surface}
 
 \begin{figure}[htb]
 \centering
@@ -224,60 +286,64 @@ preprocess
   \label{f:boundaryclose3}
  }
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a5_boundary_projectinteriorcloseto.png}
-  \label{f:boundaryclose5}
+  \includegraphics[width=0.3\textwidth]{a3_boundary_removesurface.png}
+  \label{f:boundaryrem3}
+ }\\
+  \subfigure[~]{
+  \includegraphics[width=0.3\textwidth]{a3_boundary_shrinkexterior.png}
+  \label{f:boundaryshrink3}
  }
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a7_boundary_projectinteriorcloseto.png}
-  \label{f:boundaryclose7}
+  \includegraphics[width=0.3\textwidth]{a3_boundary_surfacepatterns.png}
+  \label{f:boundarysurf3}
  }
- \caption{After projecting interior points close to boundary, level 3, 5, 7.}
-\label{fig:projectinteriorcloseto}
+ \caption{After projecting interior points close to boundary, , level 3.}
+\label{fig:surfacehandling3}
 \end{figure}
-
-%---------------------------
-\subsection{Remove on input surface}
-
+%
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a3_boundary_removesurface.png}
-  \label{f:boundaryrem3}
+  \includegraphics[width=0.3\textwidth]{a5_boundary_projectinteriorcloseto.png}
+  \label{f:boundaryclose5}
  }
  \subfigure[~]{
   \includegraphics[width=0.3\textwidth]{a5_boundary_removesurface.png}
   \label{f:boundaryrem5}
  }
+ \\
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a7_boundary_removesurface.png}
-  \label{f:boundaryrem7}
+  \includegraphics[width=0.3\textwidth]{a5_boundary_shrinkexterior.png}
+  \label{f:boundaryshrink5}
  }
- \caption{After safely removing exterior quadrants, level 3, 5, 7.}
-\label{fig:removesurface}
+  \subfigure[~]{
+  \includegraphics[width=0.3\textwidth]{a5_boundary_surfacepatterns.png}
+  \label{f:boundarysurf5}
+ }
+ \caption{After projecting interior points close to boundary, level 5.}
+\label{fig:surfacehandling5}
 \end{figure}
-
-
-%---------------------------
-\subsection{Surface Patterns}
-
-surface patterns + features
-
+%
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a3_boundary_surfacepatterns.png}
-  \label{f:boundaryrem3}
+  \includegraphics[width=0.3\textwidth]{a7_boundary_projectinteriorcloseto.png}
+  \label{f:boundaryclose7}
  }
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a5_boundary_surfacepatterns.png}
-  \label{f:boundaryrem5}
+  \includegraphics[width=0.3\textwidth]{a7_boundary_removesurface.png}
+  \label{f:boundaryrem7}
+ }\\
+  \subfigure[~]{
+  \includegraphics[width=0.3\textwidth]{a7_boundary_shrinkexterior.png}
+  \label{f:boundaryshrink7}
  }
   \subfigure[~]{
   \includegraphics[width=0.3\textwidth]{a7_boundary_surfacepatterns.png}
-  \label{f:boundaryrem7}
+  \label{f:boundarysurf7}
  }
- \caption{After applying surface patterns, level 3, 5, 7.}
-\label{fig:surfacepatterns}
+ \caption{After projecting interior points close to boundary, level 7.}
+\label{fig:surfacehandling7}
 \end{figure}
 
 
@@ -321,15 +387,48 @@ subdivide Quad + goto subsection balanced
 
 In order to install this application you will need a Unix--based system, a \texttt{c++} compiler and \texttt{cmake}. You should do the following:
 
+%---------------------------
+\subsection{Create an account on github.com}
+
+\begin{itemize}
+\item go to github.com, then 'Signup and Pricing' $\Rightarrow$ 'Free for open source' $\Rightarrow$ 'Create a free account'
+\item choose Username/Email/Password and it's done
+\item you can also update your account settings (website, avatar...)
+\end {itemize}
+
+%---------------------------
+\subsection{Git Fork MixedQuadTree}
+
+Let's fork the initial MEPP repository. So, once you're logged in on github
+\begin{itemize}
+\item go to https://github.com/jaillet/MixedQuadTree/
+\item click on the 'Fork' button
+\item once the fork is finished, you'll have your own copy of MixedQuadTree with the following path: https://github.com/\textbf{yourUsername}/MixedQuadTree
+\item at this URL, you're able to browse the sources, see the commit log, report issues...
+\end {itemize}
+
+%---------------------------
+\subsection{Compiling}
+
 {\small
 \begin{verbatim}
-$ unzip mesher.zip
-$ cmake src/
+$ git clone /https://github.com/jaillet/MixedQuadTree.git
+$ cd MixedQuadTree/
+$ git checkout branch develop
+$ cmake src -D_CMAKE_BUILD_TYPE=Debug (or Release) // Uppercase is important
 $ make
 \end{verbatim}
 }
 
-This has been tested on Linux and Mac without any error nor warning.
+This has been tested on Linux and Mac without any known error nor warning.
+
+\subsection{Git usage}
+At this point, you can edit and commit files using  the git workflow 
+ 
+\textbf{but only push to your own fork of MEPP (origin) !!!}\\
+
+The merge between the original repository is done by ANOTHER DEVELOPER after a \textbf{'pull request'}.
+To make a 'pull request', go to https://github.com/yourUsername/MixedQuadTree, click on 'Pull Request'. Then, choose the two branches you would like to merge (master in \textit{jaillet} and yourbranch in origin), write your comments and click on 'Send Pull Request'.
 
 %%---------------------------
 %%---------------------------
