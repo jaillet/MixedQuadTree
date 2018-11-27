@@ -65,8 +65,9 @@ void endMsg(){
     cerr << "              [-r] input_surface rl [-g] [-v]\n";
     cerr << "where:\n";
     cerr << "  one of the parameters must be an input surface mesh in\n";
-    cerr << "  mdl or off format. If output name is not provided it\n";
-    cerr << "  will be saved in input_name.m3d. Options:\n";
+    cerr << "  mdl or poly format. If output name is not provided it\n";
+    cerr << "  will be saved in input_name.???. Options:\n";
+    cerr << "    -d input surface as .mdl file (alternative to -p).\n";
     cerr << "    -s Refine Quadrants intersecting the input surface.\n";
     cerr << "       Parameter ref_level is the refinement level\n";
     cerr << "    -a Refine all elements in the input domain.\n";

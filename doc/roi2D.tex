@@ -49,7 +49,8 @@
 This document will show you how to obtain mixed--elements meshes with the provided code. Two main alternatives are explained here. The first will show you how to use the code as a standalone program. The second will show you how to bundle your own code with the mixed-element mesh generator. In both cases, mixed--element are employed to manage transitions between fine and coarse regions and at the boundary of the domain. All the remaining regions will be meshed with structured regular quadrangles.
 \end{abstract}
 
-
+\tableofcontents
+\newpage
 %---------------------------
 %---------------------------
 \section{Data Structures and initialisation}
@@ -172,10 +173,31 @@ As previously said, the method is based on Quad-tree, and this user parameter wi
 \textcolor{red}{todo: describe region refinement format and usage}
 The different option for refinement could be:
 \begin{itemize}
-\item refine all Quadrants (\texttt{-a}). The splitting operation will be performed over each Quadrant enclosing $\mathcal{S}$. For instance, \texttt{-a 2} will split all the initial Quadrants twice, replacing them by potentially 16 new Quadrants. In reality, this is achieved level by level: first subdividing and replacing the Quadrants in 4 new ones, keeping only those that lay inside or that intersect $\mathcal{S}$ intersects (using again a \textit{visitor}). Then, only those ones are candidates to the second level of subdivision, repeating the steps of splitting and checking of intersection on sub-Quadrants (Fig.~). 
-\item refine Quadrant \textbf{surface},
-\item refine Quadrant laying in a specific \textbf{region}, determined by 
+\item refine \textbf{all} Quadrants (\texttt{-a N}). The spitting operation will be performed over each Quadrant enclosing $\mathcal{S}$. $N$ will define the refinement level \textit{rl} for this operation. For instance, \texttt{-a 2} will split all the initial Quadrants twice, replacing them by potentially 16 new Quadrants. In reality, this is achieved level by level: first subdividing and replacing the Quadrants in 4 new ones, keeping only those that lay inside or that intersect $\mathcal{S}$ intersects (using again a \textit{visitor}). Then, only those ones are candidates to the second level of subdivision, repeating the steps of splitting and checking of intersection on sub-Quadrants (Fig.~\ref{fig:pieref}). 
+\item refine \textbf{surface} Quadrant \texttt{-s N}. The  splitting  operation  will  be  performed  over  each Quadrant  that  intersects  a  section  of $\mathcal{S}$.  For  instance, \texttt{-s  2} will  split  all  the  initial  Quadrants into  4  new  ones  and  then,  only  the  Quadrants  that  still  intersect $\mathcal{S}$ will  be  split  in 4  more, still keeping only intersecting ones (Fig.~\ref{fig:pierefs})
+\item (\textcolor{red}{not tested yet in 2D!}) refine by \textbf{block} \texttt{-b} followed by the name of file where some block regions are specified. A block is defined by 2 points: $(min_x, min_y,min_z), ((max_x, max_y,max_z)$ and a refinement level \textit{rl} to be applied over the Quadrants that intersect this block. This is a text file where first we specify the number of blocks and then we detail each one of them. An example with 2 regions is now provided:\\
+%
+\begin{minipage}{0.2\textwidth}
+\begin{verbatim}
+n_regions 2
+0 0 0
+10 10 0
+5
+0 0 0
+20 20 0
+4
+\end{verbatim}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.65\textwidth}
+In this 2D case, $min_z$ and $max_z$ are mandatory for compatibility reasons with the 3D format, but will not be used. Thus, the portion of $\mathcal{S}$ intersecting the quadrangle $(0,0) \to (10,10)$ will be refined to level 5 and the complement inside the block $(0,0) \to (20,20)$ that intersects $\mathcal{S}$ will be refined to level 4.\\[0.2cm]
+\end{minipage}
+\item (\textcolor{red}{not tested yet in 2D!}) refine Quadrants laying in a specific \textbf{region} \texttt{-r}. Its followed by 2 arguments: the name of file where another input surface is specified in \texttt{mdl} format and a \textit{rl}. All the Quadrants inside $\mathcal{S}$ and the specified region will be refined to \textit{rl}. %Note that this geometry can be any closed triangle mesh, for instance a tetrahedron. Also note that mesh generation time will be directly influenced by the number of triangle faces the input meshes have. In order to accelerate the process you should use as less triangles as possible that correctly define the input domains and regions. Let us say that the mesh called \texttt{myregion.mdl} intersects a portion of $\mathcal{S}$, then the instruction: \texttt{-r myregion.mdl 5} will refine to level 5 all the octants in that region. The last point regarding this option is automatic rotation. The code will compute the ``dominant normals'' of the input region and will try to align them with referential axes. This transformation will also be applied to $\mathcal{S}$. Once the mesh is generated, the inverse transformation will be applied to the output so the domain is well represented.
 \end{itemize}
+
+Finally, note that large meshes can be produced with a small value for $N$. For instance, if the starting point is only one cube and we set \texttt{N=10}, the code may produce up to $4^{10} = 1,048,576$ elements.
+
+Of course, all these switches might be combined (as in Fig.~\ref{fig:pierefs}) to produce flexible tools and comply with the user requirements. If a Quadrant belongs to more than one refinement region (no matter the type of it), it will be refined to maximum level among those regions.\\
 
 The \textbf{Visitor Pattern} has been implemented to circulate (\textit{visit}) the Quadrants and determine whether they should be split or not (\textit{accept}).
 
@@ -213,7 +235,7 @@ The \textbf{Visitor Pattern} has been implemented to circulate (\textit{visit}) 
   \includegraphics[width=0.14\textwidth]{pie_refined6.png}
   \label{f:pieref6}
  }
- \caption{Effect of the refinement level applied on the complete structure (\texttt{-a} switch), (1 to 6)}
+ \caption{Effect of the refinement level applied on the complete structure (\texttt{-a N} switch, with \texttt{N=1..6})}
 \label{fig:pieref}
 \end{figure}
 %
@@ -238,7 +260,7 @@ The \textbf{Visitor Pattern} has been implemented to circulate (\textit{visit}) 
   \includegraphics[width=0.22\textwidth]{pie_refined2s6.png}
   \label{f:pierefs6}
  }
- \caption{Effect of combined refinement levels, with level 2 applied on the complete structure (\texttt{-a} switch), and incremental refinement (3 to 6) only applied on surface quadrants (\texttt{-s} switch).}
+ \caption{Effect of combined refinement levels, with level 2 applied on the complete structure (\texttt{-a 2} switch), and incremental refinement (\texttt{-s N} switch, with \texttt{N=3..6}) only applied on surface quadrants.}
 \label{fig:pierefs}
 \end{figure}
 
@@ -360,7 +382,7 @@ preprocess
  \begin{figure}[htb]
 \centering
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a_boundary.png}
+  \includegraphics[width=0.6\textwidth]{a_boundary.png}
   \label{f:boundary}
  }
 \caption{After boundary handling.}
@@ -593,127 +615,97 @@ At this point, you can edit and commit files using  the git workflow
 The merge between the original repository is done by ANOTHER DEVELOPER after a \textbf{'pull request'}.
 To make a 'pull request', go to https://github.com/yourUsername/MixedQuadTree, click on 'Pull Request'. Then, choose the two branches you would like to merge (master in \textit{jaillet} and yourbranch in origin), write your comments and click on 'Send Pull Request'.
 
-%%---------------------------
-%%---------------------------
-%\section{Standalone program use}
-%\label{standalone}
-%%---------------------------
-%%---------------------------
+%---------------------------
+%---------------------------
+\section{Standalone program use}
+\label{standalone}
+%---------------------------
+%---------------------------
+
+%---------------------------
+\subsection{Produce a conformal high-quality mixed--elements mesh}
+\label{s:generatemesh}
+
+To produce a mesh you must execute in a terminal the following:
 %
-%
-%This mesh generator will allow you to create a mixed--element mesh starting from a surface mesh composed of triangles. Let this input surface mesh be $\mathcal{S}$. Two constraints must be fulfilled by $\mathcal{S}$: it must be unfolded (no self--intersection), and the normal of the triangles must be pointing outside.
-%
-%The algorithm will use $\mathcal{S}$ for two purposes: to find out if a point is inside or outside the domain and to project a point onto $\mathcal{S}$. Therefore, if you have two different meshes representing the exact same domain, you should use the one with less triangles. The algorithm will compute faster the output volume mesh.
-%
-%The first step of the algorithm is to compute the Bounding box (Bbox) of $\mathcal{S}$. This Bbox will not necessarily be a perfect hexahedron (cube). Therefore, an algorithm will be employed to automatically compute a set of cubes containing $\mathcal{S}$. For instance, if $\mathcal{S}$ is a baseball bat, the starting point will be 3 or 4 cubes, one  next to the other.
-%
-%Now it is possible to introduce the other important input: the Refinement Level (\textit{rl}). This mesh generator is based on the  Octree technique \cite{Yerry1984,Shephard1991}. This technique recursively split an Octant in a finite number of equivalent sons. For instance if the Octant is a cube, to refine it one level means that it will be replaced by 8 new Octants. All of them will be sons of the replaced Octant in the Octree structure. Note that in some works this splitting operation produces 27 new cubes each time an Octant is refined \cite{Schneiders1996,Zhang2006,Ito2009}. In our case, Octants will continue to refine until a maximum provided level is reached. Octants lying completely outside $\mathcal{S}$ will be removed.
-%
-%To produce a mesh you must execute in a terminal the following:
-%
-%{\small
-%\begin{verbatim}
-%$ ./mesher_roi [-option | parameters]
-%\end{verbatim}
-%}
-%
-%%---------------------------
-%%---------------------------
-%\subsection{Basic mesh generation}
-%\label{generatemesh}
-%%---------------------------
-%%---------------------------
-%
-%If you do not indicate any option nor parameters, the program will list all the available options for you. The basic mesh generation options are listed below. It is mandatory to provide a surface triangular mesh that describes the domain to mesh. Basic input/output formats are the following:
-%
-%\begin{itemize}
-%\item \texttt{-d}: next to it comes the name of an input file (\texttt{mdl} extension) where the surface mesh is specified. In this version of the code only one input surface can be specified.
-%\item \texttt{-o}: another option to specify an input: \texttt{off} format file.
-%\item \texttt{-u}: next to it comes the name of the output file. The extension (file format) will be automatically added: \texttt{mvm} (Mixed Volumen Mesh) is by default, but it can be changed with the next two options.
-%\item \texttt{-g}: save the ouput mesh in \textsc{GetFem} format: \texttt{gmf} extenstion (Getfem Mesh Format). Note you can still specify an output file name with option \texttt{-u}, \textit{e.g.}: \texttt{-u myoutput -g} will produce output file: \texttt{myoutput.gmf}.
-%\item \texttt{-v}: equivalent to option \texttt{-g}, but saves in \textsc{vtk -- ascii} format.
-%\end{itemize}
-%
-%Now, to provide the Refinement Level (\textit{rl}) several options can be used:
-%
-%\begin{itemize}
-%\item \texttt{-a}: next to it comes the number of times ($N$) the splitting operation will be performed over the initial octants enclosing $\mathcal{S}$. For instance if we type: \texttt{-a 2} this will split all the intial octants into eight new ones and each one of them in eight more.
-%\item \texttt{-s}: next to it comes the number of times ($N$) the splitting operation will be performed over each octant that intersects a section of $\mathcal{S}$. For instance if we type: \texttt{-s 2} this will split all the intial octants into eight new ones and  then, only the octants that still intersect $\mathcal{S}$ will be split in eight more.
-%\item \texttt{-b}: next to it comes the name of file where some block regions are specified. A block is defined by 2 points: $(min_x, min_y, min_z), ((max_x, max_y, max_z)$ and a \textit{rl} to be applyed over the octants that intersect this block. This is a text file where first we specify the number of blocks and then we detail each one of them. An example with 2 regions is now provided:
-%
-%\begin{minipage}{0.2\textwidth}
-%\begin{verbatim}
-%n_regions 2
-%
-%0 0 0
-%10 10 10
-%5
-%
-%0 0 0
-%20 20 20
-%4
-%\end{verbatim}
-%\end{minipage}
-%\hfill
-%\begin{minipage}[c]{0.65\textwidth}
-%In this case the portion of $\mathcal{S}$ intersecting the hexahedron $(0,0,0) \to (10,10,10)$ will be refined to level 5 and the complement inside the block $(0,0,0) \to (20,20,20)$ that intersects $\mathcal{S}$ will be refined to level 4.\\[0.2cm]
-%
-%\textbf{Important Note}: if an octant belongs within more than one refinement region (no matter the type of it), it will be refined to maximum level among those regions.
-%\end{minipage}
-%\item \texttt{-r}: next to it comes 2 arguments; the name of file where another input surface is specified in \texttt{mdl} format and a \textit{rl}. All the octants inside $\mathcal{S}$ and the specified region will be refined to \textit{rl}. Note that this geometry can be any closed triangle mesh, for instance a tetrahedron. Also note that mesh generation time will be directly influenced by the number of triangle faces the input meshes have. In order to accelerate the process you should use as less triangles as possible that correctly define the input domains and regions. Let us say that the mesh called \texttt{myregion.mdl} intersects a portion of $\mathcal{S}$, then the instruction: \texttt{-r myregion.mdl 5} will refine to level 5 all the octants in that region. The last point regarding this option is automatic rotation. The code will compute the ``dominant normals'' of the input region and will try to align them with referential axes. This transformation will also be applied to $\mathcal{S}$. Once the mesh is generated, the inverse transformation will be applied to the output so the domain is well represented.
-%\end{itemize}
-%
-%Finally, note that ``big'' meshes can be produced with a small value for $N$. For instance, if the starting point is only one cube and we set $N=9$, the code may produce up to $8^9 = 134,217,728$ elements.
-%
-%Let illustrate all this with the followig example: \texttt{./mesher\_roi -o cortex.off -r reg.mdl 5 -s 5 -u out -g}. Meaning that $\mathcal{S}$ is defined in input file \texttt{cortex.off} in \texttt{off} format, then another surface that intersects a portion of $\mathcal{S}$ is defined in file \texttt{reg.mdl} and the octants in that region must be refined to level 5. At the same time, every octant intersecting the surface must also be refined to level 5 and all the rest are as big as possible. Finally output must be written to file \texttt{out.gmf} in \textsc{GetFem} mesh format. The inputs and outputs of this execution can be seen in Figure \ref{f:mesheroi}.
-%
-% \begin{figure}[htb]
-%\centering
-% \subfigure[~]{
-%  \includegraphics[width=0.28\textwidth]{a_polyline.png}
-%  \label{f:roic}
-% }
-% \subfigure[~]{
-%  \includegraphics[width=0.26\textwidth]{a_polyline.png}
-%  \label{f:roicsurf}
-% }
-% \subfigure[~]{
-%  \includegraphics[width=0.24\textwidth]{a_polyline.png}
-%  \label{f:roiccut}
-% }
-%\caption{An example with different refinement levels: \subref{f:roic} input surface mesh and region of refinement specified by another surface mesh, \subref{f:roicsurf} the surface of the output mesh and \subref{f:roiccut} the same output with a saggital cut where the alignement with the region of refinement in the top front section of the brain is perfect.}
-%\label{f:mesheroi}
-%\end{figure}
-%
-%%---------------------------
-%%---------------------------
-%\subsection{Advanced mesh generation}
-%\label{regeneratemesh}
-%%---------------------------
-%%---------------------------
-%
-%When generating a mesh with the code explained in section \ref{generatemesh}, an octant mesh file will be automatically written. Using the octant file (extension .oct) elements, octants and even regions of the generated mesh can be refined. Actually, only octants can be subdivided in 8 new octants (cubes), however, if a particular element must be refined the octant file allows to detect to which octant it belongs and refine it. All the refinement options of setcion \ref{generatemesh} can be used and one extra option to list particular elements of the mesh can be employed.
-%
-%Following the example of setcion \ref{generatemesh}, we can now execute: \texttt{./mesher\_roi -d cortex.mdl -c out.oct -a 4 -l list.txt -u test -v} generating the result shown in Figure \ref{f:mesheroi2}.
-%
-% \begin{figure}[htb]
-% \centering
-%  \includegraphics[width=0.28\textwidth]{a_polyline.png}
-%\caption{An example starting from a previous generated mesh. Section inside the red circle are a list of elements we want to refine only once.}
-%\label{f:mesheroi2}
-%\end{figure}
-%
-%As you noticed, in this example we start from octant mesh already generated \texttt{out.oct}, so the element alignement is conserved as in previous example. We then specify that all the octants in the mesh must, at least, count with a refinement level 4 (\texttt{-a 4}). Then we can provide a simple text file listing specific element index we want to refine. One element per line and that is all (no element count needed). Please note that is plain text file only (be shure not to be using rtf files which add more information). In the example these elements are placed in bottom back portion of the brain inside a red circle. All the elements will be refined exactly one extra time, therefor it is not necessary to specify a target refinement level. Finally this will generate two outputs: \texttt{test.vtk} and \texttt{test.oct}. The first is because we specified option \texttt{-v} and the last because we will always generate and oct file in case further refinement is required. 
+{\small
+\begin{verbatim}
+$ ./mesher_roi [-option | parameters]
+\end{verbatim}
+}
+If you do not indicate any option nor parameters, the program will list all the available options for you. Options for input/output:
+{\small
+\begin{verbatim}
+    usage: ./mesher [-p] input.poly [-u] output
+                    [-s] ref_level [-a] ref_level [-b] file.reg
+                    [-r] input_surface rl [-option 1] .. [-option n]
+    where:
+      one of the parameters must be an input surface mesh in
+      mdl or off format. If output name is not provided it
+      will be saved in input_name.m3d. Options:
+        -d input surface as .mdl file (alternative to -p).
+        -s Refine Quadrants intersecting the input surface.
+           Parameter ref_level is the refinement level
+        -a Refine all elements in the input domain.
+           Parameter ref_level is the refinement level
+        -b Refine block regions provided in file file.reg
+        -r Refine surface region. Will refine all the elements
+           in the provided input_surface at level rl
+        -q if supported (only VTK by now), write quality attributes to output file.
+        -g save output mesh in GetFem format (gmf)
+        -v save output mesh + input in VTK ASCII format (vtk)
+        -m save output mesh in M3D ASCII format (m3d)
+        -x save output mesh in GMSH ASCII format (gmsh)
+        -i save output mesh in MVM ASCII format (mvm)
+        -o save output mesh in OFF ASCII format (off)
+\end{verbatim}
+}
+
+\begin{itemize}
+\item \texttt{-p}: with the name of an input file (\texttt{.poly} extension) where the surface Polyline is specified. In this version of the code, only one input can be specified.
+\item  \texttt{-d} input surface as .mdl file (alternative to -p).
+\item \texttt{-u}: next to it comes the name of the output file. The extension (file format) will be automatically added and  it can be changed with one (or several) of  the next options \texttt{-g, -v, -m, -x, -i, -o}. \textcolor{red}{(check if default for  name and format!)}
+\item \texttt{-q}: add decoration to the VTK file (must be used along with \texttt{-v}). Useful for visualization or debugging purpose
+\end{itemize}
+
+Now, to provide the Refinement Level (\textit{rl}) several options can be used (\texttt{-a, -s, -b, -r}), see section~\ref{s:refinement} for more details.
+we can now execute the following to test the meshing process:
+{\small
+\begin{verbatim}
+$ ./mesher\_roi -p a.poly -a 2 -s 5 -u testa2s5 -v -q
+\end{verbatim}
+}
+%---------------------------
+\subsection{Advanced mesh refinement}
+\label{refinemesh}
+
+When generating a mesh with the code explained in section \ref{s:generatemesh}, a quadrant mesh file will be automatically written. Using the \textit{octant} file (extension \texttt{.oct}, for compatibility reasons with 3D \textcolor{red}{to be changed??}) elements, quadrants and even regions of the generated mesh can be refined. Currently, only quadrants can be subdivided in 4 new quadrants (squares), however, if a particular element must be refined, the \textit{octant} file allows to detect to which quadrant it belongs and refine it. All the refinement options of section \ref{s:generatemesh} can be used, and one extra option to list particular elements of the mesh can be employed.
+we can now execute: 
+{\small
+\begin{verbatim}
+$ ./mesher\_roi -p a.poly -c testa2s5.oct -a 4 -l list.txt -u testa2s5ref -v
+\end{verbatim}
+}
+generating the result shown in Figure \ref{f:???}.
+
+As you noticed, in this example we start from a Quadrant mesh already generated \texttt{out.oct}, so the element alignment is conserved as in previous example. We then specify that all the quadrants in the mesh must, at least, count with a refinement level 4 (\texttt{-a 4}). 
+
+Then we can provide, in a simple text file listing \texttt{list.txt}, specific element indexes we want to refine. One element per line. Please note that is \textit{plain text} file only (be sure not to be using \textit{rtf} files which add more information).
+%In the example these elements are placed in bottom back portion of the brain inside a red circle. 
+All the elements will be refined exactly one extra time, therefore it is not necessary to specify a target refinement level. Finally this will generate two outputs: \texttt{testa2s5ref.vtk} and \texttt{testa2s5ref.oct}. The first is because we specified option \texttt{-v} and the last because we will always generate the \texttt{.oct} file in case further refinement is required. 
 %
 %\textbf{Note}: even if it is possible to generate elements of different refinement level at boundary of the domain, it is not recommended because most of the times this leads to invalid (inverted) elements. In the previous example, as next to boundary octants were refined one extra level (to level 6) it would be safer to have also refined the entire surface to level 6 (with option \texttt{-s 6}).
 %
-%%---------------------------
-%%---------------------------
-%\section{Using the code from another program}
-%\label{inside}
-%%---------------------------
-%%---------------------------
+
+%---------------------------
+%---------------------------
+\section{Using the code from another program}
+\label{inside}
+%---------------------------
+%---------------------------
 %
+\textcolor{red}{todo for 2D, compile external lib and function call + data structure for information exchange between the mesher and the external program......}
+
 %In order to generate a volume mesh, we only need a list of nodes, a list of triangular faces and the refinement level. This section explains how to interact with the code if you want to program your own application. For example, this is useful if you have a surface mesh that is not in the proper file format, or you need to write the output in another file format.
 %
 %File \texttt{Main.cpp} is in charge of input reading, executing the mesh generator with proper parameters and write the output. In order to specify an input surface mesh, we need to create a \texttt{TriMesh} object. This object is composed of two vectors: one with the points and the other with triangles. The Points are specified through instances of class Point3D as follow:
@@ -820,58 +812,6 @@ To make a 'pull request', go to https://github.com/yourUsername/MixedQuadTree, c
 % 
 %The vector \texttt{output\_elem} (defined in section \ref{inside}) will contain the entire set of elements. Each element is defined by its node indexes and they are contained in a vector.
 % 
-% %---------------------------
-% %---------------------------
-%\section{Troubleshooting and FAQ}
-%\label{problems}
-%%---------------------------
-%%---------------------------
-%
-%
-%This section try to explain common errors and how to solve them.
-%
-%%---------------------------
-%\subsection{Inversed normal orientation at intput}
-%%---------------------------
-%
-%This is one of the most common errors. If the input has inverted normal orientation, i.e., normals pointing towards inside the domain, the result will be an hexahedron, and inside of it, the domain will be represented as a void space.
-%
-% \begin{figure}[htb]
-%\centering
-% \subfigure[~]{
-%  \includegraphics[width=0.2\textwidth]{a_polyline.png}
-%  \label{f:cortex_input}
-% }
-% \subfigure[~]{
-%  \includegraphics[width=0.2\textwidth]{a_polyline.png}
-%  \label{f:c4}
-% }
-% \subfigure[~]{
-%  \includegraphics[width=0.25\textwidth]{a_polyline.png}
-%  \label{f:c4_inv}
-% }
-% \subfigure[~]{
-%  \includegraphics[width=0.25\textwidth]{a_polyline.png}
-%  \label{f:c4_inv_wf}
-% }
-%\caption{Inverted normals example.}
-%\label{f:inverted_example}
-%\end{figure}
-%
-%
-%If we take as input Figure \ref{f:cortex_input}, we would expect to have as result something like Figure \ref{f:c4}. However, if we obtain something like Figure \ref{f:c4_inv} (or Figure \ref{f:c4_inv_wf} which is the wireframe version of it), it means that the input has inverted normals. The solution is to invert each triangle of the input. For instance if we consider triangle $0-1-2$ (defined by node index), we should replace it with triangle $0-2-1$.
-%
-%%---------------------------
-%\subsection{How can I get a mesh of 4000 nodes?}
-%%---------------------------
-%
-%The algorithm is not prepared to produce a mesh of $x$ nodes. The problem can be established as: the difference of node quantity between refinement level $n$ and $n+1$ is too large. How can I gain more control over node quantity if I want something in the middle of 2 refinement levels? 
-%
-%There is no direct solution to this problem, however, one practical solution is to artificially increase the size of domain's Bounding Box (Bbox). Let us say that input geometry is defined between nodes: $\begin{bmatrix} \pm a & \pm a & \pm a \end{bmatrix}$ and it count with $m$ nodes. The way to artificially increase its Bbox is by modifying the input file to have $m+1$ nodes. This new node will be used by no element, therefore, it should be the last node of the list and it coordinates should be, for instance, $\begin{bmatrix} a+b & a+b & a+b \end{bmatrix}$. With this, the size of the Bbox should no longer be $(2a)^3$, but $(2a+b)^3$. If we now restart the program we should obtain more coarse elements for the same level of refinement.
-%
-%Once more, there is no proper solution. You will have to try with different sizes of $b$ to get the right node density for your simulation problem.
-%
-%
 %%---------------------------
 %%---------------------------
 %\section{About implementation and embedded algorithms}
