@@ -61,14 +61,11 @@ This document will show you how to obtain mixed--elements meshes with the provid
 \textcolor{red}{Final resulting Mesh}
 
 
-This mesh generator will allow you to create a mixed--element mesh starting from a boundary 2D mesh  (polyline) composed of edges (Fig.~\ref{f:polyline}). Let this input surface mesh be $\mathcal{S}$. Two constraints must be fulfilled by $\mathcal{S}$: it must be unfolded (no self--intersection), and the normal of the edges must be pointing outside.
+This mesh generator will allow you to create a mixed--element mesh starting from a boundary 2D mesh  (Polyline) composed of edges (Fig.~\ref{f:polyline}). Let this input surface mesh be $\mathcal{S}$. Two constraints must be fulfilled by $\mathcal{S}$: it must be unfolded (no self--intersection), and the normal of the edges must be pointing outside.
 
 The algorithm will use $\mathcal{S}$ for two purposes: to find out if a point is inside or outside the domain and to project a point onto $\mathcal{S}$. Therefore, if you have two different meshes representing the exact same domain, you should use the one with less edges. The algorithm will compute faster the output mesh.
 
 The first step of the algorithm is to compute the Bounding box (Bbox) of $\mathcal{S}$. This Bbox will not necessarily be a perfect square. Therefore, an algorithm will be employed to automatically compute a set of squares containing $\mathcal{S}$ (Fig.~\ref{f:grid}).
-
-Now it is possible to introduce the other important input: the Refinement Level (\textit{rl}). This mesh generator is based on the  Quadtree technique introduced in \cite{Finkel1974}. This technique recursively split a Quadant in a finite number of equivalent sons. For instance if the Quadrant is a square, to refine it one level means that it will be replaced by 4 new QUadrants. All of them will be sons of the replaced Quadrant in the Quadtree structure. By allowing the use of quadrants with cut corners, this modeling technique overcomes some of the drawbacks of standard Quadtree encoding for finite element mesh generation \cite{Yerry1983}.
-In our case, Quadrants will continue to refine until a maximum provided level is reached. Quadrants lying completely outside $\mathcal{S}$ will be removed.\\
 
  \begin{figure}[htb]
 \centering
@@ -78,8 +75,8 @@ In our case, Quadrants will continue to refine until a maximum provided level is
  \subfigure[~]{
   \includegraphics[width=0.72\textwidth]{a_grid.png}
   \label{f:grid}}
+\caption{ (a) An example of complex polyline with holes and sharp features. This corresponds to the Input to be meshed (\href{https://github.com/jaillet/MixedQuadTree/blob/master/data/a.poly}{source: a.poly}) . (b) The embedding (poorly defined...) initial quadrants structure. }
 \label{fig:boundary}
-\caption{ (a) An example of complex polyline with holes and sharp features. This corresponds to the Input to be meshed (\href{https://github.com/jaillet/MixedQuadTree/blob/master/data/a.poly}{source: a.poly}) . (b) The embedding (poorly defined...) initial quadrants }
 \end{figure}
 
 %---------------------------
@@ -100,8 +97,8 @@ It could also be defined as \verb?.mdl? file, see \href{https://github.com/jaill
 The other important structure is the \textbf{Quadrant}:
 \begin{itemize}
 \item is composed of a \textit{pointindex}, vector of 4 corner indices in a vector of \textbf{MeshPoint}: Note here that MeshPoint is embedding a previously seen \textbf{3DPoint}, as well as some information describing its state. More details below.
-\item When the Quadrant is subdived into non quadrant elements (in Transitions for example), it contains a vector of \textit{sub\_elements}, each one described by a vector of indices as presented right above.
-\item It also contains a list of intersecting \textbf{PolyEdges}, and intersecting \textbf{Features}. These informations are useful to speed up the inside/outside descrimination for the Quadrant or to better handle the boundary and surface elements, for example.
+\item When the Quadrant is subdivided into non quadrant elements (in Transitions for example), it contains a vector of \textit{sub\_elements}, each one described by a vector of indexes as presented right above.
+\item It also contains a list of intersecting \textbf{PolyEdges}, and intersecting \textbf{Features}. These informations are useful to speed up the inside/outside discrimination for the Quadrant or to better handle the boundary and surface elements, for example.
 \item and some additional data, for processing purpose that will be described later.
 \end{itemize}
 
@@ -112,7 +109,7 @@ Along with the Quadrant, comes the \textbf{QuadEdge}:
 
 And finally, the \textbf{MeshPoint}:
 \begin{itemize}
-\item that is embedding a 3DPoint, as coordinates of the Quadrant's corners, referenced as indices.
+\item that is embedding a 3DPoint, as coordinates of the Quadrant's corners, referenced as indexes.
 \item MeshPoint are conversely connected to Quadrant by an index map of \textit{elements}, referencing all the Quadrants having this point as corner.
 \item it also is the support for some crucial processing information on it's \textit{state}, merged in a single byte: the point is \verb?inside?, has been \verb?projected?, is representing a \verb?feature?, has been previously \verb?checked?, etc\ldots  
 \end{itemize}
@@ -121,7 +118,7 @@ These three structures will be used together along with the Polyline by the \tex
 \begin{itemize}
 \item a vector of \textbf{MeshPoint},
 \item a vector of \textbf{Quadrant},
-\item a set of \textbf{QuadEdge}. Note that this kind of structure is costly (quasi 30\% of the whole computation time), as insertion is done in a sorted container, but it guarantees uniqueness of the element, and reasonably fast access. By the way, it might not be exactly dapted to parallelism...
+\item a set of \textbf{QuadEdge}. Note that this kind of structure is costly (quasi 30\% of the whole computation time), as insertion is done in a sorted container, but it guarantees uniqueness of the element, and reasonably fast access. By the way, it might not be exactly adapted to parallelism...
 \item It also contains a list of \textbf{Refinement Regions}, which usage will be presented later on.
 \end{itemize}
 
@@ -131,8 +128,10 @@ These three structures will be used together along with the Polyline by the \tex
 \label{sec:method}
 %---------------------------
 %---------------------------
+This mesh generator is based on the Quad-tree technique introduced in \cite{Finkel1974}. This technique recursively split a Quadrant in a finite number of equivalent sons. For instance if the Quadrant is a square, to refine it one level means that it will be replaced by 4 new Quadrants. All of them will be sons of the replaced Quadrant in the Quad-tree structure. By allowing the use of quadrants with cut corners, this modeling technique overcomes some of the drawbacks of standard Quad-tree encoding for finite element mesh generation \cite{Yerry1983}.
+In our case, Quadrants will be continuously split until a maximum provided level is reached. Quadrants lying completely outside $\mathcal{S}$ will be removed.\\
 
-mixed-elements mesh generation, describe here the main steps of the method
+\textcolor{red}{todo: mixed-elements mesh generation, describe here the main steps of the method}
 
 \subsection{A quadtree-based method}
 show different steps of the method: 
@@ -161,10 +160,28 @@ show different steps of the method:
 \item transition patterns (OMP)
 \end{enumerate}
 
+\textcolor{red}{todo: describe visitors}
+
 
 %---------------------------
-\subsection{Refinement, Balancing and Transition steps}
+\subsection{Refinement level: all, surface and/or region}
+\label{s:refinement}
+Now it is possible to introduce the most important parameter of the method: the Refinement Level (\textit{rl}).
+As previously said, the method is based on Quad-tree, and this user parameter will set the level of subdivision required to reconstruct the input $\mathcal{S}$.
 
+\textcolor{red}{todo: describe region refinement format and usage}
+The different option for refinement could be:
+\begin{itemize}
+\item refine all Quadrants (\texttt{-a}). The splitting operation will be performed over each Quadrant enclosing $\mathcal{S}$. For instance, \texttt{-a 2} will split all the initial Quadrants twice, replacing them by potentially 16 new Quadrants. In reality, this is achieved level by level: first subdividing and replacing the Quadrants in 4 new ones, keeping only those that lay inside or that intersect $\mathcal{S}$ intersects (using again a \textit{visitor}). Then, only those ones are candidates to the second level of subdivision, repeating the steps of splitting and checking of intersection on sub-Quadrants (Fig.~). 
+\item refine Quadrant \textbf{surface},
+\item refine Quadrant laying in a specific \textbf{region}, determined by 
+\end{itemize}
+
+The \textbf{Visitor Pattern} has been implemented to circulate (\textit{visit}) the Quadrants and determine whether they should be split or not (\textit{accept}).
+
+\textcolor{red}{todo: describe visitors}
+
+%
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
@@ -199,8 +216,7 @@ show different steps of the method:
  \caption{Effect of the refinement level applied on the complete structure (\texttt{-a} switch), (1 to 6)}
 \label{fig:pieref}
 \end{figure}
-
-
+%
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
@@ -226,7 +242,11 @@ show different steps of the method:
 \label{fig:pierefs}
 \end{figure}
 
+%---------------------------
+\subsection{Balancing the mesh}
+A Quad mesh is said \textit{balanced} when there is at most a difference of 1 level of subdivision between any two adjacent elements. In practice, this is determined by checking whether a Quadrant contains at least one QuadEdge that is subdivided twice as in Algorithm~\ref{alg:generate} step~\ref{alg:subdivide}. Thus, for each Quadrant, every QuadEdge is checked. If one of them is subdivided, then the 2 sub-edges must be checked. Note that the \textit{search} and \textit{access} operations on QuadEdges are accelerated by the ordered set container. But whether this data structure is adapted to parallel computing is a good question\ldots
 
+%
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
@@ -248,11 +268,30 @@ show different steps of the method:
   \includegraphics[width=0.22\textwidth]{pie_balanced2s6.png}
   \label{f:piebals6}
  }
- \caption{After the balancing step, note that in the first case, nothing is to be done.}
-\label{fig:pielabs}
+ \caption{After the balancing step of previously refined mesh (sec.~\ref{s:refinement}). Note that in the first case, nothing is to be done.}
+\label{fig:piebals}
 \end{figure}
 
+%---------------------------
+\subsection{Transition patterns}
+%
+Now the mesh is balanced, we need to handle transitions between Quadrants, to produce a \textit{conformal mesh}, when the elements exactly share nodes and edges. This technique is known to save time during the computation, and also to avoid node interpolation errors.
+If 2 adjacent Quadrants have the same refinement level, then there is nothing to do. Otherwise, the less refined Quadrant must be treated. Again, in practice, this is determined by checking whether a Quadrant contains at least one QuadEdge that is subdivided.
 
+For the Transition, the chosen technique was to apply a Pattern corresponding to the  number and relative position of the refined QuadEdges. In 2D, there are only 6 cases to consider (Fig.~\ref{fig:transitionpatterns}). Note that:
+\begin{itemize}
+\item newly created internal edges (red lines in Fig.~\ref{fig:transitionpatterns}) are not of type QuadEdge. In that sense, they could not be subdivided again, and do not participate in the remaining of the subdivision process. They are indirectly stored as sub-elements, ie. a list of connected nodes (indexes, to be more precise),
+\item all patterns are producing good shaped sub-elements,
+\item and that the last one could have been simplified into 4 sub-squares, but that will require one additional middle vertex. This choice could be reconsidered if the number of elements matters more than number of points, or to improve quality, or to better handle Quadrants with Features.
+\end{itemize}
+%
+\begin{figure}[htb]
+\centering
+  \includegraphics[width=0.84\textwidth]{transitionPatterns.png}
+ \caption{All possible configurations for transition patterns in 2D. Black dots represent an edge subdivision, while red lines draw the internal edges of the Quadrant sub-elements.}
+\label{fig:transitionpatterns}
+\end{figure}
+%
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
@@ -275,7 +314,7 @@ show different steps of the method:
   \label{f:pietranss6}
  }
  \caption{After the transition step. Note that the more difference between levels, the more transition patterns are used\ldots}
-\label{fig:pielabs}
+\label{fig:pietranss}
 \end{figure}
 
 %---------------------------
@@ -330,12 +369,14 @@ preprocess
 
 The first step to 
 
-        // test1: if nb Features >= 2
+        // test1: if nb Features $>= 2$
         // first condition is optimization if NbFeatures has been already computed
-        // test2: if distFProjectionFeature > distMax for each node
+        // test2: if $distFProjectionFeature > distMax$ for each node
         // done: compute distMax before...
-        // test3: if the number of intersection of the Polyline and Quadrant edge >= 3
+        // test3: if the number of intersection of the Polyline and Quadrant edge $>= 3$
 
+
+\textcolor{red}{setting, or not, a refinement level for Boundary handling}
 
 %---------------------------
 \subsection{Generating first quadrants over boundary prepared mesh}
