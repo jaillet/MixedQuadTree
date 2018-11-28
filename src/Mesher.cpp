@@ -927,17 +927,18 @@ namespace Clobscode
             points.reserve(points.size() + new_pts.size());
             points.insert(points.end(),new_pts.begin(),new_pts.end());
 
-            //CL Debbuging
-            {
-                //save pure octree mesh
-                std::shared_ptr<FEMesh> bound_octree=make_shared<FEMesh>();
-                saveOutputMesh(bound_octree,points,tmp_Quadrants);
-                string tmp_name = name + "_bound";
-                Services::WriteVTK(tmp_name,bound_octree);
-            }
 
             ++i;
         } while (!new_pts.empty());
+
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> bound_octree=make_shared<FEMesh>();
+            saveOutputMesh(bound_octree,points,tmp_Quadrants);
+            string tmp_name = name + "_bound";
+            Services::WriteVTK(tmp_name,bound_octree);
+        }
 
         unsigned short max_rl=i;
 
