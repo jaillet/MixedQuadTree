@@ -23,7 +23,7 @@
 
 {\LARGE \textsc{Documentation}}
 
-{\Large \textbf{2D Mixed--element mesh generator}
+{\Large \textbf{Quality 2D Mixed--Element Mesh\\ Generation and Refinement}
 
 {\large Version 2018.11.23 \textsc{roi}--type}}
 
@@ -89,8 +89,8 @@ A \textbf{Polyline} is composed of (Fig.~\ref{f:polyline}):
 \item and their associated angle. If the angle is not lying in the range $[MinAngle=175,MaxAngle=185]$, then it's considered as a sharp point, and called  a \textbf{Feature} in the remaining.
 \item a vector of \textbf{PolyEdge}, each one defined by the indexes of the extremity' nodes, and a normal. By convention, the normal is not normed and is pointing out the Input. For an oriented edge $(i,j)$, its right side will be outside and its left side inside. Thus, the Input must be defined by closed sets of connecting edges with counter-clockwise orientation. This way, holes may be simply created.
 \end{itemize}
-The format for Input file might be either \verb?.poly? as described on the \href{https://www.cs.cmu.edu/~quake/triangle.poly.html}{ Triangle\_1.6 website}; find an example here: \href{https://github.com/jaillet/MixedQuadTree/blob/master/data/unit\_square.poly}{unit\_square.poly}.
-It could also be defined as \verb?.mdl? file, see \href{https://github.com/jaillet/MixedQuadTree/blob/master/data/unit\_square.mdl}{unit\_square.mdl}:
+The format for Input file might be either \verb?.poly? as described on the \href{https://www.cs.cmu.edu/~quake/triangle.poly.html}{Triangle\_1.6 website}; find an example here: \href{https://github.com/jaillet/MixedQuadTree/blob/master/data/unit\_square.poly}{unit\_square.poly}.
+It could also be defined as \verb?.mdl? file, see \href{https://github.com/jaillet/MixedQuadTree/blob/master/data/unit\_square.mdl}{unit\_square.mdl}. More examples in the \href{https://github.com/jaillet/MixedQuadTree/blob/master/data/}{data} directory.
 
 %---------------------------
 \subsection{Quadrant as support of surface mesh}
@@ -135,21 +135,22 @@ In our case, Quadrants will be continuously split until a maximum provided level
 \textcolor{red}{todo: mixed-elements mesh generation, describe here the main steps of the method}
 
 \subsection{A quadtree-based method}
-show different steps of the method: 
+\textcolor{red}{show different steps of the method: }
 
 \begin{algorithm}[H]
 \SetAlgoLined
 \KwResult{A mixed-elements mesh}
+  \tcc{Generate quadtree:}
  \nl \ForEach{Quadrant}{
  \Repeat {desired Refinement Level}{
- \nl Subdivide Quadrant\;
+ \nl {Subdivide Quadrant\label{alg:subdivide}}\; 
    \ForEach{ new Sub-Quadrant}{
-   \If{Intersects Input \textit{or} Is Inside}{Insert Sub-Quadrant}
+   \If{Intersects Input \textit{or} Is Inside}{\nl Insert Sub-Quadrant\label{alg:insertsub}}
     }
-  }\label{alg:subdivide}
+  }
   }
  \nl Create balanced quadtree\; \label{alg:goto}
- \nl Apply Transition Patterns\;
+ \nl Apply Transition Patterns\; \label{alg:trans}
  \caption{Generation process}
  \label{alg:generate}
 \end{algorithm}
@@ -170,10 +171,9 @@ show different steps of the method:
 Now it is possible to introduce the most important parameter of the method: the Refinement Level (\textit{rl}).
 As previously said, the method is based on Quad-tree, and this user parameter will set the level of subdivision required to reconstruct the input $\mathcal{S}$.
 
-\textcolor{red}{todo: describe region refinement format and usage}
 The different option for refinement could be:
 \begin{itemize}
-\item refine \textbf{all} Quadrants (\texttt{-a N}). The spitting operation will be performed over each Quadrant enclosing $\mathcal{S}$. $N$ will define the refinement level \textit{rl} for this operation. For instance, \texttt{-a 2} will split all the initial Quadrants twice, replacing them by potentially 16 new Quadrants. In reality, this is achieved level by level: first subdividing and replacing the Quadrants in 4 new ones, keeping only those that lay inside or that intersect $\mathcal{S}$ intersects (using again a \textit{visitor}). Then, only those ones are candidates to the second level of subdivision, repeating the steps of splitting and checking of intersection on sub-Quadrants (Fig.~\ref{fig:pieref}). 
+\item refine \textbf{all} Quadrants (\texttt{-a N}). The spitting operation will be performed over each Quadrant enclosing $\mathcal{S}$. $N$ will define the refinement level \textit{rl} for this operation. For instance, \texttt{-a 2} will split all the initial Quadrants twice, replacing them by potentially 16 new Quadrants. In reality, this is achieved level by level: first subdividing and replacing the Quadrants in 4 new ones (Algorithm \ref{alg:generate} step~\ref{alg:subdivide}), keeping only those that lay inside or that intersect $\mathcal{S}$ (step~\ref{alg:insertsub}, using again a \textit{visitor}). Then, only those ones are candidates to the second level of subdivision, repeating the steps of splitting and checking of intersection on sub-Quadrants (Fig.~\ref{fig:pieref}). 
 \item refine \textbf{surface} Quadrant \texttt{-s N}. The  splitting  operation  will  be  performed  over  each Quadrant  that  intersects  a  section  of $\mathcal{S}$.  For  instance, \texttt{-s  2} will  split  all  the  initial  Quadrants into  4  new  ones  and  then,  only  the  Quadrants  that  still  intersect $\mathcal{S}$ will  be  split  in 4  more, still keeping only intersecting ones (Fig.~\ref{fig:pierefs})
 \item (\textcolor{red}{not tested yet in 2D!}) refine by \textbf{block} \texttt{-b} followed by the name of file where some block regions are specified. A block is defined by 2 points: $(min_x, min_y,min_z), ((max_x, max_y,max_z)$ and a refinement level \textit{rl} to be applied over the Quadrants that intersect this block. This is a text file where first we specify the number of blocks and then we detail each one of them. An example with 2 regions is now provided:\\
 %
@@ -266,7 +266,7 @@ The \textbf{Visitor Pattern} has been implemented to circulate (\textit{visit}) 
 
 %---------------------------
 \subsection{Balancing the mesh}
-A Quad mesh is said \textit{balanced} when there is at most a difference of 1 level of subdivision between any two adjacent elements. In practice, this is determined by checking whether a Quadrant contains at least one QuadEdge that is subdivided twice as in Algorithm~\ref{alg:generate} step~\ref{alg:subdivide}. Thus, for each Quadrant, every QuadEdge is checked. If one of them is subdivided, then the 2 sub-edges must be checked. Note that the \textit{search} and \textit{access} operations on QuadEdges are accelerated by the ordered set container. But whether this data structure is adapted to parallel computing is a good question\ldots
+A Quad mesh is said \textit{balanced} when there is at most a difference of 1 level of subdivision between any two adjacent elements (step~\ref{alg:goto}). In practice, this is determined by checking whether a Quadrant contains at least one QuadEdge that is subdivided twice as in Algorithm~\ref{alg:generate} step~\ref{alg:subdivide}. Thus, for each Quadrant, every QuadEdge is checked. If one of them is subdivided, then the 2 sub-edges must be checked. Note that the \textit{search} and \textit{access} operations on QuadEdges are accelerated by the ordered set container. But whether this data structure is adapted to parallel computing is a good question\ldots
 
 %
 \begin{figure}[htb]
@@ -298,7 +298,7 @@ A Quad mesh is said \textit{balanced} when there is at most a difference of 1 le
 \subsection{Transition patterns}
 %
 Now the mesh is balanced, we need to handle transitions between Quadrants, to produce a \textit{conformal mesh}, when the elements exactly share nodes and edges. This technique is known to save time during the computation, and also to avoid node interpolation errors.
-If 2 adjacent Quadrants have the same refinement level, then there is nothing to do. Otherwise, the less refined Quadrant must be treated. Again, in practice, this is determined by checking whether a Quadrant contains at least one QuadEdge that is subdivided.
+If 2 adjacent Quadrants have the same refinement level, then there is nothing to do. Otherwise, the less refined Quadrant must be treated. Again, in practice, this is determined by checking whether a Quadrant contains at least one QuadEdge that is subdivided (step~\ref{alg:trans}).
 
 For the Transition, the chosen technique was to apply a Pattern corresponding to the  number and relative position of the refined QuadEdges. In 2D, there are only 6 cases to consider (Fig.~\ref{fig:transitionpatterns}). Note that:
 \begin{itemize}
@@ -350,111 +350,120 @@ For the Transition, the chosen technique was to apply a Pattern corresponding to
 
 \begin{algorithm}[H]
 
+\setcounter{AlgoLine}{-1}
 \SetAlgoLined
 \KwResult{A mixed-elements mesh}
- \tcc{Preprocess: handle boundary}
- \tcc{Generate quadtree}
+  \tcc{Preprocess:}
+\nl   Handle Boundary\; \label{alg:bound2}
+ \tcc{Generate quadtree:}
 \nl \ForEach{Quadrant}{
  \Repeat {desired Refinement Level}{
- \nl Subdivide Quadrant\;
+ \nl Subdivide Quadrant\; \label{alg:subdivide2}
    \ForEach{ new Sub-Quadrant}{
-   \If{Intersects Input \textit{or} Is Inside}{Insert Sub-Quadrant}
+   \If{Intersects Input \textit{or} Is Inside}{\nl Insert Sub-Quadrant \label{alg:insertsub2}}
     }
-  }\label{alg:subdivide}
   }
- \nl Create balanced quadtree\; \label{alg:goto}
+  }
+ \nl Create balanced quadtree\; \label{alg:goto2}
  \nl Apply Transition Patterns\;
- \tcc{Input surface fitting}
+ \tcc{Input surface fitting:}
  \nl Detect Features in Input\;
- Project Close to Boundary\;
- Remove on Input Surface\;
- Shrink to Boundary\;
- \nl Apply Surface Patterns\;
+ \nl  Project Intern Nodes Close to Boundary\; \label{alg:closeto2}
+  \nl Remove Outside Quadrant\; \label{alg:remsur2}
+  \nl Shrink Extern Nodes to Boundary\; \label{alg:shrink2}
+ \nl Apply Surface Patterns\; \label{alg:surfpat2}
  \caption{Generation process and Input surface fitting}
  \label{alg:surfacefitting}
 \end{algorithm}
 
 %---------------------------
 \subsection{Boundary and sharp features handling}
+\label{sec:boundary}
 
-preprocess
+\textcolor{red}{preprocessing}
+
+\begin{enumerate}
+\item        // test1: if nb Features $>= 2$
+        // first condition is optimization if NbFeatures has been already computed
+\item        // test2: if $distFProjectionFeature > distMax$ for each node
+        // done: compute distMax before...
+\item        // test3: if the number of intersection of the Polyline and Quadrant edge $>= 3$
+\end{enumerate}
+The result for the \textit{A} and \text{Pie} Polyline is shown on Fig.~\ref{fig:boundary}, where it can be appreciated that subdivision only occurred where required by the Input Polyline.
 
  \begin{figure}[htb]
 \centering
  \subfigure[~]{
   \includegraphics[width=0.6\textwidth]{a_boundary.png}
-  \label{f:boundary}
+  \label{f:aboundary}
  }
-\caption{After boundary handling.}
+ \subfigure[~]{
+  \includegraphics[width=0.3\textwidth]{pie_boundary.png}
+  \label{f:pieboundary}
+ }
+\caption{After preprocessing for Boundary handling, leading to a better representation of the Input Polyline.}
 \label{fig:boundary}
 \end{figure}
 
-The first step to 
-
-        // test1: if nb Features $>= 2$
-        // first condition is optimization if NbFeatures has been already computed
-        // test2: if $distFProjectionFeature > distMax$ for each node
-        // done: compute distMax before...
-        // test3: if the number of intersection of the Polyline and Quadrant edge $>= 3$
-
-
 \textcolor{red}{setting, or not, a refinement level for Boundary handling}
+This preprocessing will now serve as input for Algorithm~\ref{alg:generate} or \ref{alg:surfacefitting}. 
+
 
 %---------------------------
 \subsection{Generating first quadrants over boundary prepared mesh}
-
+This is exactly the same as in Algorithm~\ref{alg:generate}. The only difference is the initial Quadrant list, that as been prepared as described in section~\ref{sec:boundary}
 
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a3_boundary_refined.png}
+  \includegraphics[width=0.31\textwidth]{a3_boundary_refined.png}
   \label{f:boundaryref3}
  }
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a3_boundary_balanced.png}
+  \includegraphics[width=0.31\textwidth]{a3_boundary_balanced.png}
   \label{f:boundarybal3}
  }
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a3_boundary_transition.png}
+  \includegraphics[width=0.31\textwidth]{a3_boundary_transition.png}
   \label{f:boundarytrans3}
  }
- \caption{After refinement, balancing and transition steps, level 3.}
+ \caption{After refinement level 3, balancing and transition steps (see Algorithm~\ref{alg:generate}).}
 \label{fig:generate3}
 \end{figure}
 
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a5_boundary_refined.png}
+  \includegraphics[width=0.31\textwidth]{a5_boundary_refined.png}
   \label{f:boundaryref5}
  }
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a5_boundary_balanced.png}
+  \includegraphics[width=0.31\textwidth]{a5_boundary_balanced.png}
   \label{f:boundarybal5}
  }
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a5_boundary_transition.png}
+  \includegraphics[width=0.31\textwidth]{a5_boundary_transition.png}
   \label{f:boundarytrans5}
  }
- \caption{After refinement, balancing and transition steps, level 5.}
+ \caption{After refinement level 5, balancing and transition steps (see Algorithm~\ref{alg:generate}).}
 \label{fig:generate5}
 \end{figure}
 
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a7_boundary_refined.png}
+  \includegraphics[width=0.31\textwidth]{a7_boundary_refined.png}
   \label{f:boundaryref7}
  }
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a7_boundary_balanced.png}
+  \includegraphics[width=0.31\textwidth]{a7_boundary_balanced.png}
   \label{f:boundarybal7}
  }
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a7_boundary_transition.png}
+  \includegraphics[width=0.31\textwidth]{a7_boundary_transition.png}
   \label{f:boundarytrans7}
  }
- \caption{After refinement, balancing and transition steps, level 7.}
+ \caption{After refinement level 7, balancing and transition steps (see Algorithm~\ref{alg:generate}).}
 \label{fig:generate7}
 \end{figure}
 
@@ -462,70 +471,72 @@ The first step to
 %---------------------------
 \subsection{Handling Input surface}
 
+\textcolor{red}{describe sub-algorithms for each step, in particular the Surface Patterns that are the main contribution of the method and most delicate step\ldots}
+
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a3_boundary_projectinteriorcloseto.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_projectinteriorcloseto3.png}
   \label{f:boundaryclose3}
  }
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a3_boundary_removesurface.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_removesurface3.png}
   \label{f:boundaryrem3}
  }\\
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a3_boundary_shrinkexterior.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_shrinkexterior3.png}
   \label{f:boundaryshrink3}
  }
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a3_boundary_surfacepatterns.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_surfacepatterns3.png}
   \label{f:boundarysurf3}
  }
- \caption{After projecting interior points close to boundary, , level 3.}
+ \caption{Algorithm~\ref{alg:surfacefitting}, level 3. After projecting interior points close to boundary (step~\ref{alg:closeto2}), removing exterior quadrants (step~\ref{alg:remsur2}), projection external nodes to boundary (step~\ref{alg:shrink2}) and finally applying Surface Patterns (step~\ref{alg:surfpat2}).}
 \label{fig:surfacehandling3}
 \end{figure}
 %
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a5_boundary_projectinteriorcloseto.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_projectinteriorcloseto5.png}
   \label{f:boundaryclose5}
  }
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a5_boundary_removesurface.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_removesurface5.png}
   \label{f:boundaryrem5}
  }
  \\
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a5_boundary_shrinkexterior.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_shrinkexterior5.png}
   \label{f:boundaryshrink5}
  }
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a5_boundary_surfacepatterns.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_surfacepatterns5.png}
   \label{f:boundarysurf5}
  }
- \caption{After projecting interior points close to boundary, level 5.}
+ \caption{Algorithm~\ref{alg:surfacefitting}, level 5. After projecting interior points close to boundary (step~\ref{alg:closeto2}), removing exterior quadrants (step~\ref{alg:remsur2}), projection external nodes to boundary (step~\ref{alg:shrink2}) and finally applying Surface Patterns (step~\ref{alg:surfpat2}).}
 \label{fig:surfacehandling5}
 \end{figure}
 %
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a7_boundary_projectinteriorcloseto.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_projectinteriorcloseto7.png}
   \label{f:boundaryclose7}
  }
  \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a7_boundary_removesurface.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_removesurface7.png}
   \label{f:boundaryrem7}
  }\\
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a7_boundary_shrinkexterior.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_shrinkexterior7.png}
   \label{f:boundaryshrink7}
  }
   \subfigure[~]{
-  \includegraphics[width=0.3\textwidth]{a7_boundary_surfacepatterns.png}
+  \includegraphics[width=0.33\textwidth]{a_boundary_surfacepatterns7.png}
   \label{f:boundarysurf7}
  }
- \caption{After projecting interior points close to boundary, level 7.}
+ \caption{Algorithm~\ref{alg:surfacefitting}, level 7. After projecting interior points close to boundary (step~\ref{alg:closeto2}), removing exterior quadrants (step~\ref{alg:remsur2}), projection external nodes to boundary (step~\ref{alg:shrink2}) and finally applying Surface Patterns (step~\ref{alg:surfpat2}).}
 \label{fig:surfacehandling7}
 \end{figure}
 
@@ -537,7 +548,7 @@ The first step to
 \label{sec:remeshing}
 %---------------------------
 %---------------------------
-
+\textcolor{red}{todo description, main point is the recycling of previously generated Quad Mesh, and Quad identification for the element list to be refined.}
 
 \begin{algorithm}[H]
 \SetAlgoLined
@@ -547,12 +558,64 @@ The first step to
   Identify containing Quadrant\;
   Subdivide Quadrant\;
    \ForEach{Sub-quadrant}{
-   \If{Intersect input \textit{or} Is In}{Insert Sub-Quadrant}
+   \If{Intersect Input \textit{or} Is Inside}{Insert Sub-Quadrant}
     }
   }
-  \kwGoto{Algorithm \ref{alg:generate}, step \ref{alg:goto}}
+  \kwGoto{Algorithm \ref{alg:surfacefitting}, step \ref{alg:goto}}
  \caption{Refinement process}
+ \label{alg:refinement}
 \end{algorithm}
+
+Some results are shown on Fig.~\ref{}. On each image, the bottom left element is refined. Notice how mesh is balanced and transition are created to produce a conformal mesh.
+\begin{figure}[htb]
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.31\textwidth]{box1.png}
+  \label{f:box1}
+ }
+ \subfigure[~]{
+  \includegraphics[width=0.31\textwidth]{box2.png}
+  \label{f:box2}
+ }
+  \subfigure[~]{
+  \includegraphics[width=0.31\textwidth]{box3.png}
+  \label{f:box3}
+ }
+  \subfigure[~]{
+  \includegraphics[width=0.31\textwidth]{box4.png}
+  \label{f:box4}
+ }
+  \subfigure[~]{
+  \includegraphics[width=0.31\textwidth]{box5.png}
+  \label{f:box5}
+ }
+  \subfigure[~]{
+  \includegraphics[width=0.31\textwidth]{box8.png}
+  \label{f:box8}
+ }
+ \caption{Algorithm~\ref{alg:refinement}. With \textit{Box} example, the bottom left element is refined once at each iteration of the algorithm. (a-c) iteration 1 to 5, (d) iteration 8.}
+\label{fig:refiningbox}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+ \subfigure[~]{
+  \includegraphics[width=0.31\textwidth]{box20.png}
+  \label{f:box20}
+ }
+ \subfigure[~]{
+  \includegraphics[width=0.31\textwidth]{box20_zoom1.png}
+  \label{f:boox20z1}
+ }
+  \subfigure[~]{
+  \includegraphics[width=0.31\textwidth]{box20_zoom2.png}
+  \label{f:box20z2}
+ }
+ \caption{Algorithm~\ref{alg:refinement}.  Same \textit{Box} example as Fig.~\ref{fig:refiningbox}, iteration 20. (b) Zoomed once and (b) twice in the bottom left corner.}
+\label{fig:refiningbox20}
+\end{figure}
+
+
 
 identify which Quad contains the element, information from file
 
@@ -582,7 +645,7 @@ In order to install this application you will need a Unix--based system, a \text
 %---------------------------
 \subsection{Git Fork MixedQuadTree}
 
-Let's fork the initial MEPP repository. So, once you're logged in on github
+Let's fork the initial MixedQuadTree repository. So, once you're logged in on github:
 \begin{itemize}
 \item go to https://github.com/jaillet/MixedQuadTree/
 \item click on the 'Fork' button
@@ -591,13 +654,13 @@ Let's fork the initial MEPP repository. So, once you're logged in on github
 \end {itemize}
 
 %---------------------------
-\subsection{Compiling}
+\subsection{Getting the program, and Compiling}
 
 {\small
 \begin{verbatim}
 $ git clone /https://github.com/jaillet/MixedQuadTree.git
 $ cd MixedQuadTree/
-$ git checkout branch develop
+$ git checkout branch develop (this will create a new branch)
 $ mkdir build ; cd build
 $ cmake ../src -D_CMAKE_BUILD_TYPE=Debug (or Release) // Uppercase is important
 $ cmake .
@@ -605,15 +668,51 @@ $ make -j#nproc
 \end{verbatim}
 }
 
-This has been tested on Linux and Mac without any known error nor warning.
-
 \subsection{Git usage}
-At this point, you can edit and commit files using  the git workflow 
+At this point, you can edit and commit files on you branch using  the git workflow.
+
+In order to easily access to the initial MixedQuadTree repository and stay updated with the other developers advances, you can set it as a remote repository, called 'upstreamMixedQuadTree':
+
+\begin{verbatim}
+$ git remote add upstreamMixedQuadTree git@github.com:MixedQuadTree/MixedQuadTree.git
+\end{verbatim}
+
+Git remotes are great because they allows to have multiple pull/push repositories. You can see the list of your remote repositories under a shell:
+
+\begin{verbatim}
+$ git remote
+$ git remote -v
+\end{verbatim}
+
+At this point, you should have two remote repositories:
+%
+\begin{itemize}
+\item origin, your own fork of the initial MixedQuadTree repository
+\item upstreamMixedQuadTree, the remote repository you have just added containing the initial MixedQuadTree repository
+\end{itemize}
+
+You can see the state of a remote repository called 'remotename' under a shell with the command 'git remote show remotename':
+%
+\begin{verbatim}
+$ git remote show origin
+$ git remote show upstreamMixedQuadTree (you can use the tab-key for auto-completion)
+\end{verbatim}
+
+In the normal workflow, you can pull from the main MixedQuadTree repository (upstreamMixedQuadTree)...
+%
+\begin{verbatim}
+$ git pull upstreamMixedQuadTree master
+\end{verbatim}
  
-\textbf{but only push to your own fork of MixedQuadTree (origin) !!!}\\
+\textbf{IMPORTANT NOTE $\Rightarrow$ but only push to your own fork of MixedQuadTree (origin) !!!}
+
+\begin{verbatim}
+$ git push origin master
+\end{verbatim}
 
 The merge between the original repository is done by ANOTHER DEVELOPER after a \textbf{'pull request'}.
-To make a 'pull request', go to https://github.com/yourUsername/MixedQuadTree, click on 'Pull Request'. Then, choose the two branches you would like to merge (master in \textit{jaillet} and yourbranch in origin), write your comments and click on 'Send Pull Request'.
+To make a 'pull request', go to \url{https://github.com/yourUsername/MixedQuadTree}, click on 'Pull Request'. Then, choose the two branches you would like to merge (master in \textit{jaillet} and your branch in \textit{origin}), write your comments and click on \textit{'Send Pull Request'}.
+
 
 %---------------------------
 %---------------------------
@@ -630,7 +729,7 @@ To produce a mesh you must execute in a terminal the following:
 %
 {\small
 \begin{verbatim}
-$ ./mesher_roi [-option | parameters]
+$ ../mesher_roi [-option | parameters]
 \end{verbatim}
 }
 If you do not indicate any option nor parameters, the program will list all the available options for you. Options for input/output:
@@ -672,7 +771,7 @@ Now, to provide the Refinement Level (\textit{rl}) several options can be used (
 we can now execute the following to test the meshing process:
 {\small
 \begin{verbatim}
-$ ./mesher\_roi -p a.poly -a 2 -s 5 -u testa2s5 -v -q
+$ ../mesher_roi -p a.poly -a 2 -s 5 -u testa2s5 -v -q
 \end{verbatim}
 }
 %---------------------------
@@ -683,7 +782,7 @@ When generating a mesh with the code explained in section \ref{s:generatemesh}, 
 we can now execute: 
 {\small
 \begin{verbatim}
-$ ./mesher\_roi -p a.poly -c testa2s5.oct -a 4 -l list.txt -u testa2s5ref -v
+$ ../mesher\_roi -p a.poly -c testa2s5.oct -a 4 -l list.txt -u testa2s5ref -v
 \end{verbatim}
 }
 generating the result shown in Figure \ref{f:???}.

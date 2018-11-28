@@ -249,7 +249,7 @@ namespace Clobscode
         const Point3D &p0 = mp[pointindex[0]].getPoint();
         const Point3D &p1 = mp[pointindex[2]].getPoint();
         //max_dis = 0.3 * (p0 - p1).Norm();
-        max_dis = 0.3 * (p0 - p1).Norm() / getSubElements().size();
+        max_dis = 0.3 * (p0 - p1).Norm() / sqrt(getSubElements().size());
     }
     
     inline void Quadrant::updateSubElements(vector<vector <unsigned int> > &nsubs) {

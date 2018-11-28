@@ -338,7 +338,7 @@ int main(int argc,char** argv){
 
         //Boundary: add in first position a Region dedicated to handle correctly the boundary
         //see if force rotation enable
-        RefinementBoundaryRegion *rb =new RefinementBoundaryRegion(inputs.at(0),0);//std::numeric_limits<unsigned short>::max());
+        RefinementBoundaryRegion *rb =new RefinementBoundaryRegion(inputs.at(0),4);//std::numeric_limits<unsigned short>::max());
         //    if (argv[i][2]=='r') {
         //        rb->forceInputRotation();
         //    }
