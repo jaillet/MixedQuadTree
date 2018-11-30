@@ -92,6 +92,8 @@ A \textbf{Polyline} is composed of (Fig.~\ref{f:polyline}):
 The format for Input file might be either \verb?.poly? as described on the \href{https://www.cs.cmu.edu/~quake/triangle.poly.html}{Triangle\_1.6 website}; find an example here: \href{https://github.com/jaillet/MixedQuadTree/blob/master/data/unit\_square.poly}{unit\_square.poly}.
 It could also be defined as \verb?.mdl? file, see \href{https://github.com/jaillet/MixedQuadTree/blob/master/data/unit\_square.mdl}{unit\_square.mdl}. More examples in the \href{https://github.com/jaillet/MixedQuadTree/blob/master/data/}{data} directory.
 
+\textbf{Remarque:} \texttt{.poly} files could by displayed using the \href{https://www.cs.cmu.edu/~quake/showme.html}{ShowMe}  that comes with \textit{Triangle} software. But for practical reasons, the mesher could generate also \texttt{\_poly.vtk} files to ease visualization of the Polyline in the open-source and multi-platform \href{https://www.paraview.org/}{ParaView} suite (with option \texttt{-v}).
+
 %---------------------------
 \subsection{Quadrant as support of surface mesh}
 
@@ -296,6 +298,7 @@ A Quad mesh is said \textit{balanced} when there is at most a difference of 1 le
 
 %---------------------------
 \subsection{Transition patterns}
+\label{sec:transpat}
 %
 Now the mesh is balanced, we need to handle transitions between Quadrants, to produce a \textit{conformal mesh}, when the elements exactly share nodes and edges. This technique is known to save time during the computation, and also to avoid node interpolation errors.
 If 2 adjacent Quadrants have the same refinement level, then there is nothing to do. Otherwise, the less refined Quadrant must be treated. Again, in practice, this is determined by checking whether a Quadrant contains at least one QuadEdge that is subdivided (step~\ref{alg:trans}).
@@ -341,15 +344,17 @@ For the Transition, the chosen technique was to apply a Pattern corresponding to
 
 %---------------------------
 %---------------------------
-\section{Fitting quadrants to Input Surface}
+\section{Fitting quadrants to Input Polyline}
 \label{sec:method}
 %---------------------------
 %---------------------------
 
+As seen previously in section~\ref{sec:method}, Quadrants are well suited to decompose the input  domain $\mathcal{S}$ into a set of Elements. However, you may notice that the Boundaries are not exactly fitted when PolyEdges are not aligned with the Quadrants border, unless you use a very fine subdivision\ldots that is generally unwanted to avoid generating a huge amount of Elements.
 
+Thus, following the same approach as for Transition Patterns (see~\ref{sec:transpat}), the Boundary Elements will be treated with \textit{Surface Patterns}, as described in Algorithm~\ref{alg:surfacefitting}.\\
 
 \begin{algorithm}[H]
-
+%
 \setcounter{AlgoLine}{-1}
 \SetAlgoLined
 \KwResult{A mixed-elements mesh}
@@ -389,7 +394,7 @@ For the Transition, the chosen technique was to apply a Pattern corresponding to
         // done: compute distMax before...
 \item        // test3: if the number of intersection of the Polyline and Quadrant edge $>= 3$
 \end{enumerate}
-The result for the \textit{A} and \text{Pie} Polyline is shown on Fig.~\ref{fig:boundary}, where it can be appreciated that subdivision only occurred where required by the Input Polyline.
+The result for the \textit{A} and \text{Pie} Polyline is shown on Fig.~\ref{fig:boundary}, where it can be appreciated that subdivision only occurred where required and is driven by the Input Polyline characteristics.
 
  \begin{figure}[htb]
 \centering
