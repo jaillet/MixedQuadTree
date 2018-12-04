@@ -334,6 +334,7 @@ int main(int argc,char** argv){
     
     // and next proceed with mesh generation or refinement
     if (!Quadrant_start) {
+        
 
         //Boundary: add in first position a Region dedicated to handle correctly the boundary
         //see if force rotation enable
