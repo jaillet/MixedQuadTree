@@ -94,7 +94,7 @@ namespace Clobscode
         //Finally, apply the transition pattern
         //------------------------------------------------------
         
-        //creat the pattern
+        //create the pattern
         patterns::QuadTransition qt(nodes);
         
         //the subelements of this Quadrant will no longer be a Quad.

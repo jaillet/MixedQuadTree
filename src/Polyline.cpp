@@ -299,7 +299,7 @@ namespace Clobscode
     bool Polyline::pointIsInMesh(const Point3D & pPoint, const list<unsigned int> &lEdges) const{
 
         // index of the closest edges (if many)
-        vector <unsigned int> closestEdge;
+        vector <unsigned int> closestEdges;
         // closest point on the list of Edges (on edge, or vertice)
         Point3D pProjP,pProjP_tmp;
         // -1 if projection on edge, index of the point if projection on an extremity
@@ -324,12 +324,12 @@ namespace Clobscode
 
             // if projection on the same point for 2 edges
             if (found && projWhere_tmp>=0 && projWhere_tmp==projWhere ) {
-                closestEdge.push_back(iEdg); //just update list
+                closestEdges.push_back(iEdg); //just update list
             } else {
                 if (pDist < closestDist ) {
                     pProjP = pProjP_tmp;
-                    closestEdge.clear();
-                    closestEdge.push_back(iEdg);
+                    closestEdges.clear();
+                    closestEdges.push_back(iEdg);
                     closestDist = pDist;
                     projWhere=projWhere_tmp;
                     found = true;
@@ -342,10 +342,10 @@ namespace Clobscode
 
             uint iClosest=0;
 
-            if (closestEdge.size()>1) { // if closest point lies on edge
+            if (closestEdges.size()>1) { // if closest point lies on an edge extremity
                 Point3D v=(pPoint-pProjP).normalize();
-                double dot0= v.dot(mEdges[closestEdge[0]].getNormalizedNormal());
-                double dot1= v.dot(mEdges[closestEdge[1]].getNormalizedNormal());
+                double dot0= v.dot(mEdges[closestEdges[0]].getNormalizedNormal());
+                double dot1= v.dot(mEdges[closestEdges[1]].getNormalizedNormal());
                 // check with the edge that normal is most colinear to the (pPoint-pProjP) line
                 // in other terms, the direction of the projection is most orthogonal to that edge
                 if (fabs(dot0)>=fabs(dot1)) {
@@ -355,8 +355,8 @@ namespace Clobscode
                 }
             }
 
-            const Point3D &P0=mVertices[mEdges[closestEdge[iClosest]][0]];
-            const Point3D &P1=mVertices[mEdges[closestEdge[iClosest]][1]];
+            const Point3D &P0=mVertices[mEdges[closestEdges[iClosest]][0]];
+            const Point3D &P1=mVertices[mEdges[closestEdges[iClosest]][1]];
             //bIsIn = (pPoint.isLeft(P0,P1)>=0); // pPoint left of the closest edge, "in" if "on"
             bIsIn = (pPoint.isLeft(P0,P1)>0); // pPoint left of the closest edge, "out" if "on"
             //                std::cerr << pPoint << "  e:" << mEdges[closestEdge[0]] << " dot: " << dot0 << "  -  " << mEdges[closestEdge[1]] << " dot: " << dot1 << "->" << (fabs(dot0)>=fabs(dot1))
@@ -379,7 +379,13 @@ namespace Clobscode
 
         return bIsIn;
     }
-    
+
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    inline bool Polyline::pointIsFeature(unsigned int i) const {
+        return (mVerticesAngles[i]<MinFeatureAngle || mVerticesAngles[i]>MaxFeatureAngle);
+    }
+
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     list<unsigned int> Polyline::getFeatureProjection(const Quadrant &q,
@@ -409,8 +415,8 @@ namespace Clobscode
         }
         
         for (unsigned int iNd:iCommonNodes) {
-            //if angle is between 150 and 210 grades, then is not a sharp feature:
-            if (mVerticesAngles[iNd]<175. || mVerticesAngles[iNd]>185.) {
+            //if angle is between 175 and 185 grades, then is not a sharp feature:
+            if ( pointIsFeature(iNd) ) {
                 //std::cout << " " << iNd << std::flush;
                 fes.push_back(iNd);
             }
@@ -438,7 +444,7 @@ namespace Clobscode
         std::sort(iNodes.begin(),iNodes.end());
 
         //FJA: we want to test only the intersection, not the extremities of the edges
-        // the feature should lies IN the quadrant
+        // the feature should lie IN the quadrant
         list<unsigned int> iCommonNodes;
         for (unsigned int i=1; i<iNodes.size(); ++i) {
             if (iNodes.at(i-1)==iNodes.at(i)){
@@ -448,8 +454,8 @@ namespace Clobscode
         }
         
         for (auto iNd:iCommonNodes) {
-            //if angle is between 150 and 210 grades, then is not a sharp feature:
-            if (mVerticesAngles[iNd]<150. || mVerticesAngles[iNd]>210.) {
+            //if angle is between 175 and 185 grades, then is not a sharp feature:
+            if ( pointIsFeature(iNd) ) {
                 //std::cout << " " << iNd << std::flush;
                 if (q.pointInside(mp,mVertices[iNd])) {
                     iFeatures.push_back(iNd);

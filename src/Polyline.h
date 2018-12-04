@@ -32,12 +32,12 @@
 #include "MeshPoint.h"
 //FJA no more used #include "SurfEdgeContainer.h"
 #include <limits>
-#include <set>
+#include <map>
 #include <algorithm>    // std::sort
 #include <math.h>
 
 using std::vector;
-using std::set;
+using std::map;
 using Clobscode::Point3D;
 using PolyMesh::PolyEdge;
 //FJA?? using SurfMesh::SurfEdgeContainer;
@@ -45,6 +45,9 @@ using PolyMesh::PolyEdge;
 namespace Clobscode
 {
     class Polyline {
+
+        const double MinFeatureAngle=175.;
+        const double MaxFeatureAngle=185.;
 
     public:
         Polyline();
@@ -74,6 +77,8 @@ namespace Clobscode
         virtual bool pointIsInMesh(const Point3D &pPoint) const;
 		virtual bool pointIsInMesh(const Point3D & pPoint, 
                                    const list<unsigned int> &lEdges) const;
+
+        virtual bool pointIsFeature(unsigned int i) const;
 		
         //returns the number of features of the list of edges contained by this quad
         //and update the quad accordingly
@@ -112,6 +117,21 @@ namespace Clobscode
         // compute the pseudo normal at each surface node
         virtual void computeNodesPseudoNormal();
 
+        virtual void setFeatureIndexProjectedPt(unsigned int iFeat, unsigned int iPt) {
+            mFeatureIndexProjectedPt[iFeat]=iPt;
+        }
+        virtual unsigned int getFeatureIndexProjectedPt(unsigned int iFeat) { // not const because of map::operator[]
+            return (mFeatureIndexProjectedPt[iFeat]);
+        }
+        // check if this feature has been treated
+        // required as map::operator[] will insert default value if key not present...
+        virtual bool featureHasProjectedPt(unsigned int iFeat) const {
+            auto it = mFeatureIndexProjectedPt.find(iFeat);
+            if (it != mFeatureIndexProjectedPt.end())
+                return (true);
+            return (false);
+        }
+
         friend ostream& operator<<(ostream& os, const Polyline &ply);
 		
 	protected:
@@ -132,6 +152,9 @@ namespace Clobscode
 		//one pseudo normal per vertices (same size)
 		vector<Point3D> mVerticePseudoNormals;
         vector<double> mVerticesAngles;
+
+        //index of projected point of the mesh on the Feature
+        map<unsigned int,unsigned int> mFeatureIndexProjectedPt;
 		
         //bounding box of this surface mesh
         vector<double> bounds;

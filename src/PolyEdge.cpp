@@ -70,7 +70,8 @@ namespace PolyMesh
                                            const Point3D &ep1,
                                            const Point3D &ep2) const{
         std::cerr << "warning PolyEdge::segmentIntersection(...)\n" ;
-        std::cerr << "  not implemented yet\n" ;
+        std::cerr << "  not implemented yet. Exiting.......\n" ;
+        exit(1);
 
         const Point3D &p0 = pts[getKey()];
         const Point3D &p1 = pts[getVal()];
