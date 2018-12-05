@@ -97,6 +97,14 @@ namespace Clobscode
         const Point3D &P1 = mp[pointindex[nIdx]].getPoint();       //mid point
         const Point3D &P2 = mp[pointindex[(nIdx+1)%4]].getPoint(); //next point        
         
+        //if two nodes are the same, we return NaN
+        if ((P0-P1).Norm()<0.001) {
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+        if ((P2-P1).Norm()<0.001) {
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+        
         //double angle = toDegrees( P1.angle3Points(P0,P2));
         //function angle returns degrees in 360.
         double angle = P1.angle3Points(P0,P2);
