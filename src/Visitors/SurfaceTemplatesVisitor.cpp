@@ -75,6 +75,15 @@ namespace Clobscode
 
 
                 for (unsigned int i=0; i<pointindex.size(); i++) {
+                    Point3D CP = (*meshpts)[pointindex[i]].getPoint();
+                    Point3D NP = (*meshpts)[pointindex[(i+1)%4]].getPoint();
+                    //this is to treat when two next nodes are projected
+                    //onto the same place (candidate: become a triangle)
+                    if ((CP-NP).Norm()<0.01) {
+                        tri = true;
+                        in[(i+1)%4] = true;
+                        nin++;
+                    }
                     double angle = o->getAngle(i,*meshpts);
                     if (angle<=150.0) {
                         in[i]=true;

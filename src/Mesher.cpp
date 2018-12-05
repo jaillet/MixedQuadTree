@@ -200,7 +200,6 @@ namespace Clobscode
             unsigned int nels = Quadrants.size();
             Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
 
-
             //CL Debbuging
             {
                 //save pure octree mesh
@@ -250,7 +249,7 @@ namespace Clobscode
             //apply the surface Patterns
             applySurfacePatterns(input);
             //removeOnSurface(input);
-
+            
             if (rotated) {
                 // rotate the mesh
                 for (unsigned int i=0; i<points.size(); i++) {
@@ -1436,7 +1435,7 @@ namespace Clobscode
         auto end_time = chrono::high_resolution_clock::now();
         cout << "    * SaveOutputMesh in "
              << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
-        cout << " ms"<< endl;
+        cout << " ms ("<< endl;
 
         return out_els.size();
     }
@@ -1664,7 +1663,6 @@ namespace Clobscode
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-
     void Mesher::removeOnSurfaceSafe(Polyline &input){
         auto start_time = chrono::high_resolution_clock::now();
 
@@ -1706,13 +1704,17 @@ namespace Clobscode
             //Sometimes the avg node is just over domain's boundary,
             //despite the fact that a (big) portion of it's still
             //inside the domain and no other Quad will cover this
-            //section. For this reason the mid node between the average
-            //point and every node of the Quad is tested to be inside.
-            //This implies 8 point sums and 5 division. Better than 12 point
-            //sums and 4 divisions.
+            //section. For this reason the entire element is shrink
+            //to 99% of it. If one node of this shrink element is still
+            //inside the domain, the Octant remains. Recall that a
+            //node projected onto the surface is treated as an outside
+            //node.
             bool accepted = false;
             for (auto quaNoIdx:q.getPointIndex()) {
-                Point3D test = (avg + points[quaNoIdx].getPoint())/2;
+                //Point3D test = (avg + points[quaNoIdx].getPoint())/2;
+                Point3D test = points[quaNoIdx].getPoint() - avg;
+                test*=0.99;
+                test+=avg;
                 if (input.pointIsInMesh(test,q.getIntersectedEdges())) {
                     newele.push_back(q);
                     accepted = true;

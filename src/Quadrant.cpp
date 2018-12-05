@@ -95,11 +95,15 @@ namespace Clobscode
         
         const Point3D &P0 = mp[pointindex[(nIdx+3)%4]].getPoint(); //previous point
         const Point3D &P1 = mp[pointindex[nIdx]].getPoint();       //mid point
-        const Point3D &P2 = mp[pointindex[(nIdx+1)%4]].getPoint(); //next point
+        const Point3D &P2 = mp[pointindex[(nIdx+1)%4]].getPoint(); //next point        
         
         //double angle = toDegrees( P1.angle3Points(P0,P2));
         //function angle returns degrees in 360.
         double angle = P1.angle3Points(P0,P2);
+        
+        if (isnan(angle)) {
+            return 180;
+        }
         
         return angle;
         
