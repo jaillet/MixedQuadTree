@@ -253,7 +253,7 @@ namespace Clobscode
         applySurfacePatterns(input);
         //removeOnSurface(input);
         
-        if (rotated) {
+        /*if (rotated) {
             // rotate the mesh
             for (unsigned int i=0; i<points.size(); i++) {
                 gt.applyInverse(points[i].getPoint());
@@ -262,7 +262,7 @@ namespace Clobscode
             for (unsigned int i=0; i<input.getPoints().size(); i++) {
                 gt.applyInverse(input.getPoints()[i]);
             }
-        }
+        }*/
         
         //the almighty output mesh
         std::shared_ptr<FEMesh> mesh = std::make_shared<FEMesh>();
@@ -2058,6 +2058,15 @@ namespace Clobscode
                         //for each quadrant that must be treated (note that
                         //a surface quad is not the same as an inside quad).
                         Quadrants[pe].setSurface();
+                        
+                        //Also, if quadrant was completely inside, then we must
+                        //set as intersected edges the edges of its neighbor.
+                        //This information will be used to detect if sub-elements
+                        //are still inside the domain and for that, the subset
+                        //of intersected edges is necessary.
+                        if (Quadrants[pe].getIntersectedEdges().empty()) {
+                            Quadrants[pe].setIntersectedEdges(q.getIntersectedEdges());
+                        }
                     }
                     
                     fsNum--;
