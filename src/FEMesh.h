@@ -68,12 +68,15 @@ namespace Clobscode
         
         virtual const vector<unsigned short> &getSurfState() const;
         virtual void setSurfState(const vector<unsigned short> &surf);
+        
+        virtual const vector<unsigned short> &getDebugging() const;
+        virtual void setDebugging(const vector<unsigned short> &deb);
 
 	protected:
 		
 		vector<Point3D> points;
         vector<vector<unsigned int> > elements;
-        vector <unsigned short> ref_levels, surf_state;
+        vector <unsigned short> ref_levels, surf_state, deb_state;
         vector <double> min_angles;
         vector<unsigned int> color;
 		list<unsigned int> outpts;
@@ -88,6 +91,9 @@ namespace Clobscode
     
     inline const vector<unsigned short> &FEMesh::getSurfState() const {return surf_state;}
     inline void FEMesh::setSurfState(const vector<unsigned short> &surf) {surf_state=surf;}
+    
+    inline const vector<unsigned short> &FEMesh::getDebugging() const {return deb_state;}
+    inline void FEMesh::setDebugging(const vector<unsigned short> &deb) {deb_state=deb;}
 
     inline void FEMesh::setColoredCells(const vector<unsigned int> &colored) {
         color = colored;

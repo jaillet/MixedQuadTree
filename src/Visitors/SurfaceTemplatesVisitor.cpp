@@ -53,7 +53,6 @@ namespace Clobscode
             unsigned int nin = 0, onei=0, oneo=0;
 
             for (unsigned int i=0; i<pointindex.size(); i++) {
-
                 if (!meshpts->at(pointindex[i]).isOutside()){
                     in[i] = true;
                     onei = i;
@@ -62,6 +61,10 @@ namespace Clobscode
                 else {
                     oneo = i;
                 }
+            }
+            
+            if (nin==1) {
+                o->setDebugging();
             }
 
             if (nin==0) {

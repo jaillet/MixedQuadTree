@@ -920,6 +920,17 @@ bool Services::WriteVTK(std::string name, const shared_ptr<FEMesh> &output){
                 fprintf(f," %d", (int) (90.-minAngles[i]));
         }
     }
+    
+    //write debugging state if computed before (-q option, decoration==true)
+    const vector <unsigned short> &debugging= output->getDebugging();
+    if (debugging.size()>0) {
+        fprintf(f,"\nSCALARS debugging int 1");
+        fprintf(f,"\nLOOKUP_TABLE default");
+        for (unsigned int i=0; i<surfele.size(); i++) {
+            if (i%30==0) {fprintf(f,"\n");}
+            fprintf(f," %u",debugging[i]);
+        }
+    }
 
     fclose(f);
 
