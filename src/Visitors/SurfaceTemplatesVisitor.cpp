@@ -62,10 +62,6 @@ namespace Clobscode
                     oneo = i;
                 }
             }
-            
-            if (nin==1) {
-                o->setDebugging();
-            }
 
             if (nin==0) {
                 //All the nodes of the octant were projected onto the
