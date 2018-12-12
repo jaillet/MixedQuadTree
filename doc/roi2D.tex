@@ -386,6 +386,7 @@ Thus, following the same approach as for Transition Patterns (see~\ref{sec:trans
 \label{sec:boundary}
 
 \textcolor{red}{preprocessing}
+This stage is a preprocessing 
 
 \begin{enumerate}
 \item        // test1: if nb Features $>= 2$
@@ -665,7 +666,8 @@ Let's fork the initial MixedQuadTree repository. So, once you're logged in on gi
 \begin{verbatim}
 $ git clone /https://github.com/jaillet/MixedQuadTree.git
 $ cd MixedQuadTree/
-$ git checkout branch develop (this will create a new branch)
+$ git checkout -b develop upstream/develop (this will create a new branch and follow upstream one)
+$ or (git checkout develop) once the branch has been created
 $ mkdir build ; cd build
 $ cmake ../src -D_CMAKE_BUILD_TYPE=Debug (or Release) // Uppercase is important
 $ cmake .
@@ -676,10 +678,10 @@ $ make -j#nproc
 \subsection{Git usage}
 At this point, you can edit and commit files on you branch using  the git workflow.
 
-In order to easily access to the initial MixedQuadTree repository and stay updated with the other developers advances, you can set it as a remote repository, called 'upstreamMixedQuadTree':
+In order to easily access to the initial MixedQuadTree repository and stay updated with the other developers advances, you can set it as a remote repository, called 'upstream' (\href{https://help.github.com/articles/syncing-a-fork/}{github help}):
 
 \begin{verbatim}
-$ git remote add upstreamMixedQuadTree git@github.com:MixedQuadTree/MixedQuadTree.git
+$ git remote add upstream git@github.com:MixedQuadTree/MixedQuadTree.git
 \end{verbatim}
 
 Git remotes are great because they allows to have multiple pull/push repositories. You can see the list of your remote repositories under a shell:
@@ -693,20 +695,20 @@ At this point, you should have two remote repositories:
 %
 \begin{itemize}
 \item origin, your own fork of the initial MixedQuadTree repository
-\item upstreamMixedQuadTree, the remote repository you have just added containing the initial MixedQuadTree repository
+\item upstream, the remote repository you have just added containing the initial MixedQuadTree repository
 \end{itemize}
 
 You can see the state of a remote repository called 'remotename' under a shell with the command 'git remote show remotename':
 %
 \begin{verbatim}
 $ git remote show origin
-$ git remote show upstreamMixedQuadTree (you can use the tab-key for auto-completion)
+$ git remote show upstream (you can use the tab-key for auto-completion)
 \end{verbatim}
 
-In the normal workflow, you can pull from the main MixedQuadTree repository (upstreamMixedQuadTree)...
+In the normal workflow, you can pull from the main MixedQuadTree repository (upstream)...
 %
 \begin{verbatim}
-$ git pull upstreamMixedQuadTree master
+$ git pull upstream master
 \end{verbatim}
  
 \textbf{IMPORTANT NOTE $\Rightarrow$ but only push to your own fork of MixedQuadTree (origin) !!!}
