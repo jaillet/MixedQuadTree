@@ -296,7 +296,7 @@ int main(int argc,char** argv){
                 }
                 else {
                     cerr << "Warning: option -l needs a previously provided Quadrant";
-                    cerr << " mesh (option -o) skipping\n";
+                    cerr << " mesh (option -c) skipping\n";
                 }
                 i++;
                 break;

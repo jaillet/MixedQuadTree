@@ -142,7 +142,7 @@ In our case, Quadrants will be continuously split until a maximum provided level
 \begin{algorithm}[H]
 \SetAlgoLined
 \KwResult{A mixed-elements mesh}
-  \tcc{Generate quadtree:}
+  \tcc{Generating quadtree:}
  \nl \ForEach{Quadrant}{
  \Repeat {desired Refinement Level}{
  \nl {Subdivide Quadrant\label{alg:subdivide}}\; 
@@ -151,7 +151,8 @@ In our case, Quadrants will be continuously split until a maximum provided level
     }
   }
   }
- \nl Create balanced quadtree\; \label{alg:goto}
+  \tcc{ Creating conformal mesh:}
+\nl Create balanced quadtree\; \label{alg:goto}
  \nl Apply Transition Patterns\; \label{alg:trans}
  \caption{Generation process}
  \label{alg:generate}
@@ -360,7 +361,7 @@ Thus, following the same approach as for Transition Patterns (see~\ref{sec:trans
 \KwResult{A mixed-elements mesh}
   \tcc{Preprocess:}
 \nl   Handle Boundary\; \label{alg:bound2}
- \tcc{Generate quadtree:}
+ \tcc{Generating quadtree:}
 \nl \ForEach{Quadrant}{
  \Repeat {desired Refinement Level}{
  \nl Subdivide Quadrant\; \label{alg:subdivide2}
@@ -369,11 +370,12 @@ Thus, following the same approach as for Transition Patterns (see~\ref{sec:trans
     }
   }
   }
- \nl Create balanced quadtree\; \label{alg:goto2}
+   \tcc{ Creating conformal mesh:}
+\nl Create balanced quadtree\; \label{alg:goto2}
  \nl Apply Transition Patterns\;
  \tcc{Input surface fitting:}
  \nl Detect Features in Input\;
- \nl  Project Intern Nodes Close to Boundary\; \label{alg:closeto2}
+ \nl  Project Close to Boundary Intern Nodes\; \label{alg:closeto2}
   \nl Remove Outside Quadrant\; \label{alg:remsur2}
   \nl Shrink Extern Nodes to Boundary\; \label{alg:shrink2}
  \nl Apply Surface Patterns\; \label{alg:surfpat2}
@@ -560,19 +562,58 @@ This is exactly the same as in Algorithm~\ref{alg:generate}. The only difference
 \SetAlgoLined
 \SetKw{kwGoto}{Goto}
 \KwResult{A refined mixed-elements mesh}
+  \tcc{Reconstructing quadtree}
+\nl Read .oct file\;
+\nl Regenerate quadtree\;
+  \tcc{Refining Elements}
  \ForEach{Element to refine}{
-  Identify containing Quadrant\;
-  Subdivide Quadrant\;
+\nl   Identify containing Quadrant\;
+\nl   Subdivide Quadrant\;
    \ForEach{Sub-quadrant}{
-   \If{Intersect Input \textit{or} Is Inside}{Insert Sub-Quadrant}
+\nl    \If{Intersect Input \textit{or} Is Inside}{Insert Sub-Quadrant}
     }
   }
-  \kwGoto{Algorithm \ref{alg:surfacefitting}, step \ref{alg:goto}}
+   \tcc{Conformal mesh and Input surface fitting}
+  \kwGoto{Algorithm \ref{alg:surfacefitting}, step \ref{alg:goto2}}
  \caption{Refinement process}
  \label{alg:refinement}
 \end{algorithm}
 
-Some results are shown on Fig.~\ref{}. On each image, the bottom left element is refined. Notice how mesh is balanced and transition are created to produce a conformal mesh.
+\subsection{.oct File Format}
+
+{\small
+\begin{verbatim}
+#NbVertex #NbEdges #NbLinks #NbQuadrants
+
+# Coordinates of the Quadrants' vertices
+x y z
+
+# Edges: vertex Indices
+# with e0 e1: indices of edge' extremities
+# and e2 index of the middle point of the edge
+e0 e1 e2
+
+# Quadrants links
+l
+
+# Quadrants data
+# 2 lines for each Quad
+# first line: number of corners (should be 4!)
+# followed by indices of Corner's vertices and refinement level 
+4 vo v1 v2 v3 rl
+# second line:  number of intersected faces (Input)
+# followed by list of intersected faces
+n f0 ... fn-1
+
+# Geometric Transform
+Geometric Transform
+x y z # centroid coordinates
+x y z # axis coordinates
+
+\end{verbatim}
+}
+
+Some results are shown on Fig.~\ref{fig:refiningbox}. On each image, the bottom left element is refined. Notice how mesh is balanced and transition are created to produce a conformal mesh. Note how successive mesh refinement keeps the good quality if the elements. 
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
@@ -599,7 +640,7 @@ Some results are shown on Fig.~\ref{}. On each image, the bottom left element is
   \includegraphics[width=0.31\textwidth]{box8.png}
   \label{f:box8}
  }
- \caption{Algorithm~\ref{alg:refinement}. With \textit{Box} example, the bottom left element is refined once at each iteration of the algorithm. (a-c) iteration 1 to 5, (d) iteration 8.}
+ \caption{Iterating on Algorithm~\ref{alg:refinement}\ . With \textit{Box} example, the bottom left element is refined once at each iteration of the algorithm. (a-c) iteration 1 to 5, (d) iteration 8.}
 \label{fig:refiningbox}
 \end{figure}
 
@@ -617,7 +658,7 @@ Some results are shown on Fig.~\ref{}. On each image, the bottom left element is
   \includegraphics[width=0.31\textwidth]{box20_zoom2.png}
   \label{f:box20z2}
  }
- \caption{Algorithm~\ref{alg:refinement}.  Same \textit{Box} example as Fig.~\ref{fig:refiningbox}, iteration 20. (b) Zoomed once and (b) twice in the bottom left corner.}
+ \caption{Iterating on Algorithm~\ref{alg:refinement}.  Same \textit{Box} example as Fig.~\ref{fig:refiningbox}, iteration 20. (b) Zooming once and (b) twice at the bottom left corner.}
 \label{fig:refiningbox20}
 \end{figure}
 
@@ -627,7 +668,13 @@ identify which Quad contains the element, information from file
 
 subdivide Quad + goto subsection balanced
 
+\textcolor{red}{
 (local remeshing? neighbourhood??)
+}
+
+\textcolor{red}{
+Discussion: the limitation of the currently proposed method is clearly the lack of a local remeshing process. As described right above, 
+}
 
 
 %---------------------------
@@ -783,7 +830,7 @@ $ ../mesher_roi -p a.poly -a 2 -s 5 -u testa2s5 -v -q
 }
 %---------------------------
 \subsection{Advanced mesh refinement}
-\label{refinemesh}
+\label{s:refinemesh}
 
 When generating a mesh with the code explained in section \ref{s:generatemesh}, a quadrant mesh file will be automatically written. Using the \textit{octant} file (extension \texttt{.oct}, for compatibility reasons with 3D \textcolor{red}{to be changed??}) elements, quadrants and even regions of the generated mesh can be refined. Currently, only quadrants can be subdivided in 4 new quadrants (squares), however, if a particular element must be refined, the \textit{octant} file allows to detect to which quadrant it belongs and refine it. All the refinement options of section \ref{s:generatemesh} can be used, and one extra option to list particular elements of the mesh can be employed.
 we can now execute: 
@@ -794,7 +841,7 @@ $ ../mesher\_roi -p a.poly -c testa2s5.oct -a 4 -l list.txt -u testa2s5ref -v
 }
 generating the result shown in Figure \ref{f:???}.
 
-As you noticed, in this example we start from a Quadrant mesh already generated \texttt{out.oct}, so the element alignment is conserved as in previous example. We then specify that all the quadrants in the mesh must, at least, count with a refinement level 4 (\texttt{-a 4}). 
+As you noticed, in this example we start from a Quadrant mesh already generated \texttt{testa2s5.oct} (see~\ref{s:generatemesh}), so the element alignment is conserved as in previous example. We then specify that all the quadrants in the mesh must, at least, count with a refinement level 4 (\texttt{-a 4}). 
 
 Then we can provide, in a simple text file listing \texttt{list.txt}, specific element indexes we want to refine. One element per line. Please note that is \textit{plain text} file only (be sure not to be using \textit{rtf} files which add more information).
 %In the example these elements are placed in bottom back portion of the brain inside a red circle. 
