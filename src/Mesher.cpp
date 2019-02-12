@@ -25,6 +25,7 @@
 
 #include "Mesher.h"
 #include <math.h>
+#include "omp.h"
 
 namespace Clobscode {
     //--------------------------------------------------------------------------------
@@ -1203,13 +1204,20 @@ namespace Clobscode {
         tpv.setMaxRefLevel(max_rl);
         new_pts.clear();
 
-        for (iter = tmp_Quadrants.begin(); iter != tmp_Quadrants.end(); ++iter) {
+        // list don't provide random access iterator needed for OpenMP pragma for
+        std::vector<Quadrant*> quadrants;
+        for (iter = tmp_Quadrants.begin(); iter != tmp_Quadrants.end(); ++iter)
+            quadrants.push_back(&*iter);
 
-            if (!(*iter).accept(&tpv)) {
+        #pragma omp parallel for
+        for (int i = 0; i < quadrants.size(); i++) {
+            if (!quadrants[i]->accept(&tpv)) {
                 std::cerr << "Error at Mesher::generateQuadtreeMesh";
                 std::cerr << " Transition Pattern not found\n";
             }
         }
+
+
 
         //CL Debbuging
         {
