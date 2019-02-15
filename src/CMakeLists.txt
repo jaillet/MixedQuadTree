@@ -26,7 +26,10 @@ set(SOURCE_FILES Main
         Visitors/RemoveSubElementsVisitor
         )
 
+set(SOURCE_MEANTIME MeanTimePerformance/Main)
+
 add_executable(mesher_roi ${SOURCE_FILES})
+add_executable(meanTime ${SOURCE_MEANTIME})
 
 # obsolete 3D files to be removed
 
