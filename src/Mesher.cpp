@@ -1207,7 +1207,7 @@ namespace Clobscode {
         // list don't provide random access iterator needed for OpenMP pragma for
         std::vector<Quadrant*> quadrants;
         for (iter = tmp_Quadrants.begin(); iter != tmp_Quadrants.end(); ++iter)
-            quadrants.push_back(&*iter);
+            quadrants.push_back(&(*iter));
 
         #pragma omp parallel for
         for (int i = 0; i < quadrants.size(); i++) {
@@ -1217,7 +1217,40 @@ namespace Clobscode {
             }
         }
 
+        /*
+        // With openMP 3.0 -> worse performance than above
+        // This will execute the loop in one thread, but delegate the processing of elements to others.
+        #pragma omp parallel
+        #pragma omp single
+        {
+            for(iter = tmp_Quadrants.begin(); iter != tmp_Quadrants.end(); ++iter) {
+                #pragma omp task firstprivate(iter)
+                if (!iter->accept(&tpv)) {
+                    std::cerr << "Error at Mesher::generateQuadtreeMesh";
+                    std::cerr << " Transition Pattern not found\n";
+                }
+                #pragma omp taskwait
+            }
+        }
+        */
 
+        // Other version!
+        // Longer too?
+        /*
+        #pragma omp parallel
+        {
+           for(iter = tmp_Quadrants.begin(); iter != tmp_Quadrants.end(); iter++)
+           {
+              #pragma omp single nowait
+              {
+                 if (!iter->accept(&tpv)) {
+                    std::cerr << "Error at Mesher::generateQuadtreeMesh";
+                    std::cerr << " Transition Pattern not found\n";
+                }
+              }
+           } // end for
+        } // end ompparallel
+        */
 
         //CL Debbuging
         {
