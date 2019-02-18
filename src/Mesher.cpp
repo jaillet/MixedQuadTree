@@ -1205,6 +1205,11 @@ namespace Clobscode {
         new_pts.clear();
 
         // list don't provide random access iterator needed for OpenMP pragma for
+        
+
+        // Mean with a.poly 1000 times : 30.3 ms
+
+        /*
         std::vector<Quadrant*> quadrants;
         for (iter = tmp_Quadrants.begin(); iter != tmp_Quadrants.end(); ++iter)
             quadrants.push_back(&(*iter));
@@ -1216,10 +1221,12 @@ namespace Clobscode {
                 std::cerr << " Transition Pattern not found\n";
             }
         }
+        */
 
         /*
         // With openMP 3.0 -> worse performance than above
         // This will execute the loop in one thread, but delegate the processing of elements to others.
+        // Mean with a.poly 100 times : 47.56 ms
         #pragma omp parallel
         #pragma omp single
         {
@@ -1235,8 +1242,8 @@ namespace Clobscode {
         */
 
         // Other version!
-        // Longer too?
-        /*
+        // Mean with a.poly 100 times : 29.55 ms
+        
         #pragma omp parallel
         {
            for(iter = tmp_Quadrants.begin(); iter != tmp_Quadrants.end(); iter++)
@@ -1250,7 +1257,7 @@ namespace Clobscode {
               }
            } // end for
         } // end ompparallel
-        */
+        
 
         //CL Debbuging
         {
