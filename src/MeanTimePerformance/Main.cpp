@@ -10,13 +10,17 @@
 std::string exec(const char* cmd) {
     std::array<char, 128> buffer;
     std::string result;
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    //std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+
+    FILE* pipe = popen(cmd, "r");
     if (!pipe) {
         throw std::runtime_error("popen() failed!");
     }
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+    while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
         result += buffer.data();
     }
+    auto returnCode = pclose(pipe);
+    std::cout << "EXIT CODE : " << returnCode << std::endl;
     return result;
 }
 
@@ -56,9 +60,13 @@ void addCorrespondingTime(const std::string& ouputOfMesher, std::map<std::string
     for(auto& kv : map) {
         processPattern = kv.first;
         std::regex rgx(processPattern + " in ([0-9]+)");
-        std::regex_search(ouputOfMesher.begin(), ouputOfMesher.end(), match, rgx);
-        //TODO Check if match
-        map[processPattern] += std::stoi(match[1].str().c_str());
+        if (std::regex_search(ouputOfMesher.begin(), ouputOfMesher.end(), match, rgx)) {
+            map[processPattern] += std::stoi(match[1].str().c_str());
+        }
+        else {
+            //No match, weird?
+            std::cerr << "No matching found for regex : " << processPattern << " in ([0-9]+)" << "in the string :\n" << ouputOfMesher << std::endl;
+        }
     }
 
 }
