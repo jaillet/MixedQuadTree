@@ -27,9 +27,11 @@ set(SOURCE_FILES Main
         )
 
 set(SOURCE_MEANTIME MeanTimePerformance/Main)
+set(SOURCE_PARALLELIZE ParallelizeTest/ParallelizeTest.cpp)
 
 add_executable(mesher_roi ${SOURCE_FILES})
 add_executable(meanTime ${SOURCE_MEANTIME})
+add_executable(parallelize_test ${SOURCE_PARALLELIZE})
 
 # obsolete 3D files to be removed
 
