@@ -27,7 +27,7 @@ set(SOURCE_FILES Main
         )
 
 set(SOURCE_MEANTIME MeanTimePerformance/Main)
-set(SOURCE_PARALLELIZE ParallelizeTest/ParallelizeTest.cpp)
+set(SOURCE_PARALLELIZE ParallelizeTest/ParallelizeTest.cpp ParallelizeTest/TimeDecorator.hpp)
 
 add_executable(mesher_roi ${SOURCE_FILES})
 add_executable(meanTime ${SOURCE_MEANTIME})
