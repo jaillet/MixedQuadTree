@@ -4,6 +4,7 @@
 #include <vector>
 #include <chrono>
 #include <algorithm>
+#include <deque>
 
 #include "TimeDecorator.hpp"
 
@@ -145,7 +146,7 @@ void openmp_list_copy(list<Element> &l, VisitorTest &visitor) {
     for (auto iter = l.begin(); iter != l.end(); ++iter)
         elements.push_back(&(*iter));
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < elements.size(); i++) {
         visitor.visit(*(elements[i]));
         // cout << l[i].value() << " ";
@@ -161,7 +162,7 @@ void openmp_list_copy2(list<Element> &l, VisitorTest &visitor) {
               [](Element &n) { return &n; }
     );
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < items.size(); i++) {
         visitor.visit(*(items[i]));
     }
@@ -170,12 +171,12 @@ void openmp_list_copy2(list<Element> &l, VisitorTest &visitor) {
 
 void openmp_list_nowait(list<Element> &l, VisitorTest &visitor) {
     list<Element>::iterator iter;
-    #pragma omp parallel private(iter)
+#pragma omp parallel private(iter)
     {
         //Every thread has its own copy of the for loop
         //And each one has a copy of iter
         for (iter = l.begin(); iter != l.end(); iter++) {
-        #pragma omp single nowait
+#pragma omp single nowait
             {
                 //Only one per iteration (single), and the other don't wait (nowait)
                 iter->accept(visitor);
@@ -186,13 +187,31 @@ void openmp_list_nowait(list<Element> &l, VisitorTest &visitor) {
     // Maybe because simulated tasks are too short
 }
 
+// DEQUE
+
+void simple_deque(deque<Element> &l, VisitorTest &visitor) {
+    auto iter = l.begin();
+    for (; iter != l.end(); iter++) {
+        visitor.visit(*iter);
+    }
+}
+
+void openmp_deque(deque<Element> &l, VisitorTest &visitor) {
+#pragma omp parallel for
+    for (int i = 0; i < l.size(); i++) {
+        visitor.visit(l[i]);
+        // cout << l[i].value() << " ";
+    }
+}
+
+
 void openmp_list_task(list<Element> &l, VisitorTest &visitor) {
-    #pragma omp parallel
+#pragma omp parallel
     {
-    #pragma omp single
+#pragma omp single
         {
             for (auto iter = l.begin(); iter != l.end(); ++iter) {
-    #pragma omp task firstprivate(iter)
+#pragma omp task firstprivate(iter)
                 iter->accept(visitor);
             }
         }
@@ -265,6 +284,25 @@ void list_test() {
     */
 }
 
+void deque_test() {
+    deque<Element> d;
+    ConcreteVisitorTest visitor(2);
+    float time;
+
+    // Simple thread test
+    d.assign(elements.begin(), elements.end());
+    cout << "Simple deque..   ";
+    time = count_time(simple_deque, d, visitor);
+    cout << " Done in " << time << " ms." << endl;
+
+    // OpenMP test
+    d.clear();
+    d.assign(elements.begin(), elements.end());
+    cout << "OpenMP deque..   ";
+    time = count_time(openmp_deque, d, visitor);
+    cout << " Done in " << time << " ms." << endl;
+}
+
 /*------------- Main -------------*/
 
 int main(int argc, char const *argv[]) {
@@ -280,6 +318,8 @@ int main(int argc, char const *argv[]) {
     vector_test();
 
     list_test();
+
+    deque_test();
 
     return 0;
 }
