@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <algorithm>
 
 #include "TimeDecorator.hpp"
 
@@ -137,8 +138,7 @@ void simple_list(list<Element> &l, VisitorTest& visitor) {
 
 void openmp_list_copy(list<Element> &l, VisitorTest& visitor) {
     std::vector<Element*> elements;
-    auto iter = l.begin();
-    for (iter = l.begin(); iter != l.end(); ++iter)
+    for (auto iter = l.begin(); iter != l.end(); ++iter)
         elements.push_back(&(*iter));
 
     #pragma omp parallel for
@@ -146,6 +146,57 @@ void openmp_list_copy(list<Element> &l, VisitorTest& visitor) {
         visitor.visit(*(elements[i]));
         // cout << l[i].value() << " ";
     }
+}
+
+void openmp_list_copy2(list<Element> &l, VisitorTest& visitor) {
+    std::vector<Element*> items;
+
+    items.reserve(l.size());
+    //put the pointers in the vector
+    transform(l.begin(), l.end(), back_inserter(items), 
+                   [](Element& n){ return &n; }
+    );
+
+    #pragma omp parallel for
+    for (int i = 0; i < items.size(); i++)
+    {
+      visitor.visit(*(items[i]));
+    }
+}
+
+
+void openmp_list_nowait(list<Element> &l, VisitorTest& visitor) {
+    list<Element>::iterator iter;
+    #pragma omp parallel private(iter)
+    {
+        //Every thread has its own copy of the for loop
+        //And each one has a copy of iter
+        for(iter = l.begin(); iter != l.end(); iter++)
+        {
+          #pragma omp single nowait
+          {
+            //Only one per iteration (single), and the other don't wait (nowait)
+            iter->accept(visitor);
+          }
+        }
+    }
+    //Very long solution, why ?
+    // Maybe because simulated tasks are too short
+}
+
+void openmp_list_task(list<Element> &l, VisitorTest& visitor) {
+    #pragma omp parallel
+    {
+        #pragma omp single
+        {
+            for(auto iter = l.begin(); iter != l.end(); ++iter) {
+                #pragma omp task firstprivate(iter)
+                iter->accept(visitor);
+            }
+        }
+    }
+    //Only with openmp 3.0, but very VERY long, why?
+    //Maybe too much tasks...
 }
 
 /*------------- Tests finaux -------------*/
@@ -184,6 +235,29 @@ void list_test() {
     cout<<"OpenMP list copy..   ";
     time = count_time(openmp_list_copy, l, visitor);
     cout<<" Done in "<<time<<" ms."<<endl;
+
+    //OpenMP list copy2
+    init_list(l);
+    cout<<"OpenMP list copy2..   ";
+    time = count_time(openmp_list_copy2, l, visitor);
+    cout<<" Done in "<<time<<" ms."<<endl;
+
+
+    //VEry long solutions......
+    /*
+    //OpenMP list nowait
+    init_list(l);
+    cout<<"OpenMP list nowait..   ";
+    time = count_time(openmp_list_nowait, l, visitor);
+    cout<<" Done in "<<time<<" ms."<<endl;
+
+    //OpenMP list task
+    init_list(l);
+    cout<<"OpenMP list task..   ";
+    time = count_time(openmp_list_task, l, visitor);
+    cout<<" Done in "<<time<<" ms."<<endl;
+
+    */
 }
 
 /*------------- Main -------------*/
