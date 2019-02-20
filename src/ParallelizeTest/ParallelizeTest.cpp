@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <deque>
 
+#include "tbb/parallel_for_each.h"
+
 #include "TimeDecorator.hpp"
 
 #if COMPILER_MSVC
@@ -91,12 +93,14 @@ vector<Element> elements;
 
 void init_vector(vector<Element> &vector) {
     vector.clear();
+    vector.reserve(NOMBRE_ELEM);
 
     cout << "Init vector.. " << endl;
 
+    #pragma omp parallel for
     for (int i = 0; i < NOMBRE_ELEM; i++) {
         vector.push_back(Element(i));
-        // cout << vector[i].value() << " ";
+        //cout << vector[i].value() << " ";
     }
     // cout << endl;
 }
@@ -130,6 +134,10 @@ void openmp_vector(vector<Element> &v, VisitorTest &visitor) {
         visitor.visit(v[i]);
         // cout << v[i].value() << " ";
     }
+}
+
+void inteltbb_vector(vector<Element> &v, VisitorTest &visitor) {
+    tbb::parallel_for_each(v.begin(), v.end(), [&] (Element &element) { visitor.visit(element);});
 }
 
 // LIST
@@ -168,7 +176,6 @@ void openmp_list_copy2(list<Element> &l, VisitorTest &visitor) {
     }
 }
 
-
 void openmp_list_nowait(list<Element> &l, VisitorTest &visitor) {
     list<Element>::iterator iter;
 #pragma omp parallel private(iter)
@@ -185,6 +192,25 @@ void openmp_list_nowait(list<Element> &l, VisitorTest &visitor) {
     }
     //Very long solution, why ?
     // Maybe because simulated tasks are too short
+}
+
+void openmp_list_task(list<Element> &l, VisitorTest &visitor) {
+#pragma omp parallel
+    {
+#pragma omp single
+        {
+            for (auto iter = l.begin(); iter != l.end(); ++iter) {
+#pragma omp task firstprivate(iter)
+                iter->accept(visitor);
+            }
+        }
+    }
+    //Only with openmp 3.0, but very VERY long, why?
+    //Maybe too much tasks...
+}
+
+void inteltbb_list(list<Element> &v, VisitorTest &visitor) {
+    tbb::parallel_for_each(v.begin(), v.end(), [&] (Element &element) { visitor.visit(element);});
 }
 
 // DEQUE
@@ -204,20 +230,8 @@ void openmp_deque(deque<Element> &l, VisitorTest &visitor) {
     }
 }
 
-
-void openmp_list_task(list<Element> &l, VisitorTest &visitor) {
-#pragma omp parallel
-    {
-#pragma omp single
-        {
-            for (auto iter = l.begin(); iter != l.end(); ++iter) {
-#pragma omp task firstprivate(iter)
-                iter->accept(visitor);
-            }
-        }
-    }
-    //Only with openmp 3.0, but very VERY long, why?
-    //Maybe too much tasks...
+void inteltbb_deque(deque<Element> &v, VisitorTest &visitor) {
+    tbb::parallel_for_each(v.begin(), v.end(), [&] (Element &element) { visitor.visit(element);});
 }
 
 /*------------- Tests finaux -------------*/
@@ -239,6 +253,13 @@ void vector_test() {
     cout << "OpenMP vector..   ";
     time = count_time(openmp_vector, v, visitor);
     cout << " Done in " << time << " ms." << endl;
+
+    // IntelTBB test
+    v.clear();
+    v.assign(elements.begin(), elements.end());
+    cout << "IntelTBB vector..   ";
+    time = count_time(inteltbb_vector, v, visitor);
+    cout << " Done in " << time << " ms." << endl;
 }
 
 void list_test() {
@@ -252,14 +273,14 @@ void list_test() {
     time = count_time(simple_list, l, visitor);
     cout << " Done in " << time << " ms." << endl;
 
-    //OpenMP list copy
+    // OpenMP list copy
     l.clear();
     l.assign(elements.begin(), elements.end());
     cout << "OpenMP list copy..   ";
     time = count_time(openmp_list_copy, l, visitor);
     cout << " Done in " << time << " ms." << endl;
 
-    //OpenMP list copy2
+    // OpenMP list copy2
     l.clear();
     l.assign(elements.begin(), elements.end());
     cout << "OpenMP list copy2..   ";
@@ -280,8 +301,14 @@ void list_test() {
     cout<<"OpenMP list task..   ";
     time = count_time(openmp_list_task, l, visitor);
     cout<<" Done in "<<time<<" ms."<<endl;
-
     */
+
+    // IntelTBB test
+    l.clear();
+    l.assign(elements.begin(), elements.end());
+    cout << "IntelTBB list ..   ";
+    time = count_time(inteltbb_list, l, visitor);
+    cout << " Done in " << time << " ms." << endl;
 }
 
 void deque_test() {
@@ -300,6 +327,13 @@ void deque_test() {
     d.assign(elements.begin(), elements.end());
     cout << "OpenMP deque..   ";
     time = count_time(openmp_deque, d, visitor);
+    cout << " Done in " << time << " ms." << endl;
+
+    // IntelTBB test
+    d.clear();
+    d.assign(elements.begin(), elements.end());
+    cout << "IntelTBB deque ..   ";
+    time = count_time(inteltbb_deque, d, visitor);
     cout << " Done in " << time << " ms." << endl;
 }
 
