@@ -12,7 +12,10 @@ std::string exec(const char* cmd) {
     std::string result;
     //std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
 
-    FILE* pipe = popen(cmd, "r");
+    std::string cmds(cmd);
+    cmds = cmds + " 2> /dev/null";
+
+    FILE* pipe = popen(cmds.c_str(), "r");
     if (!pipe) {
         throw std::runtime_error("popen() failed!");
     }
@@ -50,31 +53,41 @@ void fillMapToEvaluate(char arg, std::map<std::string, float>& map) {
     }
 }
 
-void addCorrespondingTime(const std::string& ouputOfMesher, std::map<std::string, float>& map) {
+bool addCorrespondingTime(const std::string& ouputOfMesher, std::map<std::string, float>& map) {
 
     //Parse output and find lines that contain a word that is a key of map
     //Then store corresponding time (after ' in ')
 
     std::string processPattern; //Example "Transition Patterns"
     std::smatch match;
+
+    bool added = true;
+
     for(auto& kv : map) {
         processPattern = kv.first;
         std::regex rgx(processPattern + " in ([0-9]+)");
         if (std::regex_search(ouputOfMesher.begin(), ouputOfMesher.end(), match, rgx)) {
             map[processPattern] += std::stoi(match[1].str().c_str());
+            if (!added) {
+                std::cerr << "WARNING: added one for process " << processPattern << " but not for the processPatern before it......\n";
+                std::cerr << "Mean will be wrong !!!!" << std::endl; 
+            }
         }
         else {
             //No match, weird?
             std::cerr << "No matching found for regex : " << processPattern << " in ([0-9]+)" << "in the string :\n" << ouputOfMesher << std::endl;
+            added = false;
         }
     }
+
+    return added;
 
 }
 
 int main(int argc, char const *argv[])
 {
     
-    const char* cmd = "./mesher_roi -p ../data/a.poly -a 5 -u ../output/a";
+    const char* cmd = "./mesher_roi -p ../data/a.poly -a 7 -u ../output/a";
 
     if (argc < 3) {
         endMsg();
@@ -99,19 +112,21 @@ int main(int argc, char const *argv[])
     std::cout << number << std::endl;
     */
 
+    int NUMBER_GOOD = 0;
+
     for (int i = 0; i < number; ++i)
     {
         std::string output = exec(cmd);
-        addCorrespondingTime(output, mapProcessToTime);
+        if (addCorrespondingTime(output, mapProcessToTime)) NUMBER_GOOD++;
     }
 
     //Divide to get the mean
-    float nb = (float) number;
+    float nb = (float) NUMBER_GOOD;
     for(auto& kv : mapProcessToTime) {
         mapProcessToTime[kv.first] /= nb;
     }
 
-    std::cout << "Test ended. After " << number << " executions, here are the results :\n";
+    std::cout << "Test ended. After " << number << " executions, with " << NUMBER_GOOD << " good executions, here are the results :\n";
     for(auto& kv : mapProcessToTime) {
         std::cout << " * " << kv.first << " in " << kv.second << " ms" << std::endl;
     }
