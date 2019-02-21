@@ -23,6 +23,8 @@
  * @brief
  **/
 
+//#define WRITE_OUTPUT
+
 #include "Mesher.h"
 #include <math.h>
 #include "omp.h"
@@ -59,6 +61,7 @@ namespace Clobscode {
             gt.rotatePolyline(input);
         }
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -67,6 +70,7 @@ namespace Clobscode {
             string tmp_name = name + "_grid";
             Services::WriteVTK(tmp_name, grid_octree);
         }
+        #endif
 
         //split Quadrants until the refinement level (rl) is achieved.
         //The output will be a one-irregular mesh.
@@ -84,6 +88,7 @@ namespace Clobscode {
         Services::WriteQuadtreeMesh(name, points, Quadrants, QuadEdges, nels, gt);        //Debbuging
 
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -92,9 +97,11 @@ namespace Clobscode {
             string tmp_name = name + "_quads";
             Services::WriteVTK(tmp_name, pure_octree);
         }
+        #endif
 
         projectCloseToBoundaryNodes(input);
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -103,12 +110,14 @@ namespace Clobscode {
             string tmp_name = name + "_closeto";
             Services::WriteVTK(tmp_name, closeto_octree);
         }
+        #endif
 
         removeOnSurfaceSafe(input);
 
         //update element and node info.
         linkElementsToNodes();
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -117,10 +126,12 @@ namespace Clobscode {
             string tmp_name = name + "_remSur";
             Services::WriteVTK(tmp_name, pure_octree);
         }
+        #endif
 
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -129,6 +140,7 @@ namespace Clobscode {
             string tmp_name = name + "_shrink";
             Services::WriteVTK(tmp_name, shrink_octree);
         }
+        #endif
 
         //apply the surface Patterns
         applySurfacePatterns(input);
@@ -177,6 +189,7 @@ namespace Clobscode {
         //generate root Quadrants
         generateGridMesh(input);
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -185,6 +198,7 @@ namespace Clobscode {
             string tmp_name = name + "_grid";
             Services::WriteVTK(tmp_name, grid_octree);
         }
+        #endif
 
         //split Quadrants until the refinement level (rl) is achieved.
         //The output will be a one-irregular mesh.
@@ -201,6 +215,7 @@ namespace Clobscode {
         unsigned int nels = Quadrants.size();
         Services::WriteQuadtreeMesh(name, points, Quadrants, QuadEdges, nels, gt);        //Debbuging
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -209,9 +224,11 @@ namespace Clobscode {
             string tmp_name = name + "_quads";
             Services::WriteVTK(tmp_name, pure_octree);
         }
+        #endif
 
         projectCloseToBoundaryNodes(input);
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -220,12 +237,14 @@ namespace Clobscode {
             string tmp_name = name + "_closeto";
             Services::WriteVTK(tmp_name, closeto_octree);
         }
+        #endif
 
         removeOnSurfaceSafe(input);
 
         //update element and node info.
         linkElementsToNodes();
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -234,10 +253,12 @@ namespace Clobscode {
             string tmp_name = name + "_remSur";
             Services::WriteVTK(tmp_name, pure_octree);
         }
+        #endif
 
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -246,6 +267,7 @@ namespace Clobscode {
             string tmp_name = name + "_shrink";
             Services::WriteVTK(tmp_name, shrink_octree);
         }
+        #endif
 
         //update element and node info.
         //linkElementsToNodes();
@@ -618,6 +640,7 @@ namespace Clobscode {
             cout << " ms" << endl;
         }
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -626,6 +649,7 @@ namespace Clobscode {
             string tmp_name = name + "_refined";
             Services::WriteVTK(tmp_name, refined_octree);
         }
+        #endif
 
         auto end_refine_quad_time = chrono::high_resolution_clock::now();
         cout << "       * Refine Quad in "
@@ -718,6 +742,7 @@ namespace Clobscode {
             points.insert(points.end(), new_pts.begin(), new_pts.end());
         }
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -726,6 +751,7 @@ namespace Clobscode {
             string tmp_name = name + "_balanced";
             Services::WriteVTK(tmp_name, balanced_octree);
         }
+        #endif
 
         auto end_balanced_time = chrono::high_resolution_clock::now();
         cout << "       * Balanced mesh in "
@@ -751,6 +777,7 @@ namespace Clobscode {
             }
         }
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -759,6 +786,7 @@ namespace Clobscode {
             string tmp_name = name + "_transition";
             Services::WriteVTK(tmp_name, transition_octree);
         }
+        #endif
 
         //Debbuging
         /*{
@@ -926,6 +954,7 @@ namespace Clobscode {
             ++i;
         } while (!new_pts.empty());
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -934,6 +963,7 @@ namespace Clobscode {
             string tmp_name = name + "_bound";
             Services::WriteVTK(tmp_name, bound_octree);
         }
+        #endif
 
         unsigned short max_rl = i;
 
@@ -1071,6 +1101,7 @@ namespace Clobscode {
             cout << " ms" << endl;
         }
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -1079,6 +1110,7 @@ namespace Clobscode {
             string tmp_name = name + "_refined";
             Services::WriteVTK(tmp_name, refined_octree);
         }
+        #endif
 
         auto end_refine_quad_time = chrono::high_resolution_clock::now();
         cout << "       * Refine Quad in "
@@ -1179,6 +1211,7 @@ namespace Clobscode {
             points.insert(points.end(), new_pts.begin(), new_pts.end());
         }
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -1187,6 +1220,7 @@ namespace Clobscode {
             string tmp_name = name + "_balanced";
             Services::WriteVTK(tmp_name, balanced_octree);
         }
+        #endif
 
         auto end_balanced_time = chrono::high_resolution_clock::now();
         cout << "       * Balanced mesh in "
@@ -1209,7 +1243,7 @@ namespace Clobscode {
 
         // Mean with a.poly 1000 times : 30.3 ms
 
-        /*
+        
         std::vector<Quadrant*> quadrants;
         for (iter = tmp_Quadrants.begin(); iter != tmp_Quadrants.end(); ++iter)
             quadrants.push_back(&(*iter));
@@ -1221,7 +1255,7 @@ namespace Clobscode {
                 std::cerr << " Transition Pattern not found\n";
             }
         }
-        */
+        
 
         /*
         // With openMP 3.0 -> worse performance than above
@@ -1243,7 +1277,7 @@ namespace Clobscode {
 
         // Other version!
         // Mean with a.poly 100 times : 29.55 ms
-        
+        /*
         #pragma omp parallel
         {
            for(iter = tmp_Quadrants.begin(); iter != tmp_Quadrants.end(); iter++)
@@ -1257,8 +1291,9 @@ namespace Clobscode {
               }
            } // end for
         } // end ompparallel
-        
+        */
 
+        #ifdef WRITE_OUTPUT
         //CL Debbuging
         {
             //save pure octree mesh
@@ -1267,6 +1302,7 @@ namespace Clobscode {
             string tmp_name = name + "_transition";
             Services::WriteVTK(tmp_name, transition_octree);
         }
+        #endif
 
         //Debbuging
         /*{
