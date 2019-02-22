@@ -170,7 +170,7 @@ void openmp_list_copy2(list<Element> &l, VisitorTest &visitor) {
               [](Element &n) { return &n; }
     );
 
-#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < items.size(); i++) {
         visitor.visit(*(items[i]));
     }
@@ -178,35 +178,35 @@ void openmp_list_copy2(list<Element> &l, VisitorTest &visitor) {
 
 void openmp_list_nowait(list<Element> &l, VisitorTest &visitor) {
     list<Element>::iterator iter;
-#pragma omp parallel private(iter)
+    #pragma omp parallel private(iter)
     {
         //Every thread has its own copy of the for loop
         //And each one has a copy of iter
         for (iter = l.begin(); iter != l.end(); iter++) {
-#pragma omp single nowait
+            #pragma omp single nowait
             {
                 //Only one per iteration (single), and the other don't wait (nowait)
                 iter->accept(visitor);
             }
         }
     }
-    //Very long solution, why ?
-    // Maybe because simulated tasks are too short
+    //Very long solution, because each thread iterates over the list
+    //Overhead strong, maybe OK with few elements and long process
 }
 
 void openmp_list_task(list<Element> &l, VisitorTest &visitor) {
-#pragma omp parallel
+    #pragma omp parallel
     {
-#pragma omp single
+        #pragma omp single
         {
             for (auto iter = l.begin(); iter != l.end(); ++iter) {
-#pragma omp task firstprivate(iter)
+                #pragma omp task firstprivate(iter)
                 iter->accept(visitor);
             }
         }
     }
-    //Only with openmp 3.0, but very VERY long, why?
-    //Maybe too much tasks...
+    //Only with openmp 3.0 (tasks)
+    //Only one thread who iterates, and creates one task for each element
 }
 
 void inteltbb_list(list<Element> &v, VisitorTest &visitor) {
