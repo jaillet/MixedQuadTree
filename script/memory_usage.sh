@@ -24,7 +24,7 @@ done
 
 echo ""
 touch $FILE
-echo "Command : ${PROG}N"
+echo "Command : ${PROG}N" >> $FILE
 echo "----------------------" >> $FILE
 echo "N  | Peak memory usage" >> $FILE
 echo "----------------------" >> $FILE
