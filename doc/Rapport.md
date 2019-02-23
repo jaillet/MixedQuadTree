@@ -25,6 +25,8 @@ Le fichier memory_usage contient la pic de mémoire utilisée pour chaque niveau
 
 # Passage de list à deque
 
+Compairaison entre vector / list / deque : https://baptiste-wicht.com/posts/2012/12/cpp-benchmark-vector-list-deque.html  
+
 Utilisation mémoire légèrement plus importante.
 
 ## Utilisation mémoire avec list
