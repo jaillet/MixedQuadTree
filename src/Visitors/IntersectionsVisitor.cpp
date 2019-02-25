@@ -39,24 +39,25 @@ namespace Clobscode
 
 {
     IntersectionsVisitor::IntersectionsVisitor()
-        :ply(NULL),points(NULL),edges(NULL),coords(NULL),select_edges(false)
-    {    }
+            : ply(NULL), points(NULL), edges(NULL), coords(NULL), select_edges(false) {}
 
 
     IntersectionsVisitor::IntersectionsVisitor(bool select_edges)
-        :ply(NULL),points(NULL),edges(NULL),coords(NULL),select_edges(select_edges)
-    {    }
+            : ply(NULL), points(NULL), edges(NULL), coords(NULL), select_edges(select_edges) {}
 
-    void IntersectionsVisitor::setPolyline( Polyline &ply) {
+    void IntersectionsVisitor::setPolyline(Polyline &ply) {
         this->ply = &ply;
     }
-    void IntersectionsVisitor::setPoints(vector<MeshPoint> &points){
+
+    void IntersectionsVisitor::setPoints(vector<MeshPoint> &points) {
         this->points = &points;
     }
-    void IntersectionsVisitor::setEdges(list<unsigned int> &edges){
+
+    void IntersectionsVisitor::setEdges(list<unsigned int> &edges) {
         this->edges = &edges;
     }
-    void IntersectionsVisitor::setCoords(vector<Point3D> &coords){
+
+    void IntersectionsVisitor::setCoords(vector<Point3D> &coords) {
         this->coords = &coords;
     }
 
@@ -73,16 +74,16 @@ namespace Clobscode
             list<unsigned int>::const_iterator e_iter;
             const vector<Point3D> &input_pts = ply->getPoints();
 
-            for (e_iter = edges->begin(); e_iter!=edges->end(); e_iter++) {
+            for (e_iter = edges->begin(); e_iter != edges->end(); e_iter++) {
                 const PolyEdge &edge = ply->getEdges()[*e_iter];
-                if (intersectsEdge(edge,input_pts,coords->at(0),coords->at(1))) {
+                if (intersectsEdge(edge, input_pts, coords->at(0), coords->at(1))) {
                     intersected_edges.push_back(*e_iter);
                 }
             }
 
             return !intersected_edges.empty();
         }
-        //check intersections with all input edges
+            //check intersections with all input edges
         else //checkIntersections(PolyEdge &ply, vector<MeshPoint> &pts)
         {
             if (points == NULL)
@@ -93,11 +94,10 @@ namespace Clobscode
             const vector<PolyEdge> &edges = ply->getEdges();
             const vector<Point3D> &input_pts = ply->getPoints();
 
-            for (unsigned int j=0; j<edges.size(); j++) {
-                if (intersectsEdge(edges[j],input_pts,
-                                       points->at(pointindex[0]).getPoint(),  //bbox vertices
-                                       points->at(pointindex[2]).getPoint()))
-                {
+            for (unsigned int j = 0; j < edges.size(); j++) {
+                if (intersectsEdge(edges[j], input_pts,
+                                   points->at(pointindex[0]).getPoint(),  //bbox vertices
+                                   points->at(pointindex[2]).getPoint())) {
                     intersected_edges.push_back(j);
                 }
             }
@@ -107,8 +107,9 @@ namespace Clobscode
     }
 
     //auxiliary functions
-    bool IntersectionsVisitor::intersectsEdge(const PolyMesh::PolyEdge &pEdge, const vector<Point3D> &input_pts, const Point3D &pmin,
-                                             const Point3D &pmax) const {
+    bool IntersectionsVisitor::intersectsEdge(const PolyMesh::PolyEdge &pEdge, const vector<Point3D> &input_pts,
+                                              const Point3D &pmin,
+                                              const Point3D &pmax) const {
 
         //pmin and pmax describe the bounding box of the
         //Quadrant. They are used to detect intersections
@@ -124,11 +125,11 @@ namespace Clobscode
 
         unsigned int n_pts = iEdge.size(); //FJA always 2 ?????
 
-        vector<unsigned int> sides(n_pts,0);
+        vector<unsigned int> sides(n_pts, 0);
 
-        for (unsigned int i=0; i<n_pts; i++) {
+        for (unsigned int i = 0; i < n_pts; i++) {
             sides[i] = computePosition(input_pts[iEdge[i]],
-                                       pmin,pmax);
+                                       pmin, pmax);
             if (sides[i] == 0) {
                 return true;
             }
@@ -162,7 +163,7 @@ namespace Clobscode
         // I guess no, so this test (15 <> 00 11 11) is wrong !
         // and the 3D one as well (63 <> 11 11 11) is wrong !
         // FJA@discussion2 and exact opposite "3D corners"
-        unsigned int result_or = sides[0]|sides[1];
+        unsigned int result_or = sides[0] | sides[1];
 //        unsigned int result_xor = sides[0]^sides[1];
         if (result_or == 48) {
             //48 <> 11 00 00 z
@@ -194,7 +195,7 @@ namespace Clobscode
 //        if (clipGeneralCase(p1,p2,pmin,pmax)) {
 //            return true;
 //        }
-        return (clipGeneralCase(p1,p2,pmin,pmax));
+        return (clipGeneralCase(p1, p2, pmin, pmax));
 
         //Last "hard" test: Apply Ray Tracing to detect
         //intersection between every edge of the Quadrant
@@ -211,13 +212,13 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 
     bool IntersectionsVisitor::clipGeneralCase(const Point3D &p1, const Point3D &p2, const Point3D &pmin,
-                                          const Point3D &pmax) const {
+                                               const Point3D &pmax) const {
 
         //compute the parametric equations of the given segment
-        double dx = p2[0]-p1[0];
-        double dy = p2[1]-p1[1];
-        double dz = p2[2]-p1[2];
-        double X,Y,Z,t;
+        double dx = p2[0] - p1[0];
+        double dy = p2[1] - p1[1];
+        double dz = p2[2] - p1[2];
+        double X, Y, Z, t;
 
         //Each 't' value is computed regarding a particular
         //plane. For instance, X_min (pmin[0]) is YZ plane
@@ -239,36 +240,36 @@ namespace Clobscode
         ////////////////////////////////////////////////////
 
         //test X axis over X_min
-        t = (pmin[0]-p1[0])/dx;
+        t = (pmin[0] - p1[0]) / dx;
 
         //if (0<t && t<1) {
-        if (0<=t && t<=1) {
+        if (0 <= t && t <= 1) {
             //test Y axis for this 't'
-            Y = p1[1] + t*dy;
+            Y = p1[1] + t * dy;
             //if (pmin[1]<Y && Y<pmax[1]) {
-            if (pmin[1]<=Y && Y<=pmax[1]) {
+            if (pmin[1] <= Y && Y <= pmax[1]) {
                 //test Z axis for this 't'
-                Z = p1[2] + t*dz;
+                Z = p1[2] + t * dz;
                 //if (pmin[2]<Z && Z<pmax[2]) {
-                if (pmin[2]<=Z && Z<=pmax[2]) {
+                if (pmin[2] <= Z && Z <= pmax[2]) {
                     return true;
                 }
             }
         }
 
         //test X axis over X_max
-        t = (pmax[0]-p1[0])/dx;
+        t = (pmax[0] - p1[0]) / dx;
 
         //if (0<t && t<1) {
-        if (0<=t && t<=1) {
+        if (0 <= t && t <= 1) {
             //test Y axis for this 't'
-            Y = p1[1] + t*dy;
+            Y = p1[1] + t * dy;
             //if (pmin[1]<Y && Y<pmax[1]) {
-            if (pmin[1]<=Y && Y<=pmax[1]) {
+            if (pmin[1] <= Y && Y <= pmax[1]) {
                 //test Z axis for this 't'
-                Z = p1[2] + t*dz;
+                Z = p1[2] + t * dz;
                 //if (pmin[2]<Z && Z<pmax[2]) {
-                if (pmin[2]<=Z && Z<=pmax[2]) {
+                if (pmin[2] <= Z && Z <= pmax[2]) {
                     return true;
                 }
             }
@@ -276,36 +277,36 @@ namespace Clobscode
 
 
         //test Y axis over Y_min
-        t = (pmin[1]-p1[1])/dy;
+        t = (pmin[1] - p1[1]) / dy;
 
         //if (0<t && t<1) {
-        if (0<=t && t<=1) {
+        if (0 <= t && t <= 1) {
             //test Y axis for this 't'
-            X = p1[0] + t*dx;
+            X = p1[0] + t * dx;
             //if (pmin[0]<X && X<pmax[0]) {
-            if (pmin[0]<=X && X<=pmax[0]) {
+            if (pmin[0] <= X && X <= pmax[0]) {
                 //test Z axis for this 't'
-                Z = p1[2] + t*dz;
+                Z = p1[2] + t * dz;
                 //if (pmin[2]<Z && Z<pmax[2]) {
-                if (pmin[2]<=Z && Z<=pmax[2]) {
+                if (pmin[2] <= Z && Z <= pmax[2]) {
                     return true;
                 }
             }
         }
 
         //test Y axis over Y_max
-        t = (pmax[1]-p1[1])/dy;
+        t = (pmax[1] - p1[1]) / dy;
 
         //if (0<t && t<1) {
-        if (0<=t && t<=1) {
+        if (0 <= t && t <= 1) {
             //test Y axis for this 't'
-            X = p1[0] + t*dx;
+            X = p1[0] + t * dx;
             //if (pmin[0]<X && X<pmax[0]) {
-            if (pmin[0]<=X && X<=pmax[0]) {
+            if (pmin[0] <= X && X <= pmax[0]) {
                 //test Z axis for this 't'
-                Z = p1[2] + t*dz;
+                Z = p1[2] + t * dz;
                 //if (pmin[2]<Z && Z<pmax[2]) {
-                if (pmin[2]<=Z && Z<=pmax[2]) {
+                if (pmin[2] <= Z && Z <= pmax[2]) {
                     return true;
                 }
             }
@@ -358,17 +359,17 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 
     vector<vector<Point3D>> IntersectionsVisitor::getEdges(const Point3D &pmin,
-                                                      const Point3D &pmax) const {
+                                                           const Point3D &pmax) const {
         vector<vector<Point3D> > edges;
         edges.reserve(4);
 
         //create the 4 nodes of the Quadrant
-        Point3D p0 (pmin[0],pmin[1],0.0); //FJA assume pmin[2]=pmax[2]=0.0;
-        Point3D p1 (pmax[0],pmin[1],0.0);
-        Point3D p2 (pmax[0],pmax[1],0.0);
-        Point3D p3 (pmin[0],pmax[1],0.0);
+        Point3D p0(pmin[0], pmin[1], 0.0); //FJA assume pmin[2]=pmax[2]=0.0;
+        Point3D p1(pmax[0], pmin[1], 0.0);
+        Point3D p2(pmax[0], pmax[1], 0.0);
+        Point3D p3(pmin[0], pmax[1], 0.0);
 
-        vector<Point3D> edge(2, Point3D ());
+        vector<Point3D> edge(2, Point3D());
         //CCW
         edge[0] = p0;
         edge[1] = p1;
@@ -392,33 +393,31 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
-    unsigned int IntersectionsVisitor::computePosition(const Point3D &p, const Point3D &pmin, const Point3D &pmax) const {
+    unsigned int
+    IntersectionsVisitor::computePosition(const Point3D &p, const Point3D &pmin, const Point3D &pmax) const {
 
         unsigned int sides = 0;
 
         //decide left/right X axis.
-        if (p[0]<pmin[0]) {
+        if (p[0] < pmin[0]) {
             sides += 1;
-        }
-        else if (pmax[0] < p[0]) {
+        } else if (pmax[0] < p[0]) {
             sides += 2;
         }
 
         //decide bottom/top Y axis.
-        if (p[1]<pmin[1]) {
+        if (p[1] < pmin[1]) {
             sides += 4;
-        }
-        else if (pmax[1] < p[1]) {
+        } else if (pmax[1] < p[1]) {
             sides += 8;
         }
 
         //decide back/front Z axis.
-        if (p[2]<pmin[2]) {
+        if (p[2] < pmin[2]) {
             sides += 16;
             std::cerr << "FJA: Warning in IntersectionsVisitor::computePosition()\n";
             std::cerr << "  case 16 should never happen, as z=0.0\n";
-        }
-        else if (pmax[2]<p[2]) {
+        } else if (pmax[2] < p[2]) {
             sides += 32;
             std::cerr << "FJA: Warning in IntersectionsVisitor::computePosition()\n";
             std::cerr << "  case 32 should never happen, as z=0.0\n";
