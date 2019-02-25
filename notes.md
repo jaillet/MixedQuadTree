@@ -12,14 +12,10 @@ Lorsque visit() accès concurrent :
 true, check avec des points spécifiques (-> coords & edges)  
 false, check avec tous les points (-> points)
 * ply (Polyline) : accès en lecture / copies
-* quandrant->intersected_edges (list<unsigned int>) : accès lecture mais où est il modifié ?
+* quandrant->intersected_edges (list<unsigned int>) : insertion
 * edges (list<unsigned int>) : accès en lecture
 * coords (vector<Point3D>) : accès en lecture
 * points (vector<MeshPoint>) : accès en lecture
-
-Possible amélioration, dans visit, on renvoie true / false.  
-Hors on réalise une boucle, ou l'on ajoute des éléments dans une liste puis on renvoie !liste.empty().  
-Aucune modification n'est réalisé sur les données (?), on peut donc retourner un résultat avant de finir la boucle si on ajoute un élément.  
 
 
 # Dans la première boucle
