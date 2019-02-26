@@ -12,15 +12,10 @@ Lorsque visit() accès concurrent :
 true, check avec des points spécifiques (-> coords & edges)  
 false, check avec tous les points (-> points)
 * ply (Polyline) : accès en lecture / copies
-* quandrant->intersected_edges (list<unsigned int>) : accès lecture mais où est il modifié ?
+* quandrant->intersected_edges (list<unsigned int>) : accès lecture et écriture
 * edges (list<unsigned int>) : accès en lecture
 * coords (vector<Point3D>) : accès en lecture
 * points (vector<MeshPoint>) : accès en lecture
-
-Possible amélioration, dans visit, on renvoie true / false.  
-Hors on réalise une boucle, ou l'on ajoute des éléments dans une liste puis on renvoie !liste.empty().  
-Aucune modification n'est réalisé sur les données (?), on peut donc retourner un résultat avant de finir la boucle si on ajoute un élément.  
-
 
 # Dans la première boucle
 
@@ -37,3 +32,22 @@ Variable **new_pts** permet de sortir de la première boucle :
 * new_eles (vector<vector<unsigned int> >) : réinit avant chaque appel
 * clipping (vector<vector<Point3D> >) : réinit avant chaque appel
 
+
+# Compte rendu
+
+Regarder si on peut écrire avec plusieurs threads en même temps.
+  
+Effectuer des tests inteltbb et openmp avec nb thread fixe.  
+Regarder usage mémoire et temps.  
+Faire plusieurs execution + moyenne + tracé courbe.
+
+
+Faire un container set avec plusieurs thread qui le modifie et s'en sert pour le modifier dans les visiteurs.  
+Et tester. Comment vérifier les valeurs ? 
+Regarder si c'est possible de tracer avec inteltbb / openmp.
+Vérifier si option pour executer en sequentiel puis parallele.
+
+
+
+
+Analyser le code existant voir là ou ça coince.  
