@@ -5,8 +5,10 @@
 #include <chrono>
 #include <algorithm>
 #include <deque>
+#include <omp.h>
 
 #include "tbb/parallel_for_each.h"
+#include "tbb/task_scheduler_init.h"
 
 #include "TimeDecorator.hpp"
 
@@ -86,6 +88,7 @@ public:
 /* Global */
 
 int NOMBRE_ELEM = 10000000;
+int NOMBRE_THREAD = omp_get_max_threads();
 
 vector<Element> elements;
 
@@ -344,6 +347,16 @@ int main(int argc, char const *argv[]) {
     if (argc > 1) {
         NOMBRE_ELEM = atoi(argv[1]);
     }
+
+    if (argc > 2) {
+        NOMBRE_ELEM = atoi(argv[1]);
+        if (atoi(argv[2]) < NOMBRE_THREAD) {
+            NOMBRE_THREAD = atoi(argv[2]);
+        }
+    }
+
+    omp_set_num_threads(NOMBRE_THREAD);
+    tbb::task_scheduler_init test(NOMBRE_THREAD);
 
     cout << "Launching tests with " << NOMBRE_ELEM << " elements.\n";
 
