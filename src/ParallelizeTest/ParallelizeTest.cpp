@@ -5,6 +5,7 @@
 #include <chrono>
 #include <algorithm>
 #include <deque>
+#include <map>
 #include <omp.h>
 
 #include "tbb/parallel_for_each.h"
@@ -88,9 +89,12 @@ public:
 /* Global */
 
 int NOMBRE_ELEM = 10000000;
+int NOMBRE_ITER = 10;
 int NOMBRE_THREAD = omp_get_max_threads();
 
 vector<Element> elements;
+
+map<string, double> time_average;
 
 /*------------- Init -------------*/
 
@@ -98,7 +102,7 @@ void init_vector(vector<Element> &vector) {
     vector.clear();
     vector.reserve(NOMBRE_ELEM);
 
-    cout << "Init vector.. " << endl;
+    //cout << "Init vector.. " << endl;
 
     #pragma omp parallel for
     for (int i = 0; i < NOMBRE_ELEM; i++) {
@@ -239,105 +243,200 @@ void inteltbb_deque(deque<Element> &v, VisitorTest &visitor) {
 
 /*------------- Tests finaux -------------*/
 
-void vector_test() {
+void simple_vector_test(int nb_iteration) {
     vector<Element> v;
     ConcreteVisitorTest visitor(2);
     float time;
 
-    // Simple thread test
-    v.assign(elements.begin(), elements.end());
-    cout << "Simple vector..   ";
-    time = count_time(simple_vector, v, visitor);
-    cout << " Done in " << time << " ms." << endl;
-
-    // OpenMP test
-    v.clear();
-    v.assign(elements.begin(), elements.end());
-    cout << "OpenMP vector..   ";
-    time = count_time(openmp_vector, v, visitor);
-    cout << " Done in " << time << " ms." << endl;
-
-    // IntelTBB test
-    v.clear();
-    v.assign(elements.begin(), elements.end());
-    cout << "IntelTBB vector..   ";
-    time = count_time(inteltbb_vector, v, visitor);
-    cout << " Done in " << time << " ms." << endl;
+    cout << "Simple vector ";
+    for (int i = 0; i < nb_iteration; i++) {
+        v.clear();
+        v.assign(elements.begin(), elements.end());
+        time = count_time(simple_vector, v, visitor);
+        time_average["Simple vector"] += time;
+    }
+    time_average["Simple vector"] /= nb_iteration;
+    cout << time_average["Simple vector"] << " ms." << endl;
 }
 
-void list_test() {
+void openmp_vector_test(int nb_iteration) {
+    vector<Element> v;
+    ConcreteVisitorTest visitor(2);
+    float time;
+
+    cout << "OpenMP vector ";
+    for (int i = 0; i < nb_iteration; i++) {
+        v.clear();
+        v.assign(elements.begin(), elements.end());
+        time = count_time(openmp_vector, v, visitor);
+        time_average["OpenMP vector"] += time;
+    }
+    time_average["OpenMP vector"] /= nb_iteration;
+    cout << time_average["OpenMP vector"] << " ms." << endl;
+}
+
+void inteltbb_vector_test(int nb_iteration) {
+    vector<Element> v;
+    ConcreteVisitorTest visitor(2);
+    float time;
+
+    cout << "IntelTBB vector ";
+    for (int i = 0; i < nb_iteration; i++) {
+        v.clear();
+        v.assign(elements.begin(), elements.end());
+        time = count_time(inteltbb_vector, v, visitor);
+        time_average["IntelTBB vector"] += time;
+    }
+    time_average["IntelTBB vector"] /= nb_iteration;
+    cout << time_average["IntelTBB vector"] << " ms." << endl;
+}
+
+void vector_test(int nb_iteration) {
+    // Simple thread test
+    simple_vector_test(nb_iteration);
+
+    // OpenMP test
+    openmp_vector_test(nb_iteration);
+
+    // IntelTBB test
+    inteltbb_vector_test(nb_iteration);
+}
+
+void simple_list_test(int nb_iteration) {
     list<Element> l;
     ConcreteVisitorTest visitor(2);
     float time;
 
-    // Simple thread test
-    l.assign(elements.begin(), elements.end());
-    cout << "Simple list..   ";
-    time = count_time(simple_list, l, visitor);
-    cout << " Done in " << time << " ms." << endl;
-
-    // OpenMP list copy
-    l.clear();
-    l.assign(elements.begin(), elements.end());
-    cout << "OpenMP list copy..   ";
-    time = count_time(openmp_list_copy, l, visitor);
-    cout << " Done in " << time << " ms." << endl;
-
-    // OpenMP list copy2
-    l.clear();
-    l.assign(elements.begin(), elements.end());
-    cout << "OpenMP list copy2..   ";
-    time = count_time(openmp_list_copy2, l, visitor);
-    cout << " Done in " << time << " ms." << endl;
-
-
-    //VEry long solutions......
-    /*
-    //OpenMP list nowait
-    init_list(l);
-    cout<<"OpenMP list nowait..   ";
-    time = count_time(openmp_list_nowait, l, visitor);
-    cout<<" Done in "<<time<<" ms."<<endl;
-
-    //OpenMP list task
-    init_list(l);
-    cout<<"OpenMP list task..   ";
-    time = count_time(openmp_list_task, l, visitor);
-    cout<<" Done in "<<time<<" ms."<<endl;
-    */
-
-    // IntelTBB test
-    l.clear();
-    l.assign(elements.begin(), elements.end());
-    cout << "IntelTBB list ..   ";
-    time = count_time(inteltbb_list, l, visitor);
-    cout << " Done in " << time << " ms." << endl;
+    cout << "Simple list ";
+    for (int i = 0; i < nb_iteration; i++) {
+        l.clear();
+        l.assign(elements.begin(), elements.end());
+        time = count_time(simple_list, l, visitor);
+        time_average["Simple list"] += time;
+    }
+    time_average["Simple list"] /= nb_iteration;
+    cout << time_average["Simple list"] << " ms." << endl;
 }
 
-void deque_test() {
+void openmp_list_copy_test(int nb_iteration) {
+    list<Element> l;
+    ConcreteVisitorTest visitor(2);
+    float time;
+
+    cout << "OpenMP list copy ";
+    for (int i = 0; i < nb_iteration; i++) {
+        l.clear();
+        l.assign(elements.begin(), elements.end());
+        time = count_time(openmp_list_copy, l, visitor);
+        time_average["OpenMP list copy"] += time;
+    }
+    time_average["OpenMP list copy"] /= nb_iteration;
+    cout << time_average["OpenMP list copy"] << " ms." << endl;
+}
+
+void openmp_list_copy2_test(int nb_iteration) {
+    list<Element> l;
+    ConcreteVisitorTest visitor(2);
+    float time;
+
+    cout << "OpenMP list copy2 ";
+    for (int i = 0; i < nb_iteration; i++) {
+        l.clear();
+        l.assign(elements.begin(), elements.end());
+        time = count_time(openmp_list_copy2, l, visitor);
+        time_average["OpenMP list copy2"] += time;
+    }
+    time_average["OpenMP list copy2"] /= nb_iteration;
+    cout << time_average["OpenMP list copy2"] << " ms." << endl;
+}
+
+void inteltbb_list_test(int nb_iteration) {
+    list<Element> l;
+    ConcreteVisitorTest visitor(2);
+    float time;
+
+    cout << "IntelTBB list ";
+    for (int i = 0; i < nb_iteration; i++) {
+        l.clear();
+        l.assign(elements.begin(), elements.end());
+        time = count_time(inteltbb_list, l, visitor);
+        time_average["IntelTBB list"] += time;
+    }
+    time_average["IntelTBB list"] /= nb_iteration;
+    cout << time_average["IntelTBB list"] << " ms." << endl;
+}
+
+void list_test(int nb_iteration) {
+    // Simple thread test
+    simple_list_test(nb_iteration);
+
+    // OpenMP list copy
+    openmp_list_copy_test(nb_iteration);
+
+    // OpenMP list copy2
+    openmp_list_copy2_test(nb_iteration);
+
+    // IntelTBB test
+    inteltbb_list_test(nb_iteration);
+}
+
+void simple_deque_test(int nb_iteration) {
     deque<Element> d;
     ConcreteVisitorTest visitor(2);
     float time;
 
+    cout << "Simple deque ";
+    for (int i = 0; i < nb_iteration; i++) {
+        d.clear();
+        d.assign(elements.begin(), elements.end());
+        time = count_time(simple_deque, d, visitor);
+        time_average["Simple deque"] += time;
+    }
+    time_average["Simple deque"] /= nb_iteration;
+    cout << time_average["Simple deque"] << " ms." << endl;
+}
+
+void openmp_deque_test(int nb_iteration) {
+    deque<Element> d;
+    ConcreteVisitorTest visitor(2);
+    float time;
+
+    cout << "OpenMP deque ";
+    for (int i = 0; i < nb_iteration; i++) {
+        d.clear();
+        d.assign(elements.begin(), elements.end());
+        time = count_time(openmp_deque, d, visitor);
+        time_average["OpenMP deque"] += time;
+    }
+    time_average["OpenMP deque"] /= nb_iteration;
+    cout << time_average["OpenMP deque"] << " ms." << endl;
+}
+
+void inteltbb_deque_test(int nb_iteration) {
+    deque<Element> d;
+    ConcreteVisitorTest visitor(2);
+    float time;
+
+    cout << "IntelTBB deque ";
+    for (int i = 0; i < nb_iteration; i++) {
+        d.clear();
+        d.assign(elements.begin(), elements.end());
+        time = count_time(inteltbb_deque, d, visitor);
+        time_average["IntelTBB deque"] += time;
+    }
+    time_average["IntelTBB deque"] /= nb_iteration;
+    cout << time_average["IntelTBB deque"] << " ms." << endl;
+}
+
+void deque_test(int nb_iteration) {
     // Simple thread test
-    d.assign(elements.begin(), elements.end());
-    cout << "Simple deque..   ";
-    time = count_time(simple_deque, d, visitor);
-    cout << " Done in " << time << " ms." << endl;
+    simple_deque_test(nb_iteration);
 
     // OpenMP test
-    d.clear();
-    d.assign(elements.begin(), elements.end());
-    cout << "OpenMP deque..   ";
-    time = count_time(openmp_deque, d, visitor);
-    cout << " Done in " << time << " ms." << endl;
+    openmp_deque_test(nb_iteration);
 
     // IntelTBB test
-    d.clear();
-    d.assign(elements.begin(), elements.end());
-    cout << "IntelTBB deque ..   ";
-    time = count_time(inteltbb_deque, d, visitor);
-    cout << " Done in " << time << " ms." << endl;
+    inteltbb_deque_test(nb_iteration);
 }
 
 /*------------- Main -------------*/
@@ -349,24 +448,47 @@ int main(int argc, char const *argv[]) {
     }
 
     if (argc > 2) {
-        NOMBRE_ELEM = atoi(argv[1]);
-        if (atoi(argv[2]) < NOMBRE_THREAD) {
+        if (atoi(argv[2]) <= NOMBRE_THREAD && atoi(argv[2]) > 0) {
             NOMBRE_THREAD = atoi(argv[2]);
+        } else {
+            cerr << "Invalid number of threads or not supported by computer" << endl;
+            exit(1);
         }
     }
 
     omp_set_num_threads(NOMBRE_THREAD);
     tbb::task_scheduler_init test(NOMBRE_THREAD);
 
-    cout << "Launching tests with " << NOMBRE_ELEM << " elements.\n";
+    cout << "Launching tests with " << NOMBRE_ELEM << " elements and " << NOMBRE_THREAD << " threads" << endl;
 
     init_vector(elements);
 
-    vector_test();
+    if (argc > 3) {
+        if (strcmp(argv[3], "vector") == 0) vector_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "simple_vector") == 0) simple_vector_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "openmp_vector") == 0) openmp_vector_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "inteltbb_vector") == 0) inteltbb_vector_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "list") == 0) list_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "simple_list") == 0) simple_list_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "openmp_list_copy") == 0) openmp_list_copy_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "openmp_list_copy2") == 0) openmp_list_copy2_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "inteltbb_list") == 0) inteltbb_list_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "deque") == 0) deque_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "simple_deque") == 0) simple_deque_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "openmp_deque") == 0) openmp_deque_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "inteltbb_deque") == 0) inteltbb_deque_test(NOMBRE_ITER);
+        else {
+            cerr << "Invalid argument" << endl;
+            exit(1);
+        }
 
-    list_test();
+    } else {
+        vector_test(NOMBRE_ITER);
 
-    deque_test();
+        list_test(NOMBRE_ITER);
+
+        deque_test(NOMBRE_ITER);
+    }
 
     return 0;
 }
