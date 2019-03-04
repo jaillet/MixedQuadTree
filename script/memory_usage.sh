@@ -10,7 +10,9 @@ fi
 LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $LOCATION/../build
 
-PROG="mesher_roi -p ../data/a.poly -a "
+mkdir -p $LOCATION/../output
+
+PROG="mesher_roi -p ../data/a.poly -u ../output/a -a "
 DATE=$(date '+%Y-%m-%d_%H:%M:%S')
 DIR="memory_usage_mesher_roi_$N_"$DATE
 FILE="$DIR/memory_usage.txt"

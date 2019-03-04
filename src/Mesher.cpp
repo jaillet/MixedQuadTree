@@ -23,7 +23,7 @@
  * @brief
  **/
 
-//#define WRITE_OUTPUT
+#define WRITE_OUTPUT
 
 #include "Mesher.h"
 #include <math.h>
