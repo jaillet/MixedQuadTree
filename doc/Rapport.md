@@ -21,11 +21,11 @@ Utilise valgrind.
 Lance N fois le programme mesher_roi sur a.poly avec l'option -s i (i allant de 1 à N).
 Sauvegarde le résutat dans build/memory_usage_mesher_roi_N_DATE.  
 Les fichiers massif.out.*.i correspondent aux résultats détaillés de l'analyse mémoire avec i niveaux de raffinement.  
-Le fichier memory_usage contient la pic de mémoire utilisée pour chaque niveaux de raffinement.
+Le fichier memory_usage contient le pic de mémoire utilisée pour chaque niveaux de raffinement.
 
 # Passage de list à deque
 
-Compairaison entre vector / list / deque : https://baptiste-wicht.com/posts/2012/12/cpp-benchmark-vector-list-deque.html  
+Comparaison entre vector / list / deque : https://baptiste-wicht.com/posts/2012/12/cpp-benchmark-vector-list-deque.html  
 
 Utilisation mémoire légèrement plus importante.
 
@@ -97,5 +97,5 @@ Command : mesher_roi -p ../data/a.poly -a N
 10 | 267.182 Mo
 
 
-
+# Comparaisons de temps d'exécutions
 
