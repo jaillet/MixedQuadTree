@@ -23,34 +23,35 @@ std::string exec(const char* cmd) {
         result += buffer.data();
     }
     auto returnCode = pclose(pipe);
-    std::cout << "EXIT CODE : " << returnCode << std::endl;
+    //std::cout << "EXIT CODE : " << returnCode << std::endl;
     return result;
 }
 
 void endMsg(){
     std::cout << std::flush;
-    std::cerr << "use: ./meanTime number [t]\n";
+    std::cerr << "use: ./meanTime number [options]\n";
     std::cerr << "where:\n";
     std::cerr << "number is the number of times we execute mesher_roi program\n";
-    std::cerr << "Then at least one of the following list:\n";
-    std::cerr << "t : to compute the mean of the process Transition Patterns\n";
-    //TODO add doc
+    std::cerr << "options are the options of mesher_roi (except -p and -u), default is : -a 7\n";
 }
 
-void fillMapToEvaluate(char arg, std::map<std::string, float>& map) {
-
-    //Always look total :
+void fillMapToEvaluate(std::map<std::string, float>& map) {
+    //Initialize the map to store meantime for each process :
+    map["generateGridMesh"] = 0.f;
+    map["Refine Quad"] = 0.f;
+    map["Balanced mesh"] = 0.f;
+    map["Transition Patterns"] = 0.f;
+    map["generateQuadtreeMesh"] = 0.f;
+    map["detectFeatureQuadrants"] = 0.f;
+    map["linkElementsToNodes"] = 0.f;
+    map["detectInsideNodes"] = 0.f;
+    map["WriteQuadtreeMesh"] = 0.f;
+    map["ProjectCloseToBoundary"] = 0.f;
+    map["RemoveOnSurfaceSafe"] = 0.f;
+    map["linkElementsToNodes"] = 0.f;
+    map["ShrinkToBoundary"] = 0.f;
+    map["ApplySurfacePatterns"] = 0.f;
     map["Generation done"] = 0.f;
-
-    //TODO add options for every process...
-    //Or check all every time?
-    switch(arg) {
-        case 't': {
-            map["Transition Patterns"] = 0.f;
-            break;
-        }
-        default: break;
-    }
 }
 
 bool addCorrespondingTime(const std::string& ouputOfMesher, std::map<std::string, float>& map) {
@@ -86,39 +87,42 @@ bool addCorrespondingTime(const std::string& ouputOfMesher, std::map<std::string
 
 int main(int argc, char const *argv[])
 {
-    
-    const char* cmd = "./mesher_roi -p ../data/a.poly -a 7 -u ../output/a";
 
-    if (argc < 3) {
+    if (argc < 2) {
         endMsg();
         return 1;
     }
 
-    int number = std::atoi(argv[1]);
+    std::string options = "-a 7";
+    const int numberOfExecutions = std::atoi(argv[1]);
+    
+    if (argc > 2) {
+        //Options for mesher_roi are provided
+        //We want to concatenate all the remaining arg
+        options = "";
+        for (int i = 2; i < argc; i++) {
+            options += argv[i];
+            options += " ";
+        }
+    }
 
-    std::string arguments = argv[2];
-    char arg;
+    std::string cmd = "./mesher_roi -p ../data/a.poly " + options + " -u ../output/a";
+
+    std::cout << "Running next command " << numberOfExecutions << " times : \n\t" << cmd << std::endl;
+
+    //Initialize map
     std::map<std::string, float> mapProcessToTime;
-    for(unsigned i = 0; i < arguments.size(); ++i) {
-        arg = arguments[i];
-        fillMapToEvaluate(arg, mapProcessToTime);
-    }
+    fillMapToEvaluate(mapProcessToTime);
 
-    /*Debugging
-    for (std::vector<std::string>::iterator i = mapProcessToTime.begin(); i != mapProcessToTime.end(); ++i)
-    {
-        std::cout << *i << std::endl;
-    }
-    std::cout << number << std::endl;
-    */
-
+    //Executions
     int NUMBER_GOOD = 0;
-
-    for (int i = 0; i < number; ++i)
+    for (int i = 0; i < numberOfExecutions; ++i)
     {
-        std::string output = exec(cmd);
+        std::string output = exec(cmd.c_str());
         if (addCorrespondingTime(output, mapProcessToTime)) NUMBER_GOOD++;
+        //std::cout << "\r" << "Number of executions : " << i+1; Don't know why this prints AFTER for loop
     }
+    std::cout << std::endl;
 
     //Divide to get the mean
     float nb = (float) NUMBER_GOOD;
@@ -126,13 +130,10 @@ int main(int argc, char const *argv[])
         mapProcessToTime[kv.first] /= nb;
     }
 
-    std::cout << "Test ended. After " << number << " executions, with " << NUMBER_GOOD << " good executions, here are the results :\n";
+    std::cout << "Test ended. After " << numberOfExecutions << " executions, with " << NUMBER_GOOD << " good executions, here are the results :\n\n";
     for(auto& kv : mapProcessToTime) {
         std::cout << " * " << kv.first << " in " << kv.second << " ms" << std::endl;
     }
-
-
-
 
     return 0;
 }
