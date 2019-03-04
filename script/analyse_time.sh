@@ -19,22 +19,3 @@ do
         echo "$RES" > time_size_${SIZE}_thread_${THREAD}.txt
     done
 done
-
-echo ""
-touch $FILE
-echo "Command : ${PROG}N" >> $FILE
-echo "----------------------" >> $FILE
-echo "N  | Peak memory usage" >> $FILE
-echo "----------------------" >> $FILE
-for i in $(seq 1 $N)
-do
-    RES=$(awk -f ../script/massif_analyser.awk $DIR/massif.out.*.$i)
-    if [ $i -ge 10 ]
-    then
-        echo "$i | $RES" >> $FILE
-    else
-        echo "$i  | $RES" >> $FILE
-    fi
-done
-
-cat $FILE
