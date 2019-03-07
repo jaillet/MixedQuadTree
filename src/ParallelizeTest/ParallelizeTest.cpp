@@ -293,7 +293,7 @@ void inteltbb_vector_test(int nb_iteration) {
 
 void vector_test(int nb_iteration) {
     // Simple thread test
-    simple_vector_test(nb_iteration);
+    //simple_vector_test(nb_iteration);
 
     // OpenMP test
     openmp_vector_test(nb_iteration);
@@ -368,7 +368,7 @@ void inteltbb_list_test(int nb_iteration) {
 
 void list_test(int nb_iteration) {
     // Simple thread test
-    simple_list_test(nb_iteration);
+    //simple_list_test(nb_iteration);
 
     // OpenMP list copy
     openmp_list_copy_test(nb_iteration);
@@ -430,7 +430,7 @@ void inteltbb_deque_test(int nb_iteration) {
 
 void deque_test(int nb_iteration) {
     // Simple thread test
-    simple_deque_test(nb_iteration);
+    //simple_deque_test(nb_iteration);
 
     // OpenMP test
     openmp_deque_test(nb_iteration);

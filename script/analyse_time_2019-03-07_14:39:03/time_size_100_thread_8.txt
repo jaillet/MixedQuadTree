@@ -1,0 +1,8 @@
+Launching tests with 100 elements and 8 threads
+OpenMP vector 0 ms.
+IntelTBB vector 0 ms.
+OpenMP list copy 0 ms.
+OpenMP list copy2 0 ms.
+IntelTBB list 0 ms.
+OpenMP deque 0 ms.
+IntelTBB deque 0 ms.

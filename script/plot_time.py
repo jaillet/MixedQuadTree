@@ -1,0 +1,72 @@
+import glob
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+def takeFirst(elem):
+    return elem[0]
+
+
+data = {}
+
+onlyfiles = glob.glob("analyse_time_2019-03-07_14:39:03/time_size*.txt")
+
+for file in onlyfiles:
+    file_object = open(file, 'r')
+
+    nb_elements = 0
+    nb_threads = 0
+
+    for line in file_object:
+        words = line.split(' ')
+
+        if len(words) > 1:
+
+            if words[0] == 'Launching':
+                nb_elements = int(words[3])
+                nb_threads = int(words[6])
+
+                if nb_elements not in data:
+                    data[nb_elements] = {}
+
+            else:
+                type = ""
+
+                while len(words) > 2:
+                    type += words.pop(0) + " "
+                type = type.strip(" ")
+
+                if type not in data[nb_elements]:
+                    data[nb_elements][type] = {}
+
+                time = float(words.pop(0))
+
+                data[nb_elements][type][nb_threads] = time
+
+counter = 1
+
+for nb_elements, nb_elements_values in data.items():
+
+    plt.figure(counter)
+
+    for type, type_values in nb_elements_values.items():
+
+        x = list(type_values.keys())
+        x.sort()
+
+        print(x)
+
+        if len(x) == len(type_values.items()):
+            lst = list(type_values.items())
+            lst.sort(key=takeFirst)
+            values = list()
+            for val in lst:
+                values.append(val[1])
+            plt.plot(x, values)
+
+        for nb_threads, time in type_values.items():
+            print(nb_elements, type, nb_threads, time)
+
+    plt.show(counter)
+
+    counter += 1

@@ -1,0 +1,8 @@
+Launching tests with 1000000 elements and 2 threads
+OpenMP vector 3448 ms.
+IntelTBB vector 3446.7 ms.
+OpenMP list copy 3466.7 ms.
+OpenMP list copy2 3458.4 ms.
+IntelTBB list 3561.1 ms.
+OpenMP deque 3428.5 ms.
+IntelTBB deque 3429.8 ms.
