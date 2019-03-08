@@ -49,8 +49,12 @@ for nb_elements, nb_elements_values in data.items():
 
     plt.figure(counter)
 
-    for type, type_values in nb_elements_values.items():
+    plt.title(str(nb_elements) + " elements.")
+    plt.ylabel("Execution time")
+    plt.xlabel("Number of threads")
 
+    for type, type_values in nb_elements_values.items():
+        #x = nombre de threads
         x = list(type_values.keys())
         x.sort()
 
@@ -62,11 +66,12 @@ for nb_elements, nb_elements_values in data.items():
             values = list()
             for val in lst:
                 values.append(val[1])
-            plt.plot(x, values)
+            plt.plot(x, values, label=type)
 
         for nb_threads, time in type_values.items():
             print(nb_elements, type, nb_threads, time)
 
+    plt.legend()
     plt.show(counter)
 
     counter += 1
