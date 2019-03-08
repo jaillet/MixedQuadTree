@@ -30,20 +30,20 @@ for file in onlyfiles:
                     data[nb_elements] = {}
 
             else:
-                type = ""
-
-                while len(words) > 2:
-                    type += words.pop(0) + " "
-                type = type.strip(" ")
-
+                #Now like : "simple_list"
+                #And not like : "simple list"
+                type = words[0]
                 if type not in data[nb_elements]:
                     data[nb_elements][type] = {}
 
-                time = float(words.pop(0))
-
+                time = float(words[1])
+                #time = float(words.pop(0))
+                
                 data[nb_elements][type][nb_threads] = time
 
 counter = 1
+
+#print(data[100])
 
 for nb_elements, nb_elements_values in data.items():
 

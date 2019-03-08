@@ -248,7 +248,7 @@ void simple_vector_test(int nb_iteration) {
     ConcreteVisitorTest visitor(2);
     float time;
 
-    cout << "Simple vector ";
+    cout << "Simple_vector ";
     for (int i = 0; i < nb_iteration; i++) {
         v.clear();
         v.assign(elements.begin(), elements.end());
@@ -264,7 +264,7 @@ void openmp_vector_test(int nb_iteration) {
     ConcreteVisitorTest visitor(2);
     float time;
 
-    cout << "OpenMP vector ";
+    cout << "OpenMP_vector ";
     for (int i = 0; i < nb_iteration; i++) {
         v.clear();
         v.assign(elements.begin(), elements.end());
@@ -280,7 +280,7 @@ void inteltbb_vector_test(int nb_iteration) {
     ConcreteVisitorTest visitor(2);
     float time;
 
-    cout << "IntelTBB vector ";
+    cout << "IntelTBB_vector ";
     for (int i = 0; i < nb_iteration; i++) {
         v.clear();
         v.assign(elements.begin(), elements.end());
@@ -307,7 +307,7 @@ void simple_list_test(int nb_iteration) {
     ConcreteVisitorTest visitor(2);
     float time;
 
-    cout << "Simple list ";
+    cout << "Simple_list ";
     for (int i = 0; i < nb_iteration; i++) {
         l.clear();
         l.assign(elements.begin(), elements.end());
@@ -323,7 +323,7 @@ void openmp_list_copy_test(int nb_iteration) {
     ConcreteVisitorTest visitor(2);
     float time;
 
-    cout << "OpenMP list copy ";
+    cout << "OpenMP_list_copy ";
     for (int i = 0; i < nb_iteration; i++) {
         l.clear();
         l.assign(elements.begin(), elements.end());
@@ -339,7 +339,7 @@ void openmp_list_copy2_test(int nb_iteration) {
     ConcreteVisitorTest visitor(2);
     float time;
 
-    cout << "OpenMP list copy2 ";
+    cout << "OpenMP_list_copy2 ";
     for (int i = 0; i < nb_iteration; i++) {
         l.clear();
         l.assign(elements.begin(), elements.end());
@@ -355,7 +355,7 @@ void inteltbb_list_test(int nb_iteration) {
     ConcreteVisitorTest visitor(2);
     float time;
 
-    cout << "IntelTBB list ";
+    cout << "IntelTBB_list ";
     for (int i = 0; i < nb_iteration; i++) {
         l.clear();
         l.assign(elements.begin(), elements.end());
@@ -385,7 +385,7 @@ void simple_deque_test(int nb_iteration) {
     ConcreteVisitorTest visitor(2);
     float time;
 
-    cout << "Simple deque ";
+    cout << "Simple_deque ";
     for (int i = 0; i < nb_iteration; i++) {
         d.clear();
         d.assign(elements.begin(), elements.end());
@@ -401,7 +401,7 @@ void openmp_deque_test(int nb_iteration) {
     ConcreteVisitorTest visitor(2);
     float time;
 
-    cout << "OpenMP deque ";
+    cout << "OpenMP_deque ";
     for (int i = 0; i < nb_iteration; i++) {
         d.clear();
         d.assign(elements.begin(), elements.end());
@@ -417,7 +417,7 @@ void inteltbb_deque_test(int nb_iteration) {
     ConcreteVisitorTest visitor(2);
     float time;
 
-    cout << "IntelTBB deque ";
+    cout << "IntelTBB_deque ";
     for (int i = 0; i < nb_iteration; i++) {
         d.clear();
         d.assign(elements.begin(), elements.end());
