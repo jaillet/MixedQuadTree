@@ -45,9 +45,28 @@ counter = 1
 
 #print(data[100])
 
-for nb_elements, nb_elements_values in data.items():
 
-    plt.figure(counter)
+fig = plt.figure()
+fig.suptitle("Graph of average thread execution time for different number of elements", fontsize=16)
+
+#Fullscreen:
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
+
+#List of (pyplot lines, label) -> for legend
+#do it once (same legend for everyone??)
+legendLines = []
+legendLabel = []
+done = False
+
+for nb_elements, nb_elements_values in sorted(data.items()):
+
+    #100 elem = 0..
+    if nb_elements == 100:
+        continue
+
+    #plt.figure(counter)
+    ax = plt.subplot(2,3,counter);
 
     plt.title(str(nb_elements) + " elements.")
     plt.ylabel("Execution time")
@@ -66,12 +85,18 @@ for nb_elements, nb_elements_values in data.items():
             values = list()
             for val in lst:
                 values.append(val[1])
-            plt.plot(x, values, label=type)
+            l = plt.plot(x, values, '-3', label=type)
+            #For figure legend: 
+            if not done : 
+                legendLines.append(l)
+                legendLabel.append(type)
 
         for nb_threads, time in type_values.items():
             print(nb_elements, type, nb_threads, time)
 
-    plt.legend()
-    plt.show(counter)
-
+    #plt.legend()
     counter += 1
+    done = True
+
+ax.legend(bbox_to_anchor=(1.15,0.5), loc='lower left', borderaxespad=0.)
+plt.show()
