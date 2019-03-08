@@ -12,7 +12,7 @@ mkdir -p $DIR
 #
 for SIZE in 100 1000 10000 100000 1000000 10000000 100000000 1000000000
 do
-    for THREAD in 2 4 8
+    for THREAD in 8 4 2
     do
         echo "Compute for size $SIZE with $THREAD threads"
         RES=$(./$PROG $SIZE $THREAD)

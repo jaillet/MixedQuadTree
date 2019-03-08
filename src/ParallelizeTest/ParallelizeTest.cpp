@@ -7,6 +7,7 @@
 #include <deque>
 #include <map>
 #include <omp.h>
+#include <string.h>
 
 #include "tbb/parallel_for_each.h"
 #include "tbb/task_scheduler_init.h"
