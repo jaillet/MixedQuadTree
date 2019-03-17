@@ -33,7 +33,7 @@ Variable **new_pts** permet de sortir de la première boucle :
 * clipping (vector<vector<Point3D> >) : réinit avant chaque appel
 
 
-# Compte rendu
+# Compte rendu réunion
 
 Regarder si on peut écrire avec plusieurs threads en même temps.
   
@@ -51,3 +51,12 @@ Vérifier si option pour executer en sequentiel puis parallele.
 
 
 Analyser le code existant voir là ou ça coince.  
+
+
+# Analyse temps / structures / threads
+
+# Analyse performance et parallélisation de set avec accès concurrent
+
+## Méthode de test
+
+Reproduction d'une boucle similaire à la première boucle de generateQuadtreeMesh dans Mesher.cpp.  

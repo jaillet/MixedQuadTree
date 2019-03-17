@@ -149,7 +149,7 @@ def plot_elements_times():
 
                 for val in lst:
                     values.append(val[1])
-                    
+
                 #x.pop(0)
                 #values.pop(0)
 

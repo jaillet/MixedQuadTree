@@ -1,5 +1,6 @@
 
 #include <list>
+#include <set>
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -32,17 +33,18 @@ using namespace std;
 /*------------- Class -------------*/
 
 class Element;
+class ElementBis;
 
 class VisitorTest {
 public:
     virtual void visit(Element &) = 0;
+    virtual void visit(ElementBis &) = 0;
 };
 
 class Element {
 protected:
     int val;
     bool even;
-
 public:
 
     Element() : val(0), even(true) {};
@@ -72,6 +74,57 @@ public:
     }
 };
 
+class ElementBis {
+protected:
+    bool even;
+    set<int> values;
+
+public:
+
+    ElementBis() : even(true) { values.insert(0); }
+    ElementBis(int val) : even(val % 2 == 0) { values.insert(val); };
+
+    ElementBis(ElementBis & el) : even(el.isEven()) {
+        for(auto ite = el.values.begin(); ite != el.values.end(); ite++) {
+            values.insert(*ite);
+        }
+    };
+
+    ElementBis(const ElementBis & el) : even(el.isEven()) {
+        for(auto ite = el.values.begin(); ite != el.values.end(); ite++) {
+            values.insert(*ite);
+        }
+    };
+
+    virtual void accept(VisitorTest &visitor) {
+        visitor.visit(*this);
+    }
+
+    void divide2() {
+        int res = (*values.begin()) / 2;
+        values.insert(res);
+        even = res % 2 == 0;
+    }
+
+    const int value() const {
+        return (*values.begin());
+    }
+
+    const bool isEven() const {
+        return even;
+    }
+
+    bool operator <(ElementBis const& b)const {
+        if (*values.begin() < *b.values.begin()) return true;
+        else if (*values.begin() > *b.values.begin()) return false;
+        else {
+            if (values.size() > b.values.size()) return false;
+            else if (values.size() < b.values.size()) return true;
+            return false;
+        }
+    }
+};
+
 class ConcreteVisitorTest : public VisitorTest {
 private:
     int coef;
@@ -84,6 +137,25 @@ public:
             element.divide(coef);
         else
             element.multiply(coef);
+    };
+
+    void visit(ElementBis & element) {};
+};
+
+class ConcreteSetVisitorTest : public VisitorTest {
+private:
+    set<ElementBis> & data;
+
+public:
+    ConcreteSetVisitorTest(set<ElementBis> & data) : data(data) {};
+
+    void visit(Element &) {};
+
+    virtual void visit(ElementBis & element) override {
+        if (element.isEven()) {
+            element.divide2();
+            data.insert(element);
+        }
     };
 };
 
@@ -107,7 +179,8 @@ void init_vector(vector<Element> &vector) {
 
     #pragma omp parallel for
     for (int i = 0; i < NOMBRE_ELEM; i++) {
-        vector.push_back(Element(i));
+        vector[i] = Element(i);
+        //vector.push_back(Element(i));
         //cout << vector[i].value() << " ";
     }
     // cout << endl;
@@ -123,6 +196,14 @@ void init_list(list<Element> &list) {
         // cout << list[i].value() << " ";
     }
     // cout << endl;
+}
+
+void init_set(set<ElementBis> &set) {
+    set.clear();
+
+    for (int i = 1; i <= NOMBRE_ELEM; i++) {
+        set.insert(ElementBis(i));
+    }
 }
 
 
@@ -440,6 +521,61 @@ void deque_test(int nb_iteration) {
     inteltbb_deque_test(nb_iteration);
 }
 
+/* ############## TEST set ################### */
+
+void simple_set(set<ElementBis> & elements) {
+    set<ElementBis> result;
+    set<ElementBis> new_els;
+
+
+    do {
+        new_els.clear();
+        ConcreteSetVisitorTest visitor(new_els);
+
+        auto ite = elements.begin();
+        while (ite != elements.end()) {
+            ElementBis el (*ite);
+
+            el.accept(visitor);
+
+            if (!(el).isEven()) {
+                result.insert(el);
+            }
+            //cout << new_els.size() << endl;
+            ite++;
+        }
+
+        std::swap(new_els, elements);
+
+    } while (!new_els.empty());
+
+    std::cout << result.size() << endl;
+
+    int res = 0;
+    for (auto ite = result.begin(); ite != result.end(); ite++) {
+        cout << (*ite).value() << " ";
+        res += (*ite).value();
+    }
+    cout << endl;
+
+    cout << "Res : " << res << endl;
+}
+
+void simple_set_test(int nb_iteration) {
+    set<ElementBis> elements;
+    float time;
+
+    cout << "Simple_set ";
+    for (int i = 0; i < nb_iteration; i++) {
+        init_set(elements);
+        time = count_time(simple_set, elements);
+        time_average["Simple set"] += time;
+    }
+    time_average["Simple set"] /= NOMBRE_ITER;
+    cout << time_average["Simple set"] << " ms." << endl;
+
+}
+
 /*------------- Main -------------*/
 
 int main(int argc, char const *argv[]) {
@@ -478,6 +614,7 @@ int main(int argc, char const *argv[]) {
         else if (strcmp(argv[3], "simple_deque") == 0) simple_deque_test(NOMBRE_ITER);
         else if (strcmp(argv[3], "openmp_deque") == 0) openmp_deque_test(NOMBRE_ITER);
         else if (strcmp(argv[3], "inteltbb_deque") == 0) inteltbb_deque_test(NOMBRE_ITER);
+        else if (strcmp(argv[3], "simple_set") == 0) simple_set_test(NOMBRE_ITER);
         else {
             cerr << "Invalid argument" << endl;
             exit(1);
