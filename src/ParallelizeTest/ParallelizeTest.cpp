@@ -1,4 +1,3 @@
-
 #include <list>
 #include <set>
 #include <iostream>
@@ -14,6 +13,7 @@
 #include "tbb/task_scheduler_init.h"
 
 #include "TimeDecorator.hpp"
+#include "CPUInfo.hpp"
 
 #if COMPILER_MSVC
 #  define DISABLE_OPTIMISATIONS() __pragma( optimize( "", off ) )
@@ -597,6 +597,16 @@ int main(int argc, char const *argv[]) {
     tbb::task_scheduler_init test(NOMBRE_THREAD);
 
     cout << "Launching tests with " << NOMBRE_ELEM << " elements and " << NOMBRE_THREAD << " threads" << endl;
+
+    CPUInfo cinfo;
+    //6 lines of info
+    std::cout << "Processor : " << std::endl;
+    std::cout << std::boolalpha; //Cout true for 1, false for 0
+    std::cout << "CPU vendor = " << cinfo.vendor() << std::endl;
+    std::cout << "CPU Brand String = " << cinfo.model() << std::endl;
+    std::cout << "# of cores = " << cinfo.cores() << std::endl;
+    std::cout << "# of logical cores = " << cinfo.logicalCpus() << std::endl;
+    std::cout << "Is CPU Hyper threaded = " << cinfo.isHyperThreaded() << std::endl;
 
     init_vector(elements);
 
