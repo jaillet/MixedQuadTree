@@ -184,6 +184,7 @@ def plot_elements_times():
 
 def plot_strong_scaling_speedup():
     #With the same value of nbElem, change the number of thread for one method
+    #https://www.kth.se/blogs/pdc/2018/11/scalability-strong-and-weak-scaling/
 
     #speedup = t1 / tN, t1 = time with one thread, tN with N threads
 
