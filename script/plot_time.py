@@ -231,12 +231,20 @@ def plot_strong_scaling_speedup():
             #Time with one thread (change 2 to 1 after)
             t1 = type_values[2]
 
+            print("Value t1 = " + str(t1))
+
             speedup = list()
-            for val in type_values.values():
-                #Hack because val sometimes equals 0...
-                if val == 0:
-                    val = 0.01
-                speedup.append(t1 / val)
+            for nbThread in x:
+                val = type_values[nbThread]
+                if nbThread == 2:
+                    #change to 1
+                    speedupVal = 1
+                else:
+                    #Hack because val sometimes equals 0...
+                    if val == 0 :
+                        val = 0.1 #Very fast!!
+                    speedupVal = t1 / val
+                speedup.append(speedupVal)
 
             l = plt.plot(x, speedup, '-x', label=type, markersize=15)
 
