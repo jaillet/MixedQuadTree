@@ -179,8 +179,8 @@ void init_vector(vector<Element> &vector) {
 
     #pragma omp parallel for
     for (int i = 0; i < NOMBRE_ELEM; i++) {
-        vector[i] = Element(i);
-        //vector.push_back(Element(i));
+        //vector[i] = Element(i);
+        vector.push_back(Element(i));
         //cout << vector[i].value() << " ";
     }
     // cout << endl;
@@ -597,7 +597,7 @@ int main(int argc, char const *argv[]) {
     tbb::task_scheduler_init test(NOMBRE_THREAD);
 
     cout << "Launching tests with " << NOMBRE_ELEM << " elements and " << NOMBRE_THREAD << " threads" << endl;
-
+    
     CPUInfo cinfo;
     //6 lines of info
     std::cout << "Processor : " << std::endl;
@@ -607,7 +607,7 @@ int main(int argc, char const *argv[]) {
     std::cout << "# of cores = " << cinfo.cores() << std::endl;
     std::cout << "# of logical cores = " << cinfo.logicalCpus() << std::endl;
     std::cout << "Is CPU Hyper threaded = " << cinfo.isHyperThreaded() << std::endl;
-
+    
     init_vector(elements);
 
     if (argc > 3) {
