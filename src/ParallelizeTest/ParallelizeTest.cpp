@@ -163,7 +163,7 @@ public:
 /* Global */
 
 int NOMBRE_ELEM = 10000000;
-int NOMBRE_ITER = 10;
+int NOMBRE_ITER = 1;
 int NOMBRE_THREAD = omp_get_max_threads();
 
 vector<Element> elements;
@@ -178,10 +178,10 @@ void init_vector(vector<Element> &vector) {
 
     //cout << "Init vector.. " << endl;
 
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int i = 0; i < NOMBRE_ELEM; i++) {
-        //vector[i] = Element(i);
-        vector.push_back(Element(i));
+        vector[i] = Element(i);
+        //vector.emplace_back(i);
         //cout << vector[i].value() << " ";
     }
     // cout << endl;

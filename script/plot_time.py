@@ -187,6 +187,8 @@ def plot_strong_scaling_speedup():
     #https://www.kth.se/blogs/pdc/2018/11/scalability-strong-and-weak-scaling/
 
     #speedup = t1 / tN, t1 = time with one thread, tN with N threads
+    #speedup = t1 / (N * tN) * 100, t1 = time with one thread, tN with N threads
+
 
     counter = 1
 
@@ -264,6 +266,74 @@ def plot_strong_scaling_speedup():
     plt.show()
 
 
+def plot_strong_scaling_speedup2():
+    #speedup = t1 / (N * tN) * 100, t1 = time with one thread, tN with N threads
+
+
+    counter = 1
+
+    fig = plt.figure()
+    fig.suptitle("Graph of average thread execution time for different number of elements", fontsize=16)
+
+    mng = plt.get_current_fig_manager()
+
+    legendLines = []
+    legendLabel = []
+    done = False
+
+    for nb_elements, nb_elements_values in sorted(data.items()):
+
+        if nb_elements == 100:
+            continue
+
+        ax = plt.subplot(2, 3, counter)
+
+        plt.title(str(nb_elements) + " elements.")
+        plt.ylabel("Speedup")
+        plt.xlabel("Number of threads")
+
+        for type, type_values in nb_elements_values.items():
+            #type_value : {nbThread : timeValue}
+            #type : OpenMP_vector, IntelTBB_deque, etc..
+
+            #x = nbThreads
+            x = list(type_values.keys())
+            x.sort()
+
+            t1 = type_values[1]
+
+            speedup = list()
+            for nbThread in x:
+                val = type_values[nbThread]
+
+                if nbThread == 1:
+                    speedupVal = 100
+                else:
+                    #Hack because val sometimes equals 0...
+                    if val == 0:
+                        val = 0.1 #Very fast!!
+
+                    print(t1, nbThread, val)
+                    speedupVal = t1 / (nbThread * val) * 100
+                speedup.append(speedupVal)
+
+            l = plt.plot(x, speedup, '-x', label=type, markersize=15)
+
+            #For figure legend:
+            if not done:
+                legendLines.append(l)
+                legendLabel.append(type)
+
+            for nb_threads in x:
+                print(nb_elements, type, nb_threads, type_values[nb_threads])
+
+        #plt.legend()
+        counter += 1
+        done = True
+
+    ax.legend(bbox_to_anchor=(1.15, 0.5), loc='lower left', borderaxespad=0.)
+    plt.show()
+
 #plot_elements_times()
 #plot_threads_times()
-plot_strong_scaling_speedup()
+plot_strong_scaling_speedup2()
