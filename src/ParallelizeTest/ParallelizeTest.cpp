@@ -1,3 +1,4 @@
+#include <thread>
 #include <list>
 #include <set>
 #include <iostream>
@@ -604,8 +605,9 @@ int main(int argc, char const *argv[]) {
     std::cout << std::boolalpha; //Cout true for 1, false for 0
     std::cout << "CPU vendor = " << cinfo.vendor() << std::endl;
     std::cout << "CPU Brand String = " << cinfo.model() << std::endl;
-    std::cout << "# of cores = " << cinfo.cores() << std::endl;
+    std::cout << "# of cores = " << cinfo.cores() << " ";
     std::cout << "# of logical cores = " << cinfo.logicalCpus() << std::endl;
+    std::cout << "# of thread (std::thread) = " << std::thread::hardware_concurrency() << std::endl;
     std::cout << "Is CPU Hyper threaded = " << cinfo.isHyperThreaded() << std::endl;
     
     init_vector(elements);
