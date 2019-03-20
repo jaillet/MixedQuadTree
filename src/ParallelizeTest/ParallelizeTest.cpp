@@ -163,7 +163,7 @@ public:
 /* Global */
 
 int NOMBRE_ELEM = 10000000;
-int NOMBRE_ITER = 10;
+int NOMBRE_ITER = 1;
 int NOMBRE_THREAD = omp_get_max_threads();
 
 vector<Element> elements;

@@ -10,7 +10,7 @@ processor = ""
 data = {}
 data2 = {}
 
-onlyfiles = glob.glob("analyse_time_2019-03-07_14:39:03/time_size*.txt")
+onlyfiles = glob.glob("analyse_time_2019-03-20_17:51:37/time_size*.txt")
 
 for file in onlyfiles:
     file_object = open(file, 'r')
@@ -283,10 +283,13 @@ def plot_strong_scaling_speedup2():
 
     for nb_elements, nb_elements_values in sorted(data.items()):
 
-        if nb_elements == 100:
+
+        if 100000000 == nb_elements:
             continue
 
         ax = plt.subplot(2, 3, counter)
+
+
 
         plt.title(str(nb_elements) + " elements.")
         plt.ylabel("Speedup")

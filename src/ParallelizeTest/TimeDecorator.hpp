@@ -1,6 +1,7 @@
 #include <functional>
 #include <chrono>
 #include <iostream>
+#include <time.h>
 
 //https://gist.github.com/lizhongz/21e77864aa9d5f66e842
 //Modified a little bit
@@ -64,15 +65,31 @@ template <class> struct ExeTime;
 template <class... Args>
 struct ExeTime<void(Args ...)> {
 public:
-    ExeTime(std::function<void(Args...)> func): f_(func) { } 
+    ExeTime(std::function<void(Args...)> func): f_(func) { }
 
     double operator ()(Args ... args) {
-        double start_time = get_cpu_time();
+        struct timespec start, finish;
+        double elapsed;
+
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        f_(args...);
+        clock_gettime(CLOCK_MONOTONIC, &finish);
+
+        elapsed = (finish.tv_sec - start.tv_sec);
+        elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+        return elapsed * 1000;
+    }
+
+    /*
+    float operator ()(Args ... args) {
+        auto start_time = std::chrono::high_resolution_clock::now();
         f_(args...);    
-        double end_time = get_cpu_time();
-        return  (end_time - start_time) * 1000; // for res in ms
-        //return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-    }   
+        auto end_time = std::chrono::high_resolution_clock::now();
+
+        return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+    }
+     */
 
 private:
     std::function<void(Args ...)> f_; 
@@ -84,7 +101,7 @@ ExeTime<void(Args ...)> make_decorator(void (*f)(Args ...)) {
 }
 
 template <class F, class... Args>
-double count_time(F&& f, Args&& ... args) {
+float count_time(F&& f, Args&& ... args) {
     auto et = make_decorator(f);
     return et(std::forward<Args>(args)...);
 }
@@ -99,5 +116,5 @@ void ex(int a) {
     }
 }
 void exemple_utilisation() {
-    double time = count_time(ex, 5);
+    float time = count_time(ex, 5);
 }

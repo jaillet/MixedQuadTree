@@ -1,0 +1,14 @@
+Launching tests with 1000000 elements and 8 threads
+Processor : 
+CPU vendor = AuthenticAMD
+CPU Brand String = AMD Ryzen 7 2700X Eight-Core Processor         
+# of cores = 1 # of logical cores = 1
+# of thread (std::thread) = 16
+Is CPU Hyper threaded = false
+OpenMP_vector 1645.255127 ms.
+IntelTBB_vector 1647.290161 ms.
+OpenMP_list_copy 1669.140015 ms.
+OpenMP_list_copy2 1696.788086 ms.
+IntelTBB_list 1793.978027 ms.
+OpenMP_deque 1637.773438 ms.
+IntelTBB_deque 1648.086426 ms.
