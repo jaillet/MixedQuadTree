@@ -163,7 +163,7 @@ public:
 /* Global */
 
 int NOMBRE_ELEM = 10000000;
-int NOMBRE_ITER = 1;
+int NOMBRE_ITER = 10;
 int NOMBRE_THREAD = omp_get_max_threads();
 
 vector<Element> elements;
@@ -174,14 +174,14 @@ map<string, double> time_average;
 
 void init_vector(vector<Element> &vector) {
     vector.clear();
-    vector.reserve(NOMBRE_ELEM);
+    //vector.reserve(NOMBRE_ELEM);
 
     //cout << "Init vector.. " << endl;
 
     //#pragma omp parallel for
     for (int i = 0; i < NOMBRE_ELEM; i++) {
-        vector[i] = Element(i);
-        //vector.emplace_back(i);
+        //vector[i] = Element(i);
+        vector.emplace_back(i);
         //cout << vector[i].value() << " ";
     }
     // cout << endl;
@@ -329,7 +329,7 @@ void inteltbb_deque(deque<Element> &v, VisitorTest &visitor) {
 void simple_vector_test(int nb_iteration) {
     vector<Element> v;
     ConcreteVisitorTest visitor(2);
-    float time;
+    double time;
 
     cout << "Simple_vector ";
     for (int i = 0; i < nb_iteration; i++) {
@@ -339,13 +339,13 @@ void simple_vector_test(int nb_iteration) {
         time_average["Simple vector"] += time;
     }
     time_average["Simple vector"] /= nb_iteration;
-    cout << time_average["Simple vector"] << " ms." << endl;
+    cout << std::fixed << time_average["Simple vector"] << " ms." << endl;
 }
 
 void openmp_vector_test(int nb_iteration) {
     vector<Element> v;
     ConcreteVisitorTest visitor(2);
-    float time;
+    double time;
 
     cout << "OpenMP_vector ";
     for (int i = 0; i < nb_iteration; i++) {
@@ -355,13 +355,13 @@ void openmp_vector_test(int nb_iteration) {
         time_average["OpenMP vector"] += time;
     }
     time_average["OpenMP vector"] /= nb_iteration;
-    cout << time_average["OpenMP vector"] << " ms." << endl;
+    cout << std::fixed << time_average["OpenMP vector"] << " ms." << endl;
 }
 
 void inteltbb_vector_test(int nb_iteration) {
     vector<Element> v;
     ConcreteVisitorTest visitor(2);
-    float time;
+    double time;
 
     cout << "IntelTBB_vector ";
     for (int i = 0; i < nb_iteration; i++) {
@@ -371,7 +371,7 @@ void inteltbb_vector_test(int nb_iteration) {
         time_average["IntelTBB vector"] += time;
     }
     time_average["IntelTBB vector"] /= nb_iteration;
-    cout << time_average["IntelTBB vector"] << " ms." << endl;
+    cout << std::fixed << time_average["IntelTBB vector"] << " ms." << endl;
 }
 
 void vector_test(int nb_iteration) {
@@ -388,7 +388,7 @@ void vector_test(int nb_iteration) {
 void simple_list_test(int nb_iteration) {
     list<Element> l;
     ConcreteVisitorTest visitor(2);
-    float time;
+    double time;
 
     cout << "Simple_list ";
     for (int i = 0; i < nb_iteration; i++) {
@@ -398,13 +398,13 @@ void simple_list_test(int nb_iteration) {
         time_average["Simple list"] += time;
     }
     time_average["Simple list"] /= nb_iteration;
-    cout << time_average["Simple list"] << " ms." << endl;
+    cout << std::fixed << time_average["Simple list"] << " ms." << endl;
 }
 
 void openmp_list_copy_test(int nb_iteration) {
     list<Element> l;
     ConcreteVisitorTest visitor(2);
-    float time;
+    double time;
 
     cout << "OpenMP_list_copy ";
     for (int i = 0; i < nb_iteration; i++) {
@@ -414,13 +414,13 @@ void openmp_list_copy_test(int nb_iteration) {
         time_average["OpenMP list copy"] += time;
     }
     time_average["OpenMP list copy"] /= nb_iteration;
-    cout << time_average["OpenMP list copy"] << " ms." << endl;
+    cout << std::fixed << time_average["OpenMP list copy"] << " ms." << endl;
 }
 
 void openmp_list_copy2_test(int nb_iteration) {
     list<Element> l;
     ConcreteVisitorTest visitor(2);
-    float time;
+    double time;
 
     cout << "OpenMP_list_copy2 ";
     for (int i = 0; i < nb_iteration; i++) {
@@ -430,13 +430,13 @@ void openmp_list_copy2_test(int nb_iteration) {
         time_average["OpenMP list copy2"] += time;
     }
     time_average["OpenMP list copy2"] /= nb_iteration;
-    cout << time_average["OpenMP list copy2"] << " ms." << endl;
+    cout << std::fixed << time_average["OpenMP list copy2"] << " ms." << endl;
 }
 
 void inteltbb_list_test(int nb_iteration) {
     list<Element> l;
     ConcreteVisitorTest visitor(2);
-    float time;
+    double time;
 
     cout << "IntelTBB_list ";
     for (int i = 0; i < nb_iteration; i++) {
@@ -446,7 +446,7 @@ void inteltbb_list_test(int nb_iteration) {
         time_average["IntelTBB list"] += time;
     }
     time_average["IntelTBB list"] /= nb_iteration;
-    cout << time_average["IntelTBB list"] << " ms." << endl;
+    cout << std::fixed << time_average["IntelTBB list"] << " ms." << endl;
 }
 
 void list_test(int nb_iteration) {
@@ -466,7 +466,7 @@ void list_test(int nb_iteration) {
 void simple_deque_test(int nb_iteration) {
     deque<Element> d;
     ConcreteVisitorTest visitor(2);
-    float time;
+    double time;
 
     cout << "Simple_deque ";
     for (int i = 0; i < nb_iteration; i++) {
@@ -476,13 +476,13 @@ void simple_deque_test(int nb_iteration) {
         time_average["Simple deque"] += time;
     }
     time_average["Simple deque"] /= nb_iteration;
-    cout << time_average["Simple deque"] << " ms." << endl;
+    cout << std::fixed << time_average["Simple deque"] << " ms." << endl;
 }
 
 void openmp_deque_test(int nb_iteration) {
     deque<Element> d;
     ConcreteVisitorTest visitor(2);
-    float time;
+    double time;
 
     cout << "OpenMP_deque ";
     for (int i = 0; i < nb_iteration; i++) {
@@ -492,13 +492,13 @@ void openmp_deque_test(int nb_iteration) {
         time_average["OpenMP deque"] += time;
     }
     time_average["OpenMP deque"] /= nb_iteration;
-    cout << time_average["OpenMP deque"] << " ms." << endl;
+    cout << std::fixed << time_average["OpenMP deque"] << " ms." << endl;
 }
 
 void inteltbb_deque_test(int nb_iteration) {
     deque<Element> d;
     ConcreteVisitorTest visitor(2);
-    float time;
+    double time;
 
     cout << "IntelTBB_deque ";
     for (int i = 0; i < nb_iteration; i++) {
@@ -508,7 +508,7 @@ void inteltbb_deque_test(int nb_iteration) {
         time_average["IntelTBB deque"] += time;
     }
     time_average["IntelTBB deque"] /= nb_iteration;
-    cout << time_average["IntelTBB deque"] << " ms." << endl;
+    cout << std::fixed << time_average["IntelTBB deque"] << " ms." << endl;
 }
 
 void deque_test(int nb_iteration) {
@@ -564,7 +564,7 @@ void simple_set(set<ElementBis> & elements) {
 
 void simple_set_test(int nb_iteration) {
     set<ElementBis> elements;
-    float time;
+    double time;
 
     cout << "Simple_set ";
     for (int i = 0; i < nb_iteration; i++) {
@@ -573,7 +573,7 @@ void simple_set_test(int nb_iteration) {
         time_average["Simple set"] += time;
     }
     time_average["Simple set"] /= NOMBRE_ITER;
-    cout << time_average["Simple set"] << " ms." << endl;
+    cout << std::fixed << time_average["Simple set"] << " ms." << endl;
 
 }
 
