@@ -9,8 +9,11 @@ def takeFirst(elem):
 processor = ""
 data = {}
 data2 = {}
+data3 = {}
 
 onlyfiles = glob.glob("analyse_time_2019-03-20_17:51:37/time_size*.txt")
+
+get_process = False
 
 for file in onlyfiles:
     file_object = open(file, 'r')
@@ -22,7 +25,10 @@ for file in onlyfiles:
 
         if number >= 1 and number <= 6:
             #Lines for processor spec
-            processor += line
+            if not get_process:
+                processor += line
+                if number == 6:
+                    get_process = True
         else :
             words = line.split(' ')
 
@@ -46,10 +52,17 @@ for file in onlyfiles:
                     if type not in data2[nb_threads]:
                         data2[nb_threads][type] = {}
 
+                    if type not in data3:
+                        data3[type] = {}
+
+                    if nb_threads not in data3[type]:
+                        data3[type][nb_threads] = {}
+
                     time = float(words[1])
                     
                     data[nb_elements][type][nb_threads] = time
                     data2[nb_threads][type][nb_elements] = time
+                    data3[type][nb_threads][nb_elements] = time
 
 print(processor)
 
@@ -180,6 +193,76 @@ def plot_elements_times():
         done = True
 
         ax.legend()
+    plt.show()
+
+def plot_elements_times2():
+    counter = 1
+
+    fig = plt.figure()
+    fig.suptitle("Graph of the average execution time of a structure according to the number of elements for a different number of threads", fontsize=16)
+
+    #Fullscreen:
+    mng = plt.get_current_fig_manager()
+    mng.resize(*mng.window.maxsize())
+
+    #List of (pyplot lines, label) -> for legend
+    #do it once (same legend for everyone??)
+    legendLines = []
+    legendLabel = []
+    done = False
+
+    for type, type_values in sorted(data3.items()):
+
+        #plt.figure(counter)
+        ax = plt.subplot(3, 3, counter)
+
+        plt.title(str(type))
+        plt.ylabel("Execution time (ms)")
+        plt.xlabel("Number of elements")
+        #plt.yscale('log')
+        plt.xscale('log')
+
+        type_values = list(type_values.items())
+        type_values.sort(key=takeFirst)
+
+        for nb_threads, nb_threads_values in type_values:
+            #type_values : {nbElem : timeValue}
+            #type : OpenMP_vector, IntelTBB_deque, etc..
+
+            x = list(nb_threads_values.keys())
+            x.sort()
+
+
+            if len(x) == len(nb_threads_values.items()):
+                lst = list(nb_threads_values.items())
+                lst.sort(key=takeFirst)
+                values = list()
+
+                for val in lst:
+                    values.append(val[1])
+
+                print("X :", x)
+                print("Value (Y) :", values)
+
+                #x.pop(0)
+                #values.pop(0)
+
+                l = plt.plot(x, values, '-x', label=nb_threads, markersize=15)
+
+                #For figure legend:
+                if not done:
+                    legendLines.append(l)
+                    legendLabel.append(type)
+
+            for nb_elements in x:
+                print(type, nb_threads, nb_elements, nb_threads_values[nb_elements])
+
+        #plt.legend()
+        counter += 1
+        done = True
+
+        ax.legend()
+    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.25, hspace=0.4)
     plt.show()
 
 def plot_strong_scaling_speedup():
@@ -337,6 +420,6 @@ def plot_strong_scaling_speedup2():
     ax.legend(bbox_to_anchor=(1.15, 0.5), loc='lower left', borderaxespad=0.)
     plt.show()
 
-#plot_elements_times()
+plot_elements_times2()
 #plot_threads_times()
-plot_strong_scaling_speedup2()
+#plot_strong_scaling_speedup2()
