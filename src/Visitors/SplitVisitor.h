@@ -55,7 +55,7 @@ namespace Clobscode
 
         bool visit(Quadrant *o) override;
 
-        void setPoints(vector<MeshPoint> &points);
+        void setPoints(const vector<MeshPoint> &points);
         
         void setNewPts(list<Point3D> &new_pts);
         
@@ -68,7 +68,7 @@ namespace Clobscode
     protected:
         
         //references
-        vector<MeshPoint> *points;
+        const vector<MeshPoint> *points;
         list<Point3D> *new_pts;
         set<QuadEdge> *edges;
         vector<vector<unsigned int> > *new_eles;
@@ -78,14 +78,6 @@ namespace Clobscode
                        unsigned int idx2,
                        unsigned int &c_n_pts,
                        unsigned int &mid_idx);
-
-/*        bool splitFace(unsigned int idx1,
-                       unsigned int idx2,
-                       unsigned int idx3,
-                       unsigned int idx4,
-                       unsigned int &c_n_pts,
-                       unsigned int &mid_idx);*/
-
 
     };
 }

@@ -50,10 +50,10 @@ namespace Clobscode
 
         bool visit(Quadrant *o) override;
 
-        void setPoints(vector<MeshPoint> &points);
+        void setPoints(const vector<MeshPoint> &points);
 
     private:
-        vector<MeshPoint> *points;
+        const vector<MeshPoint> *points;
     };
 }
 

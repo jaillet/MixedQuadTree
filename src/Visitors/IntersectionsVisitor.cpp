@@ -47,16 +47,16 @@ namespace Clobscode
         :ply(NULL),points(NULL),edges(NULL),coords(NULL),select_edges(select_edges)
     {    }
 
-    void IntersectionsVisitor::setPolyline( Polyline &ply) {
+    void IntersectionsVisitor::setPolyline(const Polyline &ply) {
         this->ply = &ply;
     }
-    void IntersectionsVisitor::setPoints(vector<MeshPoint> &points){
+    void IntersectionsVisitor::setPoints(const vector<MeshPoint> &points){
         this->points = &points;
     }
-    void IntersectionsVisitor::setEdges(list<unsigned int> &edges){
+    void IntersectionsVisitor::setEdges(const list<unsigned int> &edges){
         this->edges = &edges;
     }
-    void IntersectionsVisitor::setCoords(vector<Point3D> &coords){
+    void IntersectionsVisitor::setCoords(const vector<Point3D> &coords){
         this->coords = &coords;
     }
 

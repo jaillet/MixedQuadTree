@@ -38,7 +38,7 @@ namespace Clobscode
         :points(NULL),new_pts(NULL),edges(NULL),new_eles(NULL),clipping(NULL)
     { }
 
-    void SplitVisitor::setPoints(vector<MeshPoint> &points) {
+    void SplitVisitor::setPoints(const vector<MeshPoint> &points) {
         this->points = &points;
     }
     

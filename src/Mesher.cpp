@@ -744,7 +744,7 @@ namespace Clobscode
         
         //TransitionPatternVisitor section
         TransitionPatternVisitor tpv;
-        tpv.setPoints(points);
+//        tpv.setPoints(points);
         tpv.setEdges(QuadEdges);
         tpv.setMaxRefLevel(omaxrl);
         new_pts.clear();
@@ -1211,7 +1211,7 @@ namespace Clobscode
         
         //TransitionPatternVisitor section
         TransitionPatternVisitor tpv;
-        tpv.setPoints(points);
+//        tpv.setPoints(points);
         tpv.setEdges(QuadEdges);
         tpv.setMaxRefLevel(max_rl);
         new_pts.clear();

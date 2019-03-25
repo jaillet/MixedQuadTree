@@ -30,7 +30,7 @@ namespace Clobscode
     }
 
     
-    void PointMovedVisitor::setPoints(vector<MeshPoint> &points) {      
+    void PointMovedVisitor::setPoints(const vector<MeshPoint> &points) {
         this->points = &points;
     }
 
@@ -44,8 +44,8 @@ namespace Clobscode
     }
 
     bool PointMovedVisitor::visit(Quadrant *o) {
-        unsigned short ref_level = o->ref_level;
-        vector<unsigned int> pointindex = o->pointindex;
+        const unsigned short ref_level = o->ref_level;
+        const vector<unsigned int> &pointindex = o->pointindex;
 
         //when the Quadrant has at least one point that has been
         //projected into the input surface, the transition
