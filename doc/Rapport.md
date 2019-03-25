@@ -99,3 +99,16 @@ Command : mesher_roi -p ../data/a.poly -a N
 
 # Comparaisons de temps d'exécutions
 
+
+
+# Affichage des résultats :
+
+Fichier script/plot_time.py à executer avec python3 (pyplot)
+
+3 types de graphes :
+
+* elements_times : Pour chaque méthode, un graphique présentant le temps d'execution en fonction du nombre d'élements, pour chaque nombre de threads.
+
+* thread_times : Pour chaque nombre d'élement, un graphique présentanat les temps d'éxécution en fonction des threads, pour chaque méthode
+
+* strong_scaling : Idem que précedemment, mais avec l'accélération (TempsAvec1Thread / TempsAvecNThread)

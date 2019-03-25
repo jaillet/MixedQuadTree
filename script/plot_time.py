@@ -138,7 +138,7 @@ def plot_elements_times():
 
     #Fullscreen:
     mng = plt.get_current_fig_manager()
-    #mng.resize(*mng.window.maxsize())
+    mng.resize(*mng.window.maxsize())
 
     #List of (pyplot lines, label) -> for legend
     #do it once (same legend for everyone??)
@@ -359,6 +359,7 @@ def plot_strong_scaling_speedup2():
     fig.suptitle("Graph of average thread execution time for different number of elements", fontsize=16)
 
     mng = plt.get_current_fig_manager()
+    mng.resize(*mng.window.maxsize())
 
     legendLines = []
     legendLabel = []
@@ -420,6 +421,6 @@ def plot_strong_scaling_speedup2():
     ax.legend(bbox_to_anchor=(1.15, 0.5), loc='lower left', borderaxespad=0.)
     plt.show()
 
-plot_elements_times2()
+#plot_elements_times2()
 #plot_threads_times()
-#plot_strong_scaling_speedup2()
+plot_strong_scaling_speedup()
