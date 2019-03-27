@@ -136,7 +136,12 @@ Fichier script/plot_time.py à executer avec python3 (pyplot)
 
 ### Variables de classe
 
-
+```cpp
+vector<MeshPoint> points;
+vector<Quadrant> Quadrants;
+set<QuadEdge> QuadEdges;
+list<RefinementRegion *> regions;
+```
 
 ### Fonction generateMesh (ou refineMesh)
 
