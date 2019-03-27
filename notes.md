@@ -1,5 +1,10 @@
+#PROCHAINE REUNION
+
+13h LUNDI 1 AVRIL
+
 # SplitVisitor
-Lorsque visit() accès concurrent : 
+Lorsque visit() accès concurrent :
+
 * new_pts (list<Point3D>) : var de la classe pour stocker les nouveaux pts créés 
 * edges (set<QuadEdge>) : suppression et insertion d'éléments 
 * points (vector<MeshPoint>) : accès en lecture 
@@ -7,7 +12,8 @@ Lorsque visit() accès concurrent :
 * clipping (vector<vector<Point3D> >) : var de la classe pour stocker les nouveaux pts créés
 
 # IntersectionsVisitor
-Lorsque visit() accès concurrent : 
+Lorsque visit() accès concurrent :
+
 * select_edges (bool) :  
 true, check avec des points spécifiques (-> coords & edges)  
 false, check avec tous les points (-> points)

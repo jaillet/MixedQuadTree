@@ -1,4 +1,10 @@
-# Comparaison lib de parallélisation
+# Productions
+
+* Scripts d'analyse : ```script/analyse_time.sh̀̀̀```, ```script/memory_usage.sh̀̀̀``` et ```script/massif_analyser.awk```
+* Tracés des graphes : ```script/plot_time.py``` 
+* Programme de test : ```build/parallelize_test```
+
+# Comparaison de librairies de parallélisation
 
 ## Open MP
 
@@ -6,24 +12,30 @@
 * Simple d'utilisation
  
 ### Inconvénients
+* Difficile d'utiliser des itérateurs
 
 ## Intel TBB
 
 ### Avantages
 * Container thread-safe
+* Tasks
 
 ### Inconvénients
 
-# Script pour la consommation mémoire
+# Comparaisons de consommation mémoire
+
+## Script pour l'analyse mémoire
+
+Programme ```script/memory_usage.sh [N]```
 
 Utilise valgrind.  
 
-Lance N fois le programme mesher_roi sur a.poly avec l'option -s i (i allant de 1 à N).
-Sauvegarde le résutat dans build/memory_usage_mesher_roi_N_DATE.  
+Lance N fois le programme ```mesher_roi``` sur a.poly avec l'option -s i (i allant de 1 à N).
+Sauvegarde le résutat dans ```build/memory_usage_mesher_roi_N_DATE```.  
 Les fichiers massif.out.*.i correspondent aux résultats détaillés de l'analyse mémoire avec i niveaux de raffinement.  
 Le fichier memory_usage contient le pic de mémoire utilisée pour chaque niveaux de raffinement.
 
-# Passage de list à deque
+## Passage de list à deque
 
 Comparaison entre vector / list / deque : https://baptiste-wicht.com/posts/2012/12/cpp-benchmark-vector-list-deque.html  
 
@@ -99,9 +111,14 @@ Command : mesher_roi -p ../data/a.poly -a N
 
 # Comparaisons de temps d'exécutions
 
+## Script pour l'analyse
 
+Programme ```script/analyse_time.sh```
 
-# Affichage des résultats :
+Lance le programme ```build/parallelize_test``` pour différentes valeurs d'éléments (100 à 10^9), et différents nombre de threads (8 à 1).
+Sauvegarde le résultat dans ```script/analyse_time_[DATE]/time_size_[NBELEM]_thread_[NBTRHEAD]```
+
+## Affichage des résultats :
 
 Fichier script/plot_time.py à executer avec python3 (pyplot)
 
@@ -112,3 +129,12 @@ Fichier script/plot_time.py à executer avec python3 (pyplot)
 * thread_times : Pour chaque nombre d'élement, un graphique présentanat les temps d'éxécution en fonction des threads, pour chaque méthode
 
 * strong_scaling : Idem que précedemment, mais avec l'accélération (TempsAvec1Thread / TempsAvecNThread)
+
+# Analyse du programme Mesher_roi
+
+## Classe Mesher
+
+Premier appel de fonction : 
+
+* refineMesh
+* generateMesh

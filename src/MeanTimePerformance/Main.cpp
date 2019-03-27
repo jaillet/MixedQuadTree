@@ -93,7 +93,7 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    std::string options = "-a 7";
+    std::string options = "-a 9";
     const int numberOfExecutions = std::atoi(argv[1]);
     
     if (argc > 2) {
