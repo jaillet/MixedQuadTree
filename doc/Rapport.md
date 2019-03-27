@@ -1,8 +1,8 @@
 # Productions
 
-* Scripts d'analyse : ```script/analyse_time.sh̀̀̀```, ```script/memory_usage.sh̀̀̀``` et ```script/massif_analyser.awk```
-* Tracés des graphes : ```script/plot_time.py``` 
-* Programme de test : ```build/parallelize_test```
+* Scripts d'analyse : `script/analyse_time.sh̀̀̀`, `script/memory_usage.sh̀̀̀` et `script/massif_analyser.awk`
+* Tracés des graphes : `script/plot_time.py` 
+* Programme de test : `build/parallelize_test`
 
 # Comparaison de librairies de parallélisation
 
@@ -26,12 +26,12 @@
 
 ## Script pour l'analyse mémoire
 
-Programme ```script/memory_usage.sh [N]```
+Programme `script/memory_usage.sh [N]`
 
 Utilise valgrind.  
 
-Lance N fois le programme ```mesher_roi``` sur a.poly avec l'option -s i (i allant de 1 à N).
-Sauvegarde le résutat dans ```build/memory_usage_mesher_roi_N_DATE```.  
+Lance N fois le programme `mesher_roi` sur a.poly avec l'option -s i (i allant de 1 à N).
+Sauvegarde le résutat dans `build/memory_usage_mesher_roi_N_DATE`.  
 Les fichiers massif.out.*.i correspondent aux résultats détaillés de l'analyse mémoire avec i niveaux de raffinement.  
 Le fichier memory_usage contient le pic de mémoire utilisée pour chaque niveaux de raffinement.
 
@@ -113,10 +113,10 @@ Command : mesher_roi -p ../data/a.poly -a N
 
 ## Script pour l'analyse
 
-Programme ```script/analyse_time.sh```
+Programme `script/analyse_time.sh`
 
-Lance le programme ```build/parallelize_test``` pour différentes valeurs d'éléments (100 à 10^9), et différents nombre de threads (8 à 1).
-Sauvegarde le résultat dans ```script/analyse_time_[DATE]/time_size_[NBELEM]_thread_[NBTRHEAD]```
+Lance le programme `build/parallelize_test` pour différentes valeurs d'éléments (100 à 10^9), et différents nombre de threads (8 à 1).
+Sauvegarde le résultat dans `script/analyse_time_[DATE]/time_size_[NBELEM]_thread_[NBTRHEAD]`
 
 ## Affichage des résultats :
 
@@ -149,6 +149,7 @@ list<RefinementRegion *> regions;
 * refineMesh : Si un maillage à un certain niveau de raffinement est déjà existant (commence donc à ce niveau de raffinement)
 
 #### Paramètres
+
 	- input : Ref sur Polyline
 	- rl : niveau de raffinement
 	- name : le nom de l'output (si spécifié)
@@ -156,6 +157,7 @@ list<RefinementRegion *> regions;
 	- decoration : bool pour savoir si on ajoute des décorations au fichier VTK
 	
 Paramètres supplémentaires pour refineMesh :
+
 	- roctli : liste des quadrants de départ
 	- gt : transformation géométrique
 	- minrl : le raffinement minimum des quadrants du maillage
@@ -179,45 +181,45 @@ Fonction appelé lorsque l'on souhaite raffiner un poly.
     - input : la polyline
     - all_reg : liste de RafinementRegion
     - name : nom de l'output
-    
-#### Variable de classe
-- points : ??
-    
+
 #### Algo
 ##### Init
         - temp_Quadrants : list des Quadrant actuel
         - new_Quadrants : list Quadrant vide
         - new_pts : liste Point3D vide
-        - sv : SplitVisitor ???
+        - sv : SplitVisitor
         - i : niveau actuel de raffinement
 ##### Corps
 Faire 
 
-* vide **new_pts**
-* tant que **tmp_Quadrants** n'est pas vide
-    * **iter** <- tmp_Quadrants[0]
-    * **to_refine** <- false
-    * computeMaxDistance, ie met à jour max_dis dans **iter**
-    * on regarde si **iter** a besoin d'être raffiné (on maj **to_refine** en conséquence). Cela dépend de la statégie donc de **all_reg** (raffinement pour tous et/ou ceux en intersection avec la polyline)
+* vide `new_pts`
+* tant que `tmp_Quadrants` n'est pas vide
+    * `iter` = `tmpQuadrants[0]`
+    * `to_refine` <- false
+    * computeMaxDistance, ie met à jour max_dis dans `iter`
+    * on regarde si `iter` a besoin d'être raffiné (on maj `to_refine` en conséquence). Cela dépend de la statégie donc de `all_reg` (raffinement pour tous et/ou ceux en intersection avec la polyline)
     * si le quadrant ne doit pas être raffiné
-        * on ajoute le quadrant à la fin de **new_Quadrants**
+        * on ajoute le quadrant à la fin de `new_Quadrants`
     * sinon si il doit être raffiné
-        * ??? SplitVisito
-        * si **inter_edges** est vide (ie inner quad)
+        * creation `vector<vector<Point3D>> clipping_coords` et ajout au SplitVisitor
+        * creation `vector<vector<unsigned>> split_elements` et ajout au SplitVisitor : les nouveaux elements créés par le SV
+        * iter->accept(sv) : Le SV regarde si le quadrant doit être splitté, et sauvegarde les nouveaux elements dans split_elements
+        * si `inter_edges` est vide (ie inner quad == la polyline n'intersecte pas et l'élément est à l'intérieur)
             * on raffine le quadrant, donc pour chaque élément splittés  
-                * on créée un nouveau Quadrant à partir des éléments splittés de raffinement **i+1**
-                * on l'ajoute à la fin de la liste **new_Quadrants**
-        * sinon
+                * on créée un nouveau Quadrant à partir des éléments splittés de raffinement `i+1`
+                * on l'ajoute à la fin de la liste `new_Quadrants`
+        * sinon (la polyline intersecte ou est dehors de la polyline)
             * pour chaque element splitté
-                * on créée un nouveau Quadrant à partir des éléments splittés de raffinement **i+1**
-                * ??? IntersectionsVisitor
+                * on créée un nouveau Quadrant à partir des éléments splittés de raffinement `i+1`
+                * Création de l'IntersectionVisitor : A faire avant ?
+                * Ajout des infos du quadrant à l'IntersectionVisitor
                 * si le quadrant est en intersection avec une input face
-                    * on l'ajoute à la fin de la liste **new_Quadrants**
+                    * on l'ajoute à la fin de la liste `new_Quadrants`
                 * sinon on doit regarder s'il est à l'exterieur ou à l'interieur
-                    * si il est à l'intérieur, on l'ajoute à la liste **new_Quadrants**
-    * on enleve **iter** de **tmp_Quadrants**
-* swap **tmp_Quadrants**, **new_Quadrants**
-* insert dans **points** le contenu de **new_pts**
-* pré-incrémente **i** 
+                    * si il est à l'intérieur, on l'ajoute à la liste `new_Quadrants`
+    * on enleve `iter` de `tmp_Quadrants`
+* swap `tmp_Quadrants`, `new_Quadrants`
+* insert dans `points` le contenu de `new_pts`
+* pré-incrémente `i` 
   
-tant que **new_pts** n'est pas vide
+tant que `new_pts` n'est pas vide
