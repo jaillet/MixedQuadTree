@@ -43,15 +43,15 @@ Variable **new_pts** permet de sortir de la première boucle :
 ## Premier niveau
 
 <pre>
-Do  
-    Clear <b>new_pts</b>  
+Faire  
+    Vider <b>new_pts</b>  
     Boucle tant que <b>tmp_Quadrants</b> n'est pas vide sur niveau 2  
     Swap <b>tmp_Quadrants</b> et <b>new_Quadrants</b>
-    If <b>new_pts</b> empty
+    Si <b>new_pts</b> vide
         break
-    Ajout dans <b>points (global)</b> le contenu de <b>new_pts</b>
+    Ajout dans <b>points (var classe Mesher)</b> le contenu de <b>new_pts</b>
     Incrémente <b>i</b>
-While <b>new_pts</b> n'est pas vide 
+Tant que <b>new_pts</b> n'est pas vide 
 </pre>
 
 ## Deuxième niveau
@@ -66,8 +66,9 @@ Tant que <b>tmp_Quadrants</b> n'est pas vide
         Lecture <b>sub_elements</b> (var classe Quadrant)
         Ecriture <b>max_dis</b> (var classe Quadrant)
         
-    <b>to_refine</b> <- (*all_reg.begin())->intersectsQuadrant(points, *iter) // a regarder
-    
+    <b>to_refine</b> <- (*all_reg.begin())->intersectsQuadrant(points, *iter)
+        TODO
+        
     S'il n'est pas <b>to_refine</b>
         Ajout de <b>iter</b> dans <b>new_quadrants</b>
     Sinon

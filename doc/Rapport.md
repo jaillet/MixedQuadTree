@@ -223,3 +223,78 @@ Faire
 * pré-incrémente `i` 
   
 tant que `new_pts` n'est pas vide
+
+##### Premier niveau
+
+<pre>
+Faire  
+    Vider <b>new_pts</b>  
+    Boucle tant que <b>tmp_Quadrants</b> n'est pas vide sur niveau 2  
+    Swap <b>tmp_Quadrants</b> et <b>new_Quadrants</b>
+    Si <b>new_pts</b> vide
+        break
+    Ajout dans <b>points (var classe Mesher)</b> le contenu de <b>new_pts</b>
+    Incrémente <b>i</b>
+Tant que <b>new_pts</b> n'est pas vide 
+</pre>
+
+##### Deuxième niveau
+
+<pre>
+Tant que <b>tmp_Quadrants</b> n'est pas vide
+    <b>iter</b> <- début d'itérateur de <b>tmp_Quadrants</b>
+    
+    computeMaxDistance sur <b>iter</b> (Quadrant)
+        Lecture <b>points</b> (var classe Mesher)
+        Lecture <b>pointindex</b> (var classe Quadrant)
+        Lecture <b>sub_elements</b> (var classe Quadrant)
+        Ecriture <b>max_dis</b> (var classe Quadrant)
+        
+    <b>to_refine</b> <- (*all_reg.begin())->intersectsQuadrant(points, *iter)
+        TODO
+    
+    S'il n'est pas <b>to_refine</b>
+        Ajout de <b>iter</b> dans <b>new_quadrants</b>
+    Sinon
+        Init ref <b>inter_edges</b> avec <b>iter->intersected_edges</b> (var classe Quadrant)
+        Init <b>clipping_coords</b> et set à <b>sv.clipping</b> (SplitVisitor)
+        Init <b>split_elements</b> et set à <b>sv.new_eles</b> (SplitVisitor)
+        
+        Applique <b>sv</b> (SplitVisitor) sur <b>iter</b> (Quadrant)
+            Lecture <b>iter.pointindex</b>
+            Insertion <b>sv.new_eles</b> (ref vers <b>split_elements</b>)
+            Lecture <b>sv.points</b> (ref vers <b>points</b> var classe Mesher)          
+            Insertion / Lecture <b>sv.new_pts</b> (ref vers <b>new_pts</b>) 
+            Insertion / Suppression / Lecture <b>sv.edges</b> (ref vers <b>QuadEdges</b> var classe Mesher)         
+            Insertion <b>sv.clipping</b> (ref vers <b>clipping_coords</b>)
+        
+        Si <b>inter_edges</b> (ref vers <b>iter->inteersected_edges</b>) vide
+            Pour tout <b>split_elements</b>
+                Init Quadrant <b>o</b> à partir de <b>split_elements</b>
+                Insertion <b>new_Quadrants</b> du quadrant <b>o</b> 
+        Sinon
+            Pour tout <b>split_elements</b>
+                Init Quadrant <b>o</b> à partir de <b>split_elements</b>
+                Init iv (IntersectionVisitor)
+                Set <b>iv.ply</b> (ref vers <b>input</b>)
+                Set <b>iv.edges</b> (ref vers <b>inter_edges</b>)
+                Set <b>iv.coords</b> (ref vers <b>clipping_coords</b> du split element)
+                
+                Applique <b>iv</b> (IntersectionVisitor) sur <b>iter</b> (Quadrant)
+                    Lecture <b>o.intersected_edges</b>
+                    Lecture <b>input.mVertices</b>
+                    TODO
+                    
+                Si retour fonction vrai
+                    Insertion <b>new_Quadrants</b> du quadrant <b>o</b>  
+                Sinon
+                    Apelle fonction isItIn
+                        TODO
+                                            
+                    Si retour fonction vrai
+                        Insertion <b>new_Quadrants</b> du quadrant <b>o</b>  
+                
+    Retire <b>iter</b> de <b>tmp_quadrants</b>  
+    
+</pre>
+
