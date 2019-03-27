@@ -76,6 +76,9 @@ public:
 };
 
 class ElementBis {
+
+    friend class ConcreteSetVisitorTest;
+    
 protected:
     bool even;
     set<int> values;

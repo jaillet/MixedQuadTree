@@ -29,6 +29,10 @@
 #include <stdexcept>
 #include "../Quadrant.h"
 
+#include "tbb/parallel_for_each.h"
+#include "tbb/parallel_for.h"
+#include "tbb/blocked_range.h"
+
 namespace Clobscode
 
 //Polyline *mesh;
@@ -45,7 +49,7 @@ namespace Clobscode
     IntersectionsVisitor::IntersectionsVisitor(bool select_edges)
             : ply(NULL), points(NULL), edges(NULL), coords(NULL), select_edges(select_edges) {}
 
-    void IntersectionsVisitor::setPolyline(Polyline &ply) {
+    void IntersectionsVisitor::setPolyline(const Polyline &ply) {
         this->ply = &ply;
     }
 
@@ -74,6 +78,16 @@ namespace Clobscode
             list<unsigned int>::const_iterator e_iter;
             const vector<Point3D> &input_pts = ply->getPoints();
 
+
+            // tbb::parallel_for_each(edges->begin(), edges->end(), [&] (unsigned int index) { 
+            //     const PolyEdge &edge = ply->getEdges()[index];
+            //     if (intersectsEdge(edge, input_pts, coords->at(0), coords->at(1))) {
+            //         intersected_edges.push_back(index);
+            //     }
+
+            // });
+
+            
             for (e_iter = edges->begin(); e_iter != edges->end(); e_iter++) {
                 const PolyEdge &edge = ply->getEdges()[*e_iter];
                 if (intersectsEdge(edge, input_pts, coords->at(0), coords->at(1))) {
@@ -94,6 +108,7 @@ namespace Clobscode
             const vector<PolyEdge> &edges = ply->getEdges();
             const vector<Point3D> &input_pts = ply->getPoints();
 
+            //#pragma omp parallel for shared(intersected_edges)
             for (unsigned int j = 0; j < edges.size(); j++) {
                 if (intersectsEdge(edges[j], input_pts,
                                    points->at(pointindex[0]).getPoint(),  //bbox vertices
@@ -101,6 +116,7 @@ namespace Clobscode
                     intersected_edges.push_back(j);
                 }
             }
+
             return !intersected_edges.empty();
         }
 

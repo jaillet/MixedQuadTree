@@ -48,14 +48,14 @@ namespace Clobscode
 
         bool visit(Quadrant *q) override;
 
-        void setPolyline(Polyline &ply);
+        void setPolyline(const Polyline &ply);
         void setPoints(vector<MeshPoint> &points);
         void setEdges(list<unsigned int> &edges);
         void setCoords(vector<Point3D> &coords);
 
     protected:
         //variables
-        Polyline *ply;
+        const Polyline *ply;
         vector<MeshPoint> *points;
         list<unsigned int> *edges;
         vector<Point3D> *coords;
