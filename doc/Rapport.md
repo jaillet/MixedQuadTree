@@ -134,7 +134,85 @@ Fichier script/plot_time.py à executer avec python3 (pyplot)
 
 ## Classe Mesher
 
-Premier appel de fonction : 
+### Variables de classe
 
-* refineMesh
-* generateMesh
+
+
+### Fonction generateMesh (ou refineMesh)
+
+* generateMesh : Si on part d'un niveau de raffinement égal à 0
+* refineMesh : Si un maillage à un certain niveau de raffinement est déjà existant (commence donc à ce niveau de raffinement)
+
+#### Paramètres
+	- input : Ref sur Polyline
+	- rl : niveau de raffinement
+	- name : le nom de l'output (si spécifié)
+	- all_reg : liste des ptr des régions à raffiner (Surface et/ou allRegion et/ou Boundary(pour refineMesh))
+	- decoration : bool pour savoir si on ajoute des décorations au fichier VTK
+	
+Paramètres supplémentaires pour refineMesh :
+	- roctli : liste des quadrants de départ
+	- gt : transformation géométrique
+	- minrl : le raffinement minimum des quadrants du maillage
+	- omaxrl : le raffinement maximum des quadrants du maillage
+
+
+#### Algo
+
+* rotateGridMesh(input, all_reg, gt) : applique si nécessaire la rotation dans gt sur input
+* generateGridMesh(input) : Crée et stocke dans ```Quadrants``` les Quadrant de départ (à partir de la polyline)
+* generateQuadTreeMesh(rl, input, all_reg, name) : Algo de base pour la génération du maillage (Pour ```refineMesh```, appelle splitQuadrants)
+
+Suite identique pour refineMesh et generateMesh??? à re-checker.
+
+### Fonction generateQuatdreeMesh
+
+Fonction appelé lorsque l'on souhaite raffiner un poly.
+
+#### Paramètres
+    - rl : niveau de raffinement souhaité
+    - input : la polyline
+    - all_reg : liste de RafinementRegion
+    - name : nom de l'output
+    
+#### Variable de classe
+- points : ??
+    
+#### Algo
+##### Init
+        - temp_Quadrants : list des Quadrant actuel
+        - new_Quadrants : list Quadrant vide
+        - new_pts : liste Point3D vide
+        - sv : SplitVisitor ???
+        - i : niveau actuel de raffinement
+##### Corps
+Faire 
+
+* vide **new_pts**
+* tant que **tmp_Quadrants** n'est pas vide
+    * **iter** <- tmp_Quadrants[0]
+    * **to_refine** <- false
+    * computeMaxDistance, ie met à jour max_dis dans **iter**
+    * on regarde si **iter** a besoin d'être raffiné (on maj **to_refine** en conséquence). Cela dépend de la statégie donc de **all_reg** (raffinement pour tous et/ou ceux en intersection avec la polyline)
+    * si le quadrant ne doit pas être raffiné
+        * on ajoute le quadrant à la fin de **new_Quadrants**
+    * sinon si il doit être raffiné
+        * ??? SplitVisito
+        * si **inter_edges** est vide (ie inner quad)
+            * on raffine le quadrant, donc pour chaque élément splittés  
+                * on créée un nouveau Quadrant à partir des éléments splittés de raffinement **i+1**
+                * on l'ajoute à la fin de la liste **new_Quadrants**
+        * sinon
+            * pour chaque element splitté
+                * on créée un nouveau Quadrant à partir des éléments splittés de raffinement **i+1**
+                * ??? IntersectionsVisitor
+                * si le quadrant est en intersection avec une input face
+                    * on l'ajoute à la fin de la liste **new_Quadrants**
+                * sinon on doit regarder s'il est à l'exterieur ou à l'interieur
+                    * si il est à l'intérieur, on l'ajoute à la liste **new_Quadrants**
+    * on enleve **iter** de **tmp_Quadrants**
+* swap **tmp_Quadrants**, **new_Quadrants**
+* insert dans **points** le contenu de **new_pts**
+* pré-incrémente **i** 
+  
+tant que **new_pts** n'est pas vide
