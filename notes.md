@@ -6,6 +6,8 @@ Lorsque visit() accès concurrent :
 * new_eles (vector<vector<unsigned int> >) : var de la classe pour stocker les nouveaux pts créés
 * clipping (vector<vector<Point3D> >) : var de la classe pour stocker les nouveaux pts créés
 
+Problème potentiel, ce sert de points (ref vers Mesher.points) et new_eles (ref vers data de boucle) pour calculer le nombre de point existant et attribué le numéro suivant lors de la création d'un nouveau.
+
 # IntersectionsVisitor
 Lorsque visit() accès concurrent : 
 * select_edges (bool) :  
@@ -31,6 +33,80 @@ Variable **new_pts** permet de sortir de la première boucle :
 * points (vector<MeshPoint>) : container global
 * new_eles (vector<vector<unsigned int> >) : réinit avant chaque appel
 * clipping (vector<vector<Point3D> >) : réinit avant chaque appel
+
+## Premier niveau
+
+<pre>
+Do  
+    Clear <b>new_pts</b>  
+    Boucle tant que <b>tmp_Quadrants</b> n'est pas vide sur niveau 2  
+    Swap <b>tmp_Quadrants</b> et <b>new_Quadrants</b>
+    If <b>new_pts</b> empty
+        break
+    Ajout dans <b>points (global)</b> le contenu de <b>new_pts</b>
+    Incrémente <b>i</b>
+While <b>new_pts</b> n'est pas vide 
+</pre>
+
+## Deuxième niveau
+
+<pre>
+Tant que <b>tmp_Quadrants</b> n'est pas vide
+    <b>iter</b> <- début d'itérateur de <b>tmp_Quadrants</b>
+    
+    computeMaxDistance sur <b>iter</b> (Quadrant)
+        Lecture <b>points</b> (var classe Mesher)
+        Lecture <b>pointindex</b> (var classe Quadrant)
+        Lecture <b>sub_elements</b> (var classe Quadrant)
+        Ecriture <b>max_dis</b> (var classe Quadrant)
+        
+    <b>to_refine</b> <- (*all_reg.begin())->intersectsQuadrant(points, *iter) // a regarder
+    
+    S'il n'est pas <b>to_refine</b>
+        Ajout de <b>iter</b> dans <b>new_quadrants</b>
+    Sinon
+        Init ref <b>inter_edges</b> avec <b>iter->intersected_edges</b> (var classe Quadrant)
+        Init <b>clipping_coords</b> et set à <b>sv.clipping</b> (SplitVisitor)
+        Init <b>split_elements</b> et set à <b>sv.new_eles</b> (SplitVisitor)
+        
+        Applique <b>sv</b> (SplitVisitor) sur <b>iter</b> (Quadrant)
+            Lecture <b>iter.pointindex</b>
+            Insertion <b>sv.new_eles</b> (ref vers <b>split_elements</b>)
+            Lecture <b>sv.points</b> (ref vers <b>points</b> var classe Mesher)          
+            Insertion / Lecture <b>sv.new_pts</b> (ref vers <b>new_pts</b>) 
+            Insertion / Suppression / Lecture <b>sv.edges</b> (ref vers <b>QuadEdges</b> var classe Mesher)         
+            Insertion <b>sv.clipping</b> (ref vers <b>clipping_coords</b>)
+        
+        Si <b>inter_edges</b> (ref vers <b>iter->inteersected_edges</b>) vide
+            Pour tout <b>split_elements</b>
+                Init Quadrant <b>o</b> à partir de <b>split_elements</b>
+                Insertion <b>new_Quadrants</b> du quadrant <b>o</b> 
+        Sinon
+            Pour tout <b>split_elements</b>
+                Init Quadrant <b>o</b> à partir de <b>split_elements</b>
+                Init iv (IntersectionVisitor)
+                Set <b>iv.ply</b> (ref vers <b>input</b>)
+                Set <b>iv.edges</b> (ref vers <b>inter_edges</b>)
+                Set <b>iv.coords</b> (ref vers <b>clipping_coords</b> du split element)
+                
+                Applique <b>iv</b> (IntersectionVisitor) sur <b>iter</b> (Quadrant)
+                    Lecture <b>o.intersected_edges</b>
+                    Lecture <b>input.mVertices</b>
+                    TODO
+                    
+                Si retour fonction vrai
+                    Insertion <b>new_Quadrants</b> du quadrant <b>o</b>  
+                Sinon
+                    Apelle fonction isItIn
+                        TODO
+                                            
+                    Si retour fonction vrai
+                        Insertion <b>new_Quadrants</b> du quadrant <b>o</b>  
+                
+    Retire <b>iter</b> de <b>tmp_quadrants</b>  
+    
+</pre>
+
 
 
 # Compte rendu réunion

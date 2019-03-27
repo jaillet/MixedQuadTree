@@ -866,18 +866,13 @@ namespace Clobscode {
             while (!tmp_Quadrants.empty()) {
                 iter = tmp_Quadrants.begin();
 
-                bool to_refine = false;
-
                 iter->computeMaxDistance(points); //TODO, avoid recompute if already checked
-                if ((*all_reg.begin())->intersectsQuadrant(points, *iter)) {
-                    to_refine = true;
-                }
+
+                bool to_refine = (*all_reg.begin())->intersectsQuadrant(points, *iter);
 
                 //now if refinement is not needed, we add the Quadrant as it was.
                 if (!to_refine) {
                     new_Quadrants.push_back(*iter);
-                    tmp_Quadrants.pop_front();
-                    continue;
                 } else {
                     list<unsigned int> &inter_edges = iter->getIntersectedEdges();
 
