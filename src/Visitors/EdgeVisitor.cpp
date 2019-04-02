@@ -29,7 +29,7 @@
 
 namespace Clobscode
 {
-void EdgeVisitor::insertEdges(Quadrant *q, set<QuadEdge> &edges) {
+void EdgeVisitor::insertEdges(const Quadrant *q, set<QuadEdge> &edges) {
 
     QuadEdge ee;
     // assume 4 edges in Quadrant
@@ -46,7 +46,7 @@ void EdgeVisitor::insertEdges(Quadrant *q, set<QuadEdge> &edges) {
 
     }
 
-    void EdgeVisitor::getEdge(Quadrant *q, unsigned int idx, QuadEdge &e) {
+    void EdgeVisitor::getEdge(const Quadrant *q, unsigned int idx, QuadEdge &e) {
         const vector<unsigned int> &pointindex = q->pointindex;
         unsigned int e0,e1;
         switch (idx) {

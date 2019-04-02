@@ -54,12 +54,13 @@ namespace Clobscode
 
         bool visit(Quadrant *o) override;
 
-        void setPoints(vector<MeshPoint> &points);
+//FJA points never used!
+//        void setPoints(const vector<MeshPoint> &points);
         void setEdges(const set<QuadEdge> &edges);
         void setMaxRefLevel(const unsigned short &max_ref_level);
 
     private:
-        vector<MeshPoint> *points;
+//        const vector<MeshPoint> *points;
         const set<QuadEdge> *edges;
         const unsigned short *max_ref_level;
     };

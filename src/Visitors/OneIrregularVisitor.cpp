@@ -37,11 +37,11 @@ namespace Clobscode
     OneIrregularVisitor::OneIrregularVisitor() :edges(NULL), max_ref_level(NULL)
     { }
 
-    OneIrregularVisitor::OneIrregularVisitor(set<QuadEdge> *edges,const unsigned short *max_ref_level)
+    OneIrregularVisitor::OneIrregularVisitor(const set<QuadEdge> *edges, const unsigned short *max_ref_level)
         :edges(edges), max_ref_level(max_ref_level)
     { }
 
-    void OneIrregularVisitor::setEdges(set<QuadEdge> &edges) {
+    void OneIrregularVisitor::setEdges(const set<QuadEdge> &edges) {
         this->edges = &edges;
     }
 

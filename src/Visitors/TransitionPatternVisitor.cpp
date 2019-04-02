@@ -30,12 +30,12 @@ namespace Clobscode
 {
 
     TransitionPatternVisitor::TransitionPatternVisitor()
-        :points(NULL),edges(NULL),max_ref_level(NULL)
+        :/*points(NULL),*/edges(NULL),max_ref_level(NULL)
     {    }
 
-    void TransitionPatternVisitor::setPoints(vector<MeshPoint> &points) {
-        this->points = &points;
-    }
+//    void TransitionPatternVisitor::setPoints(const vector<MeshPoint> &points) {
+//        this->points = &points;
+//    }
 
     void TransitionPatternVisitor::setEdges(const set<QuadEdge> &edges) {
         this->edges = &edges;

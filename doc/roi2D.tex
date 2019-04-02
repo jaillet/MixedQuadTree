@@ -1,3 +1,6 @@
+% !TEX encoding = UTF-8 Unicode
+% -*- coding: UTF-8; -*-
+
 \documentclass[10pt]{article}
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -15,6 +18,11 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 
+\usepackage{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{shadings}
+\tcbuselibrary{skins,breakable}
+
 \graphicspath{{images/}}
 
 \begin{document}
@@ -27,12 +35,12 @@
 
 {\large Version 2018.11.23 \textsc{roi}--type}}
 
-{\large Claudio Lobos}
+\underline{\large Claudio Lobos}
 
 \small \texttt{clobos@inf.utfsm.cl}\\
 \small Departmento de Inform\'atica -- \textsc{utfsm}  -- Chile.
 
-{\large Fabrice Jaillet}
+\underline{\large Fabrice Jaillet}
 
 \small \texttt{fabrice.jaillet@univ-lyon1.fr}\\
 \small Universit\'e de Lyon, IUT Lyon~1 -- LIRIS CNRS UMR-5205  -- France.
@@ -142,7 +150,7 @@ In our case, Quadrants will be continuously split until a maximum provided level
 \begin{algorithm}[H]
 \SetAlgoLined
 \KwResult{A mixed-elements mesh}
-  \tcc{Generate quadtree:}
+  \tcc{Generating quadtree:}
  \nl \ForEach{Quadrant}{
  \Repeat {desired Refinement Level}{
  \nl {Subdivide Quadrant\label{alg:subdivide}}\; 
@@ -151,7 +159,8 @@ In our case, Quadrants will be continuously split until a maximum provided level
     }
   }
   }
- \nl Create balanced quadtree\; \label{alg:goto}
+  \tcc{ Creating conformal mesh:}
+\nl Create balanced quadtree\; \label{alg:goto}
  \nl Apply Transition Patterns\; \label{alg:trans}
  \caption{Generation process}
  \label{alg:generate}
@@ -180,6 +189,7 @@ The different option for refinement could be:
 \item (\textcolor{red}{not tested yet in 2D!}) refine by \textbf{block} \texttt{-b} followed by the name of file where some block regions are specified. A block is defined by 2 points: $(min_x, min_y,min_z), ((max_x, max_y,max_z)$ and a refinement level \textit{rl} to be applied over the Quadrants that intersect this block. This is a text file where first we specify the number of blocks and then we detail each one of them. An example with 2 regions is now provided:\\
 %
 \begin{minipage}{0.2\textwidth}
+\begin{tcolorbox}
 \begin{verbatim}
 n_regions 2
 0 0 0
@@ -189,6 +199,7 @@ n_regions 2
 20 20 0
 4
 \end{verbatim}
+\end{tcolorbox}
 \end{minipage}
 \hfill
 \begin{minipage}[c]{0.65\textwidth}
@@ -360,7 +371,7 @@ Thus, following the same approach as for Transition Patterns (see~\ref{sec:trans
 \KwResult{A mixed-elements mesh}
   \tcc{Preprocess:}
 \nl   Handle Boundary\; \label{alg:bound2}
- \tcc{Generate quadtree:}
+ \tcc{Generating quadtree:}
 \nl \ForEach{Quadrant}{
  \Repeat {desired Refinement Level}{
  \nl Subdivide Quadrant\; \label{alg:subdivide2}
@@ -369,11 +380,12 @@ Thus, following the same approach as for Transition Patterns (see~\ref{sec:trans
     }
   }
   }
- \nl Create balanced quadtree\; \label{alg:goto2}
+   \tcc{ Creating conformal mesh:}
+\nl Create balanced quadtree\; \label{alg:goto2}
  \nl Apply Transition Patterns\;
  \tcc{Input surface fitting:}
  \nl Detect Features in Input\;
- \nl  Project Intern Nodes Close to Boundary\; \label{alg:closeto2}
+ \nl  Project Close to Boundary Intern Nodes\; \label{alg:closeto2}
   \nl Remove Outside Quadrant\; \label{alg:remsur2}
   \nl Shrink Extern Nodes to Boundary\; \label{alg:shrink2}
  \nl Apply Surface Patterns\; \label{alg:surfpat2}
@@ -386,6 +398,7 @@ Thus, following the same approach as for Transition Patterns (see~\ref{sec:trans
 \label{sec:boundary}
 
 \textcolor{red}{preprocessing}
+This stage is a preprocessing 
 
 \begin{enumerate}
 \item        // test1: if nb Features $>= 2$
@@ -559,19 +572,67 @@ This is exactly the same as in Algorithm~\ref{alg:generate}. The only difference
 \SetAlgoLined
 \SetKw{kwGoto}{Goto}
 \KwResult{A refined mixed-elements mesh}
+  \tcc{Reconstructing quadtree}
+\nl Read .oct file\;
+\nl Regenerate quadtree\;
+  \tcc{Refining Elements}
  \ForEach{Element to refine}{
-  Identify containing Quadrant\;
-  Subdivide Quadrant\;
+\nl   Identify containing Quadrant\;
+\nl   Subdivide Quadrant\;
    \ForEach{Sub-quadrant}{
-   \If{Intersect Input \textit{or} Is Inside}{Insert Sub-Quadrant}
+\nl    \If{Intersect Input \textit{or} Is Inside}{Insert Sub-Quadrant}
     }
   }
-  \kwGoto{Algorithm \ref{alg:surfacefitting}, step \ref{alg:goto}}
+   \tcc{Conformal mesh and Input surface fitting}
+  \kwGoto{Algorithm \ref{alg:surfacefitting}, step \ref{alg:goto2}}
  \caption{Refinement process}
  \label{alg:refinement}
 \end{algorithm}
 
-Some results are shown on Fig.~\ref{}. On each image, the bottom left element is refined. Notice how mesh is balanced and transition are created to produce a conformal mesh.
+\subsection{.oct File Format}
+The mesh generation process as described in Algorithms~\ref{alg:generate} and \ref{alg:surfacefitting} will always produce a \texttt{.oct} file, describing the Quadrants structure and required additional information.\\
+Note that the \texttt{.oct} extension is an oddity, kept for compatibility reasons with the 3D version. \texttt{.quad} would probably be more relevant.
+
+Fields of the file are most of the time self-explanatory, except for Quadrants' link. This latter informs on the number of sub-elements contained in each Quadrant. It is equal to $1$ for generic Quadrants, and between $2$ and $5$ in case of Transition of Surface Quadrants, independently of the type of the element, triangle o quadrangle (as shown in Fig.~\ref{fig:transitionpatterns}). \\
+Generally, after a general-purpose simulation, we get a list of Elements to be refined, and not a list of Quadrants (as the Quadrants structure is not known by the simulation). So this data allows to construct a mapping between the index of an Element, and the Quadrant that contains it. This way, we are able to determine the list of Quadrants to be subdivided by the \textit{Remeshing} step.
+
+Besides, the Quadrant part of the file contains a list of intersected faces (\textit{ie.} edges of the Polyline). The computation of this intersection is particularly time consuming, and it is worth to be stored directly in the \texttt{.oct} file.
+
+\begin{tcolorbox}[skin=enhanced,breakable]
+\begin{verbatim}
+#NbVertex #NbEdges #NbLinks #NbQuadrants
+
+# Coordinates of the Quadrants' vertices
+x y z
+
+# Edges: vertex Indices
+# with i0 i1: indices of edge' extremities
+# and i2 index of the middle point of the edge
+i0 i1 i2
+
+# Quadrants links
+# one line: number of Elements for each Quad
+e0 ... en-1
+
+# Quadrants data
+# 2 lines for each Quad
+# first line: number of corners (should be 4!)
+# followed by indices of Corner's vertices and refinement level 
+4 v0 v1 v2 v3 rl
+# second line:  number of intersected faces (Input)
+# followed by list of intersected faces
+n f0 ... fn-1
+
+# Geometric Transform
+Geometric Transform
+x y z # centroid coordinates
+x y z # axis coordinates
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Results}
+
+Some results are shown on Fig.~\ref{fig:refiningbox}. On each image, the bottom left element is refined. Notice how mesh is balanced and transition are created to produce a conformal mesh. Note how successive mesh refinement keeps the good quality if the elements. 
 \begin{figure}[htb]
 \centering
  \subfigure[~]{
@@ -598,7 +659,7 @@ Some results are shown on Fig.~\ref{}. On each image, the bottom left element is
   \includegraphics[width=0.31\textwidth]{box8.png}
   \label{f:box8}
  }
- \caption{Algorithm~\ref{alg:refinement}. With \textit{Box} example, the bottom left element is refined once at each iteration of the algorithm. (a-c) iteration 1 to 5, (d) iteration 8.}
+ \caption{Iterating on Algorithm~\ref{alg:refinement}\ . With \textit{Box} example, the bottom left element is refined once at each iteration of the algorithm. (a-c) iteration 1 to 5, (d) iteration 8.}
 \label{fig:refiningbox}
 \end{figure}
 
@@ -616,7 +677,7 @@ Some results are shown on Fig.~\ref{}. On each image, the bottom left element is
   \includegraphics[width=0.31\textwidth]{box20_zoom2.png}
   \label{f:box20z2}
  }
- \caption{Algorithm~\ref{alg:refinement}.  Same \textit{Box} example as Fig.~\ref{fig:refiningbox}, iteration 20. (b) Zoomed once and (b) twice in the bottom left corner.}
+ \caption{Iterating on Algorithm~\ref{alg:refinement}.  Same \textit{Box} example as Fig.~\ref{fig:refiningbox}, iteration 20. (b) Zooming once and (b) twice at the bottom left corner.}
 \label{fig:refiningbox20}
 \end{figure}
 
@@ -626,7 +687,13 @@ identify which Quad contains the element, information from file
 
 subdivide Quad + goto subsection balanced
 
+\textcolor{red}{
 (local remeshing? neighbourhood??)
+}
+
+\textcolor{red}{
+Discussion: the limitation of the currently proposed method is clearly the lack of a local remeshing process. As described right above, 
+}
 
 
 %---------------------------
@@ -661,59 +728,68 @@ Let's fork the initial MixedQuadTree repository. So, once you're logged in on gi
 %---------------------------
 \subsection{Getting the program, and Compiling}
 
-{\small
+\begin{tcolorbox}{\small
 \begin{verbatim}
 $ git clone /https://github.com/jaillet/MixedQuadTree.git
 $ cd MixedQuadTree/
-$ git checkout branch develop (this will create a new branch)
+$ git checkout -b develop upstream/develop (this will create a new branch and follow upstream one)
+$ or (git checkout develop) once the branch has been created
 $ mkdir build ; cd build
 $ cmake ../src -D_CMAKE_BUILD_TYPE=Debug (or Release) // Uppercase is important
 $ cmake .
 $ make -j#nproc
 \end{verbatim}
-}
+}\end{tcolorbox}
 
 \subsection{Git usage}
 At this point, you can edit and commit files on you branch using  the git workflow.
 
-In order to easily access to the initial MixedQuadTree repository and stay updated with the other developers advances, you can set it as a remote repository, called 'upstreamMixedQuadTree':
+In order to easily access to the initial MixedQuadTree repository and stay updated with the other developers advances, you can set it as a remote repository, called 'upstream' (\href{https://help.github.com/articles/syncing-a-fork/}{github help}):
 
+
+\begin{tcolorbox}
 \begin{verbatim}
-$ git remote add upstreamMixedQuadTree git@github.com:MixedQuadTree/MixedQuadTree.git
+$ git remote add upstream git@github.com:MixedQuadTree/MixedQuadTree.git
 \end{verbatim}
+\end{tcolorbox}
 
 Git remotes are great because they allows to have multiple pull/push repositories. You can see the list of your remote repositories under a shell:
 
+\begin{tcolorbox}
 \begin{verbatim}
 $ git remote
 $ git remote -v
 \end{verbatim}
+\end{tcolorbox}
 
 At this point, you should have two remote repositories:
 %
 \begin{itemize}
 \item origin, your own fork of the initial MixedQuadTree repository
-\item upstreamMixedQuadTree, the remote repository you have just added containing the initial MixedQuadTree repository
+\item upstream, the remote repository you have just added containing the initial MixedQuadTree repository
 \end{itemize}
 
 You can see the state of a remote repository called 'remotename' under a shell with the command 'git remote show remotename':
 %
-\begin{verbatim}
+\begin{tcolorbox}\begin{verbatim}
 $ git remote show origin
-$ git remote show upstreamMixedQuadTree (you can use the tab-key for auto-completion)
+$ git remote show upstream (you can use the tab-key for auto-completion)
 \end{verbatim}
+\end{tcolorbox}
 
-In the normal workflow, you can pull from the main MixedQuadTree repository (upstreamMixedQuadTree)...
+In the normal workflow, you can pull from the main MixedQuadTree repository (upstream)...
 %
-\begin{verbatim}
-$ git pull upstreamMixedQuadTree master
+\begin{tcolorbox}\begin{verbatim}
+$ git pull upstream master
 \end{verbatim}
- 
+ \end{tcolorbox}
+
 \textbf{IMPORTANT NOTE $\Rightarrow$ but only push to your own fork of MixedQuadTree (origin) !!!}
 
-\begin{verbatim}
+\begin{tcolorbox}\begin{verbatim}
 $ git push origin master
 \end{verbatim}
+\end{tcolorbox}
 
 The merge between the original repository is done by ANOTHER DEVELOPER after a \textbf{'pull request'}.
 To make a 'pull request', go to \url{https://github.com/yourUsername/MixedQuadTree}, click on 'Pull Request'. Then, choose the two branches you would like to merge (master in \textit{jaillet} and your branch in \textit{origin}), write your comments and click on \textit{'Send Pull Request'}.
@@ -732,12 +808,15 @@ To make a 'pull request', go to \url{https://github.com/yourUsername/MixedQuadTr
 
 To produce a mesh you must execute in a terminal the following:
 %
+\begin{tcolorbox}
 {\small
 \begin{verbatim}
 $ ../mesher_roi [-option | parameters]
 \end{verbatim}
-}
+}\end{tcolorbox}
+
 If you do not indicate any option nor parameters, the program will list all the available options for you. Options for input/output:
+\begin{tcolorbox}
 {\small
 \begin{verbatim}
     usage: ./mesher [-p] input.poly [-u] output
@@ -763,7 +842,8 @@ If you do not indicate any option nor parameters, the program will list all the 
         -i save output mesh in MVM ASCII format (mvm)
         -o save output mesh in OFF ASCII format (off)
 \end{verbatim}
-}
+}\end{tcolorbox}
+
 
 \begin{itemize}
 \item \texttt{-p}: with the name of an input file (\texttt{.poly} extension) where the surface Polyline is specified. In this version of the code, only one input can be specified.
@@ -774,25 +854,25 @@ If you do not indicate any option nor parameters, the program will list all the 
 
 Now, to provide the Refinement Level (\textit{rl}) several options can be used (\texttt{-a, -s, -b, -r}), see section~\ref{s:refinement} for more details.
 we can now execute the following to test the meshing process:
-{\small
+\begin{tcolorbox}{\small
 \begin{verbatim}
 $ ../mesher_roi -p a.poly -a 2 -s 5 -u testa2s5 -v -q
 \end{verbatim}
-}
+}\end{tcolorbox}
 %---------------------------
 \subsection{Advanced mesh refinement}
-\label{refinemesh}
+\label{s:refinemesh}
 
 When generating a mesh with the code explained in section \ref{s:generatemesh}, a quadrant mesh file will be automatically written. Using the \textit{octant} file (extension \texttt{.oct}, for compatibility reasons with 3D \textcolor{red}{to be changed??}) elements, quadrants and even regions of the generated mesh can be refined. Currently, only quadrants can be subdivided in 4 new quadrants (squares), however, if a particular element must be refined, the \textit{octant} file allows to detect to which quadrant it belongs and refine it. All the refinement options of section \ref{s:generatemesh} can be used, and one extra option to list particular elements of the mesh can be employed.
 we can now execute: 
-{\small
+\begin{tcolorbox}{\small
 \begin{verbatim}
 $ ../mesher\_roi -p a.poly -c testa2s5.oct -a 4 -l list.txt -u testa2s5ref -v
 \end{verbatim}
-}
+}\end{tcolorbox}
 generating the result shown in Figure \ref{f:???}.
 
-As you noticed, in this example we start from a Quadrant mesh already generated \texttt{out.oct}, so the element alignment is conserved as in previous example. We then specify that all the quadrants in the mesh must, at least, count with a refinement level 4 (\texttt{-a 4}). 
+As you noticed, in this example we start from a Quadrant mesh already generated \texttt{testa2s5.oct} (see~\ref{s:generatemesh}), so the element alignment is conserved as in previous example. We then specify that all the quadrants in the mesh must, at least, count with a refinement level 4 (\texttt{-a 4}). 
 
 Then we can provide, in a simple text file listing \texttt{list.txt}, specific element indexes we want to refine. One element per line. Please note that is \textit{plain text} file only (be sure not to be using \textit{rtf} files which add more information).
 %In the example these elements are placed in bottom back portion of the brain inside a red circle. 

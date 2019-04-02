@@ -41,15 +41,15 @@ namespace Clobscode
     class OneIrregularVisitor : public Visitor {
     public:
         OneIrregularVisitor();
-        OneIrregularVisitor(set<QuadEdge> *edges,const unsigned short *max_ref_level);
+        OneIrregularVisitor(const set<QuadEdge> *edges,const unsigned short *max_ref_level);
 
-        bool visit(Quadrant *o) override;
+        bool visit(Quadrant *o) override; // Quad is const, but no const for override...
 
-        void setEdges(set<QuadEdge> &edges);
+        void setEdges(const set<QuadEdge> &edges);
         void setMaxRefLevel(const unsigned short &max_ref_level);
 
     protected:
-        set<QuadEdge> *edges;
+        const set<QuadEdge> *edges;
         const unsigned short *max_ref_level;
         //FJA const *, really??
         //and why not const set<QuadEdge> *, as well?

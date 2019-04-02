@@ -32,7 +32,7 @@ namespace Clobscode
     RemoveSubElementsVisitor::RemoveSubElementsVisitor() :points(NULL) {
     }
 
-    void RemoveSubElementsVisitor::setPoints(vector<MeshPoint> &points) {
+    void RemoveSubElementsVisitor::setPoints(const vector<MeshPoint> &points) {
         this->points = &points;
     }
 

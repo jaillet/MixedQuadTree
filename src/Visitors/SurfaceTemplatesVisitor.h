@@ -45,22 +45,22 @@ namespace Clobscode
 
         bool visit(Quadrant *o) override;
 
-        void setPoints(vector<MeshPoint> &meshpts);
+        void setPoints(const vector<MeshPoint> &meshpts);
         
-        void setPolyline(Polyline &polyline);
+        void setPolyline(const Polyline &polyline);
 
     private:
         
-        vector<MeshPoint> *meshpts;
-        Polyline *polyline;
+        const vector<MeshPoint> *meshpts;
+        const Polyline *polyline;
 
     };
     
-    inline void SurfaceTemplatesVisitor::setPoints(vector<MeshPoint> &meshpts) {
+    inline void SurfaceTemplatesVisitor::setPoints(const vector<MeshPoint> &meshpts) {
         this->meshpts = &meshpts;
     }
     
-    inline void SurfaceTemplatesVisitor::setPolyline(Polyline &polyline) {
+    inline void SurfaceTemplatesVisitor::setPolyline(const Polyline &polyline) {
         this->polyline = &polyline;
     }
 }
