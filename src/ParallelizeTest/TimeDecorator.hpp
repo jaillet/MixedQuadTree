@@ -55,7 +55,7 @@ double get_wall_time(){
     return (double)time.tv_sec + (double)time.tv_usec * .000001;
 }
 double get_cpu_time(){
-    return (double)clock() / CLOCKS_PER_SEC;
+    return (double)clock() / CLOCKS_PER_SEC; // regarder le temps CPU
 }
 #endif
 

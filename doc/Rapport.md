@@ -248,7 +248,7 @@ Tant que <b>tmp_Quadrants</b> n'est pas vide
         Lecture <b>points</b> (var classe Mesher)
         Lecture <b>pointindex</b> (var classe Quadrant)
         Lecture <b>sub_elements</b> (var classe Quadrant)
-        Ecriture <b>max_dis</b> (var classe Quadrant)
+        Ecriture <span style="color:orange"><b>max_dis</b></span> (var classe Quadrant)
         
     <b>to_refine</b> <- (*all_reg.begin())->intersectsQuadrant(points, *iter)
         TODO
@@ -281,9 +281,22 @@ Tant que <b>tmp_Quadrants</b> n'est pas vide
                 Set <b>iv.coords</b> (ref vers <b>clipping_coords</b> du split element)
                 
                 Applique <b>iv</b> (IntersectionVisitor) sur <b>iter</b> (Quadrant)
-                    Lecture <b>o.intersected_edges</b>
-                    Lecture <b>input.mVertices</b>
-                    TODO
+                    Insertion / Lecture <b>o.intersected_edges</b>
+                    Lecture <b>iv.ply.mVertices</b> (ref vers input.mVertices)
+                    Lecture <b>iv.edges</b> (ref vers iter->intersected_edges)
+                    Lecture <b>iv.ply.mEdges</b> (ref vers input.mEdges)
+                    
+                    call intersectsEdge
+                        Lecture <b>iv.coords</b> (ref vers <b>clipping_coords</b> du split element)
+                        Lecture <b>iv.ply.mVertices</b> (ref vers input.mVertices)
+                        Lecture <b>iv.ply.mEdges</b> (ref vers input.mEdges)
+                        
+                        call computePosition
+                            Lecture <b>iv.ply.mEdges</b> (ref vers input.mEdges)
+                        
+                
+                        
+                        TODO cpliGeneralCase
                     
                 Si retour fonction vrai
                     Insertion <b>new_Quadrants</b> du quadrant <b>o</b>  
@@ -297,4 +310,110 @@ Tant que <b>tmp_Quadrants</b> n'est pas vide
     Retire <b>iter</b> de <b>tmp_quadrants</b>  
     
 </pre>
+
+#### Algo 2
+
+##### First level
+
+<pre>
+For each level until rl  
+    Clear <b>new_pts</b>  
+    While until <b>tmp_Quadrants</b> is empty (go to Second level)
+    Swap <b>tmp_Quadrants</b> and <b>new_Quadrants</b>
+    If <b>new_pts</b> empty
+        break
+    Insert in <b>points (var class Mesher)</b> the content of <b>new_pts</b>
+</pre>
+
+##### Second level
+
+<pre>
+While until <b>tmp_Quadrants</b> is empty
+    <b>iter</b> <- begin iterator of <b>tmp_Quadrants</b>
+    
+    For each RafinementRegion in <b>all_reg</b>
+        <b>region_rl</b> <- getRafinementLevel of RafinementRegion
+        If <b>region_rl</b> is lower than <b>i</b> (raffinement level) then continue
+        If <b>region_rl</b> is equal or lower than <b>iter</b>  getRafinementLevel then continue
+        If <b>reg_iter</b> intersectsQuantrant on points en <b>iter</b> then <b>to_refine</b> <- true
+        
+    If not <b>to_refine</b>
+        Insert <b>iter</b> in <b>new_quadrants</b>
+    Else (to refine)
+        Init ref <b>inter_edges</b> with <b>iter->intersected_edges</b> (var class Quadrant)
+        Init <b>qrl</b> with <b>iter</b> rafinement level
+        Init <b>clipping_coords</b> and set <b>sv.clipping</b> (SplitVisitor)
+        Init <b>split_elements</b> and set <b>sv.new_eles</b> (SplitVisitor)
+        
+        Apply <b>sv</b> (SplitVisitor) on <b>iter</b> (Quadrant)
+            Read <b>iter.pointindex</b>
+            Insert <b>sv.new_eles</b> (ref <b>split_elements</b>)
+            Read <b>sv.points</b> (ref <b>points</b> var class Mesher)          
+            Insert / Read <b>sv.new_pts</b> (ref <b>new_pts</b>) 
+            Insert / Remove / Read <b>sv.edges</b> (ref <b>QuadEdges</b> var class Mesher)         
+            Insert <b>sv.clipping</b> (ref <b>clipping_coords</b>)
+        
+        If <b>inter_edges</b> (ref <b>iter->inteersected_edges</b>) empty
+            For each <b>split_elements</b>
+                Init Quadrant <b>o</b> based on <b>split_elements</b>
+                Insert <b>o</b> quadrant in <b>new_Quadrants</b>
+        Else
+            For each <b>split_elements</b>
+                Init Quadrant <b>o</b> based on <b>split_elements</b>
+                Init iv (IntersectionVisitor)
+                Set <b>iv.ply</b> (ref <b>input</b>)
+                Set <b>iv.edges</b> (ref <b>inter_edges</b>)
+                Set <b>iv.coords</b> (ref <b>clipping_coords</b> of split element)
+                
+                Apply <b>iv</b> (IntersectionVisitor) on <b>iter</b> (Quadrant)
+                    Insert / Read <b>o.intersected_edges</b>
+                    Read <b>iv.ply.mVertices</b> (ref input.mVertices)
+                    Read <b>iv.edges</b> (ref iter->intersected_edges)
+                    Read <b>iv.ply.mEdges</b> (ref input.mEdges)
+                    
+                    Call intersectsEdge
+                        Read <b>iv.coords</b> (ref <b>clipping_coords</b> of split element)
+                        Read <b>iv.ply.mVertices</b> (ref input.mVertices)
+                        Read <b>iv.ply.mEdges</b> (ref input.mEdges)
+                        
+                        Call computePosition
+                            Read <b>iv.ply.mEdges</b> (ref input.mEdges)
+                        
+                        Call cpliGeneralCase
+                            TODO 
+                    
+                If return true
+                    Insert <b>o</b> quadrant in <b>new_Quadrants</b>
+                Else
+                    Call fonction isItIn
+                        TODO
+                                            
+                    If return true
+                        Insert <b>o</b> quadrant in <b>new_Quadrants</b>  
+                
+    Remove <b>iter</b> from <b>tmp_quadrants</b>  
+    
+</pre>
+
+##### Concurrent access for second level
+
+Insert in <b>new_quadrants</b>
+
+SplitVisitor (set class var)
+
+Insert / Read <b>sv.new_pts</b> (ref <b>new_pts</b>) 
+Insert / Remove / Read <b>sv.edges</b> (ref <b>QuadEdges</b> var class Mesher)  
+
+Remove <b>iter</b> from <b>tmp_quadrants</b>  
+
+
+Possible solutions :
+
+For each <b>tmp_Quadrants</b>
+
+<b>new_pts</b> en tbb::concurrent_vector (https://software.intel.com/en-us/node/506203)
+
+
+
+
 
