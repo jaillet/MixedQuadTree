@@ -42,7 +42,7 @@ namespace Clobscode
         this->points = &points;
     }
     
-    void SplitVisitorTest1::setNewPts(tbb::concurrent_queue<Point3D> &new_pts) {
+    void SplitVisitorTest1::setNewPts(list<Point3D> &new_pts) {
         this->new_pts = &new_pts;
     }
     
@@ -84,35 +84,35 @@ namespace Clobscode
         if (splitEdge(all_pts[0],all_pts[1],all_pts[4])) {
             //the coordinates of node 8 must be computed and added to
             //new_pts list of points
-            new_pts->push(Point3D (avg[0],min[1],avg[2]));
+            new_pts->push_back(Point3D (avg[0],min[1],avg[2]));
             mtx_new_pts->unlock();
         }
         //inserting node 5 between nodes 1 and 2
         if (splitEdge(all_pts[1],all_pts[2],all_pts[5])) {
             //the coordinates of node 9 must be computed and added to
             //new_pts list of points
-            new_pts->push(Point3D (max[0],avg[1],avg[2]));
+            new_pts->push_back(Point3D (max[0],avg[1],avg[2]));
             mtx_new_pts->unlock();
         }
         //inserting node 6 between nodes 2 and 3
         if (splitEdge(all_pts[2],all_pts[3],all_pts[6])) {
             //the coordinates of node 10 must be computed and added to
             //new_pts list of points
-            new_pts->push(Point3D (avg[0],max[1],avg[2]));
+            new_pts->push_back(Point3D (avg[0],max[1],avg[2]));
             mtx_new_pts->unlock();
         }
         //inserting node 7 between nodes 3 and 0
         if (splitEdge(all_pts[0],all_pts[3],all_pts[7])) {
             //the coordinates of node 11 must be computed and added to
             //new_pts list of points
-            new_pts->push(Point3D (min[0],avg[1],avg[2]));
+            new_pts->push_back(Point3D (min[0],avg[1],avg[2]));
             mtx_new_pts->unlock();
         }
 
         //of course all the intern edges and mid point were never inserted
         //before, so this task is performed without asking
         mtx_new_pts->lock();
-        new_pts->push(Point3D (avg[0],avg[1],avg[2]));
+        new_pts->push_back(Point3D (avg[0],avg[1],avg[2]));
         all_pts[8] = counter_points->fetch_and_increment(); // TODO c'est quoi ça ??
         mtx_new_pts->unlock();
 
@@ -205,10 +205,10 @@ namespace Clobscode
         set<QuadEdge>::const_iterator found = edges->find(this_edge);
 
         if ((*found)[2]!=0) {
+            mtx_new_edges->unlock();
             //if the edge was already split, then save its mid_point and
             //return false (the current process didn't split the edge)
             mid_idx = (*found)[2];
-            mtx_new_edges->unlock();
             return false;
         }
 

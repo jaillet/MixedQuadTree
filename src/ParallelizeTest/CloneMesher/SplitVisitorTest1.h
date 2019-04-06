@@ -58,7 +58,7 @@ namespace Clobscode
 
         void setPoints(const vector<MeshPoint> &points);
         
-        void setNewPts(tbb::concurrent_queue<Point3D> &new_pts);
+        void setNewPts(list<Point3D> &new_pts);
         
         void setEdges(set<QuadEdge> &edges);
         
@@ -76,7 +76,7 @@ namespace Clobscode
         
         //references
         const vector<MeshPoint> *points;
-        tbb::concurrent_queue<Point3D> *new_pts;
+        list<Point3D> *new_pts;
         set<QuadEdge> *edges;
         vector<vector<unsigned int> > *new_eles;
         vector<vector<Point3D> > *clipping;

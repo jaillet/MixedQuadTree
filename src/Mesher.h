@@ -134,10 +134,6 @@ namespace Clobscode
 
         virtual void projectCloseToBoundaryNodes(Polyline &input);
 
-		void refineMeshParallelTest1(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points, set<QuadEdge> QuadEdges,
-								const list<RefinementRegion *> &all_reg, const unsigned short &rl, Polyline &input);
-
-
 		
 	protected:
 		
