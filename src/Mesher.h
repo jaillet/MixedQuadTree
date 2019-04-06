@@ -51,6 +51,8 @@
 #include <string.h>
 #include <chrono>
 
+
+
 using std::vector;
 using std::list;
 using std::set;
@@ -131,6 +133,9 @@ namespace Clobscode
                                             const vector<Quadrant> &elements);
 
         virtual void projectCloseToBoundaryNodes(Polyline &input);
+
+		void refineMeshParallelTest1(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points, set<QuadEdge> QuadEdges,
+								const list<RefinementRegion *> &all_reg, const unsigned short &rl, Polyline &input);
 
 
 		

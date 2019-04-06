@@ -36,7 +36,6 @@
 #include "../../Visitors/Visitor.h"
 #include "../../MeshPoint.h"
 #include "../../QuadEdge.h"
-#include "../../Point3D.h"
 
 
 using Clobscode::MeshPoint;
@@ -71,6 +70,8 @@ namespace Clobscode
 
         void setMutexForPoints(std::mutex * mtx_new_pts);
 
+        void setMutexForEdges(std::mutex * mtx_new_edges);
+
     protected:
         
         //references
@@ -81,6 +82,7 @@ namespace Clobscode
         vector<vector<Point3D> > *clipping;
         tbb::atomic<int> * counter_points;
         std::mutex * mtx_new_pts;
+        std::mutex * mtx_new_edges;
 
         bool splitEdge(unsigned int idx1,
                        unsigned int idx2,

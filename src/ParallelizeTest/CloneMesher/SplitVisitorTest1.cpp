@@ -123,6 +123,8 @@ namespace Clobscode
 //        edges->insert(intern_edge1);
 //        edges->insert(intern_edge2);
 
+        mtx_new_edges->lock();
+
         edges->emplace(all_pts[4],all_pts[6],all_pts[8]);
         edges->emplace(all_pts[5],all_pts[7],all_pts[8]);
 
@@ -130,6 +132,8 @@ namespace Clobscode
         edges->emplace(all_pts[6],all_pts[8]);
         edges->emplace(all_pts[5],all_pts[8]);
         edges->emplace(all_pts[7],all_pts[8]);
+
+        mtx_new_edges->unlock();
         
         //now that all edges were inserted, the elements can be easily built
         vector<unsigned int> son_element (4,0);
@@ -196,12 +200,15 @@ namespace Clobscode
     bool SplitVisitorTest1::splitEdge(unsigned int idx1, unsigned int idx2, unsigned int &mid_idx){
         
         QuadEdge this_edge (idx1,idx2);
+
+        mtx_new_edges->lock();
         set<QuadEdge>::const_iterator found = edges->find(this_edge);
 
         if ((*found)[2]!=0) {
             //if the edge was already split, then save its mid_point and
             //return false (the current process didn't split the edge)
             mid_idx = (*found)[2];
+            mtx_new_edges->unlock();
             return false;
         }
 
@@ -228,6 +235,8 @@ namespace Clobscode
         edges->emplace_hint(found, this_edge[0],this_edge[2]);
         edges->emplace_hint(found, this_edge[2],this_edge[1]);
 
+        mtx_new_edges->unlock();
+
         mid_idx = this_edge[2];
         return true;
     }
@@ -238,6 +247,10 @@ namespace Clobscode
 
     void SplitVisitorTest1::setMutexForPoints(std::mutex *mtx_new_pts) {
         this->mtx_new_pts = mtx_new_pts;
+    }
+
+    void SplitVisitorTest1::setMutexForEdges(std::mutex *mtx_new_edges) {
+        this->mtx_new_edges = mtx_new_edges;
     }
 
 //--------------------------------------------------------------------------------

@@ -1,10 +1,9 @@
 //Fastest way to have big data ?
 
-#include "../../Point3D.h"
-#include "../../Quadrant.h"
 #include "../../RefinementRegion.h"
 #include "../../Visitors/IntersectionsVisitor.h"
 #include "SplitVisitorTest1.h"
+
 #include <list>
 #include <chrono>
 #include <tbb/task_scheduler_init.h>
@@ -22,6 +21,22 @@ using namespace Clobscode;
 // As edges are read/write for each quadrant, and we cannot know how openMP
 //Slice the for loop, maybe manually slice the loop ?
 
+bool isItInTest1(const Polyline &mesh, const list<unsigned int> &faces, const vector<Point3D> &coords) {
+    //this method is meant to be used by Quadrants that don't
+    //intersect input domains. If they are inside of at least
+    //one input mesh, then they must remain in the output mesh.
+
+    bool first = mesh.pointIsInMesh(coords[0], faces);
+    bool second = mesh.pointIsInMesh(coords[1], faces);
+    if (first == second) {
+        return first;
+    }
+
+    //cout << "one inconsistency detected -> hard test\n";
+    //return mesh.pointIsInMesh(coords[0],faces);
+    return mesh.pointIsInMesh(coords[0]);
+}
+
 /**
  * @brief Implementation of algorithm 2 of mesher
  * @details Uses OpenMP.
@@ -33,8 +48,8 @@ using namespace Clobscode;
  *
  * @param nbThread number of thread, must be > 0 and < MAX
  */
-void refineMeshParallel(int nbThread, vector<Quadrant> Quadrants, vector<MeshPoint> points, set<QuadEdge> QuadEdges,
-        list<RefinementRegion *> &all_reg, const unsigned short &rl, Polyline &input) {
+void refineMeshParallelTest1(int nbThread, vector<Quadrant> Quadrants, vector<MeshPoint> points, set<QuadEdge> QuadEdges,
+        const list<RefinementRegion *> &all_reg, const unsigned short &rl, Polyline &input) {
 
     int NOMBRE_THREAD = tbb::task_scheduler_init::automatic;
 
@@ -59,7 +74,6 @@ void refineMeshParallel(int nbThread, vector<Quadrant> Quadrants, vector<MeshPoi
     tmp_Quadrants.assign(make_move_iterator(Quadrants.begin()), make_move_iterator(Quadrants.end()));
     Quadrants.clear();
 
-
     //Shared variables
 
     //points
@@ -82,103 +96,110 @@ void refineMeshParallel(int nbThread, vector<Quadrant> Quadrants, vector<MeshPoi
         nb_points = points.size();
 
         std::mutex mtx_new_pts;
+        std::mutex mtx_new_edges;
 
 
         //split the Quadrants as needed
         //begin parallelisation ?
         //new_pts is shared, and new_quadrants
-        tbb::parallel_for(tmp_Quadrants.begin(), tmp_Quadrants.end(), [&] (Quadrant & iter) {
-            //Only check, can not modify after treatment
-            bool to_refine = false;
+        tbb::parallel_for(tbb::blocked_range<std::size_t>(0, tmp_Quadrants.size()),
+                [&](const tbb::blocked_range<std::size_t> &range) {
+            for (auto i = range.begin(); i != range.end(); ++i) {
 
-            for (reg_iter = all_reg.begin(), reg_iter++; reg_iter != all_reg.end(); ++reg_iter) {
+                Quadrant & iter = tmp_Quadrants[i];
+                //Only check, can not modify after treatment
+                bool to_refine = false;
 
-                unsigned short region_rl = (*reg_iter)->getRefinementLevel();
-                if (region_rl < i) {
-                    continue;
-                }
+                for (reg_iter = all_reg.begin(), reg_iter++; reg_iter != all_reg.end(); ++reg_iter) {
 
-                //If the Quadrant has a greater RL than the region needs, continue
-                if (region_rl <= iter.getRefinementLevel()) {
-                    continue;
-                }
-
-                //Get the two extreme nodes of the Quadrant to test intersection with
-                //this RefinementRegion. If not, conserve it as it is.
-                //unsigned int n_idx1 = (*iter).getPoints()[0];
-                //unsigned int n_idx2 = (*iter).getPoints()[2];
-
-
-                // intersectQaudrant can modify the quadrant with
-                // function Polyline::getNbFeatures in RefinementboundaryRegion
-                // maybe no problem for parallelisation, as this information is
-                // not used by other thread
-                if ((*reg_iter)->intersectsQuadrant(points, iter)) {
-                    to_refine = true;
-                }
-            }
-
-            //now if refinement is not needed, we add the Quadrant as it was.
-            if (!to_refine) {
-                new_Quadrants.push_back(iter); //SHARED VARIABLE
-                //End of for loop
-            } else {
-                list<unsigned int> &inter_edges = iter.getIntersectedEdges();
-                unsigned short qrl = iter.getRefinementLevel();
-
-                //create visitors and give them variables
-                SplitVisitorTest1 sv;
-                sv.setPoints(points); // READ
-                sv.setEdges(QuadEdges); // TODO INSERT / REMOVE / READ A faire en priorite car le plus contraignant
-                sv.setNewPts(new_pts); // TODO INSERT / READ
-                sv.setCounterPointst(&nb_points);
-                sv.setMutexForPoints(&mtx_new_pts);
-
-                vector<vector<Point3D> > clipping_coords;
-                sv.setClipping(clipping_coords);
-
-                vector<vector<unsigned int> > split_elements;
-                sv.setNewEles(split_elements);
-
-                iter.accept(&sv);
-
-                if (inter_edges.empty()) {
-                    for (unsigned int j = 0; j < split_elements.size(); j++) {
-                        Quadrant o(split_elements[j], qrl + 1);
-                        new_Quadrants.push_back(o);
+                    unsigned short region_rl = (*reg_iter)->getRefinementLevel();
+                    if (region_rl < i) {
+                        continue;
                     }
+
+                    //If the Quadrant has a greater RL than the region needs, continue
+                    if (region_rl <= iter.getRefinementLevel()) {
+                        continue;
+                    }
+
+                    //Get the two extreme nodes of the Quadrant to test intersection with
+                    //this RefinementRegion. If not, conserve it as it is.
+                    //unsigned int n_idx1 = (*iter).getPoints()[0];
+                    //unsigned int n_idx2 = (*iter).getPoints()[2];
+
+
+                    // intersectQaudrant can modify the quadrant with
+                    // function Polyline::getNbFeatures in RefinementboundaryRegion
+                    // maybe no problem for parallelisation, as this information is
+                    // not used by other thread
+                    if ((*reg_iter)->intersectsQuadrant(points, iter)) {
+                        to_refine = true;
+                    }
+                }
+
+                //now if refinement is not needed, we add the Quadrant as it was.
+                if (!to_refine) {
+                    new_Quadrants.push_back(iter); //SHARED VARIABLE
+                    //End of for loop
                 } else {
-                    for (unsigned int j = 0; j < split_elements.size(); j++) {
-                        Quadrant o(split_elements[j], qrl + 1);
-                        //the new points are inserted in bash at the end of this
-                        //iteration. For this reason, the coordinates must be passed
-                        //"manually" at this point (clipping_coords).
+                    list<unsigned int> &inter_edges = iter.getIntersectedEdges();
+                    unsigned short qrl = iter.getRefinementLevel();
 
-                        //select_faces = true
-                        IntersectionsVisitor iv(true);
-                        //if (o.checkIntersections(input,inter_edges,clipping_coords[j]))
-                        iv.setPolyline(input);
-                        iv.setEdges(inter_edges);
-                        iv.setCoords(clipping_coords[j]);
+                    //create visitors and give them variables
+                    SplitVisitorTest1 sv;
+                    sv.setPoints(points); // READ
+                    sv.setEdges(QuadEdges); // TODO INSERT / REMOVE / READ A faire en priorite car le plus contraignant
+                    sv.setNewPts(new_pts); // TODO INSERT / READ
+                    sv.setCounterPointst(&nb_points);
+                    sv.setMutexForPoints(&mtx_new_pts);
+                    sv.setMutexForEdges(&mtx_new_edges);
 
-                        if (o.accept(&iv)) {
+                    vector<vector<Point3D> > clipping_coords;
+                    sv.setClipping(clipping_coords);
+
+                    vector<vector<unsigned int> > split_elements;
+                    sv.setNewEles(split_elements);
+
+                    iter.accept(&sv);
+
+                    if (inter_edges.empty()) {
+                        for (unsigned int j = 0; j < split_elements.size(); j++) {
+                            Quadrant o(split_elements[j], qrl + 1);
                             new_Quadrants.push_back(o);
-                        } else {
-                            //The element doesn't intersect any input face.
-                            //It must be checked if it's inside or outside.
-                            //Only in the first case add it to new_Quadrants.
-                            //Test this with parent Quadrant faces only.
+                        }
+                    } else {
+                        for (unsigned int j = 0; j < split_elements.size(); j++) {
+                            Quadrant o(split_elements[j], qrl + 1);
+                            //the new points are inserted in bash at the end of this
+                            //iteration. For this reason, the coordinates must be passed
+                            //"manually" at this point (clipping_coords).
 
-                            //Comment the following lines of this 'else' if
-                            //only intersecting Quadrants are meant to be
-                            //displayed.
+                            //select_faces = true
+                            IntersectionsVisitor iv(true);
+                            //if (o.checkIntersections(input,inter_edges,clipping_coords[j]))
+                            iv.setPolyline(input);
+                            iv.setEdges(inter_edges);
+                            iv.setCoords(clipping_coords[j]);
 
-                            //note: inter_edges is quite enough to check if
-                            //element is inside input, no Quadrant needed,
-                            //so i moved the method to mesher  --setriva
-
-                            if (isItIn(input, inter_edges, clipping_coords[j])) {
+                            if (o.accept(&iv)) {
                                 new_Quadrants.push_back(o);
+                            } else {
+                                //The element doesn't intersect any input face.
+                                //It must be checked if it's inside or outside.
+                                //Only in the first case add it to new_Quadrants.
+                                //Test this with parent Quadrant faces only.
+
+                                //Comment the following lines of this 'else' if
+                                //only intersecting Quadrants are meant to be
+                                //displayed.
+
+                                //note: inter_edges is quite enough to check if
+                                //element is inside input, no Quadrant needed,
+                                //so i moved the method to mesher  --setriva
+
+                                if (isItInTest1(input, inter_edges, clipping_coords[j])) {
+                                    new_Quadrants.push_back(o);
+                                }
                             }
                         }
                     }

@@ -59,6 +59,7 @@ namespace Clobscode
         friend class TransitionPatternVisitor;
         friend class SurfaceTemplatesVisitor;
         friend class RemoveSubElementsVisitor;
+        friend class SplitVisitorTest1;
 
 	public:
 		
