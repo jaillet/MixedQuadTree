@@ -24,6 +24,7 @@ set(SOURCE_FILES Main
         Visitors/OneIrregularVisitor Visitors/PointMovedVisitor
         Visitors/TransitionPatternVisitor Visitors/SurfaceTemplatesVisitor
         Visitors/RemoveSubElementsVisitor
+        ParallelizeTest/CloneMesher/
         )
 
 set(SOURCE_MEANTIME MeanTimePerformance/Main)

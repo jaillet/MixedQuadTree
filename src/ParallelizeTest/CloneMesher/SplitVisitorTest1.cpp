@@ -67,7 +67,7 @@ namespace Clobscode
         new_eles->reserve(4);
 
         // TODO numero des points s'ils sont uniques ca suffit ? A FAIRE ie creation classe avec operation atomic qui initialisé au debut avec la valeur en dessous et mis à jour atomic ?
-        unsigned int n_pts = points->size() + new_pts->unsafe_size();
+        // unsigned int n_pts = points->size() + new_pts->size();
         //the vector containing all nodes of this Quadrant (and sons)
         vector<unsigned int> all_pts(9,0);
 
@@ -81,34 +81,40 @@ namespace Clobscode
         const Point3D avg = (max-min)/2 + min;
 
         //inserting node 4 between nodes 0 and 1
-        if (splitEdge(all_pts[0],all_pts[1],n_pts,all_pts[4])) {
+        if (splitEdge(all_pts[0],all_pts[1],all_pts[4])) {
             //the coordinates of node 8 must be computed and added to
             //new_pts list of points
             new_pts->push(Point3D (avg[0],min[1],avg[2]));
+            mtx_new_pts->unlock();
         }
         //inserting node 5 between nodes 1 and 2
-        if (splitEdge(all_pts[1],all_pts[2],n_pts,all_pts[5])) {
+        if (splitEdge(all_pts[1],all_pts[2],all_pts[5])) {
             //the coordinates of node 9 must be computed and added to
             //new_pts list of points
             new_pts->push(Point3D (max[0],avg[1],avg[2]));
+            mtx_new_pts->unlock();
         }
         //inserting node 6 between nodes 2 and 3
-        if (splitEdge(all_pts[2],all_pts[3],n_pts,all_pts[6])) {
+        if (splitEdge(all_pts[2],all_pts[3],all_pts[6])) {
             //the coordinates of node 10 must be computed and added to
             //new_pts list of points
             new_pts->push(Point3D (avg[0],max[1],avg[2]));
+            mtx_new_pts->unlock();
         }
         //inserting node 7 between nodes 3 and 0
-        if (splitEdge(all_pts[0],all_pts[3],n_pts,all_pts[7])) {
+        if (splitEdge(all_pts[0],all_pts[3],all_pts[7])) {
             //the coordinates of node 11 must be computed and added to
             //new_pts list of points
             new_pts->push(Point3D (min[0],avg[1],avg[2]));
+            mtx_new_pts->unlock();
         }
 
         //of course all the intern edges and mid point were never inserted
         //before, so this task is performed without asking
+        mtx_new_pts->lock();
         new_pts->push(Point3D (avg[0],avg[1],avg[2]));
-        all_pts[8] = n_pts;
+        all_pts[8] = counter_points->fetch_and_increment(); // TODO c'est quoi ça ??
+        mtx_new_pts->unlock();
 
 //        QuadEdge intern_edge1 (all_pts[4],all_pts[6]);
 //        intern_edge1.updateMidPoint(all_pts[8]);
@@ -187,8 +193,7 @@ namespace Clobscode
 //--------------------------------------------------------------------------------
 
 
-    bool SplitVisitorTest1::splitEdge(unsigned int idx1, unsigned int idx2,
-                                 unsigned int &c_n_pts, unsigned int &mid_idx){
+    bool SplitVisitorTest1::splitEdge(unsigned int idx1, unsigned int idx2, unsigned int &mid_idx){
         
         QuadEdge this_edge (idx1,idx2);
         set<QuadEdge>::const_iterator found = edges->find(this_edge);
@@ -212,7 +217,10 @@ namespace Clobscode
 
         // std::set doesn't permit to update an element
         // we should erase and reinsert...
-        this_edge.updateMidPoint(c_n_pts++);
+
+        mtx_new_pts->lock();
+
+        this_edge.updateMidPoint(this->counter_points->fetch_and_increment());
         found = edges->erase(found);
         edges->insert(found,this_edge); //using found as hint for insertion
 
@@ -222,6 +230,14 @@ namespace Clobscode
 
         mid_idx = this_edge[2];
         return true;
+    }
+
+    void SplitVisitorTest1::setCounterPointst(tbb::atomic<int> *counter) {
+        this->counter_points = counter;
+    }
+
+    void SplitVisitorTest1::setMutexForPoints(std::mutex *mtx_new_pts) {
+        this->mtx_new_pts = mtx_new_pts;
     }
 
 //--------------------------------------------------------------------------------

@@ -30,6 +30,7 @@
 #include <set>
 #include <vector>
 #include <tbb/concurrent_queue.h>
+#include <mutex>
 
 
 #include "../../Visitors/Visitor.h"
@@ -66,6 +67,10 @@ namespace Clobscode
         
         void setClipping(vector<vector<Point3D> > &clipping);
 
+        void setCounterPointst(tbb::atomic<int> * counter);
+
+        void setMutexForPoints(std::mutex * mtx_new_pts);
+
     protected:
         
         //references
@@ -74,10 +79,11 @@ namespace Clobscode
         set<QuadEdge> *edges;
         vector<vector<unsigned int> > *new_eles;
         vector<vector<Point3D> > *clipping;
+        tbb::atomic<int> * counter_points;
+        std::mutex * mtx_new_pts;
 
         bool splitEdge(unsigned int idx1,
                        unsigned int idx2,
-                       unsigned int &c_n_pts,
                        unsigned int &mid_idx);
 
     };

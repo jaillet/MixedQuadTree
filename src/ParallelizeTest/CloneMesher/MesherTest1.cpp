@@ -11,6 +11,8 @@
 #include <tbb/parallel_for.h>
 #include <tbb/concurrent_vector.h>
 #include <tbb/concurrent_queue.h>
+#include <atomic>
+#include <mutex>
 
 using namespace Clobscode;
 
@@ -76,6 +78,12 @@ void refineMeshParallel(int nbThread, vector<Quadrant> Quadrants, vector<MeshPoi
 
         list<RefinementRegion *>::const_iterator reg_iter;
 
+        tbb::atomic<int> nb_points;
+        nb_points = points.size();
+
+        std::mutex mtx_new_pts;
+
+
         //split the Quadrants as needed
         //begin parallelisation ?
         //new_pts is shared, and new_quadrants
@@ -123,6 +131,8 @@ void refineMeshParallel(int nbThread, vector<Quadrant> Quadrants, vector<MeshPoi
                 sv.setPoints(points); // READ
                 sv.setEdges(QuadEdges); // TODO INSERT / REMOVE / READ A faire en priorite car le plus contraignant
                 sv.setNewPts(new_pts); // TODO INSERT / READ
+                sv.setCounterPointst(&nb_points);
+                sv.setMutexForPoints(&mtx_new_pts);
 
                 vector<vector<Point3D> > clipping_coords;
                 sv.setClipping(clipping_coords);

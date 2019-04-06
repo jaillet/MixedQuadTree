@@ -406,14 +406,7 @@ Insert / Remove / Read <b>sv.edges</b> (ref <b>QuadEdges</b> var class Mesher)
 
 Remove <b>iter</b> from <b>tmp_quadrants</b>  
 
-
-Possible solutions :
-
-For each <b>tmp_Quadrants</b>
-
-<b>new_pts</b> en tbb::concurrent_vector (https://software.intel.com/en-us/node/506203)
-
-
-
+In SplitVisitor, insert new points in <b>new_pts</b> and use the indice of this points to update mid point of edges.  
+So, this should be fixed for multi-threading because multiple thread can insert points at the same time.
 
 
