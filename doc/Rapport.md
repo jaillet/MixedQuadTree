@@ -367,7 +367,11 @@ While until <b>tmp_Quadrants</b> is empty
 
 Here are the concurrent access for one refinement level :
 
-Insert in <b>new_quadrants</b>
+
+At the beginning, to know the boolean value of to_refine, virtual function RefinementRegion::intersectsQuadrant(points, iter) is called.
+These functions read <b>points</b>, <b>polyline</b>, and Read and can Modify the intersected edge of <b>Quadrant</b>. with function Polyline::getNbFeatures in RefinementboundaryRegion. But this information is not used by other thread (Is this sure ?)
+
+Insert in <b>new_quadrants</b> (output of algo 2)
 
 SplitVisitor (set class var)
 
