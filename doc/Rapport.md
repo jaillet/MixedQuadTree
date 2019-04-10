@@ -1,26 +1,26 @@
 # Productions
 
-* Scripts d'analyse : `script/analyse_time.sh̀̀̀`, `script/memory_usage.sh̀̀̀` et `script/massif_analyser.awk`
-* Tracés des graphes : `script/plot_time.py` 
-* Programme de test : `build/parallelize_test`
+* Analysis scripts : `script/analyse_time.sh̀̀̀`, `script/memory_usage.sh̀̀̀` et `script/massif_analyser.awk`
+* Grph plot : `script/plot_time.py` 
+* Test program : `build/parallelize_test`
 
-# Comparaison de librairies de parallélisation
+# Comparison 
 
 ## Open MP
 
-### Avantages
-* Simple d'utilisation
+### Pros
+* Easy to use
  
-### Inconvénients
-* Difficile d'utiliser des itérateurs
+### Cons
+* No support of iterators
 
 ## Intel TBB
 
-### Avantages
+### Pros
 * Container thread-safe
 * Tasks
 
-### Inconvénients
+### Cons
 
 # Comparaisons de consommation mémoire
 
@@ -182,63 +182,31 @@ Fonction appelé lorsque l'on souhaite raffiner un poly.
     - all_reg : liste de RafinementRegion
     - name : nom de l'output
 
-#### Algo
+#### Algo 1 (handle the boundary)
+
 ##### Init
-        - temp_Quadrants : list des Quadrant actuel
-        - new_Quadrants : list Quadrant vide
-        - new_pts : liste Point3D vide
+        - temp_Quadrants : list of actual Quadrants
+        - new_Quadrants : empty list of Quadrants
+        - new_pts : empty list of Point3D
         - sv : SplitVisitor
-        - i : niveau actuel de raffinement
-##### Corps
-Faire 
+        - i : (output) current level of refinement (start at 0)
 
-* vide `new_pts`
-* tant que `tmp_Quadrants` n'est pas vide
-    * `iter` = `tmpQuadrants[0]`
-    * `to_refine` <- false
-    * computeMaxDistance, ie met à jour max_dis dans `iter`
-    * on regarde si `iter` a besoin d'être raffiné (on maj `to_refine` en conséquence). Cela dépend de la statégie donc de `all_reg` (raffinement pour tous et/ou ceux en intersection avec la polyline)
-    * si le quadrant ne doit pas être raffiné
-        * on ajoute le quadrant à la fin de `new_Quadrants`
-    * sinon si il doit être raffiné
-        * creation `vector<vector<Point3D>> clipping_coords` et ajout au SplitVisitor
-        * creation `vector<vector<unsigned>> split_elements` et ajout au SplitVisitor : les nouveaux elements créés par le SV
-        * iter->accept(sv) : Le SV regarde si le quadrant doit être splitté, et sauvegarde les nouveaux elements dans split_elements
-        * si `inter_edges` est vide (ie inner quad == la polyline n'intersecte pas et l'élément est à l'intérieur)
-            * on raffine le quadrant, donc pour chaque élément splittés  
-                * on créée un nouveau Quadrant à partir des éléments splittés de raffinement `i+1`
-                * on l'ajoute à la fin de la liste `new_Quadrants`
-        * sinon (la polyline intersecte ou est dehors de la polyline)
-            * pour chaque element splitté
-                * on créée un nouveau Quadrant à partir des éléments splittés de raffinement `i+1`
-                * Création de l'IntersectionVisitor : A faire avant ?
-                * Ajout des infos du quadrant à l'IntersectionVisitor
-                * si le quadrant est en intersection avec une input face
-                    * on l'ajoute à la fin de la liste `new_Quadrants`
-                * sinon on doit regarder s'il est à l'exterieur ou à l'interieur
-                    * si il est à l'intérieur, on l'ajoute à la liste `new_Quadrants`
-    * on enleve `iter` de `tmp_Quadrants`
-* swap `tmp_Quadrants`, `new_Quadrants`
-* insert dans `points` le contenu de `new_pts`
-* pré-incrémente `i` 
-  
-tant que `new_pts` n'est pas vide
-
-##### Premier niveau
+##### First level
 
 <pre>
-Faire  
-    Vider <b>new_pts</b>  
-    Boucle tant que <b>tmp_Quadrants</b> n'est pas vide sur niveau 2  
-    Swap <b>tmp_Quadrants</b> et <b>new_Quadrants</b>
-    Si <b>new_pts</b> vide
+Do  
+    Empty <b>new_pts</b>  
+    While <b>tmp_Quadrants</b> is not empty 
+        Level 2  
+    Swap <b>tmp_Quadrants</b> and <b>new_Quadrants</b>
+    If <b>new_pts</b> empty
         break
-    Ajout dans <b>points (var classe Mesher)</b> le contenu de <b>new_pts</b>
-    Incrémente <b>i</b>
-Tant que <b>new_pts</b> n'est pas vide 
+    Add all points in <b>new_pts</b> to <b>points (Mesher attribute)</b> 
+    Increment <b>i</b>
+While <b>new_pts</b> is not empty 
 </pre>
 
-##### Deuxième niveau
+##### Second level
 
 <pre>
 Tant que <b>tmp_Quadrants</b> n'est pas vide
@@ -326,6 +294,8 @@ For each level until rl
 </pre>
 
 ##### Second level
+
+This is what we need to parallelize
 
 <pre>
 While until <b>tmp_Quadrants</b> is empty
