@@ -66,7 +66,7 @@ namespace Clobscode
         
         void setClipping(vector<vector<Point3D> > &clipping);
 
-        void setCounterPointst(tbb::atomic<int> * counter);
+        void setCounterPointst(unsigned int *counter);
 
         void setMutexForPoints(std::mutex * mtx_new_pts);
 
@@ -80,13 +80,16 @@ namespace Clobscode
         set<QuadEdge> *edges;
         vector<vector<unsigned int> > *new_eles;
         vector<vector<Point3D> > *clipping;
-        tbb::atomic<int> * counter_points;
+        unsigned int *counter_points;
         std::mutex * mtx_new_pts;
         std::mutex * mtx_new_edges;
 
         bool splitEdge(unsigned int idx1,
                        unsigned int idx2,
-                       unsigned int &mid_idx);
+                       unsigned int &mid_idx,
+                       double idx5,
+                       double idx6,
+                       double idx7);
 
     };
 }
