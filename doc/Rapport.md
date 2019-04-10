@@ -24,24 +24,25 @@
 
 # Comparaisons de consommation mémoire
 
-## Script pour l'analyse mémoire
+## Script for memory analysis
 
-Programme `script/memory_usage.sh [N]`
+Program `script/memory_usage.sh [N]`
 
-Utilise valgrind.  
+Uses valgrind 
 
-Lance N fois le programme `mesher_roi` sur a.poly avec l'option -s i (i allant de 1 à N).
-Sauvegarde le résutat dans `build/memory_usage_mesher_roi_N_DATE`.  
-Les fichiers massif.out.*.i correspondent aux résultats détaillés de l'analyse mémoire avec i niveaux de raffinement.  
-Le fichier memory_usage contient le pic de mémoire utilisée pour chaque niveaux de raffinement.
 
-## Passage de list à deque
+Execute N times the program `mesher_roi` with a.poly as input, and option -s i (with i from 1 to N)
+Save the result in `build/memory_usage_mesher_roi_N_DATE`
+Files massif.out.\*.i are the detailed results of the memory analysis, i is the level of refinement.
+The file memory_usage contains the peak memory usage for each level of refinement.
 
-Comparaison entre vector / list / deque : https://baptiste-wicht.com/posts/2012/12/cpp-benchmark-vector-list-deque.html  
+## Use of deque instead of list
 
-Utilisation mémoire légèrement plus importante.
+Comparison between vector / list / deque : https://baptiste-wicht.com/posts/2012/12/cpp-benchmark-vector-list-deque.html  
 
-## Utilisation mémoire avec list
+Deque uses slightly more memory.
+
+## Memory usage with list
 
 Command : mesher_roi -p ../data/a.poly -s N
 
@@ -75,7 +76,7 @@ Command : mesher_roi -p ../data/a.poly -a N
 10 | 263.253 Mo
 
 
-## Utilisation mémoire avec deque
+## Memory usage with deque
 
 
 Command : mesher_roi -p ../data/a.poly -s N
@@ -109,32 +110,32 @@ Command : mesher_roi -p ../data/a.poly -a N
 10 | 267.182 Mo
 
 
-# Comparaisons de temps d'exécutions
+# Comparision of execution time
 
-## Script pour l'analyse
+## Script for the analysis
 
-Programme `script/analyse_time.sh`
+Program `script/analyse_time.sh`
 
-Lance le programme `build/parallelize_test` pour différentes valeurs d'éléments (100 à 10^9), et différents nombre de threads (8 à 1).
-Sauvegarde le résultat dans `script/analyse_time_[DATE]/time_size_[NBELEM]_thread_[NBTRHEAD]`
+Execute the program `build/parallelize_test` for different number of elements (100 to 10^9), and different number of threads (8 to 1).
+Save the result in `script/analyse_time_[DATE]/time_size_[NBELEM]_thread_[NBTRHEAD]`.
 
-## Affichage des résultats :
+## Plot the result
 
-Fichier script/plot_time.py à executer avec python3 (pyplot)
+Execute `python3 script/plot_time.py` (pyplot)
 
-3 types de graphes :
+3 types of graph :
 
-* elements_times : Pour chaque méthode, un graphique présentant le temps d'execution en fonction du nombre d'élements, pour chaque nombre de threads.
+* elements_times : For each method, a graph that shows the execution time per number of elements, for each number of threads.
 
-* thread_times : Pour chaque nombre d'élement, un graphique présentanat les temps d'éxécution en fonction des threads, pour chaque méthode
+* thread_times : For each number of elements, a graph that shows the execution time per number of threads, for each method.
 
-* strong_scaling : Idem que précedemment, mais avec l'accélération (TempsAvec1Thread / TempsAvecNThread)
+* strong_scaling : Same as thread_times, but with speedup (TimeWith1Thread divided by TimeWithNThread)
 
-# Analyse du programme Mesher_roi
+# Mesher_roi analysis
 
-## Classe Mesher
+## Mesher class
 
-### Variables de classe
+### Member variables
 
 ```cpp
 vector<MeshPoint> points;
@@ -143,44 +144,41 @@ set<QuadEdge> QuadEdges;
 list<RefinementRegion *> regions;
 ```
 
-### Fonction generateMesh (ou refineMesh)
+### Function generateMesh (or refineMesh)
 
-* generateMesh : Si on part d'un niveau de raffinement égal à 0
-* refineMesh : Si un maillage à un certain niveau de raffinement est déjà existant (commence donc à ce niveau de raffinement)
+* generateMesh : Refinement level start at 0.
+* refineMesh : Refinement level start at the refinement level of the input.
 
-#### Paramètres
+#### Parameters
 
-	- input : Ref sur Polyline
-	- rl : niveau de raffinement
-	- name : le nom de l'output (si spécifié)
-	- all_reg : liste des ptr des régions à raffiner (Surface et/ou allRegion et/ou Boundary(pour refineMesh))
-	- decoration : bool pour savoir si on ajoute des décorations au fichier VTK
+	- input : Reference on the Polyline
+	- rl : Refinement level
+	- name : output name
+	- all_reg : list of the refinement region (Surface and/or allRegion and/or Boundary(for refineMesh))
+	- decoration : boolean to add decoration to the VTK
 	
-Paramètres supplémentaires pour refineMesh :
+Additional parameters for refineMesh :
 
-	- roctli : liste des quadrants de départ
-	- gt : transformation géométrique
-	- minrl : le raffinement minimum des quadrants du maillage
-	- omaxrl : le raffinement maximum des quadrants du maillage
+	- roctli : list of starting quadrants
+	- gt : geometric transform
+	- minrl : minimum refinement level of input quadrants.
+	- omaxrl : maximum refinement level of input quadrants.
 
+#### Algorithm
 
-#### Algo
+* rotateGridMesh(input, all_reg, gt) : If needed, apply gt on input
+* generateGridMesh(input) : Create and store in `Quadrants` the starting Quadrants (from the polyline)
+* generateQuadTreeMesh(rl, input, all_reg, name) : Algorithm for mesh generation (For `refineMesh`, call splitQuadrants)
 
-* rotateGridMesh(input, all_reg, gt) : applique si nécessaire la rotation dans gt sur input
-* generateGridMesh(input) : Crée et stocke dans ```Quadrants``` les Quadrant de départ (à partir de la polyline)
-* generateQuadTreeMesh(rl, input, all_reg, name) : Algo de base pour la génération du maillage (Pour ```refineMesh```, appelle splitQuadrants)
+The rest is identical for refineMesh and generateMesh.
 
-Suite identique pour refineMesh et generateMesh??? à re-checker.
+### Function generateQuatdreeMesh
 
-### Fonction generateQuatdreeMesh
-
-Fonction appelé lorsque l'on souhaite raffiner un poly.
-
-#### Paramètres
-    - rl : niveau de raffinement souhaité
-    - input : la polyline
-    - all_reg : liste de RafinementRegion
-    - name : nom de l'output
+#### Parameters
+    - rl : refinement level that we want
+    - input : The polyline
+    - all_reg : list of RefinementRegion
+    - name : output name
 
 #### Algo 1 (handle the boundary)
 
@@ -295,7 +293,7 @@ For each level until rl
 
 ##### Second level
 
-This is what we need to parallelize
+This is what we need to parallelize first
 
 <pre>
 While until <b>tmp_Quadrants</b> is empty
