@@ -365,14 +365,16 @@ While until <b>tmp_Quadrants</b> is empty
 
 ##### Concurrent access for second level
 
+Here are the concurrent access for one refinement level :
+
 Insert in <b>new_quadrants</b>
 
 SplitVisitor (set class var)
 
 Insert / Read <b>sv.new_pts</b> (ref <b>new_pts</b>) 
-Insert / Remove / Read <b>sv.edges</b> (ref <b>QuadEdges</b> var class Mesher)  
+Insert / Remove / Read <b>sv.edges</b> (ref <b>QuadEdges</b> member variable of class Mesher)  
 
-Remove <b>iter</b> from <b>tmp_quadrants</b>  
+Remove <b>iter</b> from <b>tmp_quadrants</b> PAUL : where ?
 
 In SplitVisitor, insert new points in <b>new_pts</b> and use the indice of this points to update mid point of edges.  
 So, this should be fixed for multi-threading because multiple thread can insert points at the same time.
