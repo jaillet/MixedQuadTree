@@ -996,6 +996,7 @@ namespace Clobscode {
         refineMeshParallelTest1TBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
 
+        
         int counterRefine = 0;
 
         for (unsigned short i = 0; i < rl; i++) {
@@ -1139,8 +1140,11 @@ namespace Clobscode {
 
         std::cout << counterRefine << std::endl;
 
+
         std::cout << "Points : " << points.size() << std::endl;
         std::cout << "QuadEdge : " << tmp_Quadrants.size() << std::endl;
+
+        
 
 
 #ifdef WRITE_OUTPUT
@@ -2461,5 +2465,12 @@ namespace Clobscode {
 
         std::cout << "Points : " << points.size() << std::endl;
         std::cout << "QuadEdge : " << tmp_Quadrants.size() << std::endl;
+
+        // output result to mesher ! comment if not needed
+        //Quadrants.clear();
+        //Quadrants.assign(tmp_Quadrants.begin(), tmp_Quadrants.end());
+
+        //QuadEdges.clear();
+        //QuadEdges.insert(quadEdges.begin(), quadEdges.end());
     }
 }
