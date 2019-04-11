@@ -54,15 +54,18 @@ void refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<M
 
     //list of temp Quadrants
     vector<Quadrant> tmp_Quadrants;
+    //moving quadrants to save memory
+    tmp_Quadrants.assign(make_move_iterator(Quadrants.begin()), make_move_iterator(Quadrants.end()));
+    Quadrants.clear();
+
     tbb::concurrent_vector<Quadrant> new_Quadrants;
 
     //list of the points added at this refinement iteration:
-    // TODO !! INSERT IN SPLITVISITOR !!
-    list<Point3D> new_pts;
+    // TODO !! INSERT IN SPLITVISITOR !! currently protect by mutex
+    tbb::concurrent_vector<Point3D> new_pts;
 
-    //initialising into a list, moving quadrants to save memory
-    tmp_Quadrants.assign(make_move_iterator(Quadrants.begin()), make_move_iterator(Quadrants.end()));
-    Quadrants.clear();
+    tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> quadEdges;
+    quadEdges.insert(QuadEdges.begin(), QuadEdges.end());
 
     tbb::atomic<int> counterRefine = 0;
 
@@ -76,16 +79,14 @@ void refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<M
 
 
     unsigned int nb_points = 0;
-    std::mutex mtx_new_pts;
-    std::mutex mtx_new_edges;
 
     for (unsigned short i = 0; i < rl; i++) {
         auto start_refine_rl_time = chrono::high_resolution_clock::now();
 
-        atomic<long> time_split_visitor;
-        atomic<long> time_inside_block;
-        time_inside_block = 0;
-        time_split_visitor = 0;
+        //atomic<long> time_split_visitor;
+        //atomic<long> time_inside_block;
+        //time_inside_block = 0;
+        //time_split_visitor = 0;
 
         //the new_pts is a list that holds the coordinates of
         //new points inserted at this iteration. At the end of
@@ -94,25 +95,23 @@ void refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<M
 
         nb_points = points.size();
 
-        auto start_outside_block_time = chrono::high_resolution_clock::now();
+        //auto start_outside_block_time = chrono::high_resolution_clock::now();
 
         //split the Quadrants as needed
         //begin parallelisation ?
         //new_pts is shared, and new_quadrants
-        tbb::parallel_for(tbb::blocked_range<std::size_t>(0, tmp_Quadrants.size(), 100),
+        tbb::parallel_for(tbb::blocked_range<std::size_t>(0, tmp_Quadrants.size()),
                           [&](const tbb::blocked_range<std::size_t> &range) {
 
-                              auto start_block_time = chrono::high_resolution_clock::now();
+                              //auto start_block_time = chrono::high_resolution_clock::now();
 
 
                               //create visitors and give them variables
                               SplitVisitorTest1 sv;
                               sv.setPoints(points); // READ
-                              sv.setEdges(QuadEdges); // TODO INSERT / REMOVE / READ A faire en priorite car le plus contraignant
+                              sv.setEdges(quadEdges); // TODO INSERT / REMOVE / READ A faire en priorite car le plus contraignant
                               sv.setNewPts(new_pts); // TODO INSERT / READ
-                              sv.setCounterPointst(&nb_points);
-                              sv.setMutexForPoints(&mtx_new_pts);
-                              sv.setMutexForEdges(&mtx_new_edges);
+                              sv.setCounterPoints(nb_points);
 
                               list<RefinementRegion *>::const_iterator reg_iter;
 
@@ -149,7 +148,7 @@ void refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<M
                                       // not used by other thread
                                       if ((*reg_iter)->intersectsQuadrant(points, iter)) {
                                           to_refine = true;
-                                          counterRefine.fetch_and_increment();
+                                          //counterRefine.fetch_and_increment();
                                           break;
                                       }
                                   }
@@ -170,10 +169,10 @@ void refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<M
                                       vector<vector<unsigned int> > split_elements;
                                       sv.setNewEles(split_elements);
 
-                                      auto start_sv_time = chrono::high_resolution_clock::now();
+                                      //auto start_sv_time = chrono::high_resolution_clock::now();
                                       iter.accept(&sv);
-                                      auto end_sv_time = chrono::high_resolution_clock::now();
-                                      time_split_visitor += std::chrono::duration_cast<chrono::milliseconds>(end_sv_time - start_sv_time).count();
+                                      //auto end_sv_time = chrono::high_resolution_clock::now();
+                                      //time_split_visitor += std::chrono::duration_cast<chrono::milliseconds>(end_sv_time - start_sv_time).count();
 
                                       if (inter_edges.empty()) {
                                           for (unsigned int j = 0; j < split_elements.size(); j++) {
@@ -218,14 +217,14 @@ void refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<M
                                   }
                               } //END FOR QUADRANTS
 
-                              auto end_block_time = chrono::high_resolution_clock::now();
-                              time_inside_block += std::chrono::duration_cast<chrono::milliseconds>(end_block_time - start_block_time).count();
+                              //auto end_block_time = chrono::high_resolution_clock::now();
+                              //time_inside_block += std::chrono::duration_cast<chrono::milliseconds>(end_block_time - start_block_time).count();
                               //cout << time << " / " << std::chrono::duration_cast<chrono::milliseconds>(end_block_time - start_block_time).count();
                               //cout << " ms for " << range.size() << " quadrants" << endl;
 
                           }); //END TBB TASK
 
-        auto end_outside_block_time = chrono::high_resolution_clock::now();
+        //auto end_outside_block_time = chrono::high_resolution_clock::now();
 
         // don't forget to update list
         tmp_Quadrants.assign(make_move_iterator(new_Quadrants.begin()), make_move_iterator(new_Quadrants.end()));
@@ -251,13 +250,14 @@ void refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<M
 
         // inside / split / outside stats
 
-        long outside = std::chrono::duration_cast<chrono::milliseconds>(end_outside_block_time - start_outside_block_time).count();
-        cout << "TBB for outside " << outside << " ms (" << (outside * 100.0 / total) << "%) ";
-        cout << "TBB for inside " << time_inside_block << " ms (all threads cumulated) ";
-        cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / time_inside_block) << "% of time inside) ";
-        cout << endl;
+        //long outside = std::chrono::duration_cast<chrono::milliseconds>(end_outside_block_time - start_outside_block_time).count();
+        //cout << "TBB for outside " << outside << " ms (" << (outside * 100.0 / total) << "%) ";
+        //cout << "TBB for inside " << time_inside_block << " ms (all threads cumulated) ";
+        //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / time_inside_block) << "% of time inside) ";
+        //cout << endl;
 
     } //END FOR REFINEMENT LEVEL
 
-    std::cout << counterRefine << std::endl;
+    std::cout << "Points : " << points.size() << std::endl;
+    std::cout << "QuadEdge : " << tmp_Quadrants.size() << std::endl;
 }

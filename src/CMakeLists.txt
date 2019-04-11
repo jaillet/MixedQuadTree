@@ -24,7 +24,6 @@ set(SOURCE_FILES Main
         Visitors/OneIrregularVisitor Visitors/PointMovedVisitor
         Visitors/TransitionPatternVisitor Visitors/SurfaceTemplatesVisitor
         Visitors/RemoveSubElementsVisitor
-        ParallelizeTest/CloneMesher/MesherTest1.cpp
         ParallelizeTest/CloneMesher/SplitVisitorTest1.cpp
         ParallelizeTest/CloneMesher/SplitVisitorTest1.h
         )

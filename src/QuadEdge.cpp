@@ -31,11 +31,12 @@ namespace Clobscode
 // vector<unsigned int> info; //info[2] midpoint
 
 	QuadEdge::QuadEdge(){
-		info.assign(3,0);
+		info.assign(2,0);
+		midpoint = 0;
 	}
 	
     QuadEdge::QuadEdge(unsigned int point1, unsigned int point2, unsigned int mid){
-        info.resize(3);
+        info.resize(2);
         if (point1<point2) {
             info[0]=point1;
             info[1]=point2;
@@ -44,8 +45,15 @@ namespace Clobscode
             info[1]=point1;
             info[0]=point2;
         }
-        info[2]=mid;
+        midpoint = mid; //info[2]=mid;
     }
+
+	QuadEdge::QuadEdge(const QuadEdge & other) {
+		info.resize(2);
+		info[0] = other[0];
+		info[1] = other[1];
+		midpoint = other[2];
+	}
 
 	QuadEdge::~QuadEdge(){
 		
