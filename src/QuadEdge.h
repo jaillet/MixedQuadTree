@@ -49,6 +49,8 @@ namespace Clobscode
 		
         QuadEdge(unsigned int idx1, unsigned int idx2, unsigned int midx=0);
 
+        QuadEdge(const QuadEdge & other);
+
 		virtual ~QuadEdge();
 		
         virtual void assign(unsigned int idx1, unsigned int idx2);
@@ -70,27 +72,35 @@ namespace Clobscode
         friend bool operator!=(const QuadEdge &e1, const QuadEdge &e2);
 		
         friend bool operator<(const QuadEdge &e1, const QuadEdge &e2);
+
+        virtual std::size_t operator()(const QuadEdge& edge) const noexcept {
+			size_t hash = 23;
+			hash = hash * 31 + edge[0];
+			hash = hash * 31 + edge[1];
+			return hash;
+		}
 		
 		
 	protected:
-		
         vector<unsigned int> info; //info[2] midpoint
+        mutable unsigned int midpoint;
 
 	};
 	
-    inline void QuadEdge::updateMidPoint(unsigned int idx){
-		info[2] = idx;
+    inline void QuadEdge::updateMidPoint(unsigned int idx) {
+		midpoint = idx;
 	}
 
     inline unsigned int QuadEdge::operator[](unsigned int pos) const{
 //		return info.at(pos);
+		if (pos == 2) return midpoint;
         return info[pos]; //no position validity check
     }
 	
     //FJA TODO: this is a duplicate of updateMidPoint
     inline void QuadEdge::setMidPoint(unsigned int mid){
-		info[2] = mid;
+		midpoint = mid;
 	}
-	
+
 }
 #endif

@@ -143,3 +143,53 @@ Analyser le code existant voir là ou ça coince.
 ## Méthode de test
 
 Reproduction d'une boucle similaire à la première boucle de generateQuadtreeMesh dans Mesher.cpp.  
+
+
+Algo + Reduction.  
+Chaque thread a edge et new pts local (new pts indices commence au precedent).  
+Reduction avec map pour chaque thread pour inserer new pts et edges dans global.
+
+ECRITE ALGO ET LEUR ENVOYER
+IMPLEMENTER EN OPENMP ET INTELTBB
+
+
+# TBB FOR ALGO
+For params : a -s 15
+
+Parallel version with 8 threads :
+         * level 0 in 1 ms
+         * level 1 in 0 ms
+         * level 2 in 0 ms
+         * level 3 in 0 ms
+         * level 4 in 1 ms
+         * level 5 in 3 ms
+         * level 6 in 5 ms
+         * level 7 in 10 ms
+         * level 8 in 31 ms
+         * level 9 in 49 ms
+         * level 10 in 87 ms
+         * level 11 in 188 ms
+         * level 12 in 345 ms
+         * level 13 in 676 ms
+         * level 14 in 1287 ms
+- number of Points : 856771
+- number of QuadEdge : 444155 
+
+Sequentail version :
+         * level 0 in 35 ms
+         * level 1 in 0 ms
+         * level 2 in 0 ms
+         * level 3 in 1 ms
+         * level 4 in 2 ms
+         * level 5 in 7 ms
+         * level 6 in 14 ms
+         * level 7 in 30 ms
+         * level 8 in 62 ms
+         * level 9 in 128 ms
+         * level 10 in 265 ms
+         * level 11 in 543 ms
+         * level 12 in 1140 ms
+         * level 13 in 2318 ms
+         * level 14 in 4727 ms
+- number of Points : 856758
+- number of QuadEdge : 444155

@@ -26,8 +26,17 @@
 #include "SplitVisitorTest1.h"
 #include "../../Quadrant.h"
 
-namespace Clobscode
-{
+namespace std {
+    template<>
+    struct hash<Clobscode::QuadEdge> {
+        size_t operator()(const Clobscode::QuadEdge &k) const {
+            // Compute individual hash values for two data members and combine them using XOR and bit shifting
+            return ((hash<float>()(k[0]) ^ (hash<float>()(k[1]) << 1)) >> 1);
+        }
+    };
+}
+
+namespace Clobscode {
 //vector<MeshPoint> *points;
 //list<Point3D> *new_pts;
 //set<QuadEdge> *edges;
@@ -35,31 +44,29 @@ namespace Clobscode
 //vector<vector<Point3D> > *clipping;
 
     SplitVisitorTest1::SplitVisitorTest1()
-        :points(NULL),new_pts(NULL),edges(NULL),new_eles(NULL),clipping(NULL)
-    { }
+            : points(NULL), new_pts(NULL), edges(NULL), new_eles(NULL), clipping(NULL), counter_points(NULL) {}
 
     void SplitVisitorTest1::setPoints(const vector<MeshPoint> &points) {
         this->points = &points;
     }
-    
-    void SplitVisitorTest1::setNewPts(list<Point3D> &new_pts) {
+
+    void SplitVisitorTest1::setNewPts(tbb::concurrent_vector<Point3D> &new_pts) {
         this->new_pts = &new_pts;
     }
-    
-    void SplitVisitorTest1::setEdges(set<QuadEdge> &edges) {
+
+    void SplitVisitorTest1::setEdges(tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> &edges) {
         this->edges = &edges;
     }
-    
+
     void SplitVisitorTest1::setNewEles(vector<vector<unsigned int> > &new_eles) {
         this->new_eles = &new_eles;
     }
-    
+
     void SplitVisitorTest1::setClipping(vector<vector<Point3D> > &clipping) {
         this->clipping = &clipping;
     }
 
-    bool SplitVisitorTest1::visit(Quadrant *o)
-    {
+    bool SplitVisitorTest1::visit(Quadrant *o) {
         //getting variables for modification
         //preferably by reference, to avoid unnecessary copying
         const vector<unsigned int> &pi = o->pointindex; // TODO add visitor to friend in Quadrant
@@ -69,52 +76,51 @@ namespace Clobscode
         // TODO numero des points s'ils sont uniques ca suffit ? A FAIRE ie creation classe avec operation atomic qui initialisé au debut avec la valeur en dessous et mis à jour atomic ?
         // unsigned int n_pts = points->size() + new_pts->size();
         //the vector containing all nodes of this Quadrant (and sons)
-        vector<unsigned int> all_pts(9,0);
+        vector<unsigned int> all_pts(9, 0);
 
         //save the four nodes of this square first
-        for (unsigned int i=0; i< pi.size(); i++) {
+        for (unsigned int i = 0; i < pi.size(); i++) {
             all_pts[i] = pi[i];
         }
 
         const Point3D &min = points->at(pi[0]).getPoint();
         const Point3D &max = points->at(pi[2]).getPoint();
-        const Point3D avg = (max-min)/2 + min;
+        const Point3D avg = (max - min) / 2 + min;
 
         //inserting node 4 between nodes 0 and 1
-        if (splitEdge(all_pts[0],all_pts[1],all_pts[4])) {
-            //the coordinates of node 8 must be computed and added to
-            //new_pts list of points
-            new_pts->push_back(Point3D (avg[0],min[1],avg[2]));
-            mtx_new_pts->unlock();
-        }
+        //if (
+        splitEdge(all_pts[0], all_pts[1], all_pts[4], avg[0], min[1], avg[2]);//) {
+        //the coordinates of node 8 must be computed and added to
+        //new_pts list of points
+        //new_pts->push_back(Point3D (avg[0],min[1],avg[2]));
+        //}
         //inserting node 5 between nodes 1 and 2
-        if (splitEdge(all_pts[1],all_pts[2],all_pts[5])) {
-            //the coordinates of node 9 must be computed and added to
-            //new_pts list of points
-            new_pts->push_back(Point3D (max[0],avg[1],avg[2]));
-            mtx_new_pts->unlock();
-        }
+        //if (
+        splitEdge(all_pts[1], all_pts[2], all_pts[5], max[0], avg[1], avg[2]);//) {
+        //the coordinates of node 9 must be computed and added to
+        //new_pts list of points
+        //new_pts->push_back(Point3D (max[0],avg[1],avg[2]));
+        //}
         //inserting node 6 between nodes 2 and 3
-        if (splitEdge(all_pts[2],all_pts[3],all_pts[6])) {
-            //the coordinates of node 10 must be computed and added to
-            //new_pts list of points
-            new_pts->push_back(Point3D (avg[0],max[1],avg[2]));
-            mtx_new_pts->unlock();
-        }
+        //if (
+        splitEdge(all_pts[2], all_pts[3], all_pts[6], avg[0], max[1], avg[2]);//) {
+        //the coordinates of node 10 must be computed and added to
+        //new_pts list of points
+        //new_pts->push_back(Point3D (avg[0],max[1],avg[2]));
+        //}
         //inserting node 7 between nodes 3 and 0
-        if (splitEdge(all_pts[0],all_pts[3],all_pts[7])) {
-            //the coordinates of node 11 must be computed and added to
-            //new_pts list of points
-            new_pts->push_back(Point3D (min[0],avg[1],avg[2]));
-            mtx_new_pts->unlock();
-        }
+        //if (
+        splitEdge(all_pts[0], all_pts[3], all_pts[7], min[0], avg[1], avg[2]);//) {
+        //the coordinates of node 11 must be computed and added to
+        //new_pts list of points
+        //new_pts->push_back(Point3D (min[0],avg[1],avg[2]));
+        //}
 
         //of course all the intern edges and mid point were never inserted
         //before, so this task is performed without asking
-        mtx_new_pts->lock();
-        new_pts->push_back(Point3D (avg[0],avg[1],avg[2]));
-        all_pts[8] = counter_points->fetch_and_increment(); // TODO c'est quoi ça ??
-        mtx_new_pts->unlock();
+        auto ite = new_pts->push_back(Point3D(avg[0], avg[1], avg[2]));
+        all_pts[8] = points->size() + int(ite - new_pts->begin()); // TODO c'est quoi ça ??
+
 
 //        QuadEdge intern_edge1 (all_pts[4],all_pts[6]);
 //        intern_edge1.updateMidPoint(all_pts[8]);
@@ -123,71 +129,67 @@ namespace Clobscode
 //        edges->insert(intern_edge1);
 //        edges->insert(intern_edge2);
 
-        mtx_new_edges->lock();
+        edges->emplace(all_pts[4], all_pts[6], all_pts[8]);
+        edges->emplace(all_pts[5], all_pts[7], all_pts[8]);
 
-        edges->emplace(all_pts[4],all_pts[6],all_pts[8]);
-        edges->emplace(all_pts[5],all_pts[7],all_pts[8]);
+        edges->emplace(all_pts[4], all_pts[8]);
+        edges->emplace(all_pts[6], all_pts[8]);
+        edges->emplace(all_pts[5], all_pts[8]);
+        edges->emplace(all_pts[7], all_pts[8]);
 
-        edges->emplace(all_pts[4],all_pts[8]);
-        edges->emplace(all_pts[6],all_pts[8]);
-        edges->emplace(all_pts[5],all_pts[8]);
-        edges->emplace(all_pts[7],all_pts[8]);
-
-        mtx_new_edges->unlock();
-        
         //now that all edges were inserted, the elements can be easily built
-        vector<unsigned int> son_element (4,0);
-        son_element[0]=all_pts[0];
-        son_element[1]=all_pts[4];
-        son_element[2]=all_pts[8];
-        son_element[3]=all_pts[7];
+        vector<unsigned int> son_element(4, 0);
+        son_element[0] = all_pts[0];
+        son_element[1] = all_pts[4];
+        son_element[2] = all_pts[8];
+        son_element[3] = all_pts[7];
 
         new_eles->push_back(son_element);
 
-        son_element[0]=all_pts[4];
-        son_element[1]=all_pts[1];
-        son_element[2]=all_pts[5];
-        son_element[3]=all_pts[8];
+        son_element[0] = all_pts[4];
+        son_element[1] = all_pts[1];
+        son_element[2] = all_pts[5];
+        son_element[3] = all_pts[8];
 
         new_eles->push_back(son_element);
 
-        son_element[0]=all_pts[8];
-        son_element[1]=all_pts[5];
-        son_element[2]=all_pts[2];
-        son_element[3]=all_pts[6];
+        son_element[0] = all_pts[8];
+        son_element[1] = all_pts[5];
+        son_element[2] = all_pts[2];
+        son_element[3] = all_pts[6];
 
         new_eles->push_back(son_element);
 
-        son_element[0]=all_pts[7];
-        son_element[1]=all_pts[8];
-        son_element[2]=all_pts[6];
-        son_element[3]=all_pts[3];
+        son_element[0] = all_pts[7];
+        son_element[1] = all_pts[8];
+        son_element[2] = all_pts[6];
+        son_element[3] = all_pts[3];
 
         new_eles->push_back(son_element);
 
         //extreme nodes of each son to be used by clipping
         //method.
         clipping->reserve(4);
-        vector<Point3D> extreme_nodes(2, Point3D ());
+        vector<Point3D> extreme_nodes(2, Point3D());
 
         //bottom/left son is defined by nodes 0 and 8
-        extreme_nodes[0] = Point3D (min.X(),min.Y(),avg.Z());
-        extreme_nodes[1] = Point3D (avg.X(),avg.Y(),avg.Z());
+        extreme_nodes[0] = Point3D(min.X(), min.Y(), avg.Z());
+        extreme_nodes[1] = Point3D(avg.X(), avg.Y(), avg.Z());
         clipping->push_back(extreme_nodes);
 
         //bottom/right son is defined by nodes 4 and 5
-        extreme_nodes[0] = Point3D (avg.X(),min.Y(),avg.Z());
-        extreme_nodes[1] = Point3D (max.X(),avg.Y(),avg.Z());
+        extreme_nodes[0] = Point3D(avg.X(), min.Y(), avg.Z());
+        extreme_nodes[1] = Point3D(max.X(), avg.Y(), avg.Z());
         clipping->push_back(extreme_nodes);
 
         //top/right son is defined by nodes 8 and 2
-        extreme_nodes[0] = Point3D (avg.X(),avg.Y(),avg.Z());
-        extreme_nodes[1] = Point3D (max.X(),max.Y(),avg.Z());
+        extreme_nodes[0] = Point3D(avg.X(), avg.Y(), avg.Z());
+        extreme_nodes[1] = Point3D(max.X(), max.Y(), avg.Z());
         clipping->push_back(extreme_nodes);
 
         //bottom/left son is defined by nodes 7 and 6
-        extreme_nodes[0] = Point3D (min.X(),avg.Y(),avg.Z());
-        extreme_nodes[1] = Point3D (avg.X(),max.Y(),avg.Z());
+        extreme_nodes[0] = Point3D(min.X(), avg.Y(), avg.Z());
+        extreme_nodes[1] = Point3D(avg.X(), max.Y(), avg.Z());
         clipping->push_back(extreme_nodes);
 
         return true;
@@ -197,15 +199,15 @@ namespace Clobscode
 //--------------------------------------------------------------------------------
 
 
-    bool SplitVisitorTest1::splitEdge(unsigned int idx1, unsigned int idx2, unsigned int &mid_idx){
-        
-        QuadEdge this_edge (idx1,idx2);
+    bool SplitVisitorTest1::splitEdge(unsigned int idx1, unsigned int idx2, unsigned int &mid_idx,
+                                      double idx5, double idx6, double idx7) {
 
-        mtx_new_edges->lock();
-        set<QuadEdge>::const_iterator found = edges->find(this_edge);
+        QuadEdge this_edge(idx1, idx2);
 
-        if ((*found)[2]!=0) {
-            mtx_new_edges->unlock();
+        tbb::concurrent_unordered_set<QuadEdge>::const_iterator found = edges->find(this_edge);
+
+        // edge found
+        if ((*found)[2] != 0) {
             //if the edge was already split, then save its mid_point and
             //return false (the current process didn't split the edge)
             mid_idx = (*found)[2];
@@ -225,32 +227,27 @@ namespace Clobscode
         // std::set doesn't permit to update an element
         // we should erase and reinsert...
 
-        mtx_new_pts->lock();
+        //this_edge.updateMidPoint((*counter_points)++);
 
-        this_edge.updateMidPoint(this->counter_points->fetch_and_increment());
-        found = edges->erase(found);
-        edges->insert(found,this_edge); //using found as hint for insertion
+        // update found midpoint allowed since he is mutable now in QuadEdge
+        auto ite = new_pts->push_back(Point3D(idx5, idx6, idx7));
+        found->updateMidPoint(points->size() + int(ite - new_pts->begin()));
+        this_edge.updateMidPoint((*found)[2]);
+
+        //found = edges->unsafe_erase(found);
+        //edges->insert(found,this_edge); //using found as hint for insertion
 
         // bulding and inserting, with hint if possible
-        edges->emplace_hint(found, this_edge[0],this_edge[2]);
-        edges->emplace_hint(found, this_edge[2],this_edge[1]);
+        edges->emplace_hint(found, this_edge[0], this_edge[2]);
+        edges->emplace_hint(found, this_edge[2], this_edge[1]);
 
-        mtx_new_edges->unlock();
 
         mid_idx = this_edge[2];
         return true;
     }
 
-    void SplitVisitorTest1::setCounterPointst(tbb::atomic<int> *counter) {
+    void SplitVisitorTest1::setCounterPoints(unsigned int counter) {
         this->counter_points = counter;
-    }
-
-    void SplitVisitorTest1::setMutexForPoints(std::mutex *mtx_new_pts) {
-        this->mtx_new_pts = mtx_new_pts;
-    }
-
-    void SplitVisitorTest1::setMutexForEdges(std::mutex *mtx_new_edges) {
-        this->mtx_new_edges = mtx_new_edges;
     }
 
 //--------------------------------------------------------------------------------

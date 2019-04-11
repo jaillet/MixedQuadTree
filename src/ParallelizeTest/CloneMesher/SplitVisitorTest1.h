@@ -29,7 +29,8 @@
 #include <list>
 #include <set>
 #include <vector>
-#include <tbb/concurrent_queue.h>
+#include <tbb/concurrent_unordered_set.h>
+#include <tbb/concurrent_vector.h>
 #include <mutex>
 
 
@@ -45,7 +46,6 @@ using std::vector;
 using std::list;
 using std::set;
 
-
 namespace Clobscode
 {
     class SplitVisitorTest1 : public Visitor {
@@ -58,35 +58,32 @@ namespace Clobscode
 
         void setPoints(const vector<MeshPoint> &points);
         
-        void setNewPts(list<Point3D> &new_pts);
+        void setNewPts(tbb::concurrent_vector<Point3D> &new_pts);
         
-        void setEdges(set<QuadEdge> &edges);
+        void setEdges(tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> &edges);
         
         void setNewEles(vector<vector<unsigned int> > &new_eles);
         
         void setClipping(vector<vector<Point3D> > &clipping);
 
-        void setCounterPointst(tbb::atomic<int> * counter);
-
-        void setMutexForPoints(std::mutex * mtx_new_pts);
-
-        void setMutexForEdges(std::mutex * mtx_new_edges);
+        void setCounterPoints(unsigned int counter);
 
     protected:
         
         //references
         const vector<MeshPoint> *points;
-        list<Point3D> *new_pts;
-        set<QuadEdge> *edges;
+        tbb::concurrent_vector<Point3D> *new_pts;
+        tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> *edges;
         vector<vector<unsigned int> > *new_eles;
         vector<vector<Point3D> > *clipping;
-        tbb::atomic<int> * counter_points;
-        std::mutex * mtx_new_pts;
-        std::mutex * mtx_new_edges;
+        unsigned int counter_points;
 
         bool splitEdge(unsigned int idx1,
                        unsigned int idx2,
-                       unsigned int &mid_idx);
+                       unsigned int &mid_idx,
+                       double idx5,
+                       double idx6,
+                       double idx7);
 
     };
 }
