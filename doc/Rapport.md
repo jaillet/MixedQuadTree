@@ -383,4 +383,17 @@ Remove <b>iter</b> from <b>tmp_quadrants</b> PAUL : where ?
 In SplitVisitor, insert new points in <b>new_pts</b> and use the indice of this points to update mid point of edges.  
 So, this should be fixed for multi-threading because multiple thread can insert points at the same time.
 
+# Parallel version
 
+A parallel version using tbb and the container concurrent_vector for new_points and a concurrent_unordered_set for QuadEges is implemented.
+
+## Ideas
+
+If the refinement region is a box, or only the quadrants that intersect the polyline, the load balance will not be fair, so maybe add a task only if the quadrant need to be refined. 
+
+
+# Parallelism with a reduction
+
+To avoid thinking about concurrence issues like inserting new edges, creating new points with good index, we thought about a reduction, ie every thread has private memory, and a single thread join all previous thread. That means that an algorithm need to be implemented to attribute new mesh points indexes.
+
+## Algo
