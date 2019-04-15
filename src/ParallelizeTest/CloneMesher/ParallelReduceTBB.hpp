@@ -1,25 +1,28 @@
 #include "SplitVisitorNoCounterWithConcurrentSet.h"
-#include <tbb/task_scheduler_init.h>
-#include <tbb/parallel_for.h>
-#include <tbb/concurrent_vector.h>
+#include <tbb/blocked_range.h>
 #include <tbb/concurrent_unordered_set.h>
 #include <tbb/parallel_reduce.h>
 
 
 #include "../../Visitors/IntersectionsVisitor.h"
+#include "../../RefinementRegion.h"
 #include "../../Polyline.h"
 #include "../../Quadrant.h"
 
+/*
 using Clobscode::SplitVisitorNoCounterWithConcurrentSet;
 using Clobscode::QuadEdge;
+using Clobscode::RefinementRegion;
 using Clobscode::Quadrant;
 using Clobscode::MeshPoint;
 using Clobscode::Polyline;
-using Clobscode::Point3D;
+using Clobscode::Point3D;*/
 using std::vector;
 using std::list;
 using std::set;
 
+
+namespace Clobscode {
 
 class RefineMeshReduction {
     
@@ -36,6 +39,7 @@ class RefineMeshReduction {
     //Read only
     const Polyline *m_input;
     const vector<MeshPoint> m_points;
+    const list<RefinementRegion *> m_all_reg;
 
     //Only one shared, edges
     //Take ptr to share it without fear of non existing constructor
@@ -83,8 +87,8 @@ public:
     }
     
     RefineMeshReduction(unsigned int refinementLevel, const vector<Quadrant>& tmp_Quadrants, tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> *quadEdges, 
-    					const Polyline *input, const vector<MeshPoint>& points) :
-    m_rl(refinementLevel), m_tmp_Quadrants(tmp_Quadrants), m_input(input), m_points(points) {
+    					const Polyline *input, const vector<MeshPoint>& points, const list<RefinementRegion *> &all_reg) :
+    m_rl(refinementLevel), m_tmp_Quadrants(tmp_Quadrants), m_input(input), m_points(points), m_all_reg(all_reg) {
     	m_quadEdges = quadEdges;
     	setSplitVisitor();
     }
@@ -108,10 +112,7 @@ public:
     /**
      * @brief Accumulate result for subrange.
      */
-    void operator()( const blocked_range<size_t>& range ) {
-
-        nb_points = points.size();
-
+    void operator()( const tbb::blocked_range<size_t>& range ) {
 
         list<RefinementRegion *>::const_iterator reg_iter;
 
@@ -122,7 +123,7 @@ public:
             //Only check, can not modify after treatment
             bool to_refine = false;
 
-            for (reg_iter = all_reg.begin(), reg_iter++; reg_iter != all_reg.end(); ++reg_iter) {
+            for (reg_iter = m_all_reg.begin(), reg_iter++; reg_iter != m_all_reg.end(); ++reg_iter) {
 
 
                 unsigned short region_rl = (*reg_iter)->getRefinementLevel();
@@ -145,7 +146,7 @@ public:
                 // function Polyline::getNbFeatures in RefinementboundaryRegion
                 // maybe no problem for parallelisation, as this information is
                 // not used by other thread
-                if ((*reg_iter)->intersectsQuadrant(points, iter)) {
+                if ((*reg_iter)->intersectsQuadrant(m_points, iter)) {
                     to_refine = true;
                     //counterRefine.fetch_and_increment();
                     break;
@@ -164,13 +165,13 @@ public:
                 unsigned short qrl = iter.getRefinementLevel();
 
                 vector<vector<Point3D> > clipping_coords;
-                sv.setClipping(clipping_coords);
+                m_sv.setClipping(clipping_coords);
 
                 vector<vector<unsigned int> > split_elements;
-                sv.setNewEles(split_elements);
+                m_sv.setNewEles(split_elements);
 
                 //auto start_sv_time = chrono::high_resolution_clock::now();
-                iter.accept(&sv);
+                iter.accept(&m_sv);
                 //auto end_sv_time = chrono::high_resolution_clock::now();
                 //time_split_visitor += std::chrono::duration_cast<chrono::milliseconds>(end_sv_time - start_sv_time).count();
 
@@ -189,7 +190,7 @@ public:
 
                         //(paul) TODO add as attribute ?
                         IntersectionsVisitor iv(true);
-                        iv.setPolyline(input);
+                        iv.setPolyline(*m_input);
                         iv.setEdges(inter_edges);
                         iv.setCoords(clipping_coords[j]);
 
@@ -209,7 +210,7 @@ public:
                             //element is inside input, no Quadrant needed,
                             //so i moved the method to mesher  --setriva
 
-                            if (isItIn(*input, inter_edges, clipping_coords[j])) {
+                            if (isItIn(*m_input, inter_edges, clipping_coords[j])) {
                                 m_new_Quadrants.push_back(o);
                             }
                         }
@@ -220,6 +221,7 @@ public:
     }
 };
 
+}
 
 //How to use it :
 
