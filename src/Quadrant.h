@@ -39,6 +39,10 @@
 #include "Point3D.h"
 #include "QuadEdge.h"
 
+//Test
+#include "ParallelizeTest/CloneMesher/SplitVisitorNoCounterWithConcurrentSet.h"
+#include "ParallelizeTest/CloneMesher/SplitVisitorTest1.h"
+
 using Clobscode::MeshPoint;
 using Clobscode::QuadEdge;
 using Clobscode::Point3D;
@@ -59,7 +63,10 @@ namespace Clobscode
         friend class TransitionPatternVisitor;
         friend class SurfaceTemplatesVisitor;
         friend class RemoveSubElementsVisitor;
+
+        //Test
         friend class SplitVisitorTest1;
+        friend class SplitVisitorNoCounterWithConcurrentSet;
 
 	public:
 		

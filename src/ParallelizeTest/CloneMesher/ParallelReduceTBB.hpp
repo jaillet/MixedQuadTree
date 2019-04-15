@@ -1,7 +1,3 @@
-#ifndef PARALLEL_REDUCE_TBB_HPP
-#define PARALLEL_REDUCE_TBB_HPP
-
-
 #include "SplitVisitorNoCounterWithConcurrentSet.h"
 #include <tbb/task_scheduler_init.h>
 #include <tbb/parallel_for.h>
@@ -9,8 +5,20 @@
 #include <tbb/concurrent_unordered_set.h>
 #include <tbb/parallel_reduce.h>
 
+
 #include "../../Visitors/IntersectionsVisitor.h"
 #include "../../Polyline.h"
+#include "../../Quadrant.h"
+
+using Clobscode::SplitVisitorNoCounterWithConcurrentSet;
+using Clobscode::QuadEdge;
+using Clobscode::Quadrant;
+using Clobscode::MeshPoint;
+using Clobscode::Polyline;
+using Clobscode::Point3D;
+using std::vector;
+using std::list;
+using std::set;
 
 
 class RefineMeshReduction {
@@ -27,6 +35,7 @@ class RefineMeshReduction {
 
     //Read only
     const Polyline *m_input;
+    const vector<MeshPoint> m_points;
 
     //Only one shared, edges
     //Take ptr to share it without fear of non existing constructor
@@ -35,7 +44,7 @@ class RefineMeshReduction {
     SplitVisitorNoCounterWithConcurrentSet m_sv;
 
     void setSplitVisitor() {
-		m_sv.setPoints(points);
+		m_sv.setPoints(m_points);
 		m_sv.setEdges(*m_quadEdges);
 		m_sv.setNewPts(m_new_pts);
     }
@@ -53,8 +62,9 @@ public:
      * @details split is a dummy argument of type split, distinguishes the splitting constructor from a copy constructor. 
      */
     RefineMeshReduction( RefineMeshReduction& x, split ) : 
-    m_tmp_Quadrants(x.m_tmp_Quadrants), m_quadEdges(x.m_quadEdges), m_input(x.m_input) {
+    m_tmp_Quadrants(x.m_tmp_Quadrants) {
 
+    	m_quadEdges = x.m_quadEdges;
     	setSplitVisitor();
     }
     
@@ -72,9 +82,10 @@ public:
 
     }
     
-    RefineMeshReduction(unsigned int refinementLevel, const vector<Quadrant>& tmp_Quadrants, tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> *quadEdges, const Polyline *input) :
-    m_rl(refinementLevel), m_tmp_Quadrants(tmp_Quadrants), m_quadEdges(quadEdges), m_input(input) {
-
+    RefineMeshReduction(unsigned int refinementLevel, const vector<Quadrant>& tmp_Quadrants, tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> *quadEdges, 
+    					const Polyline *input, const vector<MeshPoint>& points) :
+    m_rl(refinementLevel), m_tmp_Quadrants(tmp_Quadrants), m_input(input), m_points(points) {
+    	m_quadEdges = quadEdges;
     	setSplitVisitor();
     }
 
@@ -217,5 +228,3 @@ public:
 // RefineMeshReduction rmr(a);
 // parallel_reduce( blocked_range<size_t>(0,n), rmr );
 // return rmr.my_sum;
-
-#endif // PARALLEL_REDUCE_TBB_HPP
