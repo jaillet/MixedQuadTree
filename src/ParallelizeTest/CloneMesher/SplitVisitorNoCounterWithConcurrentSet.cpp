@@ -223,7 +223,8 @@ namespace Clobscode
         // std::set doesn't permit to update an element
         // we should erase and reinsert...
         this_edge.updateMidPoint(c_n_pts++);
-        found = edges->erase(found);
+        //found = edges->erase(found);
+        found = edges->unsafe_erase(found);
         //PAUL : todo change ? peut poser pb
         edges->insert(found,this_edge); //using found as hint for insertion
 
