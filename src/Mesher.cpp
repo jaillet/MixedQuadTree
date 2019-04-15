@@ -31,6 +31,7 @@
 
 // TODO remove below after test
 #include "ParallelizeTest/CloneMesher/SplitVisitorTest1.h"
+#include "ParallelizeTest/CloneMesher/ParallelReduceTBB.hpp"
 #include <tbb/task_scheduler_init.h>
 #include <tbb/parallel_for.h>
 #include <tbb/concurrent_vector.h>
@@ -2239,6 +2240,58 @@ namespace Clobscode {
 
     }
 
+    void Mesher::refineMeshReductionTBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+                                    set<QuadEdge> QuadEdges,
+                                    const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                    Polyline &input) {
+
+        int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
+        std::cout << NOMBRE_THREAD << std::endl;
+
+        if (nbThread > NOMBRE_THREAD || nbThread < 0) {
+            std::cout << "Invalid number of threads or not supported by computer" << std::endl;
+            return;
+        }
+
+        tbb::task_scheduler_init test(nbThread);
+
+
+
+        //list of temp Quadrants
+        vector<Quadrant> tmp_Quadrants;
+        //moving quadrants to save memory
+        tmp_Quadrants.assign(make_move_iterator(Quadrants.begin()), make_move_iterator(Quadrants.end()));
+
+        //Each thread will share quadEdges, because useful in reading and modified
+        tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> quadEdges;
+        quadEdges.insert(QuadEdges.begin(), QuadEdges.end());
+
+
+        for (unsigned short i = 0; i < rl; i++) {
+         
+            auto start_refine_rl_time = chrono::high_resolution_clock::now();
+
+
+            //Create refineMeshReduction, give it the level and quadrants to refine
+            RefineMeshReduction rmr(i, tmp_Quadrants, &quadEdges, input);
+            
+
+            parallel_reduce( blocked_range<size_t>(0,n), rmr );
+
+            auto end_refine_rl_time = chrono::high_resolution_clock::now();
+            long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();
+            cout << "         * level " << i << " in "
+                 << total;
+            cout << " ms" << endl;
+
+            //Access new_pts :
+            // rmr.new_pts;
+
+        }
+
+
+    }
+
     void Mesher::refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                     set<QuadEdge> QuadEdges,
                                     const list<RefinementRegion *> &all_reg, const unsigned short &rl,
@@ -2364,6 +2417,7 @@ namespace Clobscode {
                                           new_Quadrants.push_back(iter); //SHARED VARIABLE
                                           //End of for loop
                                       } else {
+                                          //(paul) Idea : add a task here (only if to refined, check if faster..)
 
                                           list<unsigned int> &inter_edges = iter.getIntersectedEdges();
                                           unsigned short qrl = iter.getRefinementLevel();

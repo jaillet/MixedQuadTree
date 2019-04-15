@@ -26,6 +26,9 @@ set(SOURCE_FILES Main
         Visitors/RemoveSubElementsVisitor
         ParallelizeTest/CloneMesher/SplitVisitorTest1.cpp
         ParallelizeTest/CloneMesher/SplitVisitorTest1.h
+        ParallelizeTest/CloneMesher/ParallelReduceTBB.hpp
+        ParallelizeTest/CloneMesher/SplitVisitorNoCounterWithConcurrentSet.h
+        ParallelizeTest/CloneMesher/SplitVisitorNoCounterWithConcurrentSet.cpp
         )
 
 set(SOURCE_MEANTIME MeanTimePerformance/Main)

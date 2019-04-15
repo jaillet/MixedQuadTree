@@ -397,3 +397,7 @@ If the refinement region is a box, or only the quadrants that intersect the poly
 To avoid thinking about concurrence issues like inserting new edges, creating new points with good index, we thought about a reduction, ie every thread has private memory, and a single thread join all previous thread. That means that an algorithm need to be implemented to attribute new mesh points indexes.
 
 ## Algo
+
+Each thread will have it's own copy of <b>new_pts</b>, <b>new_Quadrants</b> but they will share quadEdges as a concurrent set (because the need it for reading, inserting and removing)
+
+
