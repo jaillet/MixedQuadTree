@@ -1,7 +1,6 @@
 #include "SplitVisitorNoCounterWithConcurrentSet.h"
 #include <tbb/blocked_range.h>
 #include <tbb/concurrent_unordered_set.h>
-#include <tbb/parallel_reduce.h>
 
 
 #include "../../Visitors/IntersectionsVisitor.h"
@@ -65,7 +64,7 @@ public:
      * @brief Splitting constructor. Must be able to run concurrently with operator() and method join.
      * @details split is a dummy argument of type split, distinguishes the splitting constructor from a copy constructor. 
      */
-    RefineMeshReduction( RefineMeshReduction& x, split ) : 
+    RefineMeshReduction( RefineMeshReduction& x, tbb::split ) : 
     m_tmp_Quadrants(x.m_tmp_Quadrants) {
 
     	m_quadEdges = x.m_quadEdges;
@@ -86,8 +85,8 @@ public:
 
     }
     
-    RefineMeshReduction(unsigned int refinementLevel, const vector<Quadrant>& tmp_Quadrants, tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> *quadEdges, 
-    					const Polyline *input, const vector<MeshPoint>& points, const list<RefinementRegion *> &all_reg) :
+    RefineMeshReduction(unsigned int refinementLevel, vector<Quadrant>& tmp_Quadrants, tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> *quadEdges, 
+    					Polyline *input, vector<MeshPoint>& points, const list<RefinementRegion *> &all_reg) :
     m_rl(refinementLevel), m_tmp_Quadrants(tmp_Quadrants), m_input(input), m_points(points), m_all_reg(all_reg) {
     	m_quadEdges = quadEdges;
     	setSplitVisitor();

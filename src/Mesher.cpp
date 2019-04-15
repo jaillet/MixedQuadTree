@@ -33,6 +33,7 @@
 #include "ParallelizeTest/CloneMesher/SplitVisitorTest1.h"
 #include <tbb/task_scheduler_init.h>
 #include <tbb/parallel_for.h>
+#include <tbb/parallel_reduce.h>
 #include <tbb/concurrent_vector.h>
 #include <tbb/concurrent_unordered_set.h>
 #include "ParallelizeTest/CloneMesher/ParallelReduceTBB.hpp"
@@ -2273,10 +2274,10 @@ namespace Clobscode {
 
 
             //Create refineMeshReduction, give it the level and quadrants to refine
-            RefineMeshReduction rmr(i, tmp_Quadrants, &quadEdges, input);
+            RefineMeshReduction rmr(i, tmp_Quadrants, &quadEdges, &input, points, all_reg);
             
 
-            parallel_reduce( blocked_range<size_t>(0,n), rmr );
+            parallel_reduce( tbb::blocked_range<size_t>(0, tmp_Quadrants.size()), rmr );
 
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();

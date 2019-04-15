@@ -52,7 +52,7 @@ namespace Clobscode
         this->points = &points;
     }
     
-    void SplitVisitorNoCounterWithConcurrentSet::setNewPts(list<Point3D> &new_pts) {
+    void SplitVisitorNoCounterWithConcurrentSet::setNewPts(vector<Point3D> &new_pts) {
         this->new_pts = &new_pts;
     }
     
