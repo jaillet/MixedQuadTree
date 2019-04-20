@@ -137,8 +137,8 @@ namespace Clobscode
 
         // REMOVE HERE AFTER TEST
 
-        void refineMeshReductionTBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
-                                    set<QuadEdge> QuadEdges,
+        void refineMeshReductionTBB(int nbThread, list<Quadrant> & Quadrants, vector<MeshPoint> & points,
+                                    set<QuadEdge> & QuadEdges,
                                     const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                     Polyline &input);
 

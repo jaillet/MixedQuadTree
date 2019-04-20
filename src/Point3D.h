@@ -126,8 +126,10 @@ namespace Clobscode
         virtual string print() const;
         friend std::ostream& operator<<(std::ostream& o,const Point3D &p);
 		
-		friend bool operator==(Point3D &p1,Point3D &p2);
-		
+		friend bool operator==(const Point3D &p1, const Point3D &p2) {
+		    return p1.x == p2.x && p1.y == p2.y && p1.z == p2.z;
+		}
+		friend bool operator==(Point3D &p1, Point3D &p2);
 		friend bool operator!=(Point3D &p1,Point3D &p2);
 		
         //FJA: double/Pt, has no sense
@@ -371,5 +373,5 @@ namespace Clobscode
 		x = can*ox - san*oy;
         y = san*ox + can*oy;
      }
-}    
+}
 #endif

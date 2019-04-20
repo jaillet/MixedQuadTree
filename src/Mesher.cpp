@@ -1,18 +1,18 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
- 
+
  Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
- 
+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
  */
@@ -36,7 +36,7 @@
 #include <tbb/parallel_reduce.h>
 #include <tbb/concurrent_vector.h>
 #include <tbb/concurrent_unordered_set.h>
-#include "ParallelizeTest/CloneMesher/ParallelReduceTBB.hpp"
+#include "ParallelizeTest/Join/ParallelReduceTBB.hpp"
 #include <atomic>
 
 namespace std {
@@ -995,10 +995,10 @@ namespace Clobscode {
         //----------------------------------------------------------
 
         // TEST MULTI THREAD FIRST
-        refineMeshParallelTest1TBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        //refineMeshParallelTest1TBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
+        refineMeshReductionTBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
-        
         int counterRefine = 0;
 
         for (unsigned short i = 0; i < rl; i++) {
@@ -1144,9 +1144,10 @@ namespace Clobscode {
 
 
         std::cout << "Points : " << points.size() << std::endl;
-        std::cout << "QuadEdge : " << tmp_Quadrants.size() << std::endl;
+        std::cout << "QuadEdges : " << QuadEdges.size() << std::endl;
+        std::cout << "Quadrants : " << tmp_Quadrants.size() << std::endl;
 
-        
+
 
 
 #ifdef WRITE_OUTPUT
@@ -1595,7 +1596,7 @@ namespace Clobscode {
         }
 
         /*for (o_iter=tmp_Quadrants.begin(); o_iter!=tmp_Quadrants.end(); ++o_iter) {
-         
+
          vector<vector<unsigned int> > sub_els= o_iter->getSubElements();
          for (unsigned int j=0; j<sub_els.size(); j++) {
          tmp_elements.push_back(sub_els[j]);
@@ -1960,47 +1961,47 @@ namespace Clobscode {
 
             /*
              All features were already managed.
-             
+
              if (!q.hasFeature()) {
              continue;
              }
-             
+
              list<unsigned int> fs = input.getFeatureProjection(q,points);
-             
+
              if (fs.empty()) {
              cerr << "Error at Mesher::shrinkToBoundary";
              cerr << " Quadrant labeled with feature has none\n";
              continue;
              }
-             
+
              const vector<unsigned int> &epts = q.getPointIndex();
-             
+
              unsigned int fsNum = fs.size(), outNo = 0;
              for (auto pIdx:epts) {
              if (points[pIdx].isOutside() && !points[pIdx].wasProjected()) {
              outNo++;
              }
              }
-             
+
              list<unsigned int>::const_iterator iter;
-             
+
              for (iter=fs.begin(); iter!=fs.end(); ++iter) {
-             
+
              if (outNo==0) {
              break;
              }
-             
+
              double best = std::numeric_limits<double>::infinity();
              Point3D projected = input.getPoints()[*iter];
              unsigned int pos = 0;
              bool push = false;
-             
+
              for (auto pIdx:epts) {
              if (points[pIdx].isOutside() && !points[pIdx].wasProjected()) {
-             
+
              const Point3D &current = points[pIdx].getPoint();
              double dis = (current - projected).Norm();
-             
+
              if(best>dis){
              best = dis;
              pos = pIdx;
@@ -2008,7 +2009,7 @@ namespace Clobscode {
              }
              }
              }
-             
+
              if (push) {
              points[pos].setProjected();
              points[pos].setPoint(projected);
@@ -2016,7 +2017,7 @@ namespace Clobscode {
              //apply surface patterns.
              points[pos].featureProjected();
              for (auto pe:points[pos].getElements()) {
-             
+
              //this should be studied further.
              if (Quadrants.at(pe).intersectsSurface()) {
              Quadrants[pe].setSurface();
@@ -2241,8 +2242,8 @@ namespace Clobscode {
 
     }
 
-    void Mesher::refineMeshReductionTBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
-                                    set<QuadEdge> QuadEdges,
+    void Mesher::refineMeshReductionTBB(int nbThread, list<Quadrant> & tmp_Quadrants, vector<MeshPoint> & points,
+                                    set<QuadEdge> & QuadEdges,
                                     const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                     Polyline &input) {
 
@@ -2258,26 +2259,53 @@ namespace Clobscode {
 
 
 
-        //list of temp Quadrants
-        vector<Quadrant> tmp_Quadrants;
-        //moving quadrants to save memory
-        tmp_Quadrants.assign(make_move_iterator(Quadrants.begin()), make_move_iterator(Quadrants.end()));
-
-        //Each thread will share quadEdges, because useful in reading and modified
-        tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> quadEdges;
-        quadEdges.insert(QuadEdges.begin(), QuadEdges.end());
+        // TEST REDUCTION
+        list<Point3D> new_pts;
+        vector<MeshPoint> tmp_points(points.begin(), points.end());
+        set<QuadEdge> tmp_edges(QuadEdges.begin(), QuadEdges.end());
+        vector<Quadrant> tmp_quadrants(tmp_Quadrants.begin(), tmp_Quadrants.end());
 
 
         for (unsigned short i = 0; i < rl; i++) {
-         
             auto start_refine_rl_time = chrono::high_resolution_clock::now();
 
+            new_pts.clear();
 
-            //Create refineMeshReduction, give it the level and quadrants to refine
-            RefineMeshReduction rmr(i, tmp_Quadrants, &quadEdges, &input, points, all_reg);
-            
+            int split = tmp_quadrants.size() / nbThread + 1;
+            split = std::max(split, 10000);
+            std::cout << split << std::endl;
 
-            parallel_reduce( tbb::blocked_range<size_t>(0, tmp_Quadrants.size()), rmr );
+            RefineMeshReduction rmr(i, tmp_quadrants, tmp_edges, input, tmp_points, all_reg);
+            parallel_reduce(tbb::blocked_range<size_t>(0, tmp_quadrants.size(), split), rmr);
+
+
+            std::swap(tmp_quadrants, rmr.getNewQuadrants());
+
+            //if no points were added at this iteration, it is no longer
+            //necessary to continue the refinement.
+            if (rmr.getNewPts().empty()) {
+                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                break;
+            }
+
+            //add the new points to the vector
+            tmp_points.reserve(tmp_points.size() + rmr.getNewPts().size());
+            tmp_points.insert(tmp_points.end(), rmr.getNewPts().begin(), rmr.getNewPts().end());
+
+            //add the new edges to the vector
+            for (auto edge : rmr.getNewEdges()) {
+                auto found = tmp_edges.find(edge);
+                if (found != tmp_edges.end()) {
+                    tmp_edges.erase(found);
+                    tmp_edges.insert(edge);
+                } else {
+                    tmp_edges.insert(edge);
+                }
+
+            }
+            //tmp_edges.insert(rmr.getNewEdges().begin(), rmr.getNewEdges().end());
+
+
 
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();
@@ -2285,12 +2313,16 @@ namespace Clobscode {
                  << total;
             cout << " ms" << endl;
 
-            //Access new_pts :
-            // rmr.new_pts;
-
+            //long outside = std::chrono::duration_cast<chrono::milliseconds>(end_outside_block_time - start_outside_block_time).count();
+            //cout << "TBB for outside / inside " << outside << " ms (" << (outside * 100.0 / total) << "%) ";
+            //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
+            //cout << endl;
         }
 
 
+        std::cout << "Points : " << tmp_points.size() << std::endl;
+        std::cout << "QuadEdges : " << tmp_edges.size() << std::endl;
+        std::cout << "Quadrants : " << tmp_quadrants.size() << std::endl;
     }
 
     void Mesher::refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
