@@ -1,6 +1,8 @@
 #include "CustomSplitVisitor.h"
 #include <tbb/blocked_range.h>
 #include <tr1/unordered_map>
+#include <tbb/task_group.h>
+#include <tbb/task_scheduler_init.h>
 
 #include "../../Visitors/IntersectionsVisitor.h"
 #include "../../RefinementRegion.h"
@@ -21,7 +23,7 @@ using std::set;
 
 namespace Clobscode {
 
-    class RefineMeshReduction {
+    class RefineMeshReductionV2 {
 
         //Private variables
         unsigned int m_rl;
@@ -34,7 +36,7 @@ namespace Clobscode {
 
         //Read only
         const Polyline &input;
-        const vector<MeshPoint> &points;
+        vector<MeshPoint> &points;
         const list<RefinementRegion *> &all_reg;
         vector<Quadrant> &tmp_Quadrants;
         set<QuadEdge> &edges;
@@ -43,6 +45,10 @@ namespace Clobscode {
 
         int numberOfJoint;
         bool master;
+        bool joinDone;
+
+        // usefull constante
+        unsigned long nb_points;
 
         void setSplitVisitor() {
             csv.setPoints(points);
@@ -55,125 +61,243 @@ namespace Clobscode {
 
     public:
 
-        RefineMeshReduction(unsigned int refinementLevel, vector<Quadrant> &tmp_Quadrants, set<QuadEdge> &quadEdges,
+        RefineMeshReductionV2(unsigned int refinementLevel, vector<Quadrant> &tmp_Quadrants, set<QuadEdge> &quadEdges,
                             Polyline &input, vector<MeshPoint> &points, const list<RefinementRegion *> &all_reg, const bool master) :
                 m_rl(refinementLevel), input(input), points(points), all_reg(all_reg), tmp_Quadrants(tmp_Quadrants),
                 edges(quadEdges), master(master){
             setSplitVisitor();
             numberOfJoint = 0;
+            nb_points = points.size();
+            joinDone = false;
         }
 
         /**
          * @brief Splitting constructor. Must be able to run concurrently with operator() and method join.
          * @details split is a dummy argument of type split, distinguishes the splitting constructor from a copy constructor.
          */
-        RefineMeshReduction(RefineMeshReduction &x, tbb::split) :
+        RefineMeshReductionV2(RefineMeshReductionV2 &x, tbb::split) :
                 m_rl(x.m_rl), input(x.input), points(x.points), all_reg(x.all_reg), tmp_Quadrants(x.tmp_Quadrants),
                 edges(x.edges) {
             setSplitVisitor();
             numberOfJoint = 0;
-            master = false;
+            nb_points = points.size();
+            joinDone = false;
+        }
+
+        /**
+         * @brief insert points and edges in global structures
+         */
+        void doMasterJoin() {
+            if (!joinDone) {
+
+                //add the new points to the vector
+                points.reserve(points.size() + m_new_pts.size());
+                points.insert(points.end(), m_new_pts.begin(), m_new_pts.end());
+
+                //add the new edges to the vector
+                for (auto edge : m_new_edges) {
+                    auto found = edges.find(edge);
+                    if (found != edges.end()) {
+                        edges.erase(found);
+                        edges.insert(edge);
+                    } else {
+                        edges.insert(edge);
+                    }
+
+                }
+
+                joinDone = true;
+            }
         }
 
         /**
          * @brief Reduction.
          * @details Join results. The result in rmr should be merged into the result of this.
          */
-        void join(const RefineMeshReduction &rmr) {
+        void join(const RefineMeshReductionV2 &rmr) {
 
             std::cout << "Start join" << (master ? " master" : "") << std::endl;
-
-            // TODO first call need to add local ?
-            // TODO choose smallest m_new_pts for comparison and swap ?
 
             numberOfJoint += rmr.numberOfJoint + 1;
 
             // best than map for insert and access
             std::tr1::unordered_map<unsigned int, unsigned int> taskToGlobal;
 
-            int i = 0;
-            for (const Point3D &point : rmr.m_new_pts) {
+            // allow master to insert directly in final structures
+            if (master) {
+                doMasterJoin();
 
-                //auto found = m_new_pts.find(point);
-                size_t hashPoint = point.operator()(point);
+                int i = 0;
+                for (const Point3D &point : rmr.m_new_pts) {
 
-                auto found = m_map_new_pts.find(hashPoint);
-                if (found != m_map_new_pts.end()) {
-                    taskToGlobal[i++ + points.size()] = m_map_new_pts[hashPoint];
-                } else {
-                    m_map_new_pts[hashPoint] = points.size() + m_new_pts.size();
-                    m_new_pts.push_back(point);
-                    taskToGlobal[i++ + points.size()] = points.size() + m_new_pts.size() - 1;
-                }
-            }
+                    //auto found = m_new_pts.find(point);
+                    size_t hashPoint = point.operator()(point);
 
-            tbb::task_scheduler_init def_init; // Use the default number of threads.
-            tbb::task_group tg;
-
-            tg.run([&] { // run in task group
-                std::cout << "Edge start" << std::endl;
-                for (const QuadEdge &local_edge : rmr.m_new_edges) {
-                    // build new edge with right index
-                    vector<unsigned long> index(3, 0);
-
-                    for (unsigned int i = 0; i < 3; i++) {
-                        if (local_edge[i] < points.size()) {
-                            // index refer point not created during this refinement level
-                            index[i] = local_edge[i];
-                        } else {
-                            // point created, need to update the point with correct index
-                            index[i] = taskToGlobal[local_edge[i]];
-                        }
-                    }
-
-                    QuadEdge edge(index[0], index[1], index[2]);
-
-                    auto found = m_new_edges.find(edge);
-
-                    if (found == m_new_edges.end()) {
-                        m_new_edges.insert(edge);
+                    auto found = m_map_new_pts.find(hashPoint);
+                    if (found != m_map_new_pts.end()) {
+                        taskToGlobal[i++ + nb_points] = m_map_new_pts[hashPoint];
                     } else {
-                        if (edge[2] != 0 && edge[2] != (*found)[2]) {
-                            // since all points have been replaced, if it's different then midpoint has been created
-                            // is it possible ?
-                            m_new_edges.erase(found);
-                            m_new_edges.insert(edge);
-                        }
+                        m_map_new_pts[hashPoint] = points.size();
+                        points.push_back(point);
+                        taskToGlobal[i++ + nb_points] = points.size() - 1;
                     }
                 }
 
-                std::cout << "Edge end" << std::endl;
-            });
+                tbb::task_scheduler_init def_init; // Use the default number of threads.
+                tbb::task_group tg;
 
-            // Run another job concurrently with the loop above.
-            // It can use up to the default number of threads.
-            tg.run([&] { // run in task group
-                std::cout << "Quad start" << std::endl;
-                for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
-                    // build new quad with right index
+                tg.run([&] { // run in task group
+                    std::cout << "Edge start" << std::endl;
+                    for (const QuadEdge &local_edge : rmr.m_new_edges) {
+                        // build new edge with right index
+                        vector<unsigned long> index(3, 0);
 
-                    vector<unsigned int> new_pointindex(4, 0);
-                    for (unsigned int i = 0; i < 4; i++) {
-                        if (local_quad.getPointIndex(i) < points.size()) {
-                            // index refer point not created during this refinement level
-                            new_pointindex[i] = local_quad.getPointIndex(i);
+                        for (unsigned int i = 0; i < 3; i++) {
+                            if (local_edge[i] < nb_points) {
+                                // index refer point not created during this refinement level
+                                index[i] = local_edge[i];
+                            } else {
+                                // point created, need to update the point with correct index
+                                index[i] = taskToGlobal[local_edge[i]];
+                            }
+                        }
+
+                        QuadEdge edge(index[0], index[1], index[2]);
+
+                        auto found = edges.find(edge);
+
+                        if (found == edges.end()) {
+                            edges.insert(edge);
                         } else {
-                            // point created, need to update the point with correct index
-                            new_pointindex[i] = taskToGlobal[local_quad.getPointIndex(i)];
+                            if (edge[2] != 0 && edge[2] != (*found)[2]) {
+                                // since all points have been replaced, if it's different then midpoint has been created
+                                // is it possible ?
+                                edges.erase(found);
+                                edges.insert(edge);
+                            }
                         }
                     }
 
-                    Quadrant quad(new_pointindex, m_rl);
-                    m_new_Quadrants.push_back(quad);
+                    std::cout << "Edge end" << std::endl;
+                });
 
+                // Run another job concurrently with the loop above.
+                // It can use up to the default number of threads.
+                tg.run([&] { // run in task group
+                    std::cout << "Quad start" << std::endl;
+                    for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
+                        // build new quad with right index
+
+                        vector<unsigned int> new_pointindex(4, 0);
+                        for (unsigned int i = 0; i < 4; i++) {
+                            if (local_quad.getPointIndex(i) < nb_points) {
+                                // index refer point not created during this refinement level
+                                new_pointindex[i] = local_quad.getPointIndex(i);
+                            } else {
+                                // point created, need to update the point with correct index
+                                new_pointindex[i] = taskToGlobal[local_quad.getPointIndex(i)];
+                            }
+                        }
+
+                        Quadrant quad(new_pointindex, m_rl);
+                        m_new_Quadrants.push_back(quad);
+
+                    }
+                    std::cout << "Quad end" << std::endl;
+                });
+
+                // Wait for completion of the task group
+                tg.wait();
+
+                std::cout << "End join" << (master ? " master" : "") << std::endl;
+
+            } else {
+
+
+                int i = 0;
+                for (const Point3D &point : rmr.m_new_pts) {
+
+                    //auto found = m_new_pts.find(point);
+                    size_t hashPoint = point.operator()(point);
+
+                    auto found = m_map_new_pts.find(hashPoint);
+                    if (found != m_map_new_pts.end()) {
+                        taskToGlobal[i++ + nb_points] = m_map_new_pts[hashPoint];
+                    } else {
+                        m_map_new_pts[hashPoint] = nb_points + m_new_pts.size();
+                        m_new_pts.push_back(point);
+                        taskToGlobal[i++ + nb_points] = nb_points + m_new_pts.size() - 1;
+                    }
                 }
-                std::cout << "Quad end" << std::endl;
-            });
 
-            // Wait for completion of the task group
-            tg.wait();
+                tbb::task_scheduler_init def_init; // Use the default number of threads.
+                tbb::task_group tg;
 
-            std::cout << "End join" << (master ? " master" : "") << std::endl;
+                tg.run([&] { // run in task group
+                    std::cout << "Edge start" << std::endl;
+                    for (const QuadEdge &local_edge : rmr.m_new_edges) {
+                        // build new edge with right index
+                        vector<unsigned long> index(3, 0);
+
+                        for (unsigned int i = 0; i < 3; i++) {
+                            if (local_edge[i] < nb_points) {
+                                // index refer point not created during this refinement level
+                                index[i] = local_edge[i];
+                            } else {
+                                // point created, need to update the point with correct index
+                                index[i] = taskToGlobal[local_edge[i]];
+                            }
+                        }
+
+                        QuadEdge edge(index[0], index[1], index[2]);
+
+                        auto found = m_new_edges.find(edge);
+
+                        if (found == m_new_edges.end()) {
+                            m_new_edges.insert(edge);
+                        } else {
+                            if (edge[2] != 0 && edge[2] != (*found)[2]) {
+                                // since all points have been replaced, if it's different then midpoint has been created
+                                // is it possible ?
+                                m_new_edges.erase(found);
+                                m_new_edges.insert(edge);
+                            }
+                        }
+                    }
+
+                    std::cout << "Edge end" << std::endl;
+                });
+
+                // Run another job concurrently with the loop above.
+                // It can use up to the default number of threads.
+                tg.run([&] { // run in task group
+                    std::cout << "Quad start" << std::endl;
+                    for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
+                        // build new quad with right index
+
+                        vector<unsigned int> new_pointindex(4, 0);
+                        for (unsigned int i = 0; i < 4; i++) {
+                            if (local_quad.getPointIndex(i) < nb_points) {
+                                // index refer point not created during this refinement level
+                                new_pointindex[i] = local_quad.getPointIndex(i);
+                            } else {
+                                // point created, need to update the point with correct index
+                                new_pointindex[i] = taskToGlobal[local_quad.getPointIndex(i)];
+                            }
+                        }
+
+                        Quadrant quad(new_pointindex, m_rl);
+                        m_new_Quadrants.push_back(quad);
+
+                    }
+                    std::cout << "Quad end" << std::endl;
+                });
+
+                // Wait for completion of the task group
+                tg.wait();
+
+                std::cout << "End join" << (master ? " master" : "") << std::endl;
+            }
         }
 
         /**

@@ -31,6 +31,7 @@ set(SOURCE_FILES Main
         ParallelizeTest/Join/CustomSplitVisitor.cpp
         ParallelizeTest/Join/CustomSplitVisitor.h
         ParallelizeTest/Join/ParallelReduceTBB.hpp
+        ParallelizeTest/Join/ParallelReduceTBBV2.hpp
         )
 
 set(SOURCE_MEANTIME MeanTimePerformance/Main)
