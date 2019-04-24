@@ -29,7 +29,6 @@
 #include <list>
 #include <set>
 #include <vector>
-#include <tbb/concurrent_unordered_set.h>
 
 #include "../../Visitors/Visitor.h"
 #include "../../MeshPoint.h"
@@ -56,7 +55,7 @@ namespace Clobscode
 
         void setPoints(const vector<MeshPoint> &points);
         
-        void setNewPts(vector<Point3D> &new_pts);
+        void setNewPts(set<Point3D> &new_pts);
 
         void setNewEdges(set<QuadEdge> & new_edges);
         
@@ -70,7 +69,7 @@ namespace Clobscode
         
         //references
         const vector<MeshPoint> *points;
-        vector<Point3D> *new_pts;
+        set<Point3D> *new_pts;
         set<QuadEdge> *new_edges;
         set<QuadEdge> *edges;
         vector<vector<unsigned int>> *new_eles;

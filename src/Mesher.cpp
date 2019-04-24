@@ -50,6 +50,7 @@ namespace std {
     };
 }
 
+
 namespace Clobscode {
 
 
@@ -1138,14 +1139,16 @@ namespace Clobscode {
             //cout << "TBB for outside / inside " << outside << " ms (" << (outside * 100.0 / total) << "%) ";
             //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
             //cout << endl;
+
+            std::cout << "Points : " << points.size() << std::endl;
+            std::cout << "QuadEdges : " << QuadEdges.size() << std::endl;
+            std::cout << "Quadrants : " << tmp_Quadrants.size() << std::endl;
         }
 
         std::cout << counterRefine << std::endl;
 
 
-        std::cout << "Points : " << points.size() << std::endl;
-        std::cout << "QuadEdges : " << QuadEdges.size() << std::endl;
-        std::cout << "Quadrants : " << tmp_Quadrants.size() << std::endl;
+
 
 
 
@@ -2255,7 +2258,7 @@ namespace Clobscode {
             return;
         }
 
-        tbb::task_scheduler_init test(nbThread);
+        tbb::task_scheduler_init test(1);
 
 
 
@@ -2317,12 +2320,15 @@ namespace Clobscode {
             //cout << "TBB for outside / inside " << outside << " ms (" << (outside * 100.0 / total) << "%) ";
             //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
             //cout << endl;
+
+            std::cout << "Points : " << tmp_points.size() << std::endl;
+            std::cout << "QuadEdges : " << tmp_edges.size() << std::endl;
+            std::cout << "Quadrants : " << tmp_quadrants.size() << std::endl;
+
         }
 
 
-        std::cout << "Points : " << tmp_points.size() << std::endl;
-        std::cout << "QuadEdges : " << tmp_edges.size() << std::endl;
-        std::cout << "Quadrants : " << tmp_quadrants.size() << std::endl;
+
     }
 
     void Mesher::refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,

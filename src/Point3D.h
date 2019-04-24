@@ -125,10 +125,22 @@ namespace Clobscode
 		
         virtual string print() const;
         friend std::ostream& operator<<(std::ostream& o,const Point3D &p);
+
+        friend bool operator<(const Point3D &p1, const Point3D &p2) {
+            return p1.x < p2.x && p1.y < p2.y && p1.z < p2.z;
+        }
 		
 		friend bool operator==(const Point3D &p1, const Point3D &p2) {
 		    return p1.x == p2.x && p1.y == p2.y && p1.z == p2.z;
 		}
+
+        virtual std::size_t operator()(const Point3D& point) const noexcept {
+            size_t h1 = std::hash<double>()(point[0]);
+            size_t h2 = std::hash<double>()(point[1]);
+            size_t h3 = std::hash<double>()(point[2]);
+            return (h1 ^ (h2 << 1) ^ h3);
+        }
+
 		friend bool operator==(Point3D &p1, Point3D &p2);
 		friend bool operator!=(Point3D &p1,Point3D &p2);
 		

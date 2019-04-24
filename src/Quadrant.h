@@ -121,7 +121,11 @@ namespace Clobscode
         virtual const list<unsigned int>& getIntersectedFeatures() const;
         virtual list<unsigned int>& getIntersectedFeatures();
         virtual bool hasIntersectedFeatures() const;
-        
+
+
+        friend bool operator==(const Quadrant &p1, const Quadrant &p2) {
+            return p1.pointindex[0] == p2.pointindex[0] && p1.pointindex[1] == p2.pointindex[1] && p1.pointindex[2] == p2.pointindex[2] && p1.pointindex[3] == p2.pointindex[3];
+        }
         
         /***** BEGIN Debugging methods *******/
         virtual void setDebugging();

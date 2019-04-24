@@ -1,6 +1,7 @@
 #include "CustomSplitVisitor.h"
 #include <tbb/blocked_range.h>
 #include <tr1/unordered_map>
+#include <unordered_set>
 
 #include "../../Visitors/IntersectionsVisitor.h"
 #include "../../RefinementRegion.h"
@@ -18,7 +19,7 @@ using Clobscode::Point3D;*/
 using std::vector;
 using std::list;
 using std::set;
-
+using std::unordered_set;
 
 namespace Clobscode {
 
@@ -29,7 +30,7 @@ class RefineMeshReduction {
 
     //Need to be read in reduction :
     vector<Quadrant> m_new_Quadrants;
-    vector<Point3D> m_new_pts; //Local new pts (not merged)
+    set<Point3D> m_new_pts; //Local new pts (not merged)
     set<QuadEdge> m_new_edges;
 
     //Read only
@@ -44,9 +45,6 @@ class RefineMeshReduction {
     int numberOfJoint;
 
     void setSplitVisitor() {
-        m_new_Quadrants.size();
-        m_new_pts.size();
-        m_new_edges.size();
         csv.setPoints(points);
         csv.setEdges(edges);
         csv.setNewPts(m_new_pts);
@@ -78,34 +76,37 @@ public:
      */
     void join( const RefineMeshReduction& rmr ) {
 
+        std::cout << "Start join" << std::endl;
+
         // TODO first call need to add local ?
         // TODO choose smallest m_new_pts for comparison and swap ?
 
         numberOfJoint += rmr.numberOfJoint + 1;
         // best than map for insert and access
-        std::tr1::unordered_map<unsigned int, unsigned int> taskToGlobal;
+        std::tr1::unordered_map<unsigned long, unsigned long> taskToGlobal;
 
-        Point3D point;
-        for (int i = 0; i < rmr.m_new_pts.size(); i++) {
-            point = rmr.m_new_pts[i];
+        int i = 0;
+        for (const Point3D & point : rmr.m_new_pts) {
 
-            auto found = std::find(m_new_pts.begin(), m_new_pts.end(), point);
+            auto found = m_new_pts.find(point);
+            //auto found = std::find(m_new_pts.begin(), m_new_pts.end(), point);
+
             if (found != m_new_pts.end()) {
                 // point already created by other thread, map index of point to index of corresponding
                 // point in new_points plus size of points because all new_points will be added to
                 // points at the end
-                unsigned int index_new_pts = distance(m_new_pts.begin(), found);
-                taskToGlobal[i] = points.size() + index_new_pts;
+                long index_new_pts = distance(m_new_pts.begin(), found);
+                taskToGlobal[i++ + points.size()] = points.size() + index_new_pts;
             } else {
                 // point doesn’t exists, add it and map index
-                m_new_pts.push_back(point);
-                taskToGlobal[i] = points.size() + m_new_pts.size() - 1;
+                m_new_pts.insert(point);
+                taskToGlobal[i++ + points.size()] = points.size() + m_new_pts.size() - 1;
             }
         }
 
         for (const QuadEdge & local_edge : rmr.m_new_edges) {
             // build new edge with right index
-            vector<unsigned int> index(3,0);
+            vector<unsigned long> index(3,0);
 
             for (unsigned int i = 0; i < 3; i++) {
                 if (local_edge[i] < points.size()) {
@@ -123,11 +124,13 @@ public:
 
             if (found == m_new_edges.end()) {
                 m_new_edges.insert(edge);
-            } else if (edge[2] != (*found)[2]) {
-                // since all points have been replaced, if it's different then midpoint has been created
-                // is it possible ?
-                m_new_edges.erase(found);
-                m_new_edges.insert(edge);
+            } else {
+                if (edge[2] != 0 && edge[2] != (*found)[2]) {
+                    // since all points have been replaced, if it's different then midpoint has been created
+                    // is it possible ?
+                    m_new_edges.erase(found);
+                    m_new_edges.insert(edge);
+                }
             }
         }
 
@@ -146,9 +149,14 @@ public:
             }
 
             Quadrant quad(new_pointindex, m_rl);
+            auto found = std::find(m_new_Quadrants.begin(), m_new_Quadrants.end(), quad);
+            if (found != m_new_Quadrants.end()) {
+                std::cout << "WTF" << std::endl;
+            }
             m_new_Quadrants.push_back(quad);
 
         }
+        std::cout << "End join" << std::endl;
     }
     /**
      * @brief Accumulate result for subrange.
@@ -262,7 +270,7 @@ public:
     }
 
     inline vector<Quadrant> & getNewQuadrants() { return m_new_Quadrants; }
-    inline vector<Point3D> & getNewPts() {  return m_new_pts; }
+    inline set<Point3D> & getNewPts() {  return m_new_pts; }
     inline set<QuadEdge> & getNewEdges() { return m_new_edges; }
 
     bool isItIn(const Polyline &mesh, const list<unsigned int> &faces, const vector<Point3D> &coords) const {
