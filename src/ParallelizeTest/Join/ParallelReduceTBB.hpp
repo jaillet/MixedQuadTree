@@ -1,7 +1,6 @@
 #include "CustomSplitVisitor.h"
 #include <tbb/blocked_range.h>
 #include <tr1/unordered_map>
-#include <unordered_set>
 
 #include "../../Visitors/IntersectionsVisitor.h"
 #include "../../RefinementRegion.h"
@@ -19,7 +18,6 @@ using Clobscode::Point3D;*/
 using std::vector;
 using std::list;
 using std::set;
-using std::unordered_set;
 
 namespace Clobscode {
 
@@ -30,7 +28,8 @@ class RefineMeshReduction {
 
     //Need to be read in reduction :
     vector<Quadrant> m_new_Quadrants;
-    set<Point3D> m_new_pts; //Local new pts (not merged)
+    vector<Point3D> m_new_pts; //Local new pts (not merged)
+    std::tr1::unordered_map<size_t, unsigned int> m_map_new_pts;
     set<QuadEdge> m_new_edges;
 
     //Read only
@@ -43,12 +42,14 @@ class RefineMeshReduction {
     CustomSplitVisitor csv;
 
     int numberOfJoint;
+    bool master;
 
     void setSplitVisitor() {
         csv.setPoints(points);
         csv.setEdges(edges);
         csv.setNewPts(m_new_pts);
         csv.setNewEdges(m_new_edges);
+        csv.setMapPts(m_map_new_pts);
     }
 
 
@@ -56,9 +57,10 @@ public:
 
     RefineMeshReduction(unsigned int refinementLevel, vector<Quadrant>& tmp_Quadrants, set<QuadEdge> & quadEdges,
                         Polyline & input, vector<MeshPoint>& points, const list<RefinementRegion *> &all_reg) :
-            m_rl(refinementLevel), tmp_Quadrants(tmp_Quadrants), input(input), edges(quadEdges), points(points), all_reg(all_reg) {
+            m_rl(refinementLevel), input(input), points(points), all_reg(all_reg), tmp_Quadrants(tmp_Quadrants), edges(quadEdges){
         setSplitVisitor();
         numberOfJoint = 0;
+        master = true;
     }
 
     /**
@@ -66,8 +68,10 @@ public:
      * @details split is a dummy argument of type split, distinguishes the splitting constructor from a copy constructor. 
      */
     RefineMeshReduction( RefineMeshReduction& x, tbb::split ) :
-        m_rl(x.m_rl), tmp_Quadrants(x.tmp_Quadrants), input(x.input), edges(x.edges), points(x.points), all_reg(x.all_reg)  {
+        m_rl(x.m_rl), input(x.input), points(x.points), all_reg(x.all_reg), tmp_Quadrants(x.tmp_Quadrants), edges(x.edges) {
     	setSplitVisitor();
+        numberOfJoint = 0;
+    	master = false;
     }
     
     /**
@@ -76,20 +80,33 @@ public:
      */
     void join( const RefineMeshReduction& rmr ) {
 
-        std::cout << "Start join" << std::endl;
+        std::cout << "Start join" << (master ? " master" : "") << std::endl;
 
         // TODO first call need to add local ?
         // TODO choose smallest m_new_pts for comparison and swap ?
 
         numberOfJoint += rmr.numberOfJoint + 1;
+
         // best than map for insert and access
-        std::tr1::unordered_map<unsigned long, unsigned long> taskToGlobal;
+        std::tr1::unordered_map<unsigned int, unsigned int> taskToGlobal;
 
         int i = 0;
         for (const Point3D & point : rmr.m_new_pts) {
 
-            auto found = m_new_pts.find(point);
-            //auto found = std::find(m_new_pts.begin(), m_new_pts.end(), point);
+            //auto found = m_new_pts.find(point);
+            size_t hashPoint = point.operator()(point);
+
+            auto found = m_map_new_pts.find(hashPoint);
+            if (found != m_map_new_pts.end()) {
+                taskToGlobal[i++ + points.size()] = m_map_new_pts[hashPoint];
+            } else {
+                m_map_new_pts[hashPoint] = points.size() + m_new_pts.size();
+                m_new_pts.push_back(point);
+                taskToGlobal[i++ + points.size()] = points.size() + m_new_pts.size() - 1;
+            }
+
+            /*
+            auto found = std::find(m_new_pts.begin(), m_new_pts.end(), point);
 
             if (found != m_new_pts.end()) {
                 // point already created by other thread, map index of point to index of corresponding
@@ -99,9 +116,10 @@ public:
                 taskToGlobal[i++ + points.size()] = points.size() + index_new_pts;
             } else {
                 // point doesn’t exists, add it and map index
-                m_new_pts.insert(point);
+                m_new_pts.push_back(point);
                 taskToGlobal[i++ + points.size()] = points.size() + m_new_pts.size() - 1;
             }
+             */
         }
 
         for (const QuadEdge & local_edge : rmr.m_new_edges) {
@@ -149,14 +167,10 @@ public:
             }
 
             Quadrant quad(new_pointindex, m_rl);
-            auto found = std::find(m_new_Quadrants.begin(), m_new_Quadrants.end(), quad);
-            if (found != m_new_Quadrants.end()) {
-                std::cout << "WTF" << std::endl;
-            }
             m_new_Quadrants.push_back(quad);
 
         }
-        std::cout << "End join" << std::endl;
+        std::cout << "End join" << (master ? " master" : "") << std::endl;
     }
     /**
      * @brief Accumulate result for subrange.
@@ -270,7 +284,7 @@ public:
     }
 
     inline vector<Quadrant> & getNewQuadrants() { return m_new_Quadrants; }
-    inline set<Point3D> & getNewPts() {  return m_new_pts; }
+    inline vector<Point3D> & getNewPts() {  return m_new_pts; }
     inline set<QuadEdge> & getNewEdges() { return m_new_edges; }
 
     bool isItIn(const Polyline &mesh, const list<unsigned int> &faces, const vector<Point3D> &coords) const {

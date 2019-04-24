@@ -45,7 +45,7 @@ namespace std {
         size_t operator()(const Clobscode::QuadEdge& k) const
         {
             // Compute individual hash values for two data members and combine them using XOR and bit shifting
-            return ((hash<float>()(k[0]) ^ (hash<float>()(k[1]) << 1)) >> 1);
+            return ((hash<int>()(k[0]) ^ (hash<int>()(k[1]) << 1)) >> 1);
         }
     };
 }
@@ -2258,7 +2258,7 @@ namespace Clobscode {
             return;
         }
 
-        tbb::task_scheduler_init test(1);
+        tbb::task_scheduler_init test(nbThread);
 
 
 

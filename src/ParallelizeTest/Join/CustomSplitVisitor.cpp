@@ -42,8 +42,12 @@ namespace Clobscode
         this->points = &points;
     }
     
-    void CustomSplitVisitor::setNewPts(set<Point3D> &new_pts) {
+    void CustomSplitVisitor::setNewPts(vector<Point3D> &new_pts) {
         this->new_pts = &new_pts;
+    }
+
+    void CustomSplitVisitor::setMapPts(std::tr1::unordered_map<size_t, unsigned int> &map_pts) {
+        this->map_pts = &map_pts;
     }
 
     void CustomSplitVisitor::setNewEdges(set<QuadEdge> &new_edges) {
@@ -76,47 +80,58 @@ namespace Clobscode
 
         //save the four nodes of this square first
         for (unsigned int i=0; i < pi.size(); i++) {
-            std::cout << pi[i] << std::endl;
-            std::cout << all_pts[i] << std::endl;
-            all_pts[i] = pi.at(i);
+            all_pts[i] = pi[i];
         }
 
         const Point3D &min = points->at(pi[0]).getPoint();
         const Point3D &max = points->at(pi[2]).getPoint();
         const Point3D avg = (max-min)/2 + min;
 
-        std::cout << "ok" << std::endl;
 
         //inserting node 4 between nodes 0 and 1
         if (splitEdge(all_pts[0],all_pts[1],n_pts,all_pts[4])) {
             //the coordinates of node 8 must be computed and added to
             //new_pts list of points
-            new_pts->insert(Point3D (avg[0],min[1],avg[2]));
+            Point3D pt (avg[0],min[1],avg[2]);
+            map_pts->insert(std::pair<size_t, unsigned int>(pt.operator()(pt), n_pts -1));
+            new_pts->push_back(pt);
+            //new_pts->push_back(Point3D (avg[0],min[1],avg[2]));
         }
         //inserting node 5 between nodes 1 and 2
         if (splitEdge(all_pts[1],all_pts[2],n_pts,all_pts[5])) {
             //the coordinates of node 9 must be computed and added to
             //new_pts list of points
-            new_pts->insert(Point3D (max[0],avg[1],avg[2]));
+            Point3D pt (max[0],avg[1],avg[2]);
+            map_pts->insert(std::pair<size_t, unsigned int>(pt.operator()(pt), n_pts -1));
+            new_pts->push_back(pt);
+            //new_pts->push_back(Point3D (max[0],avg[1],avg[2]));
         }
         //inserting node 6 between nodes 2 and 3
         if (splitEdge(all_pts[2],all_pts[3],n_pts,all_pts[6])) {
             //the coordinates of node 10 must be computed and added to
             //new_pts list of points
-            new_pts->insert(Point3D (avg[0],max[1],avg[2]));
+            Point3D pt (avg[0],max[1],avg[2]);
+            map_pts->insert(std::pair<size_t, unsigned int>(pt.operator()(pt), n_pts -1));
+            new_pts->push_back(pt);
+            //new_pts->push_back(Point3D (avg[0],max[1],avg[2]));
         }
         //inserting node 7 between nodes 3 and 0
         if (splitEdge(all_pts[0],all_pts[3],n_pts,all_pts[7])) {
             //the coordinates of node 11 must be computed and added to
             //new_pts list of points
-            new_pts->insert(Point3D (min[0],avg[1],avg[2]));
+            Point3D pt (min[0],avg[1],avg[2]);
+            map_pts->insert(std::pair<size_t, unsigned int>(pt.operator()(pt), n_pts -1));
+            new_pts->push_back(pt);
+            //new_pts->push_back(Point3D (min[0],avg[1],avg[2]));
         }
 
         //of course all the intern edges and mid point were never inserted
         //before, so this task is performed without asking
         Point3D pt (avg[0],avg[1],avg[2]);
-        auto found = new_pts->find(pt);
-        new_pts->insert(pt);
+        map_pts->insert(std::pair<size_t, unsigned int>(pt.operator()(pt), n_pts -1));
+        new_pts->push_back(pt);
+        //new_pts->push_back(Point3D (avg[0],avg[1],avg[2]));
+        //new_pts->insert(Point3D (avg[0],avg[1],avg[2]));
         all_pts[8] = n_pts;
 
 //        QuadEdge intern_edge1 (all_pts[4],all_pts[6]);

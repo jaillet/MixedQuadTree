@@ -127,7 +127,11 @@ namespace Clobscode
         friend std::ostream& operator<<(std::ostream& o,const Point3D &p);
 
         friend bool operator<(const Point3D &p1, const Point3D &p2) {
-            return p1.x < p2.x && p1.y < p2.y && p1.z < p2.z;
+            if (p1.x < p2.x) return true;
+            else if (p1.x > p2.x) return false;
+            else if (p1.y < p2.y) return true;
+            else if (p1.y > p2.y) return false;
+            else return p1.z < p2.z;
         }
 		
 		friend bool operator==(const Point3D &p1, const Point3D &p2) {

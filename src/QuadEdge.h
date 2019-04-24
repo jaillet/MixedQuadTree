@@ -83,23 +83,21 @@ namespace Clobscode
 		
 	protected:
         vector<unsigned int> info; //info[2] midpoint
-        mutable unsigned int midpoint;
 
 	};
 	
     inline void QuadEdge::updateMidPoint(unsigned int idx) {
-		midpoint = idx;
+        info[2] = idx;
 	}
 
     inline unsigned int QuadEdge::operator[](unsigned int pos) const{
 //		return info.at(pos);
-		if (pos == 2) return midpoint;
         return info[pos]; //no position validity check
     }
 	
     //FJA TODO: this is a duplicate of updateMidPoint
     inline void QuadEdge::setMidPoint(unsigned int mid){
-		midpoint = mid;
+		info[2] = mid;
 	}
 
 }

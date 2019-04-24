@@ -29,6 +29,8 @@
 #include <list>
 #include <set>
 #include <vector>
+#include <map>
+#include <tr1/unordered_map>
 
 #include "../../Visitors/Visitor.h"
 #include "../../MeshPoint.h"
@@ -41,6 +43,7 @@ using Clobscode::Point3D;
 using std::vector;
 using std::list;
 using std::set;
+using std::map;
 
 
 namespace Clobscode
@@ -55,7 +58,9 @@ namespace Clobscode
 
         void setPoints(const vector<MeshPoint> &points);
         
-        void setNewPts(set<Point3D> &new_pts);
+        void setNewPts(vector<Point3D> &new_pts);
+
+        void setMapPts(std::tr1::unordered_map<size_t, unsigned int> &map_pts);
 
         void setNewEdges(set<QuadEdge> & new_edges);
         
@@ -69,7 +74,8 @@ namespace Clobscode
         
         //references
         const vector<MeshPoint> *points;
-        set<Point3D> *new_pts;
+        vector<Point3D> *new_pts;
+        std::tr1::unordered_map<size_t, unsigned int> *map_pts;
         set<QuadEdge> *new_edges;
         set<QuadEdge> *edges;
         vector<vector<unsigned int>> *new_eles;
