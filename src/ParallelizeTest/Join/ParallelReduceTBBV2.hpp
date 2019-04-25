@@ -159,7 +159,6 @@ namespace Clobscode {
 
                     long timeInit = 0;
                     long timeInsert = 0;
-                    long timeInsert1 = 0;
                     long timeInsertErase = 0;
                     long timeFound = 0;
 
@@ -188,10 +187,11 @@ namespace Clobscode {
                         start_quad = chrono::high_resolution_clock::now();
 
                         //auto found = edges.find(edge);
-                        auto found = edges.insert(edge);
+                        auto found = edges.insert(edge); // try insert
 
                         timeFound += std::chrono::duration_cast<chrono::nanoseconds>( chrono::high_resolution_clock::now() - start_quad).count();
 
+                        // if edge already exists
                         if (!found.second) {
                             if (edge[2] != 0 && edge[2] != (*found.first)[2]) {
                                 auto start = chrono::high_resolution_clock::now();
