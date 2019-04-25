@@ -187,21 +187,18 @@ namespace Clobscode {
 
                         start_quad = chrono::high_resolution_clock::now();
 
-                        auto found = edges.find(edge);
+                        //auto found = edges.find(edge);
+                        auto found = edges.insert(edge);
 
                         timeFound += std::chrono::duration_cast<chrono::nanoseconds>( chrono::high_resolution_clock::now() - start_quad).count();
 
-                        if (found == edges.end()) {
-                            auto start = chrono::high_resolution_clock::now();
-                            edges.insert(found, edge);
-                            timeInsert1 += std::chrono::duration_cast<chrono::nanoseconds>( chrono::high_resolution_clock::now() - start).count();
-                        } else {
-                            if (edge[2] != 0 && edge[2] != (*found)[2]) {
+                        if (!found.second) {
+                            if (edge[2] != 0 && edge[2] != (*found.first)[2]) {
                                 auto start = chrono::high_resolution_clock::now();
                                 // since all points have been replaced, if it's different then midpoint has been created
                                 // is it possible ?
-                                found = edges.erase(found);
-                                edges.insert(found, edge);
+                                auto hint = edges.erase(found.first);
+                                edges.insert(hint, edge);
                                 timeInsertErase += std::chrono::duration_cast<chrono::nanoseconds>( chrono::high_resolution_clock::now() - start).count();
                             }
                         }
@@ -213,7 +210,7 @@ namespace Clobscode {
                     auto end_quad = chrono::high_resolution_clock::now();
 
                     long total2 = std::chrono::duration_cast<chrono::nanoseconds>(end_quad - start_quad).count();
-                    cout << " time edges " << total2 << " ns => init " << (timeInit * 100 / total2) << " %, insert " << (timeInsert * 100 / total2) << " % (" << (100 * timeFound / timeInsert) << "% found, " <<  (100 * timeInsert1 / timeInsert) << "%  simple insert, " << (100 * timeInsertErase / timeInsert) << "% erase insert)" << endl;
+                    cout << " time edges " << total2 << " ns => init " << (timeInit * 100 / total2) << " %, insert " << (timeInsert * 100 / total2) << " % (" << (100 * timeFound / timeInsert) << "% try insert, " << (100 * timeInsertErase / timeInsert) << "% erase insert)" << endl;
 
                     //std::cout << "Edge end" << std::endl;
                 });
