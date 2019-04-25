@@ -2362,7 +2362,9 @@ namespace Clobscode {
         for (unsigned short i = 0; i < rl; i++) {
             auto start_refine_rl_time = chrono::high_resolution_clock::now();
 
-            new_pts.clear();
+
+
+            auto start_split = chrono::high_resolution_clock::now();
 
             int split = tmp_quadrants.size() / (nbThread) + 1;
             split = std::max(split, 5000);
@@ -2387,7 +2389,7 @@ namespace Clobscode {
 
 
                 tg.run([&threads, &tmp_quadrants, j, split, prevStart]{ // run in task group
-                    std::cout << "Start from " << prevStart << " to " << prevStart + split << " / " << tmp_quadrants.size() << std::endl;
+                    //std::cout << "Start from " << prevStart << " to " << prevStart + split << " / " << tmp_quadrants.size() << std::endl;
                     threads[j]->operator()(tbb::blocked_range<size_t>(prevStart, (prevStart + split)));
                 });
 
@@ -2396,11 +2398,25 @@ namespace Clobscode {
 
             tg.wait();
 
+            auto end_split = chrono::high_resolution_clock::now();
+
+            long total1 = std::chrono::duration_cast<chrono::milliseconds>(end_split - start_split).count();
+            cout << " time split " << total1 << endl;
+
+
+            auto start_join = chrono::high_resolution_clock::now();
+
             threads[0]->doMasterJoin();
 
             for (int j = 1; j < threads.size(); j++) {
                 threads[0]->join(*threads[j]);
             }
+
+
+            auto end_join = chrono::high_resolution_clock::now();
+
+            long total2 = std::chrono::duration_cast<chrono::milliseconds>(end_join - end_split).count();
+            cout << " time join " << total2 << endl;
 
             RefineMeshReductionV2 & rmr = *threads[0];
 

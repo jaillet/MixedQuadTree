@@ -98,8 +98,8 @@ namespace Clobscode {
                 for (auto edge : m_new_edges) {
                     auto found = edges.find(edge);
                     if (found != edges.end()) {
-                        edges.erase(found);
-                        edges.insert(edge);
+                        found = edges.erase(found);
+                        edges.insert(found, edge);
                     } else {
                         edges.insert(edge);
                     }
@@ -116,7 +116,7 @@ namespace Clobscode {
          */
         void join(const RefineMeshReductionV2 &rmr) {
 
-            std::cout << "Start join" << (master ? " master" : "") << std::endl;
+            //std::cout << "Start join" << (master ? " master" : "") << std::endl;
 
             numberOfJoint += rmr.numberOfJoint + 1;
 
@@ -126,6 +126,8 @@ namespace Clobscode {
             // allow master to insert directly in final structures
             if (master) {
                 doMasterJoin();
+
+                auto start_points = chrono::high_resolution_clock::now();
 
                 int i = 0;
                 for (const Point3D &point : rmr.m_new_pts) {
@@ -143,13 +145,28 @@ namespace Clobscode {
                     }
                 }
 
-                tbb::task_scheduler_init def_init; // Use the default number of threads.
+                auto end_points = chrono::high_resolution_clock::now();
+
+                long total1 = std::chrono::duration_cast<chrono::milliseconds>(end_points - start_points).count();
+                cout << " time points " << total1 << endl;
+
+                //tbb::task_scheduler_init def_init; // Use the default number of threads.
                 tbb::task_group tg;
 
                 tg.run([&] { // run in task group
-                    std::cout << "Edge start" << std::endl;
+                    //std::cout << "Edge start" << std::endl;
+                    auto start_quad = chrono::high_resolution_clock::now();
+
+                    long timeInit = 0;
+                    long timeInsert = 0;
+                    long timeInsert1 = 0;
+                    long timeInsertErase = 0;
+                    long timeFound = 0;
+
                     for (const QuadEdge &local_edge : rmr.m_new_edges) {
                         // build new edge with right index
+                        auto start_quad = chrono::high_resolution_clock::now();
+
                         vector<unsigned long> index(3, 0);
 
                         for (unsigned int i = 0; i < 3; i++) {
@@ -164,27 +181,49 @@ namespace Clobscode {
 
                         QuadEdge edge(index[0], index[1], index[2]);
 
+                        auto end_quad = chrono::high_resolution_clock::now();
+
+                        timeInit += std::chrono::duration_cast<chrono::nanoseconds>(end_quad - start_quad).count();
+
+                        start_quad = chrono::high_resolution_clock::now();
+
                         auto found = edges.find(edge);
 
+                        timeFound += std::chrono::duration_cast<chrono::nanoseconds>( chrono::high_resolution_clock::now() - start_quad).count();
+
                         if (found == edges.end()) {
-                            edges.insert(edge);
+                            auto start = chrono::high_resolution_clock::now();
+                            edges.insert(found, edge);
+                            timeInsert1 += std::chrono::duration_cast<chrono::nanoseconds>( chrono::high_resolution_clock::now() - start).count();
                         } else {
                             if (edge[2] != 0 && edge[2] != (*found)[2]) {
+                                auto start = chrono::high_resolution_clock::now();
                                 // since all points have been replaced, if it's different then midpoint has been created
                                 // is it possible ?
-                                edges.erase(found);
-                                edges.insert(edge);
+                                found = edges.erase(found);
+                                edges.insert(found, edge);
+                                timeInsertErase += std::chrono::duration_cast<chrono::nanoseconds>( chrono::high_resolution_clock::now() - start).count();
                             }
                         }
-                    }
 
-                    std::cout << "Edge end" << std::endl;
+                        end_quad = chrono::high_resolution_clock::now();
+
+                        timeInsert += std::chrono::duration_cast<chrono::nanoseconds>(end_quad - start_quad).count();
+                    }
+                    auto end_quad = chrono::high_resolution_clock::now();
+
+                    long total2 = std::chrono::duration_cast<chrono::nanoseconds>(end_quad - start_quad).count();
+                    cout << " time edges " << total2 << " ns => init " << (timeInit * 100 / total2) << " %, insert " << (timeInsert * 100 / total2) << " % (" << (100 * timeFound / timeInsert) << "% found, " <<  (100 * timeInsert1 / timeInsert) << "%  simple insert, " << (100 * timeInsertErase / timeInsert) << "% erase insert)" << endl;
+
+                    //std::cout << "Edge end" << std::endl;
                 });
 
                 // Run another job concurrently with the loop above.
                 // It can use up to the default number of threads.
-                tg.run([&] { // run in task group
-                    std::cout << "Quad start" << std::endl;
+                //tg.run([&] { // run in task group
+                    //std::cout << "Quad start" << std::endl;
+
+                auto start_quad = chrono::high_resolution_clock::now();
                     for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
                         // build new quad with right index
 
@@ -203,13 +242,19 @@ namespace Clobscode {
                         m_new_Quadrants.push_back(quad);
 
                     }
-                    std::cout << "Quad end" << std::endl;
-                });
+
+                auto end_quad = chrono::high_resolution_clock::now();
+
+                long total2 = std::chrono::duration_cast<chrono::milliseconds>(end_quad - start_quad).count();
+                cout << " time quad " << total2 << endl;
+
+                    //std::cout << "Quad end" << std::endl;
+                //});
 
                 // Wait for completion of the task group
                 tg.wait();
 
-                std::cout << "End join" << (master ? " master" : "") << std::endl;
+                //std::cout << "End join" << (master ? " master" : "") << std::endl;
 
             } else {
 
@@ -234,7 +279,7 @@ namespace Clobscode {
                 tbb::task_group tg;
 
                 tg.run([&] { // run in task group
-                    std::cout << "Edge start" << std::endl;
+                    //std::cout << "Edge start" << std::endl;
                     for (const QuadEdge &local_edge : rmr.m_new_edges) {
                         // build new edge with right index
                         vector<unsigned long> index(3, 0);
@@ -265,13 +310,13 @@ namespace Clobscode {
                         }
                     }
 
-                    std::cout << "Edge end" << std::endl;
+                    //std::cout << "Edge end" << std::endl;
                 });
 
                 // Run another job concurrently with the loop above.
                 // It can use up to the default number of threads.
                 tg.run([&] { // run in task group
-                    std::cout << "Quad start" << std::endl;
+                    //std::cout << "Quad start" << std::endl;
                     for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
                         // build new quad with right index
 
@@ -290,13 +335,13 @@ namespace Clobscode {
                         m_new_Quadrants.push_back(quad);
 
                     }
-                    std::cout << "Quad end" << std::endl;
+                    //std::cout << "Quad end" << std::endl;
                 });
 
                 // Wait for completion of the task group
                 tg.wait();
 
-                std::cout << "End join" << (master ? " master" : "") << std::endl;
+                //std::cout << "End join" << (master ? " master" : "") << std::endl;
             }
         }
 

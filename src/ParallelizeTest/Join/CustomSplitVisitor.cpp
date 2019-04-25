@@ -278,7 +278,7 @@ namespace Clobscode
         /*this_edge.updateMidPoint(c_n_pts++);
         found = new_edges->erase(found);
         //PAUL : todo change ? peut poser pb
-        new_edges->insert(this_edge); //using found as hint for insertion
+        new_edges->insert(found, this_edge); //using found as hint for insertion
 
 
         // bulding and inserting, with hint if possible
