@@ -40,7 +40,6 @@
 #include "QuadEdge.h"
 
 //Test
-#include "ParallelizeTest/CloneMesher/SplitVisitorNoCounterWithConcurrentSet.h"
 #include "ParallelizeTest/CloneMesher/SplitVisitorTest1.h"
 
 using Clobscode::MeshPoint;
@@ -66,7 +65,6 @@ namespace Clobscode
 
         //Test
         friend class SplitVisitorTest1;
-        friend class SplitVisitorNoCounterWithConcurrentSet;
 
 	public:
 		
