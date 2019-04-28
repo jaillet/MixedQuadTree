@@ -28,7 +28,7 @@ namespace Clobscode {
 
         //Need to be read in reduction :
         vector<Quadrant> m_new_Quadrants;
-        vector<Point3D> m_new_pts; //Local new pts (not merged)
+        vector<Point3D> m_new_pts; //Local new pts
         std::tr1::unordered_map<size_t, unsigned int> m_map_new_pts;
         set<QuadEdge> m_new_edges;
 
@@ -44,6 +44,11 @@ namespace Clobscode {
         int numberOfJoint;
         bool master;
 
+        //Number of points before the parallel reduce
+        //ie. The start index of all new points created
+        //By threads
+        const unsigned long POINTS_SIZE_BEFORE_JOIN;
+
         void setSplitVisitor() {
             csv.setPoints(points);
             csv.setEdges(edges);
@@ -58,7 +63,7 @@ namespace Clobscode {
         RefineMeshReduction(unsigned int refinementLevel, vector<Quadrant> &tmp_Quadrants, set<QuadEdge> &quadEdges,
                             Polyline &input, vector<MeshPoint> &points, const list<RefinementRegion *> &all_reg, const bool master) :
                 m_rl(refinementLevel), input(input), points(points), all_reg(all_reg), tmp_Quadrants(tmp_Quadrants),
-                edges(quadEdges), master(master){
+                edges(quadEdges), master(master), POINTS_SIZE_BEFORE_JOIN(POINTS_SIZE_BEFORE_JOIN){
             setSplitVisitor();
             numberOfJoint = 0;
         }
@@ -69,7 +74,7 @@ namespace Clobscode {
          */
         RefineMeshReduction(RefineMeshReduction &x, tbb::split) :
                 m_rl(x.m_rl), input(x.input), points(x.points), all_reg(x.all_reg), tmp_Quadrants(x.tmp_Quadrants),
-                edges(x.edges) {
+                edges(x.edges), POINTS_SIZE_BEFORE_JOIN(points.size()) {
             setSplitVisitor();
             numberOfJoint = 0;
             master = false;
@@ -91,20 +96,23 @@ namespace Clobscode {
             // best than map for insert and access
             std::tr1::unordered_map<unsigned int, unsigned int> taskToGlobal;
 
-            int i = 0;
+            int total_nb_points = POINTS_SIZE_BEFORE_JOIN;
             for (const Point3D &point : rmr.m_new_pts) {
 
-                //auto found = m_new_pts.find(point);
                 size_t hashPoint = point.operator()(point);
-
                 auto found = m_map_new_pts.find(hashPoint);
-                if (found != m_map_new_pts.end()) {
-                    taskToGlobal[i++ + points.size()] = m_map_new_pts[hashPoint];
-                } else {
-                    m_map_new_pts[hashPoint] = points.size() + m_new_pts.size();
+
+                if (found == m_map_new_pts.end()) {
+                    //We did not found the point
+                    //We add it in the global new_pts
                     m_new_pts.push_back(point);
-                    taskToGlobal[i++ + points.size()] = points.size() + m_new_pts.size() - 1;
+                    //We add  
+                    m_map_new_pts[hashPoint] = total_nb_points;
+                    
                 }
+
+                taskToGlobal[total_nb_points] = m_map_new_pts[hashPoint];
+                total_nb_points++;
             }
 
             tbb::task_scheduler_init def_init; // Use the default number of threads.
@@ -117,7 +125,7 @@ namespace Clobscode {
                     vector<unsigned long> index(3, 0);
 
                     for (unsigned int i = 0; i < 3; i++) {
-                        if (local_edge[i] < points.size()) {
+                        if (local_edge[i] < POINTS_SIZE_BEFORE_JOIN) {
                             // index refer point not created during this refinement level
                             index[i] = local_edge[i];
                         } else {
@@ -154,7 +162,7 @@ namespace Clobscode {
 
                     vector<unsigned int> new_pointindex(4, 0);
                     for (unsigned int i = 0; i < 4; i++) {
-                        if (local_quad.getPointIndex(i) < points.size()) {
+                        if (local_quad.getPointIndex(i) < POINTS_SIZE_BEFORE_JOIN) {
                             // index refer point not created during this refinement level
                             new_pointindex[i] = local_quad.getPointIndex(i);
                         } else {

@@ -47,8 +47,10 @@ namespace Clobscode {
         bool master;
         bool joinDone;
 
-        // usefull constante
-        unsigned long nb_points;
+        //Number of points before the parallel reduce
+        //ie. The start index of all new points created
+        //By threads
+        const unsigned long POINTS_SIZE_BEFORE_JOIN;
 
         void setSplitVisitor() {
             csv.setPoints(points);
@@ -64,10 +66,9 @@ namespace Clobscode {
         RefineMeshReductionV2(unsigned int refinementLevel, vector<Quadrant> &tmp_Quadrants, set<QuadEdge> &quadEdges,
                             Polyline &input, vector<MeshPoint> &points, const list<RefinementRegion *> &all_reg, const bool master) :
                 m_rl(refinementLevel), input(input), points(points), all_reg(all_reg), tmp_Quadrants(tmp_Quadrants),
-                edges(quadEdges), master(master){
+                edges(quadEdges), master(master), POINTS_SIZE_BEFORE_JOIN(points.size()){
             setSplitVisitor();
             numberOfJoint = 0;
-            nb_points = points.size();
             joinDone = false;
         }
 
@@ -77,10 +78,9 @@ namespace Clobscode {
          */
         RefineMeshReductionV2(RefineMeshReductionV2 &x, tbb::split) :
                 m_rl(x.m_rl), input(x.input), points(x.points), all_reg(x.all_reg), tmp_Quadrants(x.tmp_Quadrants),
-                edges(x.edges) {
+                edges(x.edges), POINTS_SIZE_BEFORE_JOIN(points.size() {
             setSplitVisitor();
             numberOfJoint = 0;
-            nb_points = points.size();
             joinDone = false;
         }
 
@@ -137,11 +137,11 @@ namespace Clobscode {
 
                     auto found = m_map_new_pts.find(hashPoint);
                     if (found != m_map_new_pts.end()) {
-                        taskToGlobal[i++ + nb_points] = m_map_new_pts[hashPoint];
+                        taskToGlobal[i++ + POINTS_SIZE_BEFORE_JOIN] = m_map_new_pts[hashPoint];
                     } else {
                         m_map_new_pts[hashPoint] = points.size();
                         points.push_back(point);
-                        taskToGlobal[i++ + nb_points] = points.size() - 1;
+                        taskToGlobal[i++ + POINTS_SIZE_BEFORE_JOIN] = points.size() - 1;
                     }
                 }
 
@@ -169,7 +169,7 @@ namespace Clobscode {
                         vector<unsigned long> index(3, 0);
 
                         for (unsigned int i = 0; i < 3; i++) {
-                            if (local_edge[i] < nb_points) {
+                            if (local_edge[i] < POINTS_SIZE_BEFORE_JOIN) {
                                 // index refer point not created during this refinement level
                                 index[i] = local_edge[i];
                             } else {
@@ -226,7 +226,7 @@ namespace Clobscode {
 
                         vector<unsigned int> new_pointindex(4, 0);
                         for (unsigned int i = 0; i < 4; i++) {
-                            if (local_quad.getPointIndex(i) < nb_points) {
+                            if (local_quad.getPointIndex(i) < POINTS_SIZE_BEFORE_JOIN) {
                                 // index refer point not created during this refinement level
                                 new_pointindex[i] = local_quad.getPointIndex(i);
                             } else {
@@ -264,11 +264,11 @@ namespace Clobscode {
 
                     auto found = m_map_new_pts.find(hashPoint);
                     if (found != m_map_new_pts.end()) {
-                        taskToGlobal[i++ + nb_points] = m_map_new_pts[hashPoint];
+                        taskToGlobal[i++ + POINTS_SIZE_BEFORE_JOIN] = m_map_new_pts[hashPoint];
                     } else {
-                        m_map_new_pts[hashPoint] = nb_points + m_new_pts.size();
+                        m_map_new_pts[hashPoint] = POINTS_SIZE_BEFORE_JOIN + m_new_pts.size();
                         m_new_pts.push_back(point);
-                        taskToGlobal[i++ + nb_points] = nb_points + m_new_pts.size() - 1;
+                        taskToGlobal[i++ + POINTS_SIZE_BEFORE_JOIN] = POINTS_SIZE_BEFORE_JOIN + m_new_pts.size() - 1;
                     }
                 }
 
@@ -282,7 +282,7 @@ namespace Clobscode {
                         vector<unsigned long> index(3, 0);
 
                         for (unsigned int i = 0; i < 3; i++) {
-                            if (local_edge[i] < nb_points) {
+                            if (local_edge[i] < POINTS_SIZE_BEFORE_JOIN) {
                                 // index refer point not created during this refinement level
                                 index[i] = local_edge[i];
                             } else {
@@ -319,7 +319,7 @@ namespace Clobscode {
 
                         vector<unsigned int> new_pointindex(4, 0);
                         for (unsigned int i = 0; i < 4; i++) {
-                            if (local_quad.getPointIndex(i) < nb_points) {
+                            if (local_quad.getPointIndex(i) < POINTS_SIZE_BEFORE_JOIN) {
                                 // index refer point not created during this refinement level
                                 new_pointindex[i] = local_quad.getPointIndex(i);
                             } else {

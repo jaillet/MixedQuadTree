@@ -390,22 +390,58 @@ So, this should be fixed for multi-threading because multiple thread can insert 
 
 If the refinement region is a box, or only the quadrants that intersect the polyline, the load balance will not be fair, so maybe add a task only if the quadrant need to be refined. 
 
+
+## Parallelism with a reduction
+
+To avoid thinking about concurrence issues like inserting new edges, creating new points with good index, we thought about a reduction, ie every thread has private memory, and a single thread join all previous thread. That means that an algorithm need to be implemented to attribute new mesh points indexes.
+
+### Algo
+
+
+[Pseudo algo with a single threaded join](https://docs.google.com/document/d/1yfQv3o02at_VegPZfQQGFGgW8L-bDadjQH8JMCeFoDE/edit?fbclid=IwAR2hhHDAjXxf4juyetLdz6M743GZyBuxZwAoF4IWCiuThErCFSwLY2BPnBU)
+
+
+Each thread will have it's own copy of <b>new_pts</b>, <b>new_Quadrants</b>, 
+
+
 ## Implemented versions
 
 ### With IntelTBB
 
 
-* A parallel version using tbb and the container concurrent_vector for new_points and a concurrent_unordered_set (with a custom hash) for QuadEges is implemented.
+* Version without reduction using tbb and the container concurrent_vector for new_points and a concurrent_unordered_set (with a custom hash) for QuadEges is implemented.
+
+Function refineMeshParallelTest1TBB
+```
 
 
+```
+
+* Version with reduction using tbb::parallel_reduce
+
+Function refineMeshReductionTBB
+```
 
 
+```
 
-### Parallelism with a reduction
+* Versions with a custom reduction
 
-To avoid thinking about concurrence issues like inserting new edges, creating new points with good index, we thought about a reduction, ie every thread has private memory, and a single thread join all previous thread. That means that an algorithm need to be implemented to attribute new mesh points indexes.
+Use a vector of RefineMeshReduction objects (class that do the parallel task), and do the join manually.
 
-## Algo
 
-Each thread will have it's own copy of <b>new_pts</b>, <b>new_Quadrants</b>, 
+Function refineMeshCustomReductionTBB
 
+Made because parallel_reduce of intel tbb can split the join task between different thread
+```
+
+
+```
+
+refineCustomMeshReductionTBBV2
+
+Improve of previous version, with a master join
+```
+
+
+```
