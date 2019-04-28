@@ -412,7 +412,31 @@ Each thread will have it's own copy of <b>new_pts</b>, <b>new_Quadrants</b>,
 * Version without reduction using tbb and the container concurrent_vector for new_points and a concurrent_unordered_set (with a custom hash) for QuadEges is implemented.
 
 Function refineMeshParallelTest1TBB
+
+with 4 cores :
 ```
+* level 8 in 385 ms
+           ---- Points : 69947
+           ---- QuadEdges : 10
+           ---- Quadrants : 64953
+* level 9 in 1685 ms
+           ---- Points : 266659
+           ---- QuadEdges : 10
+           ---- Quadrants : 255663
+
+           |
+           |
+           |
+           |
+
+* level 8 in 983 ms
+           ---- Points : 69761
+           ---- QuadEdges : 230328
+           ---- Quadrants : 64953
+* level 9 in 4074 ms
+           ---- Points : 266291
+           ---- QuadEdges : 883200
+           ---- Quadrants : 255663
 
 
 ```
@@ -420,7 +444,33 @@ Function refineMeshParallelTest1TBB
 * Version with reduction using tbb::parallel_reduce
 
 Function refineMeshReductionTBB
+
+wrong number of points at level 9+
 ```
+* level 8 in 2370 ms
+           ---- Points : 69761
+           ---- QuadEdges : 220896
+           ---- Quadrants : 64953
+* level 9 in 10177 ms
+           ---- Points : 232013
+           ---- QuadEdges : 797813
+           ---- Quadrants : 257279
+
+
+           |
+           |
+           |
+           |
+
+* level 8 in 983 ms
+           ---- Points : 69761
+           ---- QuadEdges : 230328
+           ---- Quadrants : 64953
+* level 9 in 4074 ms
+           ---- Points : 266291
+           ---- QuadEdges : 883200
+           ---- Quadrants : 255663
+
 
 
 ```
@@ -432,16 +482,68 @@ Use a vector of RefineMeshReduction objects (class that do the parallel task), a
 
 Function refineMeshCustomReductionTBB
 
+ram issues
+
 Made because parallel_reduce of intel tbb can split the join task between different thread
 ```
+
+* level 8 in 3207 ms
+           ---- Points : 69761
+           ---- QuadEdges : 211309
+           ---- Quadrants : 64953
+* level 9 in 9431 ms
+           ---- Points : 210668
+           ---- QuadEdges : 789793
+           ---- Quadrants : 257904
+
+
+           |
+           |
+           |
+           |
+
+* level 8 in 983 ms
+           ---- Points : 69761
+           ---- QuadEdges : 230328
+           ---- Quadrants : 64953
+* level 9 in 4074 ms
+           ---- Points : 266291
+           ---- QuadEdges : 883200
+           ---- Quadrants : 255663
 
 
 ```
 
 refineCustomMeshReductionTBBV2
 
+ram issues
+
 Improve of previous version, with a master join
 ```
+
+* level 8 in 4788 ms
+           ---- Points : 34476
+           ---- QuadEdges : 211309
+           ---- Quadrants : 64953
+* level 9 in 17770 ms
+           ---- Points : 82260
+           ---- QuadEdges : 789793
+           ---- Quadrants : 257904
+
+
+           |
+           |
+           |
+           |
+
+* level 8 in 983 ms
+           ---- Points : 69761
+           ---- QuadEdges : 230328
+           ---- Quadrants : 64953
+* level 9 in 4074 ms
+           ---- Points : 266291
+           ---- QuadEdges : 883200
+           ---- Quadrants : 255663
 
 
 ```

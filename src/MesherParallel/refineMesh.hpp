@@ -59,7 +59,7 @@ namespace Clobscode {
 
                 int split = tmp_quadrants.size() / nbThread + 1;
                 split = std::max(split, 10000);
-                std::cout << split << std::endl;
+                //std::cout << split << std::endl;
 
                 RefineMeshReduction rmr(i, tmp_quadrants, tmp_edges, input, tmp_points, all_reg, true);
                 parallel_reduce(tbb::blocked_range<size_t>(0, tmp_quadrants.size(), split), rmr);
@@ -108,9 +108,14 @@ namespace Clobscode {
                 std::cout << "           ---- QuadEdges : " << tmp_edges.size() << std::endl;
                 std::cout << "           ---- Quadrants : " << tmp_quadrants.size() << std::endl;
 
-                
+            
             }
 
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "---------------------END OF REDUCTION TBB--------------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
 
 
         }
@@ -131,6 +136,7 @@ namespace Clobscode {
             tbb::task_scheduler_init test(nbThread);
             tbb::task_group tg;
 
+            std::cout << "Start refine mesh custom reduction V2 IntelTBB with " << nbThread << " threads." << std::endl;
 
 
             // TEST REDUCTION
@@ -149,7 +155,7 @@ namespace Clobscode {
 
                 int split = tmp_quadrants.size() / (nbThread) + 1;
                 split = std::max(split, 5000);
-                std::cout << split << std::endl;
+                //std::cout << split << std::endl;
 
                 vector<RefineMeshReductionV2 *> threads;
 
@@ -182,7 +188,7 @@ namespace Clobscode {
                 auto end_split = chrono::high_resolution_clock::now();
 
                 long total1 = std::chrono::duration_cast<chrono::milliseconds>(end_split - start_split).count();
-                cout << " time split " << total1 << endl;
+                //cout << " time split " << total1 << endl;
 
 
                 auto start_join = chrono::high_resolution_clock::now();
@@ -197,7 +203,7 @@ namespace Clobscode {
                 auto end_join = chrono::high_resolution_clock::now();
 
                 long total2 = std::chrono::duration_cast<chrono::milliseconds>(end_join - end_split).count();
-                cout << " time join " << total2 << endl;
+                //cout << " time join " << total2 << endl;
 
                 RefineMeshReductionV2 & rmr = *threads[0];
 
@@ -276,7 +282,7 @@ namespace Clobscode {
             tbb::task_scheduler_init test(nbThread);
             tbb::task_group tg;
 
-
+            std::cout << "Start refine mesh custom reduction V1 IntelTBB with " << nbThread << " threads." << std::endl;
 
             // TEST REDUCTION
             list<Point3D> new_pts;
@@ -292,7 +298,7 @@ namespace Clobscode {
 
                 int split = tmp_quadrants.size() / (nbThread) + 1;
                 split = std::max(split, 5000);
-                std::cout << split << std::endl;
+                //std::cout << split << std::endl;
 
                 vector<RefineMeshReduction *> threads;
 
@@ -319,7 +325,7 @@ namespace Clobscode {
 
 
                     tg.run([&threads, &tmp_quadrants, j, split, prevStart]{ // run in task group
-                        std::cout << "Start from " << prevStart << " to " << prevStart + split << " / " << tmp_quadrants.size() << std::endl;
+                        //std::cout << "Start from " << prevStart << " to " << prevStart + split << " / " << tmp_quadrants.size() << std::endl;
                         threads[j]->operator()(tbb::blocked_range<size_t>(prevStart, (prevStart + split)));
                     });
 
@@ -628,11 +634,14 @@ namespace Clobscode {
 
             //QuadEdges.clear();
             //QuadEdges.insert(quadEdges.begin(), quadEdges.end());
+        
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "---------------------END OF TEST 1 INTELTBB---------------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
+
         }
 
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "---------------------END OF TEST 1 INTELTBB---------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
+        
     }

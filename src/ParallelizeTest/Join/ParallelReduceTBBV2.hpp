@@ -50,7 +50,7 @@ namespace Clobscode {
         //Number of points before the parallel reduce
         //ie. The start index of all new points created
         //By threads
-        const unsigned long POINTS_SIZE_BEFORE_JOIN;
+        unsigned long POINTS_SIZE_BEFORE_JOIN;
 
         void setSplitVisitor() {
             csv.setPoints(points);
@@ -78,7 +78,7 @@ namespace Clobscode {
          */
         RefineMeshReductionV2(RefineMeshReductionV2 &x, tbb::split) :
                 m_rl(x.m_rl), input(x.input), points(x.points), all_reg(x.all_reg), tmp_Quadrants(x.tmp_Quadrants),
-                edges(x.edges), POINTS_SIZE_BEFORE_JOIN(points.size() {
+                edges(x.edges), POINTS_SIZE_BEFORE_JOIN(points.size()) {
             setSplitVisitor();
             numberOfJoint = 0;
             joinDone = false;
@@ -116,7 +116,7 @@ namespace Clobscode {
          */
         void join(const RefineMeshReductionV2 &rmr) {
 
-            //std::cout << "Start join" << (master ? " master" : "") << std::endl;
+            ////std::cout << "Start join" << (master ? " master" : "") << std::endl;
 
             numberOfJoint += rmr.numberOfJoint + 1;
 
@@ -129,32 +129,33 @@ namespace Clobscode {
 
                 auto start_points = chrono::high_resolution_clock::now();
 
-                int i = 0;
+                int total_nb_points = POINTS_SIZE_BEFORE_JOIN;
                 for (const Point3D &point : rmr.m_new_pts) {
 
-                    //auto found = m_new_pts.find(point);
                     size_t hashPoint = point.operator()(point);
-
                     auto found = m_map_new_pts.find(hashPoint);
-                    if (found != m_map_new_pts.end()) {
-                        taskToGlobal[i++ + POINTS_SIZE_BEFORE_JOIN] = m_map_new_pts[hashPoint];
-                    } else {
-                        m_map_new_pts[hashPoint] = points.size();
-                        points.push_back(point);
-                        taskToGlobal[i++ + POINTS_SIZE_BEFORE_JOIN] = points.size() - 1;
+
+                    if (found == m_map_new_pts.end()) {
+                        //We did not found the point
+                        //We add it in the global new_pts
+                        m_new_pts.push_back(point);
+                        //We add  
+                        m_map_new_pts[hashPoint] = total_nb_points;           
                     }
+
+                    taskToGlobal[total_nb_points++] = m_map_new_pts[hashPoint];
                 }
 
                 auto end_points = chrono::high_resolution_clock::now();
 
                 long total1 = std::chrono::duration_cast<chrono::milliseconds>(end_points - start_points).count();
-                cout << " time points " << total1 << endl;
+                //cout << " time points " << total1 << endl;
 
                 //tbb::task_scheduler_init def_init; // Use the default number of threads.
                 tbb::task_group tg;
 
                 tg.run([&] { // run in task group
-                    //std::cout << "Edge start" << std::endl;
+                    ////std::cout << "Edge start" << std::endl;
                     auto start_quad = chrono::high_resolution_clock::now();
 
                     long timeInit = 0;
@@ -210,15 +211,15 @@ namespace Clobscode {
                     auto end_quad = chrono::high_resolution_clock::now();
 
                     long total2 = std::chrono::duration_cast<chrono::nanoseconds>(end_quad - start_quad).count();
-                    cout << " time edges " << total2 << " ns => init " << (timeInit * 100 / total2) << " %, insert " << (timeInsert * 100 / total2) << " % (" << (100 * timeFound / timeInsert) << "% try insert, " << (100 * timeInsertErase / timeInsert) << "% erase insert)" << endl;
+                    //cout << " time edges " << total2 << " ns => init " << (timeInit * 100 / total2) << " %, insert " << (timeInsert * 100 / total2) << " % (" << (100 * timeFound / timeInsert) << "% try insert, " << (100 * timeInsertErase / timeInsert) << "% erase insert)" << endl;
 
-                    //std::cout << "Edge end" << std::endl;
+                    ////std::cout << "Edge end" << std::endl;
                 });
 
                 // Run another job concurrently with the loop above.
                 // It can use up to the default number of threads.
                 //tg.run([&] { // run in task group
-                    //std::cout << "Quad start" << std::endl;
+                    ////std::cout << "Quad start" << std::endl;
 
                 auto start_quad = chrono::high_resolution_clock::now();
                     for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
@@ -243,15 +244,15 @@ namespace Clobscode {
                 auto end_quad = chrono::high_resolution_clock::now();
 
                 long total2 = std::chrono::duration_cast<chrono::milliseconds>(end_quad - start_quad).count();
-                cout << " time quad " << total2 << endl;
+                //cout << " time quad " << total2 << endl;
 
-                    //std::cout << "Quad end" << std::endl;
+                    ////std::cout << "Quad end" << std::endl;
                 //});
 
                 // Wait for completion of the task group
                 tg.wait();
 
-                //std::cout << "End join" << (master ? " master" : "") << std::endl;
+                ////std::cout << "End join" << (master ? " master" : "") << std::endl;
 
             } else {
 
@@ -276,7 +277,7 @@ namespace Clobscode {
                 tbb::task_group tg;
 
                 tg.run([&] { // run in task group
-                    //std::cout << "Edge start" << std::endl;
+                    ////std::cout << "Edge start" << std::endl;
                     for (const QuadEdge &local_edge : rmr.m_new_edges) {
                         // build new edge with right index
                         vector<unsigned long> index(3, 0);
@@ -307,13 +308,13 @@ namespace Clobscode {
                         }
                     }
 
-                    //std::cout << "Edge end" << std::endl;
+                    ////std::cout << "Edge end" << std::endl;
                 });
 
                 // Run another job concurrently with the loop above.
                 // It can use up to the default number of threads.
                 tg.run([&] { // run in task group
-                    //std::cout << "Quad start" << std::endl;
+                    ////std::cout << "Quad start" << std::endl;
                     for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
                         // build new quad with right index
 
@@ -332,13 +333,13 @@ namespace Clobscode {
                         m_new_Quadrants.push_back(quad);
 
                     }
-                    //std::cout << "Quad end" << std::endl;
+                    ////std::cout << "Quad end" << std::endl;
                 });
 
                 // Wait for completion of the task group
                 tg.wait();
 
-                //std::cout << "End join" << (master ? " master" : "") << std::endl;
+                ////std::cout << "End join" << (master ? " master" : "") << std::endl;
             }
         }
 
@@ -470,7 +471,7 @@ namespace Clobscode {
                 return first;
             }
 
-            //cout << "one inconsistency detected -> hard test\n";
+            ////cout << "one inconsistency detected -> hard test\n";
             //return mesh.pointIsInMesh(coords[0],faces);
             return mesh.pointIsInMesh(coords[0]);
         }
