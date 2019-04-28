@@ -54,7 +54,7 @@ namespace Clobscode
         this->new_edges = &new_edges;
     }
     
-    void CustomSplitVisitor::setEdges(const set<QuadEdge> &edges) {
+    void CustomSplitVisitor::setEdges(set<QuadEdge> &edges) {
         this->edges = &edges;
     }
     

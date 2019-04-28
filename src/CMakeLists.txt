@@ -24,13 +24,18 @@ set(SOURCE_FILES Main
         Visitors/OneIrregularVisitor Visitors/PointMovedVisitor
         Visitors/TransitionPatternVisitor Visitors/SurfaceTemplatesVisitor
         Visitors/RemoveSubElementsVisitor
+        
         ParallelizeTest/CloneMesher/SplitVisitorTest1.cpp
         ParallelizeTest/CloneMesher/SplitVisitorTest1.h
         ParallelizeTest/Join/CustomSplitVisitor.cpp
         ParallelizeTest/Join/CustomSplitVisitor.h
         ParallelizeTest/Join/ParallelReduceTBB.hpp
         ParallelizeTest/Join/ParallelReduceTBBV2.hpp
+
         MesherParallel/refineMesh.hpp
+        MesherParallel/refineMeshOpenMP.hpp
+        MesherParallel/SplitVisitorOpenMP.h
+        MesherParallel/SplitVisitorOpenMP.cpp
         )
 
 set(SOURCE_MEANTIME MeanTimePerformance/Main)

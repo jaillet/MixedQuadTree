@@ -30,7 +30,9 @@
 #include "omp.h"
 
 // TODO remove below after test
+#include "MesherParallel/refineMeshOpenMP.hpp"
 #include "MesherParallel/refineMesh.hpp"
+
 
 
 namespace Clobscode {
@@ -978,10 +980,14 @@ namespace Clobscode {
         //----------------------------------------------------------
 
         // TEST MULTI THREAD FIRST
-        //refineMeshParallelTest1TBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        
+        refineMeshParallelTest1TBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
         //refineMeshReductionTBB(16, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        refineCustomMeshReductionTBBV2(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        //refineCustomMeshReductionTBBV2(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+
+        //this->refineMeshParallelOpenMP(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+
 
         int counterRefine = 0;
 
@@ -1123,9 +1129,9 @@ namespace Clobscode {
             //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
             //cout << endl;
 
-            std::cout << "Points : " << points.size() << std::endl;
-            std::cout << "QuadEdges : " << QuadEdges.size() << std::endl;
-            std::cout << "Quadrants : " << tmp_Quadrants.size() << std::endl;
+            std::cout << "           ---- Points : " << points.size() << std::endl;
+            std::cout << "           ---- QuadEdges : " << QuadEdges.size() << std::endl;
+            std::cout << "           ---- Quadrants : " << tmp_Quadrants.size() << std::endl;
         }
 
         std::cout << counterRefine << std::endl;

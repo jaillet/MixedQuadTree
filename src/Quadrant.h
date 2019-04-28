@@ -41,6 +41,7 @@
 
 //Test
 #include "ParallelizeTest/CloneMesher/SplitVisitorTest1.h"
+#include "MesherParallel/SplitVisitorOpenMP.h"
 
 using Clobscode::MeshPoint;
 using Clobscode::QuadEdge;
@@ -65,6 +66,9 @@ namespace Clobscode
 
         //Test
         friend class SplitVisitorTest1;
+        friend class SplitVisitorOpenMP;
+
+
 
 	public:
 		

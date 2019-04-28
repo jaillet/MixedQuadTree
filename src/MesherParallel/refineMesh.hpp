@@ -41,6 +41,8 @@ namespace Clobscode {
 
             tbb::task_scheduler_init test(nbThread);
 
+            
+            std::cout << "Start refine mesh reduction IntelTBB with " << nbThread << " threads." << std::endl;
 
 
             // TEST REDUCTION
@@ -102,10 +104,11 @@ namespace Clobscode {
                 //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
                 //cout << endl;
 
-                std::cout << "Points : " << tmp_points.size() << std::endl;
-                std::cout << "QuadEdges : " << tmp_edges.size() << std::endl;
-                std::cout << "Quadrants : " << tmp_quadrants.size() << std::endl;
+                std::cout << "           ---- Points : " << tmp_points.size() << std::endl;
+                std::cout << "           ---- QuadEdges : " << tmp_edges.size() << std::endl;
+                std::cout << "           ---- Quadrants : " << tmp_quadrants.size() << std::endl;
 
+                
             }
 
 
@@ -243,13 +246,17 @@ namespace Clobscode {
                 //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
                 //cout << endl;
 
-                std::cout << "Points : " << tmp_points.size() << std::endl;
-                std::cout << "QuadEdges : " << tmp_edges.size() << std::endl;
-                std::cout << "Quadrants : " << tmp_quadrants.size() << std::endl;
+                std::cout << "           ---- Points : " << tmp_points.size() << std::endl;
+                std::cout << "           ---- QuadEdges : " << tmp_edges.size() << std::endl;
+                std::cout << "           ---- Quadrants : " << tmp_quadrants.size() << std::endl;
 
             }
 
-
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "---------------------END OF REDUCTION V2 TBB--------------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
 
         }
 
@@ -369,11 +376,17 @@ namespace Clobscode {
                 //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
                 //cout << endl;
 
-                std::cout << "Points : " << tmp_points.size() << std::endl;
-                std::cout << "QuadEdges : " << tmp_edges.size() << std::endl;
-                std::cout << "Quadrants : " << tmp_quadrants.size() << std::endl;
+                std::cout << "           ---- Points : " << tmp_points.size() << std::endl;
+                std::cout << "           ---- QuadEdges : " << tmp_edges.size() << std::endl;
+                std::cout << "           ---- Quadrants : " << tmp_quadrants.size() << std::endl;
 
             }
+
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "---------------------END OF CUSTOM REDUCTION TBB-----------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
+            std::cout << "----------------------------------------------------------" << std::endl;
         }
 
         void Mesher::refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
@@ -599,6 +612,11 @@ namespace Clobscode {
                 //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / time_inside_block) << "% of time inside) ";
                 //cout << endl;
 
+                std::cout << "           ---- Points : " << points.size() << std::endl;
+                std::cout << "           ---- QuadEdges : " << QuadEdges.size() << std::endl;
+                std::cout << "           ---- Quadrants : " << tmp_Quadrants.size() << std::endl;
+
+
             } //END FOR REFINEMENT LEVEL
 
             std::cout << "Points : " << points.size() << std::endl;
@@ -611,4 +629,10 @@ namespace Clobscode {
             //QuadEdges.clear();
             //QuadEdges.insert(quadEdges.begin(), quadEdges.end());
         }
+
+        std::cout << "----------------------------------------------------------" << std::endl;
+        std::cout << "----------------------------------------------------------" << std::endl;
+        std::cout << "---------------------END OF TEST 1 INTELTBB---------------" << std::endl;
+        std::cout << "----------------------------------------------------------" << std::endl;
+        std::cout << "----------------------------------------------------------" << std::endl;
     }
