@@ -32,10 +32,12 @@ set(SOURCE_FILES Main
         ParallelizeTest/Join/ParallelReduceTBB.hpp
         ParallelizeTest/Join/ParallelReduceTBBV2.hpp
 
-        MesherParallel/refineMesh.hpp
+        MesherParallel/refineMeshTBB.hpp
         MesherParallel/refineMeshOpenMP.hpp
         MesherParallel/SplitVisitorOpenMP.h
         MesherParallel/SplitVisitorOpenMP.cpp
+        MesherParallel/SplitVisitorReductionOpenMP.h
+        MesherParallel/SplitVisitorReductionOpenMP.cpp
         )
 
 set(SOURCE_MEANTIME MeanTimePerformance/Main)
