@@ -174,11 +174,22 @@ namespace Clobscode
         QuadEdge this_edge (idx1,idx2);
         
         bool stop;
+        
         set<QuadEdge>::const_iterator found;
         
         #pragma omp critical(edges) 
         {
             found = edges->find(this_edge);
+
+            /*
+
+			found ok ?
+
+			Check
+
+            if(found) {
+
+            }*/
 
             if ((*found)[2]!=0) {
                 //if the edge was already split, then save its mid_point and

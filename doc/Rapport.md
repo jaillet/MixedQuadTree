@@ -401,10 +401,24 @@ To avoid thinking about concurrence issues like inserting new edges, creating ne
 [Pseudo algo with a single threaded join](https://docs.google.com/document/d/1yfQv3o02at_VegPZfQQGFGgW8L-bDadjQH8JMCeFoDE/edit?fbclid=IwAR2hhHDAjXxf4juyetLdz6M743GZyBuxZwAoF4IWCiuThErCFSwLY2BPnBU)
 
 
+QuadEdge -> Regarder le midpoint des edges nouveaux créés pour savoir s'ils sont nouveaux ou pas
+
+
+
+
+
 Each thread will have it's own copy of <b>new_pts</b>, <b>new_Quadrants</b>, 
 
 
+Ne pas recréer les quadrants mais modifier le pointindex
+
+Comparer output writeMesh -> certains points ne sont pas utilisés lors de la sauvegarde du Mesh
+
+
 ## Implemented versions
+
+Add mutable midpoint in QuadEdge to modify it without erase + insert in the set
+
 
 ### With IntelTBB
 
@@ -495,7 +509,6 @@ Made because parallel_reduce of intel tbb can split the join task between differ
            ---- Points : 210668
            ---- QuadEdges : 789793
            ---- Quadrants : 257904
-
 
            |
            |

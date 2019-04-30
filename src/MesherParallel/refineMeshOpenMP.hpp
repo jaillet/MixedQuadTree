@@ -67,7 +67,8 @@ namespace Clobscode {
 				sv.setEdges(QuadEdges); // INSERT / REMOVE / READ
 				sv.setNewPts(new_pts); // INSERT / READ
 
-				#pragma omp for schedule(dynamic)
+				//schedule(dynamic)
+				#pragma omp for 
 			  	for (unsigned int j = 0; j < tmp_Quadrants.size(); ++j) {
 			  		Quadrant &iter = tmp_Quadrants[j];
 
