@@ -1,6 +1,7 @@
 #include "../Mesher.h"
 #include <omp.h>
 
+#include <iostream>
 #include "SplitVisitorOpenMP.h"
 #include "SplitVisitorReductionOpenMP.h"
 
@@ -9,6 +10,10 @@
 using namespace std;
 
 namespace Clobscode {
+
+	void make_reduceV1(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants, 
+					unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl);
+
 
 	void Mesher::refineMeshParallelOpenMP(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                         set<QuadEdge> QuadEdges,
@@ -273,22 +278,24 @@ namespace Clobscode {
                 auto start_refine_rl_time = chrono::high_resolution_clock::now();
 
 
-                //the new_pts is a list that holds the coordinates of
-                //new points inserted at this iteration. At the end of
-                //this bucle, they are inserted in the point vector
-                new_pts.clear();
-
                 nb_points = points.size();
-
 
 				//Begin of parallel region
 				#pragma omp parallel shared(nb_points, thread_new_Quadrants, thread_new_pts, thread_new_edges)
 				{
+
+
+
+
+
 					//Create reference to the dataset of actual thread
 					vector<Quadrant> &new_Quadrants = thread_new_Quadrants[omp_get_thread_num()];
 					vector<Point3D> &new_pts = thread_new_pts[omp_get_thread_num()];
 					set<QuadEdge> &new_edges = thread_new_edges[omp_get_thread_num()];
 
+					new_Quadrants.clear();
+					new_pts.clear();
+					new_edges.clear();
 
 					//create visitors and give them variables
 					//Each thread link its own dataset
@@ -420,7 +427,7 @@ namespace Clobscode {
 						// with a size=nbThread the result of the merge of all thread's new elements
 						// points.size() is needed to know at which index threads have started
 						make_reduceV1(thread_new_pts, thread_new_edges, thread_new_Quadrants,
-									nbThread, points.size());
+									nbThread, points.size(), rl);
 
 						// Output of reduce : 
 						//thread_new_pts[0]
@@ -437,12 +444,16 @@ namespace Clobscode {
 
 
 
-				//Update new_pts
+				//Update edges
+				for (set<QuadEdge>::iterator i = thread_new_edges[0].begin(); i != thread_new_edges[0].end(); ++i)
+				{
+					QuadEdges.insert(*i);
+				}
 
 
 				// don't forget to update list
-                tmp_Quadrants.assign(make_move_iterator(new_Quadrants.begin()), make_move_iterator(new_Quadrants.end()));
-                new_Quadrants.clear();
+                tmp_Quadrants.assign(make_move_iterator(thread_new_Quadrants[0].begin()), make_move_iterator(thread_new_Quadrants[0].end()));
+                thread_new_Quadrants[0].clear();
 
                 //if no points were added at this iteration, it is no longer
                 //necessary to continue the refinement.
@@ -466,14 +477,6 @@ namespace Clobscode {
 
 			} // END FOR REFINEMENT LEVEL
 
-			        	
-			          	
-			          	
-			          
-			            
-             
-	            
-            } //END FOR REFINEMENT LEVEL
 
             // output result to mesher ! comment if not needed
             //Quadrants.clear();
@@ -489,119 +492,129 @@ namespace Clobscode {
             std::cout << "----------------------------------------------------------" << std::endl;
         }
 
-}
 
+	void make_reduceV1(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants, 
+						unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl) {
 
-void make_reduceV1(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants, 
-					unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce) {
+		//The result :
+		vector<Point3D> &new_pts = threads_new_pts[0];
+		set<QuadEdge> &new_edges = threads_new_edges[0];
+		vector<Quadrant> &new_quadrants = threads_new_quadrants[0];
 
-	//The result :
-	vector<Point3D> &new_pts = threads_new_pts[0];
-	vector<Point3D> &new_edges = threads_new_edges[0];
-	vector<Point3D> &new_quadrants = threads_new_quadrants[0];
-
-	//The current number of points
-	unsigned int total_nb_points = total_nb_points_before_reduce;
-	// The map to link real index of new_pts
-	unordered_map<unsigned int, unsigned int> map_new_pts;
-	// The task to global
-	unordered_map<unsigned int, unsigned int> taskToGlobal;
-	for (int thread_number = 1; thread_number < number_of_threads; ++thread_number)
-	{
-		
-		vector<Point3D> &thread_new_pts = threads_new_pts[thread_number];
-
-		for (int i = 0; i < thread_new_pts.size(); ++i)
+		//The current number of points
+		unsigned int total_nb_points = total_nb_points_before_reduce;
+		// The map to link real index of new_pts
+		unordered_map<unsigned int, unsigned int> map_new_pts;
+		// The task to global
+		unordered_map<unsigned int, unsigned int> taskToGlobal;
+		for (int thread_number = 1; thread_number < number_of_threads; ++thread_number)
 		{
 			
-			size_t hashPoint = point.operator()(point);
-	        auto found = map_new_pts.find(hashPoint);
-
-	        if (found == map_new_pts.end()) {
-	            //We did not found the point
-	            //We add it in the global new_pts
-	            new_pts.push_back(point);
-	            //We add
-	            map_new_pts[hashPoint] = total_nb_points;
-	            
-	        }
-	        //Else we found it
-	        taskToGlobal[total_nb_points] = map_new_pts[hashPoint];
-	        total_nb_points++;
-
-		}
-
-		//std::cout << "Edge start" << std::endl;
-
-		set<QuadEdge> &thread_new_edges = threads_new_edges[thread_number];
-		for (int i = 0; i < thread_new_edges.size(); ++i)
-		{
-			const QuadEdge &local_edge = thread_new_edges[i];
-			// build new edge with right index
-	        vector<unsigned long> index(3, 0);
-
-	        bool all_created = true;
-	        for (unsigned int j = 0; j < 3; j++) {
-	            if (local_edge[j] < total_nb_points_before_reduce || local_edge[j] == 0) {
-	            	//Don't forget midpoint = 0
-	                // index refer point not created during this refinement level
-	                index[j] = local_edge[j];
-	            } else {
-	                // point created, need to update the point with correct index
-	                index[j] = taskToGlobal[local_edge[j]];
-	                all_created = false;
-	            }
-	        }
-
-	        QuadEdge edge(index[0], index[1], index[2]);
+			vector<Point3D> &thread_new_pts = threads_new_pts[thread_number];
 
 
-	        //If all created, no need to search, we can insert directly
-	        if (all_created)
-	        	new_edges.insert(edge)
-	        else {
-		        auto found = new_edges.find(edge);
-		        if (found == new_edges.end()) {
-		            new_edges.insert(edge);
-		        } else {
-		            if (edge[2] != 0 && edge[2] != (*found)[2]) {
-		                // since all points have been replaced, if it's different then midpoint has been created
-		                // is it possible ?
-		                new_edges.erase(found);
-		                new_edges.insert(edge);
+			for(const Point3D& point : thread_new_pts) {
+			//for (int i = 0; i < thread_new_pts.size(); ++i)
+			//{
+				
+				//const Point3D &point = thread_new_pts[i];
+
+				size_t hashPoint = point.operator()(point);
+		        auto found = map_new_pts.find(hashPoint);
+
+		        if (found == map_new_pts.end()) {
+		            //We did not found the point
+		            //We add it in the global new_pts
+		            new_pts.push_back(point);
+		            //We add
+		            map_new_pts[hashPoint] = total_nb_points;
+		            
+		        }
+		        //Else we found it
+		        taskToGlobal[total_nb_points] = map_new_pts[hashPoint];
+		        total_nb_points++;
+
+			}
+
+			//std::cout << "Edge start" << std::endl;
+
+			set<QuadEdge> &thread_new_edges = threads_new_edges[thread_number];
+			
+			for(const QuadEdge& local_edge : thread_new_edges)
+			//for (int i = 0; i < thread_new_edges.size(); ++i)
+			{
+				//const QuadEdge &local_edge = thread_new_edges[i];
+				// build new edge with right index
+		        vector<unsigned long> index(3, 0);
+
+		        bool all_created = true;
+		        for (unsigned int j = 0; j < 3; j++) {
+		            if (local_edge[j] < total_nb_points_before_reduce || local_edge[j] == 0) {
+		            	//Don't forget midpoint = 0
+		                // index refer point not created during this refinement level
+		                index[j] = local_edge[j];
+		            } else {
+		                // point created, need to update the point with correct index
+		                index[j] = taskToGlobal[local_edge[j]];
+		                all_created = false;
 		            }
 		        }
-		    }
-		}
 
-		//std::cout << "Edge end" << std::endl;
-
-		//std::cout << "Quad start" << std::endl;
-		vector<Quadrant> &thread_new_quadrants = threads_new_quadrants[thread_number];
-		for (int i = 0; i < thread_new_quadrants.size(); ++i)
-		{
-			const Quadrant &local_quad = thread_new_Quadrants[i];
-
-			// build new quad with right index
-	        vector<unsigned int> new_pointindex(4, 0);
-	        for (unsigned int j = 0; j < 4; j++) {
-	            if (local_quad.getPointIndex(j) < total_nb_points_before_reduce) {
-	                // index refer point not created during this refinement level
-	                new_pointindex[j] = local_quad.getPointIndex(j);
-	            } else {
-	                // point created, need to update the point with correct index
-	                new_pointindex[j] = taskToGlobal[local_quad.getPointIndex(j)];
-	            }
-	        }
-
-	        Quadrant quad(new_pointindex, m_rl);
-	        new_Quadrants.push_back(quad);
-		
-		}
-    	//std::cout << "Quad end" << std::endl;
+		        QuadEdge edge(index[0], index[1], index[2]);
 
 
-	} // END FOR ALL THREAD
+		        //If all created, no need to search, we can insert directly
+		        if (all_created) {
+		        	new_edges.insert(edge);
+		        }
+		        else {
+			        auto found = new_edges.find(edge);
+			        if (found == new_edges.end()) {
+			            new_edges.insert(edge);
+			        } else {
+			            if (edge[2] != 0 && edge[2] != (*found)[2]) {
+			                // since all points have been replaced, if it's different then midpoint has been created
+			                // is it possible ?
+			                new_edges.erase(found);
+			                new_edges.insert(edge);
+			            }
+			        }
+			    }
+			}
 
+			//std::cout << "Edge end" << std::endl;
+
+			//std::cout << "Quad start" << std::endl;
+			vector<Quadrant> &thread_new_quadrants = threads_new_quadrants[thread_number];
+			
+			for(const Quadrant &local_quad : thread_new_quadrants) {
+				
+			//for (int i = 0; i < thread_new_quadrants.size(); ++i)
+			//{
+				//const Quadrant &local_quad = thread_new_quadrants[i];
+
+				// build new quad with right index
+		        vector<unsigned int> new_pointindex(4, 0);
+		        for (unsigned int j = 0; j < 4; j++) {
+		            if (local_quad.getPointIndex(j) < total_nb_points_before_reduce) {
+		                // index refer point not created during this refinement level
+		                new_pointindex[j] = local_quad.getPointIndex(j);
+		            } else {
+		                // point created, need to update the point with correct index
+		                new_pointindex[j] = taskToGlobal[local_quad.getPointIndex(j)];
+		            }
+		        }
+
+		        Quadrant quad(new_pointindex, rl);
+		        new_quadrants.push_back(quad);
+			
+			}
+	    	//std::cout << "Quad end" << std::endl;
+
+
+		} // END FOR ALL THREAD
+
+
+	}
 
 }

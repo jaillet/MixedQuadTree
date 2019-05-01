@@ -29,7 +29,7 @@
 namespace Clobscode
 {
 //vector<MeshPoint> *points;
-//list<Point3D> *new_pts;
+//vector<Point3D> *new_pts;
 //set<QuadEdge> *edges;
 //vector<vector<unsigned int> > *new_eles;
 //vector<vector<Point3D> > *clipping;
@@ -42,7 +42,7 @@ namespace Clobscode
         this->points = &points;
     }
     
-    void SplitVisitorReductionOpenMP::setNewPts(list<Point3D> &new_pts) {
+    void SplitVisitorReductionOpenMP::setNewPts(vector<Point3D> &new_pts) {
         this->new_pts = &new_pts;
     }
 
@@ -51,7 +51,7 @@ namespace Clobscode
     }
     
     void SplitVisitorReductionOpenMP::setNewEdges(set<QuadEdge> &edges) {
-        this->edges = &edges;
+        this->new_edges = &edges;
     }
     
     void SplitVisitorReductionOpenMP::setNewEles(vector<vector<unsigned int> > &new_eles) {
@@ -86,25 +86,25 @@ namespace Clobscode
         //inserting node 4 between nodes 0 and 1
         if (splitEdge(all_pts[0],all_pts[1],n_pts,all_pts[4])) {
             //the coordinates of node 8 must be computed and added to
-            //new_pts list of points
+            //new_pts vector of points
             new_pts->push_back(Point3D (avg[0],min[1],avg[2]));
         }
         //inserting node 5 between nodes 1 and 2
         if (splitEdge(all_pts[1],all_pts[2],n_pts,all_pts[5])) {
             //the coordinates of node 9 must be computed and added to
-            //new_pts list of points
+            //new_pts vector of points
             new_pts->push_back(Point3D (max[0],avg[1],avg[2]));
         }
         //inserting node 6 between nodes 2 and 3
         if (splitEdge(all_pts[2],all_pts[3],n_pts,all_pts[6])) {
             //the coordinates of node 10 must be computed and added to
-            //new_pts list of points
+            //new_pts vector of points
             new_pts->push_back(Point3D (avg[0],max[1],avg[2]));
         }
         //inserting node 7 between nodes 3 and 0
         if (splitEdge(all_pts[0],all_pts[3],n_pts,all_pts[7])) {
             //the coordinates of node 11 must be computed and added to
-            //new_pts list of points
+            //new_pts vector of points
             new_pts->push_back(Point3D (min[0],avg[1],avg[2]));
         }
 

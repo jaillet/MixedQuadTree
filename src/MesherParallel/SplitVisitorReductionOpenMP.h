@@ -26,7 +26,6 @@
 #ifndef SplitVisitorReductionOpenMP_h
 #define SplitVisitorReductionOpenMP_h 1
 
-#include <list>
 #include <set>
 #include <vector>
 
@@ -34,14 +33,14 @@
 #include "../Point3D.h"
 #include "../QuadEdge.h"
 
-#include "Visitor.h"
+#include "../Visitors/Visitor.h"
+#include <cassert>
 
 
 using Clobscode::MeshPoint;
 using Clobscode::QuadEdge;
 using Clobscode::Point3D;
 using std::vector;
-using std::list;
 using std::set;
 
 
@@ -57,11 +56,11 @@ namespace Clobscode
 
         void setPoints(const vector<MeshPoint> &points);
         
-        void setNewPts(list<Point3D> &new_pts);
+        void setNewPts(vector<Point3D> &new_pts);
         
-        void setCurrentEdges(const set<QuadEdge> &edges)
+        void setCurrentEdges(const set<QuadEdge> &edges);
         
-        void setEdges(set<QuadEdge> &edges);
+        void setNewEdges(set<QuadEdge> &edges);
         
         void setNewEles(vector<vector<unsigned int> > &new_eles);
         
@@ -71,7 +70,7 @@ namespace Clobscode
         
         //references
         const vector<MeshPoint> *points;
-        list<Point3D> *new_pts;
+        vector<Point3D> *new_pts;
         const set<QuadEdge> *current_edges; //reading only
         set<QuadEdge> *new_edges; //Filled
         vector<vector<unsigned int> > *new_eles;
