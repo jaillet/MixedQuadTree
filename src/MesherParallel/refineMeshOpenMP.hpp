@@ -274,7 +274,7 @@ namespace Clobscode {
 
             unsigned int nb_points;
 
-            for (unsigned short i = 0; i < rl; i++) {
+            for (unsigned short i = 0; i < 1; i++) {
                 auto start_refine_rl_time = chrono::high_resolution_clock::now();
 
 
@@ -283,6 +283,8 @@ namespace Clobscode {
 				//Begin of parallel region
 				#pragma omp parallel shared(nb_points, thread_new_Quadrants, thread_new_pts, thread_new_edges)
 				{
+
+					//std::cout << "THREAD NUMBER : " <<  << std::endl;
 
 					//Create reference to the dataset of actual thread
 					vector<Quadrant> &new_Quadrants = thread_new_Quadrants[omp_get_thread_num()];
@@ -304,6 +306,7 @@ namespace Clobscode {
 					sv.setNewEdges(new_edges);
 
 					sv.setNewPts(new_pts); // INSERT / READ
+					sv.setThreadNum(omp_get_thread_num());
 
 					//split the Quadrants as needed
 			  		#pragma omp parallel for schedule(dynamic)
@@ -416,8 +419,8 @@ namespace Clobscode {
 					// Begin reduce
 
 
-
-
+					//Wait all thread
+					#pragma omp barrier
 
 					//Only one thread does the reduce
 					if (omp_get_thread_num() == 0) {
@@ -427,7 +430,7 @@ namespace Clobscode {
 						// with a size=nbThread the result of the merge of all thread's new elements
 						// points.size() is needed to know at which index threads have started
 						make_reduceV1(thread_new_pts, thread_new_edges, thread_new_Quadrants,
-									nbThread, points.size(), rl);
+									nbThread, points.size(), i);
 
 						// Output of reduce : 
 						//thread_new_pts[0]
@@ -496,6 +499,10 @@ namespace Clobscode {
 	void make_reduceV1(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants, 
 						unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl) {
 
+
+
+		std::cout << "BEGIN REDUCE at level rl=" << rl << std::endl;
+
 		//The result :
 		vector<Point3D> &new_pts = threads_new_pts[0];
 		set<QuadEdge> &new_edges = threads_new_edges[0];
@@ -510,15 +517,13 @@ namespace Clobscode {
 		for (int thread_number = 1; thread_number < number_of_threads; ++thread_number)
 		{
 			
+
+			std::cout << "Jointure thread number i=" << thread_number << std::endl;
+
+			std::cout << "Points start" << std::endl;
+
 			vector<Point3D> &thread_new_pts = threads_new_pts[thread_number];
-
-
 			for(const Point3D& point : thread_new_pts) {
-			//for (int i = 0; i < thread_new_pts.size(); ++i)
-			//{
-				
-				//const Point3D &point = thread_new_pts[i];
-
 				size_t hashPoint = point.operator()(point);
 		        auto found = map_new_pts.find(hashPoint);
 
@@ -536,14 +541,17 @@ namespace Clobscode {
 
 			}
 
-			//std::cout << "Edge start" << std::endl;
+			std::cout << "Points end" << std::endl;
+
+			std::cout << "Edge start" << std::endl;
 
 			set<QuadEdge> &thread_new_edges = threads_new_edges[thread_number];
 			
 			for(const QuadEdge& local_edge : thread_new_edges)
-			//for (int i = 0; i < thread_new_edges.size(); ++i)
 			{
-				//const QuadEdge &local_edge = thread_new_edges[i];
+
+				std::cout << "Edge : " << local_edge << std::endl;
+
 				// build new edge with right index
 		        vector<unsigned long> index(3, 0);
 
@@ -582,17 +590,12 @@ namespace Clobscode {
 			    }
 			}
 
-			//std::cout << "Edge end" << std::endl;
+			std::cout << "Edge end" << std::endl;
 
-			//std::cout << "Quad start" << std::endl;
+			std::cout << "Quad start" << std::endl;
 			vector<Quadrant> &thread_new_quadrants = threads_new_quadrants[thread_number];
 			
 			for(const Quadrant &local_quad : thread_new_quadrants) {
-				
-			//for (int i = 0; i < thread_new_quadrants.size(); ++i)
-			//{
-				//const Quadrant &local_quad = thread_new_quadrants[i];
-
 				// build new quad with right index
 		        vector<unsigned int> new_pointindex(4, 0);
 		        for (unsigned int j = 0; j < 4; j++) {
@@ -609,10 +612,13 @@ namespace Clobscode {
 		        new_quadrants.push_back(quad);
 			
 			}
-	    	//std::cout << "Quad end" << std::endl;
+	    	std::cout << "Quad end" << std::endl;
 
 
 		} // END FOR ALL THREAD
+
+		std::cout << "END REDUCE at level rl=" << rl << std::endl;
+		std::cout << "---------------------------------------" << std::endl;
 
 
 	}

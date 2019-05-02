@@ -66,6 +66,9 @@ namespace Clobscode
         
         void setClipping(vector<vector<Point3D> > &clipping);
 
+        //OpenMP
+        void setThreadNum(unsigned int tn) { this->tn = tn; }
+
     protected:
         
         //references
@@ -75,6 +78,9 @@ namespace Clobscode
         set<QuadEdge> *new_edges; //Filled
         vector<vector<unsigned int> > *new_eles;
         vector<vector<Point3D> > *clipping;
+
+        //Openmp
+        unsigned int tn = 0;
 
         bool splitEdge(unsigned int idx1,
                        unsigned int idx2,

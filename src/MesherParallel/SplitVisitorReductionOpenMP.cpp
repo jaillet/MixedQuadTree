@@ -64,6 +64,12 @@ namespace Clobscode
 
     bool SplitVisitorReductionOpenMP::visit(Quadrant *o)
     {
+
+
+        std::cout << "Visit tn=" << tn;
+
+
+
         //getting variables for modification
         //preferably by reference, to avoid unnecessary copying
         const vector<unsigned int> &pi = o->pointindex;
@@ -120,12 +126,20 @@ namespace Clobscode
 //        edges->insert(intern_edge1);
 //        edges->insert(intern_edge2);
 
+        std::cout << "------------ Adress new_edges : " << new_edges << std::endl;
+
+        std::cout << "Insert : " << QuadEdge(all_pts[4],all_pts[6],all_pts[8]) << std::endl;
         new_edges->emplace(all_pts[4],all_pts[6],all_pts[8]);
+        std::cout << "Insert : " << QuadEdge(all_pts[5],all_pts[7],all_pts[8]) << std::endl;
         new_edges->emplace(all_pts[5],all_pts[7],all_pts[8]);
 
+        std::cout << "Insert : " << QuadEdge(all_pts[4],all_pts[8]) << std::endl;
         new_edges->emplace(all_pts[4],all_pts[8]);
+        std::cout << "Insert : " << QuadEdge(all_pts[6],all_pts[8]) << std::endl;
         new_edges->emplace(all_pts[6],all_pts[8]);
+        std::cout << "Insert : " << QuadEdge(all_pts[5],all_pts[8]) << std::endl;
         new_edges->emplace(all_pts[5],all_pts[8]);
+        std::cout << "Insert : " << QuadEdge(all_pts[7],all_pts[8]) << std::endl;
         new_edges->emplace(all_pts[7],all_pts[8]);
         
         //now that all edges were inserted, the elements can be easily built
@@ -195,6 +209,8 @@ namespace Clobscode
         
         QuadEdge this_edge (idx1,idx2);
         set<QuadEdge>::const_iterator found;
+
+        std::cout << tn << " _ Split edge this_edge = " << this_edge << std::endl;
 
         //As we split edges into current edges and new_edges, 
         //we need to check only in new_edges

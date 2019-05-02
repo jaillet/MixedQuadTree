@@ -981,7 +981,8 @@ namespace Clobscode {
 
         // TEST MULTI THREAD FIRST
         
-        refineMeshParallelTest1TBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        //refineMeshParallelTest1TBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        refineMeshReductionOpenMP(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
         //refineMeshReductionTBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
         //refineCustomMeshReductionTBBV2(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
