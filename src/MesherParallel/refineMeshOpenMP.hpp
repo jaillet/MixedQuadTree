@@ -309,7 +309,7 @@ namespace Clobscode {
 					sv.setThreadNum(omp_get_thread_num());
 
 					//split the Quadrants as needed
-			  		#pragma omp parallel for schedule(dynamic)
+			  		#pragma omp for schedule(dynamic)
 			  		for (unsigned int j = 0; j < tmp_Quadrants.size(); ++j) {
 			  			Quadrant &iter = tmp_Quadrants[j];
 
@@ -422,9 +422,22 @@ namespace Clobscode {
 					//Wait all thread
 					#pragma omp barrier
 
+						#pragma omp critical 
+						{
+							std::cout << "reduce : " << omp_get_thread_num() << std::endl;
+							std::cout << "nbPoints   " << thread_new_pts[omp_get_thread_num()].size() << std::endl;
+							std::cout << "nbEdges   " <<thread_new_edges[omp_get_thread_num()].size() <<  std::endl;
+							std::cout << "nbQuad   " << thread_new_Quadrants[omp_get_thread_num()].size() << std::endl;
+
+						}
+						
+
 					//Only one thread does the reduce
 					if (omp_get_thread_num() == 0) {
 						//Master thread, use #pragma omp master ?
+
+						
+
 
 						// Fill index 0 in arrays thread_new_pts, new_edges, new_Quadrants
 						// with a size=nbThread the result of the merge of all thread's new elements
@@ -546,11 +559,13 @@ namespace Clobscode {
 			std::cout << "Edge start" << std::endl;
 
 			set<QuadEdge> &thread_new_edges = threads_new_edges[thread_number];
+
+			std::cout << thread_new_edges.size() << std::endl;
 			
 			for(const QuadEdge& local_edge : thread_new_edges)
 			{
 
-				std::cout << "Edge : " << local_edge << std::endl;
+				
 
 				// build new edge with right index
 		        vector<unsigned long> index(3, 0);

@@ -192,9 +192,6 @@ namespace Clobscode
         QuadEdge this_edge (idx1,idx2);
         set<QuadEdge>::const_iterator found = edges->find(this_edge);
 
-        
-        std::cout << this_edge << std::endl;
-
         if ((*found)[2]!=0) {
             //if the edge was already split, then save its mid_point and
             //return false (the current process didn't split the edge)
