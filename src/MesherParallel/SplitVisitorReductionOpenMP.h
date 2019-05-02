@@ -66,7 +66,7 @@ namespace Clobscode
         
         void setClipping(vector<vector<Point3D> > &clipping);
 
-        //OpenMP
+        //OpenMP debug
         void setThreadNum(unsigned int tn) { this->tn = tn; }
 
     protected:

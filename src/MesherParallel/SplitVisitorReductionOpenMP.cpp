@@ -65,8 +65,6 @@ namespace Clobscode
     bool SplitVisitorReductionOpenMP::visit(Quadrant *o)
     {
 
-        std::cout << "Visit " << o << "  __ tn = " << tn << std::endl;
-
         //getting variables for modification
         //preferably by reference, to avoid unnecessary copying
         const vector<unsigned int> &pi = o->pointindex;

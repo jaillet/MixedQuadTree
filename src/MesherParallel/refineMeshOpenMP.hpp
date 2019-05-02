@@ -271,6 +271,9 @@ namespace Clobscode {
             //Result of reduce :
             vector<Quadrant> reduced_new_Quadrants;
 
+            //Debugging
+            vector<int> nbQuadPerThread(nbThread, 0);
+
 
             unsigned int nb_points;
 
@@ -312,6 +315,8 @@ namespace Clobscode {
 			  		#pragma omp for schedule(dynamic)
 			  		for (unsigned int j = 0; j < tmp_Quadrants.size(); ++j) {
 			  			Quadrant &iter = tmp_Quadrants[j];
+
+			  			nbQuadPerThread[omp_get_thread_num()]++;
 
 			  		//Check if to refine
 						bool to_refine = false;
@@ -424,7 +429,8 @@ namespace Clobscode {
 
 						#pragma omp critical 
 						{
-							std::cout << "reduce : " << omp_get_thread_num() << std::endl;
+							std::cout << "Thread number " << omp_get_thread_num();
+							std::cout << " nbQuadrants received = " << nbQuadPerThread[omp_get_thread_num()] << std::endl;
 							std::cout << "nbPoints   " << thread_new_pts[omp_get_thread_num()].size() << std::endl;
 							std::cout << "nbEdges   " <<thread_new_edges[omp_get_thread_num()].size() <<  std::endl;
 							std::cout << "nbQuad   " << thread_new_Quadrants[omp_get_thread_num()].size() << std::endl;
