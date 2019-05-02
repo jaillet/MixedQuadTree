@@ -203,6 +203,7 @@ namespace Clobscode
 
         found = new_edges->find(this_edge);
         if (found != new_edges->end()) {
+            
             if ((*found)[2]!=0) {
                 //if the edge was already split, then save its mid_point and
                 //return false (the current process didn't split the edge)

@@ -244,7 +244,7 @@ namespace Clobscode {
         }
 
         
-        void Mesher::refineMeshReductionOpenMP(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+        void Mesher::refineMeshReductionOpenMP(const int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                         set<QuadEdge> QuadEdges,
                                         const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                         Polyline &input) {
@@ -284,10 +284,6 @@ namespace Clobscode {
 				#pragma omp parallel shared(nb_points, thread_new_Quadrants, thread_new_pts, thread_new_edges)
 				{
 
-
-
-
-
 					//Create reference to the dataset of actual thread
 					vector<Quadrant> &new_Quadrants = thread_new_Quadrants[omp_get_thread_num()];
 					vector<Point3D> &new_pts = thread_new_pts[omp_get_thread_num()];
@@ -307,7 +303,7 @@ namespace Clobscode {
 					sv.setCurrentEdges(QuadEdges);
 					sv.setNewEdges(new_edges);
 
-					sv.setNewPts(thread_new_pts[omp_get_thread_num()]); // INSERT / READ
+					sv.setNewPts(new_pts); // INSERT / READ
 
 					//split the Quadrants as needed
 			  		#pragma omp parallel for schedule(dynamic)
@@ -418,6 +414,10 @@ namespace Clobscode {
 				
 
 					// Begin reduce
+
+
+
+
 
 					//Only one thread does the reduce
 					if (omp_get_thread_num() == 0) {
