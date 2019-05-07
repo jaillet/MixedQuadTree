@@ -75,15 +75,6 @@ namespace Clobscode
             list<unsigned int>::const_iterator e_iter;
             const vector<Point3D> &input_pts = ply->getPoints();
 
-
-            // tbb::parallel_for_each(edges->begin(), edges->end(), [&] (unsigned int index) { 
-            //     const PolyEdge &edge = ply->getEdges()[index];
-            //     if (intersectsEdge(edge, input_pts, coords->at(0), coords->at(1))) {
-            //         intersected_edges.push_back(index);
-            //     }
-
-            // });
-
             
             for (e_iter = edges->begin(); e_iter != edges->end(); e_iter++) {
                 const PolyEdge &edge = ply->getEdges()[*e_iter];

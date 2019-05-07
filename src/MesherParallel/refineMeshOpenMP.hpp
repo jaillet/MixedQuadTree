@@ -289,12 +289,14 @@ namespace Clobscode {
 				#pragma omp parallel shared(thread_new_Quadrants, thread_new_pts, thread_new_edges)
 				{
 
+					const int THREAD_NUMBER = omp_get_thread_num();
+
 					//std::cout << "THREAD NUMBER : " <<  << std::endl;
 
 					//Create reference to the dataset of actual thread
-					vector<Quadrant> &new_Quadrants = thread_new_Quadrants[omp_get_thread_num()];
-					vector<Point3D> &new_pts = thread_new_pts[omp_get_thread_num()];
-					set<QuadEdge> &new_edges = thread_new_edges[omp_get_thread_num()];
+					vector<Quadrant> &new_Quadrants = thread_new_Quadrants[THREAD_NUMBER];
+					vector<Point3D> &new_pts = thread_new_pts[THREAD_NUMBER];
+					set<QuadEdge> &new_edges = thread_new_edges[THREAD_NUMBER];
 
 					new_Quadrants.clear();
 					new_pts.clear();
@@ -311,7 +313,9 @@ namespace Clobscode {
 					sv.setNewEdges(new_edges);
 
 					sv.setNewPts(new_pts); // INSERT / READ
-					sv.setThreadNum(omp_get_thread_num());
+					sv.setThreadNum(THREAD_NUMBER);
+
+					nbQuadPerThread[THREAD_NUMBER] = 0;
 
 					//split the Quadrants as needed
 			  		// schedule(dynamic)
@@ -319,7 +323,7 @@ namespace Clobscode {
 			  		for (unsigned int j = 0; j < tmp_Quadrants.size(); ++j) {
 			  			Quadrant &iter = tmp_Quadrants[j];
 
-			  			nbQuadPerThread[omp_get_thread_num()]++;
+			  			nbQuadPerThread[THREAD_NUMBER]++;
 
 			  		//Check if to refine
 						bool to_refine = false;
@@ -377,6 +381,11 @@ namespace Clobscode {
 
 
 				          	if (inter_edges.empty()) {
+
+
+			              		#pragma omp critical
+				          		std::cout << "Inter edges empty for thread " << THREAD_NUMBER << " with quad = " << j << std::endl; 
+
 			              		for (unsigned int j = 0; j < split_elements.size(); j++) {
 			                  		Quadrant o(split_elements[j], qrl + 1);
 			                  	
@@ -398,8 +407,11 @@ namespace Clobscode {
 									iv.setCoords(clipping_coords[j]);
 
 									if (o.accept(&iv)) {
+										std::cout << "Quadrant accept = true for thread " << THREAD_NUMBER << " with quad = " << j << std::endl;
 			                    		new_Quadrants.push_back(o);
 			                  		} else {
+
+			                  			std::cout << "Quadrant accept = false for thread " << THREAD_NUMBER << " with quad = " << j << std::endl;
 
 
 			                  			//The element doesn't intersect any input face.
@@ -417,8 +429,15 @@ namespace Clobscode {
 
 										if (isItIn(input, inter_edges, clipping_coords[j])) {
 
+											std::cout << "isItIn !! We push it" << std::endl;
+ 
 											new_Quadrants.push_back(o);
 										}
+										else {
+											std::cout << "NOT IN !!! Not added !" << std::endl;
+										}
+
+										std::cout << "--------------------------" << std::endl;
 									} // END ELSE ACCEPT
 								} // END FOR SPLIT ELEMENTS
 							} //END ELSE INTER_EDGES EMPTY
@@ -434,23 +453,22 @@ namespace Clobscode {
 
 						#pragma omp critical
 						{
-							int nt = omp_get_thread_num();
-							std::cout << "Thread number " << nt;
-							std::cout << " nbQuadrants received = " << nbQuadPerThread[nt] << std::endl;
-							std::cout << "nbPoints   " << thread_new_pts[nt].size() << std::endl;
-							std::cout << "nbEdges   " <<thread_new_edges[nt].size() <<  std::endl;
-							std::cout << "nbQuad   " << thread_new_Quadrants[nt].size() << std::endl;
+							std::cout << "Thread number " << THREAD_NUMBER;
+							std::cout << " nbQuadrants received = " << nbQuadPerThread[THREAD_NUMBER] << std::endl;
+							std::cout << "nbPoints   " << thread_new_pts[THREAD_NUMBER].size() << std::endl;
+							std::cout << "nbEdges   " <<thread_new_edges[THREAD_NUMBER].size() <<  std::endl;
+							std::cout << "nbQuad   " << thread_new_Quadrants[THREAD_NUMBER].size() << std::endl;
 
 						}
 						
 					/*
 					//Only one thread does the reduce
-					//if (omp_get_thread_num() == 0) 
+					//if (THREAD_NUMBER == 0) 
 					#pragma omp master
 					{
 						//Master thread, use #pragma omp master ?
 
-						std::cout << "MASTER ID = " << omp_get_thread_num() << std::endl;
+						std::cout << "MASTER ID = " << THREAD_NUMBER << std::endl;
 						
 
 
@@ -479,7 +497,7 @@ namespace Clobscode {
 				vector<Quadrant> new_quadrants;
 
 				// Fill index 0 in arrays thread_new_pts, new_edges, new_Quadrants
-				// with a size=nbThread the result of the merge of all thread's new elements
+				// with a size=nbThread the result of the merge of all thread's new elements.
 				// points.size() is needed to know at which index threads have started
 				make_reduceV1(thread_new_pts, thread_new_edges, thread_new_Quadrants,
 							nbThread, points.size(), i,
@@ -497,9 +515,13 @@ namespace Clobscode {
 				//TODO add quadrant into reduction..
 
 				// don't forget to update list
-				tmp_Quadrants.reserve(tmp_Quadrants.size() + new_quadrants.size());
-				tmp_Quadrants.insert(tmp_Quadrants.end(), new_quadrants.begin(), new_quadrants.end());
+				// tmp_Quadrants.reserve(tmp_Quadrants.size() + new_quadrants.size());
+				// tmp_Quadrants.insert(tmp_Quadrants.end(), new_quadrants.begin(), new_quadrants.end());
+                
                 //tmp_Quadrants.assign(make_move_iterator(new_quadrants.begin()), make_move_iterator(new_quadrants.end()));
+                
+				tmp_Quadrants.swap(new_quadrants);
+
                 new_quadrants.clear();
 
                 //if no points were added at this iteration, it is no longer
@@ -563,7 +585,7 @@ namespace Clobscode {
 		{
 			
 
-			std::cout << "Jointure thread number i=" << thread_number << std::endl;
+			//std::cout << "Jointure thread number i=" << thread_number << std::endl;
 
 			std::cout << "Points start" << std::endl;
 
@@ -583,12 +605,12 @@ namespace Clobscode {
 		            //We add it to the global map
 		            map_new_pts[hashPoint] = total_nb_points;
 
-		            std::cout << "new point, link it to index=" << total_nb_points << std::endl;
+		            //std::cout << "new point, link it to index=" << total_nb_points << std::endl;
 		    		total_nb_points++;        
 		        }
 		        else {
-		        	std::cout << "point already here get index=" << map_new_pts[hashPoint] << std::endl;
-		        	std::cout << "ttttt=" << indexNewPt << std::endl;
+		        	//std::cout << "point already here get index=" << map_new_pts[hashPoint] << std::endl;
+		        	//std::cout << "ttttt=" << indexNewPt << std::endl;
 
 		        }
 		        //Else we found it, we link it
@@ -604,7 +626,7 @@ namespace Clobscode {
 			for(const QuadEdge& local_edge : thread_new_edges)
 			{
 
-				std::cout << local_edge << std::endl;
+				//std::cout << local_edge << std::endl;
 
 				// build new edge with right index
 		        vector<unsigned long> index(3, 0);
@@ -650,8 +672,9 @@ namespace Clobscode {
 			std::cout << "Quad start" << std::endl;
 			vector<Quadrant> &thread_new_quadrants = threads_new_quadrants[thread_number];
 			
-			for(const Quadrant &local_quad : thread_new_quadrants) {
+			for(Quadrant &local_quad : thread_new_quadrants) {
 				// build new quad with right index
+		        
 		        vector<unsigned int> new_pointindex(4, 0);
 		        for (unsigned int j = 0; j < 4; j++) {
 		            if (local_quad.getPointIndex(j) < total_nb_points_before_reduce) {
@@ -664,9 +687,18 @@ namespace Clobscode {
 		        }
 
 		        Quadrant quad(new_pointindex, rl);
+		        //Don't forget intersected edges
+		        quad.setIntersectedEdges(local_quad.getIntersectedEdges());
 		        new_quadrants.push_back(quad);
-			
-			}
+				
+
+				//Don't rebuild it, modify only point index
+				//To keep intersected edges
+				//Todo (better memory, performance..)
+
+			}	
+
+
 	    	std::cout << "Quad end" << std::endl;
 
 
