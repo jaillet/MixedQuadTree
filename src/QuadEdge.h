@@ -62,6 +62,8 @@ namespace Clobscode
         virtual void setMidPoint(unsigned int mid);
 		
         virtual unsigned int operator[](unsigned int pos) const;
+
+        virtual unsigned int& operator[](unsigned int pos);
 		
 //        virtual QuadEdge& operator=(const QuadEdge &e);
 
@@ -93,6 +95,10 @@ namespace Clobscode
     inline unsigned int QuadEdge::operator[](unsigned int pos) const{
 //		return info.at(pos);
         return info[pos]; //no position validity check
+    }
+
+    inline unsigned int& QuadEdge::operator[](unsigned int pos) {
+    	return info[pos];
     }
 	
     //FJA TODO: this is a duplicate of updateMidPoint

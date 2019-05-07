@@ -139,6 +139,11 @@ namespace Clobscode
         virtual double getAngle(unsigned int &nIdx, const vector<MeshPoint> &mp) const;
         /***** END Debugging methods *******/
 
+        //Modification, added for parallel reduction
+        virtual void setPointIndexAt(unsigned int index, unsigned int newPointIndex) {
+            pointindex[index] = newPointIndex;
+        }
+
     protected:
         
 		//protected:

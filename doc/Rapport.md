@@ -560,3 +560,11 @@ Improve of previous version, with a master join
 
 
 ```
+
+# Idea
+
+Set mutex sur une région proche -> a voir
+
+Graphiques => POSTER
+
+Réunion prochaine : lundi 17h
