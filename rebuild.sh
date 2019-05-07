@@ -3,4 +3,4 @@ cd build
 rm -R *
 cmake ../src -D_CMAKE_BUILD_TYPE=Debug
 cmake .
-make
+make -j10
