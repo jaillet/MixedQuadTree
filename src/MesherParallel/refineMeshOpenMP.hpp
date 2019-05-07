@@ -280,10 +280,10 @@ namespace Clobscode {
                 auto start_refine_rl_time = chrono::high_resolution_clock::now();
 
 
-                std::cout << "Start Parallelisation : " << std::endl;
-                std::cout << "nbPoints   " << points.size() << std::endl;
-				std::cout << "nbEdges   " <<QuadEdges.size() <<  std::endl;
-				std::cout << "nbQuad   " << tmp_Quadrants.size() << std::endl;
+				// std::cout << "Start Parallelisation : " << std::endl;
+				// std::cout << "nbPoints   " << points.size() << std::endl;
+				// std::cout << "nbEdges   " <<QuadEdges.size() <<  std::endl;
+				// std::cout << "nbQuad   " << tmp_Quadrants.size() << std::endl;
 
 				//Begin of parallel region
 				#pragma omp parallel shared(thread_new_Quadrants, thread_new_pts, thread_new_edges)
@@ -306,6 +306,7 @@ namespace Clobscode {
 					//Each thread link its own dataset
 					SplitVisitorReductionOpenMP sv;
 					sv.setPoints(points); // READ only
+
 					//sv.setEdges(new_edges); // INSERT / REMOVE / READ
 					//Split the method to have a dataset for reading only (current_edges)
 					//And one only for new edges -> empty at the beginning, filled by sv
@@ -315,7 +316,7 @@ namespace Clobscode {
 					sv.setNewPts(new_pts); // INSERT / READ
 					sv.setThreadNum(THREAD_NUMBER);
 
-					nbQuadPerThread[THREAD_NUMBER] = 0;
+					//nbQuadPerThread[THREAD_NUMBER] = 0;
 
 					//split the Quadrants as needed
 			  		// schedule(dynamic)
@@ -323,7 +324,7 @@ namespace Clobscode {
 			  		for (unsigned int j = 0; j < tmp_Quadrants.size(); ++j) {
 			  			Quadrant &iter = tmp_Quadrants[j];
 
-			  			nbQuadPerThread[THREAD_NUMBER]++;
+			  			//nbQuadPerThread[THREAD_NUMBER]++;
 
 			  		//Check if to refine
 						bool to_refine = false;
@@ -378,14 +379,7 @@ namespace Clobscode {
 
 				          	iter.accept(&sv);
 
-
-
 				          	if (inter_edges.empty()) {
-
-
-			              		#pragma omp critical
-				          		std::cout << "Inter edges empty for thread " << THREAD_NUMBER << " with quad = " << j << std::endl; 
-
 			              		for (unsigned int j = 0; j < split_elements.size(); j++) {
 			                  		Quadrant o(split_elements[j], qrl + 1);
 			                  	
@@ -407,13 +401,8 @@ namespace Clobscode {
 									iv.setCoords(clipping_coords[j]);
 
 									if (o.accept(&iv)) {
-										std::cout << "Quadrant accept = true for thread " << THREAD_NUMBER << " with quad = " << j << std::endl;
-			                    		new_Quadrants.push_back(o);
+										new_Quadrants.push_back(o);
 			                  		} else {
-
-			                  			std::cout << "Quadrant accept = false for thread " << THREAD_NUMBER << " with quad = " << j << std::endl;
-
-
 			                  			//The element doesn't intersect any input face.
 										//It must be checked if it's inside or outside.
 										//Only in the first case add it to new_Quadrants.
@@ -428,16 +417,8 @@ namespace Clobscode {
 										//so i moved the method to mesher  --setriva
 
 										if (isItIn(input, inter_edges, clipping_coords[j])) {
-
-											std::cout << "isItIn !! We push it" << std::endl;
- 
 											new_Quadrants.push_back(o);
 										}
-										else {
-											std::cout << "NOT IN !!! Not added !" << std::endl;
-										}
-
-										std::cout << "--------------------------" << std::endl;
 									} // END ELSE ACCEPT
 								} // END FOR SPLIT ELEMENTS
 							} //END ELSE INTER_EDGES EMPTY
@@ -448,18 +429,18 @@ namespace Clobscode {
 					// Begin reduce
 
 
-					//Wait all thread
-					#pragma omp barrier
+					// //Wait all thread
+					// #pragma omp barrier
 
-						#pragma omp critical
-						{
-							std::cout << "Thread number " << THREAD_NUMBER;
-							std::cout << " nbQuadrants received = " << nbQuadPerThread[THREAD_NUMBER] << std::endl;
-							std::cout << "nbPoints   " << thread_new_pts[THREAD_NUMBER].size() << std::endl;
-							std::cout << "nbEdges   " <<thread_new_edges[THREAD_NUMBER].size() <<  std::endl;
-							std::cout << "nbQuad   " << thread_new_Quadrants[THREAD_NUMBER].size() << std::endl;
+					// 	#pragma omp critical
+					// 	{
+					// 		std::cout << "Thread number " << THREAD_NUMBER;
+					// 		std::cout << " nbQuadrants received = " << nbQuadPerThread[THREAD_NUMBER] << std::endl;
+					// 		std::cout << "nbPoints   " << thread_new_pts[THREAD_NUMBER].size() << std::endl;
+					// 		std::cout << "nbEdges   " <<thread_new_edges[THREAD_NUMBER].size() <<  std::endl;
+					// 		std::cout << "nbQuad   " << thread_new_Quadrants[THREAD_NUMBER].size() << std::endl;
 
-						}
+					// 	}
 						
 					/*
 					//Only one thread does the reduce
@@ -511,8 +492,6 @@ namespace Clobscode {
 					QuadEdges.insert(*i);
 				}
 
-
-				//TODO add quadrant into reduction..
 
 				// don't forget to update list
 				// tmp_Quadrants.reserve(tmp_Quadrants.size() + new_quadrants.size());
@@ -567,8 +546,8 @@ namespace Clobscode {
 						vector<Point3D> &new_pts, set<QuadEdge> &new_edges, vector<Quadrant> &new_quadrants) {
 
 
-		std::cout << "\n---------------------------------\n";
-		std::cout << "BEGIN REDUCE at level rl=" << rl << std::endl;
+		//std::cout << "\n---------------------------------\n";
+		//std::cout << "BEGIN REDUCE at level rl=" << rl << std::endl;
 
 		//The result :
 		// vector<Point3D> &new_pts = threads_new_pts[0];
@@ -587,7 +566,7 @@ namespace Clobscode {
 
 			//std::cout << "Jointure thread number i=" << thread_number << std::endl;
 
-			std::cout << "Points start" << std::endl;
+			//std::cout << "Points start" << std::endl;
 
 			vector<Point3D> &thread_new_pts = threads_new_pts[thread_number];
 			unsigned int pointIndexCurrentThread = 0; //To count the index of point
@@ -604,29 +583,20 @@ namespace Clobscode {
 		            new_pts.push_back(point);
 		            //We add it to the global map
 		            map_new_pts[hashPoint] = total_nb_points;
-
-		            //std::cout << "new point, link it to index=" << total_nb_points << std::endl;
 		    		total_nb_points++;        
 		        }
-		        else {
-		        	//std::cout << "point already here get index=" << map_new_pts[hashPoint] << std::endl;
-		        	//std::cout << "ttttt=" << indexNewPt << std::endl;
-
-		        }
+		        
 		        //Else we found it, we link it
 		        taskToGlobal[indexNewPt] = map_new_pts[hashPoint];
 			}
 
-			std::cout << "Points end" << std::endl;
+			//std::cout << "Points end" << std::endl;
 
-			std::cout << "Edge start" << std::endl;
+			//std::cout << "Edge start" << std::endl;
 
 			set<QuadEdge> &thread_new_edges = threads_new_edges[thread_number];
 			
-			for(const QuadEdge& local_edge : thread_new_edges)
-			{
-
-				//std::cout << local_edge << std::endl;
+			for (const QuadEdge& local_edge : thread_new_edges) {
 
 				// build new edge with right index
 		        vector<unsigned long> index(3, 0);
@@ -643,33 +613,43 @@ namespace Clobscode {
 		                all_created = false;
 		            }
 		        }
-
 		        QuadEdge edge(index[0], index[1], index[2]);
 
 
-		        //If all created, no need to search, we can insert directly
-		        if (all_created) {
-		        	new_edges.insert(edge);
-		        }
-		        else {
-			        auto found = new_edges.find(edge);
-			        if (found == new_edges.end()) {
-			            new_edges.insert(edge);
-			        } else {
-			            if (edge[2] != 0 && edge[2] != (*found)[2]) {
-			                // since all points have been replaced, if it's different then midpoint has been created
-			                // is it possible ?
-			                //assert(false);
-			                new_edges.erase(found);
-			                new_edges.insert(edge);
-			            }
-			        }
-			    }
+		        new_edges.insert(edge);
+		        //Not useful ? Because set is unique...
+
+
+		     //    //If all created, no need to search, we can insert directly
+		     //    if (all_created) {
+		     //    	new_edges.insert(edge);
+		     //    }
+		     //    else {
+		        	
+		     //    	//Look if we have already the same edge
+		     //    	//If so, don't add it
+			    //     auto found = new_edges.find(edge);
+			    //     if (found == new_edges.end()) {
+			    //         new_edges.insert(edge);
+			    //     } 
+
+			    //     // else {
+			        	
+			    //     //     if (edge[2] != 0 && edge[2] != (*found)[2]) {
+			    //     //     	assert(false);	
+			    //     //         // since all points have been replaced, if it's different then midpoint has been created
+			    //     //         // is it possible ?
+			    //     //         //assert(false);
+			    //     //         new_edges.erase(found);
+			    //     //         new_edges.insert(edge);
+			    //     //     }
+			    //     // }
+			    // }
 			}
 
-			std::cout << "Edge end" << std::endl;
+			//std::cout << "Edge end" << std::endl;
 
-			std::cout << "Quad start" << std::endl;
+			//std::cout << "Quad start" << std::endl;
 			vector<Quadrant> &thread_new_quadrants = threads_new_quadrants[thread_number];
 			
 			for(Quadrant &local_quad : thread_new_quadrants) {
@@ -692,20 +672,18 @@ namespace Clobscode {
 		        new_quadrants.push_back(quad);
 				
 
-				//Don't rebuild it, modify only point index
-				//To keep intersected edges
-				//Todo (better memory, performance..)
-
+				//TODO Don't rebuild it, modify only point index
+				//And keep intersected edges
+				//(better memory, performance..)
 			}	
 
-
-	    	std::cout << "Quad end" << std::endl;
+	    	//std::cout << "Quad end" << std::endl;
 
 
 		} // END FOR ALL THREAD
 
-		std::cout << "END REDUCE at level rl=" << rl << std::endl;
-		std::cout << "---------------------------------------" << std::endl;
+		//std::cout << "END REDUCE at level rl=" << rl << std::endl;
+		//std::cout << "---------------------------------------" << std::endl;
 
 
 	}
