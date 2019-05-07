@@ -985,8 +985,6 @@ namespace Clobscode {
         
         refineMeshReductionOpenMP(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
-
-
         //refineMeshReductionTBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
         //refineCustomMeshReductionTBBV2(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
         //refineMeshCustomReductionTBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);

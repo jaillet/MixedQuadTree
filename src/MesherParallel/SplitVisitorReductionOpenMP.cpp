@@ -64,6 +64,7 @@ namespace Clobscode
 
     bool SplitVisitorReductionOpenMP::visit(Quadrant *o)
     {
+
         //getting variables for modification
         //preferably by reference, to avoid unnecessary copying
         const vector<unsigned int> &pi = o->pointindex;
@@ -119,13 +120,13 @@ namespace Clobscode
 //        intern_edge2.updateMidPoint(all_pts[8]);
 //        edges->insert(intern_edge1);
 //        edges->insert(intern_edge2);
-
-        new_edges->emplace(all_pts[4],all_pts[6],all_pts[8]);
+ 
+        new_edges->emplace(all_pts[4],all_pts[6],all_pts[8]); 
         new_edges->emplace(all_pts[5],all_pts[7],all_pts[8]);
-
-        new_edges->emplace(all_pts[4],all_pts[8]);
-        new_edges->emplace(all_pts[6],all_pts[8]);
-        new_edges->emplace(all_pts[5],all_pts[8]);
+ 
+        new_edges->emplace(all_pts[4],all_pts[8]); 
+        new_edges->emplace(all_pts[6],all_pts[8]); 
+        new_edges->emplace(all_pts[5],all_pts[8]); 
         new_edges->emplace(all_pts[7],all_pts[8]);
         
         //now that all edges were inserted, the elements can be easily built
@@ -203,6 +204,7 @@ namespace Clobscode
 
         found = new_edges->find(this_edge);
         if (found != new_edges->end()) {
+            
             if ((*found)[2]!=0) {
                 //if the edge was already split, then save its mid_point and
                 //return false (the current process didn't split the edge)
