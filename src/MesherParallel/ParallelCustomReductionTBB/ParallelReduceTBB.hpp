@@ -1,4 +1,4 @@
-#include "CustomSplitVisitor.h"
+#include "../../ParallelizeTest/Join/CustomSplitVisitor.h"
 #include <tbb/blocked_range.h>
 #include <tr1/unordered_map>
 
@@ -21,14 +21,14 @@ using std::set;
 
 namespace Clobscode {
 
-    class RefineMeshReduction {
+    class RefineMeshReduction2 {
 
         //Private variables
         unsigned int m_rl;
 
         //Need to be read in reduction :
         vector<Quadrant> m_new_Quadrants;
-        vector<Point3D> m_new_pts; //Local new pts
+        vector<Point3D> m_new_pts; //Local new pts (not merged)
         std::tr1::unordered_map<size_t, unsigned int> m_map_new_pts;
         set<QuadEdge> m_new_edges;
 
@@ -44,11 +44,6 @@ namespace Clobscode {
         int numberOfJoint;
         bool master;
 
-        //Number of points before the parallel reduce
-        //ie. The start index of all new points created
-        //By threads
-        unsigned long POINTS_SIZE_BEFORE_JOIN;
-
         void setSplitVisitor() {
             csv.setPoints(points);
             csv.setEdges(edges);
@@ -60,10 +55,10 @@ namespace Clobscode {
 
     public:
 
-        RefineMeshReduction(unsigned int refinementLevel, vector<Quadrant> &tmp_Quadrants, set<QuadEdge> &quadEdges,
+        RefineMeshReduction2(unsigned int refinementLevel, vector<Quadrant> &tmp_Quadrants, set<QuadEdge> &quadEdges,
                             Polyline &input, vector<MeshPoint> &points, const list<RefinementRegion *> &all_reg, const bool master) :
                 m_rl(refinementLevel), input(input), points(points), all_reg(all_reg), tmp_Quadrants(tmp_Quadrants),
-                edges(quadEdges), master(master), POINTS_SIZE_BEFORE_JOIN(points.size()){
+                edges(quadEdges), master(master){
             setSplitVisitor();
             numberOfJoint = 0;
         }
@@ -72,9 +67,9 @@ namespace Clobscode {
          * @brief Splitting constructor. Must be able to run concurrently with operator() and method join.
          * @details split is a dummy argument of type split, distinguishes the splitting constructor from a copy constructor.
          */
-        RefineMeshReduction(RefineMeshReduction &x, tbb::split) :
+        RefineMeshReduction2(RefineMeshReduction2 &x, tbb::split) :
                 m_rl(x.m_rl), input(x.input), points(x.points), all_reg(x.all_reg), tmp_Quadrants(x.tmp_Quadrants),
-                edges(x.edges), POINTS_SIZE_BEFORE_JOIN(points.size()) {
+                edges(x.edges) {
             setSplitVisitor();
             numberOfJoint = 0;
             master = false;
@@ -84,47 +79,39 @@ namespace Clobscode {
          * @brief Reduction.
          * @details Join results. The result in rmr should be merged into the result of this.
          */
-        void join(const RefineMeshReduction &rmr) {
-
-            //std::cout << "Start join" << (master ? " master" : "") << std::endl;
-
-            // TODO first call need to add local ?
-            // TODO choose smallest m_new_pts for comparison and swap ?
+        void join(const RefineMeshReduction2 &rmr) {
 
             numberOfJoint += rmr.numberOfJoint + 1;
 
             // best than map for insert and access
             std::tr1::unordered_map<unsigned int, unsigned int> taskToGlobal;
 
-            int total_nb_points = POINTS_SIZE_BEFORE_JOIN;
+            int i = 0;
             for (const Point3D &point : rmr.m_new_pts) {
 
+                //auto found = m_new_pts.find(point);
                 size_t hashPoint = point.operator()(point);
+
                 auto found = m_map_new_pts.find(hashPoint);
-
-                if (found == m_map_new_pts.end()) {
-                    //We did not found the point
-                    //We add it in the global new_pts
+                if (found != m_map_new_pts.end()) {
+                    taskToGlobal[i++ + points.size()] = m_map_new_pts[hashPoint];
+                } else {
+                    m_map_new_pts[hashPoint] = points.size() + m_new_pts.size();
                     m_new_pts.push_back(point);
-                    //We add  
-                    m_map_new_pts[hashPoint] = total_nb_points;
-                    
+                    taskToGlobal[i++ + points.size()] = points.size() + m_new_pts.size() - 1;
                 }
-
-                taskToGlobal[total_nb_points++] = m_map_new_pts[hashPoint];
             }
 
             tbb::task_scheduler_init def_init; // Use the default number of threads.
             tbb::task_group tg;
 
             tg.run([&] { // run in task group
-                //std::cout << "Edge start" << std::endl;
                 for (const QuadEdge &local_edge : rmr.m_new_edges) {
                     // build new edge with right index
                     vector<unsigned long> index(3, 0);
 
                     for (unsigned int i = 0; i < 3; i++) {
-                        if (local_edge[i] < POINTS_SIZE_BEFORE_JOIN) {
+                        if (local_edge[i] < points.size()) {
                             // index refer point not created during this refinement level
                             index[i] = local_edge[i];
                         } else {
@@ -148,20 +135,17 @@ namespace Clobscode {
                         }
                     }
                 }
-
-                //std::cout << "Edge end" << std::endl;
             });
 
             // Run another job concurrently with the loop above.
             // It can use up to the default number of threads.
             tg.run([&] { // run in task group
-                //std::cout << "Quad start" << std::endl;
                 for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
                     // build new quad with right index
 
                     vector<unsigned int> new_pointindex(4, 0);
                     for (unsigned int i = 0; i < 4; i++) {
-                        if (local_quad.getPointIndex(i) < POINTS_SIZE_BEFORE_JOIN) {
+                        if (local_quad.getPointIndex(i) < points.size()) {
                             // index refer point not created during this refinement level
                             new_pointindex[i] = local_quad.getPointIndex(i);
                         } else {
@@ -171,16 +155,15 @@ namespace Clobscode {
                     }
 
                     Quadrant quad(new_pointindex, m_rl);
+                    quad.intersected_edges = local_quad.intersected_edges;
+                    quad.intersected_features = local_quad.intersected_features;
                     m_new_Quadrants.push_back(quad);
 
                 }
-                //std::cout << "Quad end" << std::endl;
             });
 
             // Wait for completion of the task group
             tg.wait();
-
-            //std::cout << "End join" << (master ? " master" : "") << std::endl;
         }
 
         /**
@@ -222,7 +205,6 @@ namespace Clobscode {
                     // not used by other thread
                     if ((*reg_iter)->intersectsQuadrant(points, iter)) {
                         to_refine = true;
-                        //counterRefine.fetch_and_increment();
                         break;
                     }
                 }
@@ -231,7 +213,6 @@ namespace Clobscode {
                 //now if refinement is not needed, we add the Quadrant as it was.
                 if (!to_refine) {
                     m_new_Quadrants.push_back(iter);
-                    //End of for loop
                 } else {
                     //(paul) Idea : add a task here (only if to refined, check if faster..)
 
@@ -244,10 +225,7 @@ namespace Clobscode {
                     vector<vector<unsigned int> > split_elements;
                     csv.setNewEles(split_elements);
 
-                    //auto start_sv_time = chrono::high_resolution_clock::now();
                     iter.accept(&csv);
-                    //auto end_sv_time = chrono::high_resolution_clock::now();
-                    //time_split_visitor += std::chrono::duration_cast<chrono::milliseconds>(end_sv_time - start_sv_time).count();
 
                     if (inter_edges.empty()) {
                         for (unsigned int j = 0; j < split_elements.size(); j++) {
@@ -262,7 +240,6 @@ namespace Clobscode {
                             //iteration. For this reason, the coordinates must be passed
                             //"manually" at this point (clipping_coords).
 
-                            //(paul) TODO add as attribute ?
                             IntersectionsVisitor iv(true);
                             iv.setPolyline(input);
                             iv.setEdges(inter_edges);

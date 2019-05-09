@@ -67,6 +67,7 @@ namespace Clobscode
 
         //Test
         friend class SplitVisitorTest1TBB;
+        friend class RefineMeshReduction;
         friend class SplitVisitorOpenMP;
         friend class SplitVisitorReductionOpenMP;
 

@@ -7,7 +7,7 @@
 #include <tbb/concurrent_vector.h>
 #include <tbb/concurrent_unordered_set.h>
 #include "ParallelTest1TBB/SplitVisitorTest1TBB.h"
-#include "../ParallelizeTest/Join/ParallelReduceTBB.hpp"
+#include "ParallelReductionTBB/ParallelReduceTBB.hpp"
 #include "../ParallelizeTest/Join/ParallelReduceTBBV2.hpp"
 #include <atomic>
 
@@ -40,10 +40,6 @@ namespace Clobscode {
 
         tbb::task_scheduler_init test(nbThread);
 
-
-        std::cout << "Start refine mesh reduction IntelTBB with " << nbThread << " threads." << std::endl;
-
-
         // TEST REDUCTION
         list<Point3D> new_pts;
         vector<MeshPoint> tmp_points(points.begin(), points.end());
@@ -58,7 +54,6 @@ namespace Clobscode {
 
             int split = tmp_quadrants.size() / nbThread + 1;
             split = std::max(split, 10000);
-            //std::cout << split << std::endl;
 
             RefineMeshReduction rmr(i, tmp_quadrants, tmp_edges, input, tmp_points, all_reg, true);
             parallel_reduce(tbb::blocked_range<size_t>(0, tmp_quadrants.size(), split), rmr);
@@ -86,23 +81,13 @@ namespace Clobscode {
                 } else {
                     tmp_edges.insert(edge);
                 }
-
             }
-            //tmp_edges.insert(rmr.getNewEdges().begin(), rmr.getNewEdges().end());
-
-
 
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
-            long total = std::chrono::duration_cast<chrono::milliseconds>(
-                    end_refine_rl_time - start_refine_rl_time).count();
+            long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();
             cout << "         * level " << i << " in "
                  << total;
             cout << " ms" << endl;
-
-            //long outside = std::chrono::duration_cast<chrono::milliseconds>(end_outside_block_time - start_outside_block_time).count();
-            //cout << "TBB for outside / inside " << outside << " ms (" << (outside * 100.0 / total) << "%) ";
-            //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
-            //cout << endl;
 
             std::cout << "           ---- Points : " << tmp_points.size() << std::endl;
             std::cout << "           ---- QuadEdges : " << tmp_edges.size() << std::endl;
