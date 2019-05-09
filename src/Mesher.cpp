@@ -984,7 +984,8 @@ namespace Clobscode {
         //refineMeshReductionTBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
         //refineMeshCustomReductionTBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
         //refineCustomMeshReductionTBBV2(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        refineCustomMeshReductionTBBV3(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        //refineCustomMeshReductionTBBV3(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        refineMeshCustomReductionTBBV4(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
 
         // TODO check if correct version and go
