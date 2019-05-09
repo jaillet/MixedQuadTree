@@ -24,9 +24,9 @@ set(SOURCE_FILES Main
         Visitors/OneIrregularVisitor Visitors/PointMovedVisitor
         Visitors/TransitionPatternVisitor Visitors/SurfaceTemplatesVisitor
         Visitors/RemoveSubElementsVisitor
-        
-        ParallelizeTest/CloneMesher/SplitVisitorTest1.cpp
-        ParallelizeTest/CloneMesher/SplitVisitorTest1.h
+
+        MesherParallel/ParallelTest1TBB/SplitVisitorTest1TBB.cpp
+        MesherParallel/ParallelTest1TBB/SplitVisitorTest1TBB.h
         ParallelizeTest/Join/CustomSplitVisitor.cpp
         ParallelizeTest/Join/CustomSplitVisitor.h
         ParallelizeTest/Join/ParallelReduceTBB.hpp

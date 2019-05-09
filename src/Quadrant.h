@@ -40,7 +40,7 @@
 #include "QuadEdge.h"
 
 //Test
-#include "ParallelizeTest/CloneMesher/SplitVisitorTest1.h"
+#include "MesherParallel/ParallelTest1TBB/SplitVisitorTest1TBB.h"
 #include "MesherParallel/SplitVisitorOpenMP.h"
 #include "MesherParallel/SplitVisitorReductionOpenMP.h"
 
@@ -66,7 +66,7 @@ namespace Clobscode
         friend class RemoveSubElementsVisitor;
 
         //Test
-        friend class SplitVisitorTest1;
+        friend class SplitVisitorTest1TBB;
         friend class SplitVisitorOpenMP;
         friend class SplitVisitorReductionOpenMP;
 
