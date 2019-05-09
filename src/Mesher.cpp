@@ -979,12 +979,13 @@ namespace Clobscode {
         //refine each Quadrant until the Refinement Level is reached
         //----------------------------------------------------------
 
-        // TEST MULTI THREAD FIRST
+        // DONE
+        //refineMeshParallelTest1TBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
 
-        refineMeshParallelTest1TBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        // TODO check if correct version and go
+        refineMeshReductionTBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
-        //refineMeshReductionTBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
         //refineCustomMeshReductionTBBV2(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
         //refineMeshCustomReductionTBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
