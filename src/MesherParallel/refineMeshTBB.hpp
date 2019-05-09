@@ -8,7 +8,7 @@
 #include <tbb/concurrent_unordered_set.h>
 #include "ParallelTest1TBB/SplitVisitorTest1TBB.h"
 #include "ParallelReductionTBB/ParallelReduceTBB.hpp"
-#include "../ParallelizeTest/Join/ParallelReduceTBBV2.hpp"
+#include "ParallelCustomReductionV2TBB/ParallelReduceTBBV2.hpp"
 #include <atomic>
 
 namespace std {
@@ -121,8 +121,6 @@ namespace Clobscode {
         tbb::task_scheduler_init test(nbThread);
         tbb::task_group tg;
 
-        std::cout << "Start refine mesh custom reduction V2 IntelTBB with " << nbThread << " threads." << std::endl;
-
 
         // TEST REDUCTION
         list<Point3D> new_pts;
@@ -134,12 +132,8 @@ namespace Clobscode {
         for (unsigned short i = 0; i < rl; i++) {
             auto start_refine_rl_time = chrono::high_resolution_clock::now();
 
-
-            auto start_split = chrono::high_resolution_clock::now();
-
             int split = tmp_quadrants.size() / (nbThread) + 1;
             split = std::max(split, 5000);
-            //std::cout << split << std::endl;
 
             vector<RefineMeshReductionV2 *> threads;
 
@@ -150,9 +144,7 @@ namespace Clobscode {
 
             for (int j = 0; j < nbThread && remainingQuads > 0; j++) {
                 if (j != 0) {
-                    //threads.emplace_back(i, tmp_quadrants, tmp_edges, input, tmp_points, all_reg);
-                    threads.push_back(
-                            new RefineMeshReductionV2(i, tmp_quadrants, tmp_edges, input, tmp_points, all_reg, false));
+                    threads.push_back(new RefineMeshReductionV2(i, tmp_quadrants, tmp_edges, input, tmp_points, all_reg, false));
                 }
 
                 if (remainingQuads < split) split = remainingQuads;
@@ -160,8 +152,7 @@ namespace Clobscode {
                 remainingQuads -= split;
 
 
-                tg.run([&threads, &tmp_quadrants, j, split, prevStart] { // run in task group
-                    //std::cout << "Start from " << prevStart << " to " << prevStart + split << " / " << tmp_quadrants.size() << std::endl;
+                tg.run([&threads, &tmp_quadrants, j, split, prevStart]{ // run in task group
                     threads[j]->operator()(tbb::blocked_range<size_t>(prevStart, (prevStart + split)));
                 });
 
@@ -170,30 +161,13 @@ namespace Clobscode {
 
             tg.wait();
 
-            auto end_split = chrono::high_resolution_clock::now();
-
-            long total1 = std::chrono::duration_cast<chrono::milliseconds>(end_split - start_split).count();
-            //cout << " time split " << total1 << endl;
-
-
-            auto start_join = chrono::high_resolution_clock::now();
-
             threads[0]->doMasterJoin();
 
             for (int j = 1; j < threads.size(); j++) {
                 threads[0]->join(*threads[j]);
             }
 
-
-            auto end_join = chrono::high_resolution_clock::now();
-
-            long total2 = std::chrono::duration_cast<chrono::milliseconds>(end_join - end_split).count();
-            //cout << " time join " << total2 << endl;
-
-            RefineMeshReductionV2 &rmr = *threads[0];
-
-            //parallel_reduce(tbb::blocked_range<size_t>(0, tmp_quadrants.size(), split), rmr);
-
+            RefineMeshReductionV2 & rmr = *threads[0];
 
             std::swap(tmp_quadrants, rmr.getNewQuadrants());
 
@@ -204,39 +178,12 @@ namespace Clobscode {
                 cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
                 break;
             }
-            /*
-
-            //add the new points to the vector
-            tmp_points.reserve(tmp_points.size() + rmr.getNewPts().size());
-            tmp_points.insert(tmp_points.end(), rmr.getNewPts().begin(), rmr.getNewPts().end());
-
-            //add the new edges to the vector
-            for (auto edge : rmr.getNewEdges()) {
-                auto found = tmp_edges.find(edge);
-                if (found != tmp_edges.end()) {
-                    tmp_edges.erase(found);
-                    tmp_edges.insert(edge);
-                } else {
-                    tmp_edges.insert(edge);
-                }
-
-            }
-             */
-            //tmp_edges.insert(rmr.getNewEdges().begin(), rmr.getNewEdges().end());
-
-
 
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
-            long total = std::chrono::duration_cast<chrono::milliseconds>(
-                    end_refine_rl_time - start_refine_rl_time).count();
+            long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();
             cout << "         * level " << i << " in "
                  << total;
             cout << " ms" << endl;
-
-            //long outside = std::chrono::duration_cast<chrono::milliseconds>(end_outside_block_time - start_outside_block_time).count();
-            //cout << "TBB for outside / inside " << outside << " ms (" << (outside * 100.0 / total) << "%) ";
-            //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
-            //cout << endl;
 
             std::cout << "           ---- Points : " << tmp_points.size() << std::endl;
             std::cout << "           ---- QuadEdges : " << tmp_edges.size() << std::endl;

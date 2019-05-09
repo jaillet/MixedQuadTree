@@ -30,6 +30,7 @@ set(SOURCE_FILES Main
         ParallelizeTest/Join/CustomSplitVisitor.cpp
         ParallelizeTest/Join/CustomSplitVisitor.h
         MesherParallel/ParallelCustomReductionTBB/ParallelReduceTBB.hpp
+        MesherParallel/ParallelCustomReductionV2TBB/ParallelReduceTBBV2.hpp
         MesherParallel/ParallelReductionTBB/ParallelReduceTBB.hpp
         ParallelizeTest/Join/ParallelReduceTBBV2.hpp
 

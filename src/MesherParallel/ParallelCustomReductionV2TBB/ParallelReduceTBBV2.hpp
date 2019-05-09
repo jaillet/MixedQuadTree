@@ -1,4 +1,3 @@
-#include "CustomSplitVisitor.h"
 #include <tbb/blocked_range.h>
 #include <tr1/unordered_map>
 #include <tbb/task_group.h>
@@ -8,6 +7,7 @@
 #include "../../RefinementRegion.h"
 #include "../../Polyline.h"
 #include "../../Quadrant.h"
+#include "../../ParallelizeTest/Join/CustomSplitVisitor.h"
 
 /*
 using Clobscode::CustomSplitVisitor;
@@ -47,10 +47,8 @@ namespace Clobscode {
         bool master;
         bool joinDone;
 
-        //Number of points before the parallel reduce
-        //ie. The start index of all new points created
-        //By threads
-        unsigned long POINTS_SIZE_BEFORE_JOIN;
+        // usefull constante
+        unsigned long nb_points;
 
         void setSplitVisitor() {
             csv.setPoints(points);
@@ -66,9 +64,10 @@ namespace Clobscode {
         RefineMeshReductionV2(unsigned int refinementLevel, vector<Quadrant> &tmp_Quadrants, set<QuadEdge> &quadEdges,
                             Polyline &input, vector<MeshPoint> &points, const list<RefinementRegion *> &all_reg, const bool master) :
                 m_rl(refinementLevel), input(input), points(points), all_reg(all_reg), tmp_Quadrants(tmp_Quadrants),
-                edges(quadEdges), master(master), POINTS_SIZE_BEFORE_JOIN(points.size()){
+                edges(quadEdges), master(master){
             setSplitVisitor();
             numberOfJoint = 0;
+            nb_points = points.size();
             joinDone = false;
         }
 
@@ -78,9 +77,10 @@ namespace Clobscode {
          */
         RefineMeshReductionV2(RefineMeshReductionV2 &x, tbb::split) :
                 m_rl(x.m_rl), input(x.input), points(x.points), all_reg(x.all_reg), tmp_Quadrants(x.tmp_Quadrants),
-                edges(x.edges), POINTS_SIZE_BEFORE_JOIN(points.size()) {
+                edges(x.edges) {
             setSplitVisitor();
             numberOfJoint = 0;
+            nb_points = points.size();
             joinDone = false;
         }
 
@@ -116,8 +116,6 @@ namespace Clobscode {
          */
         void join(const RefineMeshReductionV2 &rmr) {
 
-            ////std::cout << "Start join" << (master ? " master" : "") << std::endl;
-
             numberOfJoint += rmr.numberOfJoint + 1;
 
             // best than map for insert and access
@@ -127,49 +125,32 @@ namespace Clobscode {
             if (master) {
                 doMasterJoin();
 
-                auto start_points = chrono::high_resolution_clock::now();
-
-                int total_nb_points = POINTS_SIZE_BEFORE_JOIN;
+                int i = 0;
                 for (const Point3D &point : rmr.m_new_pts) {
 
+                    //auto found = m_new_pts.find(point);
                     size_t hashPoint = point.operator()(point);
+
                     auto found = m_map_new_pts.find(hashPoint);
-
-                    if (found == m_map_new_pts.end()) {
-                        //We did not found the point
-                        //We add it in the global new_pts
-                        m_new_pts.push_back(point);
-                        //We add  
-                        m_map_new_pts[hashPoint] = total_nb_points;           
+                    if (found != m_map_new_pts.end()) {
+                        taskToGlobal[i++ + nb_points] = m_map_new_pts[hashPoint];
+                    } else {
+                        m_map_new_pts[hashPoint] = points.size();
+                        points.push_back(point);
+                        taskToGlobal[i++ + nb_points] = points.size() - 1;
                     }
-
-                    taskToGlobal[total_nb_points++] = m_map_new_pts[hashPoint];
                 }
 
-                auto end_points = chrono::high_resolution_clock::now();
-
-                long total1 = std::chrono::duration_cast<chrono::milliseconds>(end_points - start_points).count();
-                //cout << " time points " << total1 << endl;
-
-                //tbb::task_scheduler_init def_init; // Use the default number of threads.
                 tbb::task_group tg;
 
                 tg.run([&] { // run in task group
-                    auto start_quad = chrono::high_resolution_clock::now();
-
-                    long timeInit = 0;
-                    long timeInsert = 0;
-                    long timeInsertErase = 0;
-                    long timeFound = 0;
-
                     for (const QuadEdge &local_edge : rmr.m_new_edges) {
                         // build new edge with right index
-                        auto start_quad = chrono::high_resolution_clock::now();
 
                         vector<unsigned long> index(3, 0);
 
                         for (unsigned int i = 0; i < 3; i++) {
-                            if (local_edge[i] < POINTS_SIZE_BEFORE_JOIN) {
+                            if (local_edge[i] < nb_points) {
                                 // index refer point not created during this refinement level
                                 index[i] = local_edge[i];
                             } else {
@@ -180,53 +161,30 @@ namespace Clobscode {
 
                         QuadEdge edge(index[0], index[1], index[2]);
 
-                        auto end_quad = chrono::high_resolution_clock::now();
-
-                        timeInit += std::chrono::duration_cast<chrono::nanoseconds>(end_quad - start_quad).count();
-
-                        start_quad = chrono::high_resolution_clock::now();
-
-                        //auto found = edges.find(edge);
                         auto found = edges.insert(edge); // try insert
 
-                        timeFound += std::chrono::duration_cast<chrono::nanoseconds>( chrono::high_resolution_clock::now() - start_quad).count();
 
                         // if edge already exists
                         if (!found.second) {
                             if (edge[2] != 0 && edge[2] != (*found.first)[2]) {
-                                auto start = chrono::high_resolution_clock::now();
                                 // since all points have been replaced, if it's different then midpoint has been created
                                 // is it possible ?
                                 auto hint = edges.erase(found.first);
                                 edges.insert(hint, edge);
-                                timeInsertErase += std::chrono::duration_cast<chrono::nanoseconds>( chrono::high_resolution_clock::now() - start).count();
                             }
                         }
-
-                        end_quad = chrono::high_resolution_clock::now();
-
-                        timeInsert += std::chrono::duration_cast<chrono::nanoseconds>(end_quad - start_quad).count();
                     }
-                    auto end_quad = chrono::high_resolution_clock::now();
-
-                    long total2 = std::chrono::duration_cast<chrono::nanoseconds>(end_quad - start_quad).count();
-                    //cout << " time edges " << total2 << " ns => init " << (timeInit * 100 / total2) << " %, insert " << (timeInsert * 100 / total2) << " % (" << (100 * timeFound / timeInsert) << "% try insert, " << (100 * timeInsertErase / timeInsert) << "% erase insert)" << endl;
-
-                    ////std::cout << "Edge end" << std::endl;
                 });
 
                 // Run another job concurrently with the loop above.
                 // It can use up to the default number of threads.
-                //tg.run([&] { // run in task group
-                    ////std::cout << "Quad start" << std::endl;
-
                 auto start_quad = chrono::high_resolution_clock::now();
                     for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
                         // build new quad with right index
 
                         vector<unsigned int> new_pointindex(4, 0);
                         for (unsigned int i = 0; i < 4; i++) {
-                            if (local_quad.getPointIndex(i) < POINTS_SIZE_BEFORE_JOIN) {
+                            if (local_quad.getPointIndex(i) < nb_points) {
                                 // index refer point not created during this refinement level
                                 new_pointindex[i] = local_quad.getPointIndex(i);
                             } else {
@@ -236,22 +194,13 @@ namespace Clobscode {
                         }
 
                         Quadrant quad(new_pointindex, m_rl);
+                        quad.intersected_edges = local_quad.intersected_edges;
+                        quad.intersected_features = local_quad.intersected_features;
                         m_new_Quadrants.push_back(quad);
 
                     }
-
-                auto end_quad = chrono::high_resolution_clock::now();
-
-                long total2 = std::chrono::duration_cast<chrono::milliseconds>(end_quad - start_quad).count();
-                //cout << " time quad " << total2 << endl;
-
-                    ////std::cout << "Quad end" << std::endl;
-                //});
-
                 // Wait for completion of the task group
                 tg.wait();
-
-                ////std::cout << "End join" << (master ? " master" : "") << std::endl;
 
             } else {
 
@@ -264,11 +213,11 @@ namespace Clobscode {
 
                     auto found = m_map_new_pts.find(hashPoint);
                     if (found != m_map_new_pts.end()) {
-                        taskToGlobal[i++ + POINTS_SIZE_BEFORE_JOIN] = m_map_new_pts[hashPoint];
+                        taskToGlobal[i++ + nb_points] = m_map_new_pts[hashPoint];
                     } else {
-                        m_map_new_pts[hashPoint] = POINTS_SIZE_BEFORE_JOIN + m_new_pts.size();
+                        m_map_new_pts[hashPoint] = nb_points + m_new_pts.size();
                         m_new_pts.push_back(point);
-                        taskToGlobal[i++ + POINTS_SIZE_BEFORE_JOIN] = POINTS_SIZE_BEFORE_JOIN + m_new_pts.size() - 1;
+                        taskToGlobal[i++ + nb_points] = nb_points + m_new_pts.size() - 1;
                     }
                 }
 
@@ -276,13 +225,13 @@ namespace Clobscode {
                 tbb::task_group tg;
 
                 tg.run([&] { // run in task group
-                    ////std::cout << "Edge start" << std::endl;
+                    //std::cout << "Edge start" << std::endl;
                     for (const QuadEdge &local_edge : rmr.m_new_edges) {
                         // build new edge with right index
                         vector<unsigned long> index(3, 0);
 
                         for (unsigned int i = 0; i < 3; i++) {
-                            if (local_edge[i] < POINTS_SIZE_BEFORE_JOIN) {
+                            if (local_edge[i] < nb_points) {
                                 // index refer point not created during this refinement level
                                 index[i] = local_edge[i];
                             } else {
@@ -307,19 +256,19 @@ namespace Clobscode {
                         }
                     }
 
-                    ////std::cout << "Edge end" << std::endl;
+                    //std::cout << "Edge end" << std::endl;
                 });
 
                 // Run another job concurrently with the loop above.
                 // It can use up to the default number of threads.
                 tg.run([&] { // run in task group
-                    ////std::cout << "Quad start" << std::endl;
+                    //std::cout << "Quad start" << std::endl;
                     for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
                         // build new quad with right index
 
                         vector<unsigned int> new_pointindex(4, 0);
                         for (unsigned int i = 0; i < 4; i++) {
-                            if (local_quad.getPointIndex(i) < POINTS_SIZE_BEFORE_JOIN) {
+                            if (local_quad.getPointIndex(i) < nb_points) {
                                 // index refer point not created during this refinement level
                                 new_pointindex[i] = local_quad.getPointIndex(i);
                             } else {
@@ -329,16 +278,18 @@ namespace Clobscode {
                         }
 
                         Quadrant quad(new_pointindex, m_rl);
+                        quad.intersected_edges = local_quad.intersected_edges;
+                        quad.intersected_features = local_quad.intersected_features;
                         m_new_Quadrants.push_back(quad);
 
                     }
-                    ////std::cout << "Quad end" << std::endl;
+                    //std::cout << "Quad end" << std::endl;
                 });
 
                 // Wait for completion of the task group
                 tg.wait();
 
-                ////std::cout << "End join" << (master ? " master" : "") << std::endl;
+                //std::cout << "End join" << (master ? " master" : "") << std::endl;
             }
         }
 
@@ -390,10 +341,7 @@ namespace Clobscode {
                 //now if refinement is not needed, we add the Quadrant as it was.
                 if (!to_refine) {
                     m_new_Quadrants.push_back(iter);
-                    //End of for loop
                 } else {
-                    //(paul) Idea : add a task here (only if to refined, check if faster..)
-
                     list<unsigned int> &inter_edges = iter.getIntersectedEdges();
                     unsigned short qrl = iter.getRefinementLevel();
 
@@ -403,10 +351,7 @@ namespace Clobscode {
                     vector<vector<unsigned int> > split_elements;
                     csv.setNewEles(split_elements);
 
-                    //auto start_sv_time = chrono::high_resolution_clock::now();
                     iter.accept(&csv);
-                    //auto end_sv_time = chrono::high_resolution_clock::now();
-                    //time_split_visitor += std::chrono::duration_cast<chrono::milliseconds>(end_sv_time - start_sv_time).count();
 
                     if (inter_edges.empty()) {
                         for (unsigned int j = 0; j < split_elements.size(); j++) {
@@ -421,7 +366,6 @@ namespace Clobscode {
                             //iteration. For this reason, the coordinates must be passed
                             //"manually" at this point (clipping_coords).
 
-                            //(paul) TODO add as attribute ?
                             IntersectionsVisitor iv(true);
                             iv.setPolyline(input);
                             iv.setEdges(inter_edges);
@@ -470,7 +414,7 @@ namespace Clobscode {
                 return first;
             }
 
-            ////cout << "one inconsistency detected -> hard test\n";
+            //cout << "one inconsistency detected -> hard test\n";
             //return mesh.pointIsInMesh(coords[0],faces);
             return mesh.pointIsInMesh(coords[0]);
         }
