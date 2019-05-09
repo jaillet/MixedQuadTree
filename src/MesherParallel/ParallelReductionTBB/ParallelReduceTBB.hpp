@@ -1,4 +1,4 @@
-#include "../../ParallelizeTest/Join/CustomSplitVisitor.h"
+#include "../../ParallelizeTest/Join/CustomSplitVisitorV3.h"
 #include <tbb/blocked_range.h>
 #include <tr1/unordered_map>
 

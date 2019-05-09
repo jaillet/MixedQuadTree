@@ -982,12 +982,13 @@ namespace Clobscode {
         // DONE
         //refineMeshParallelTest1TBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
         //refineMeshReductionTBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        refineCustomMeshReductionTBBV2(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        //refineMeshCustomReductionTBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        //refineCustomMeshReductionTBBV2(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        refineCustomMeshReductionTBBV3(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
 
         // TODO check if correct version and go
 
-        //refineMeshCustomReductionTBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
         //this->refineMeshParallelOpenMP(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 

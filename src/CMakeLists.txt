@@ -28,9 +28,12 @@ set(SOURCE_FILES Main
         MesherParallel/ParallelTest1TBB/SplitVisitorTest1TBB.cpp
         MesherParallel/ParallelTest1TBB/SplitVisitorTest1TBB.h
         ParallelizeTest/Join/CustomSplitVisitor.cpp
-        ParallelizeTest/Join/CustomSplitVisitor.h
-        MesherParallel/ParallelCustomReductionTBB/ParallelReduceTBB.hpp
-        MesherParallel/ParallelCustomReductionV2TBB/ParallelReduceTBBV2.hpp
+        ParallelizeTest/Join/CustomSplitVisitorV3.h
+        MesherParallel/ParallelCustomReductionTBB
+        MesherParallel/ParallelCustomReductionTBBV2
+        MesherParallel/ParallelCustomReductionTBBV3
+        MesherParallel/ParallelCustomReductionTBBV3/CustomSplitVisitorV3.h
+        MesherParallel/ParallelCustomReductionTBBV3/CustomSplitVisitorV3.cpp
         MesherParallel/ParallelReductionTBB/ParallelReduceTBB.hpp
         ParallelizeTest/Join/ParallelReduceTBBV2.hpp
 

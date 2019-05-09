@@ -1,4 +1,4 @@
-#include "CustomSplitVisitor.h"
+#include "CustomSplitVisitorV3.h"
 
 #include "../../Visitors/IntersectionsVisitor.h"
 #include "../../RefinementRegion.h"

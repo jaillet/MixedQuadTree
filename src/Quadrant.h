@@ -78,6 +78,9 @@ namespace Clobscode
 		
 		Quadrant(vector<unsigned int> &epts, 
 			   const unsigned short &ref_level);
+
+        Quadrant(vector<unsigned int> &epts,
+                 const Quadrant & quad);
 		
 		virtual ~Quadrant();
 
