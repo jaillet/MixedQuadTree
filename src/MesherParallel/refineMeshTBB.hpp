@@ -31,7 +31,6 @@ namespace Clobscode {
                                             Polyline &input) {
 
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
-        std::cout << NOMBRE_THREAD << std::endl;
 
         //OpenMP
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
@@ -41,6 +40,7 @@ namespace Clobscode {
 
         tbb::task_scheduler_init test(nbThread);
 
+        std::cout << "Start refine mesh parallel test 1 IntelTBB with " << nbThread << " threads." << std::endl;
 
         //list of temp Quadrants
         vector<Quadrant> tmp_Quadrants;
@@ -55,15 +55,6 @@ namespace Clobscode {
 
         tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> quadEdges;
         quadEdges.insert(QuadEdges.begin(), QuadEdges.end());
-
-
-        //Shared variables
-
-        //points
-        //--- Read in SplitVisitor::visit
-        //QuadEdges Warning!
-        //--- is filled by SplitVisitor::visit
-        //--- and needed and filled in SplitVisitor::splitEdge!
 
 
         unsigned int nb_points = 0;
@@ -211,13 +202,13 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "         * level " << i << " in "
+            cout << "\t* level " << i << " in "
                  << total;
             cout << " ms" << endl;
 
-            std::cout << "           ---- Points : " << points.size() << std::endl;
-            std::cout << "           ---- QuadEdges : " << quadEdges.size() << std::endl;
-            std::cout << "           ---- Quadrants : " << tmp_Quadrants.size() << std::endl;
+            std::cout << "\t---- Points : " << points.size() << std::endl;
+            std::cout << "\t---- QuadEdges : " << quadEdges.size() << std::endl;
+            std::cout << "\t---- Quadrants : " << tmp_Quadrants.size() << std::endl;
 
 
         } //END FOR REFINEMENT LEVEL
@@ -237,7 +228,6 @@ namespace Clobscode {
                                         Polyline &input) {
 
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
-        std::cout << NOMBRE_THREAD << std::endl;
 
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
             std::cout << "Invalid number of threads or not supported by computer" << std::endl;
@@ -245,6 +235,8 @@ namespace Clobscode {
         }
 
         tbb::task_scheduler_init test(nbThread);
+
+        std::cout << "Start refine mesh reduction IntelTBB with " << nbThread << " threads." << std::endl;
 
         // TEST REDUCTION
         list<Point3D> new_pts;
@@ -292,13 +284,13 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "         * level " << i << " in "
+            cout << "\t* level " << i << " in "
                  << total;
             cout << " ms" << endl;
 
-            std::cout << "           ---- Points : " << tmp_points.size() << std::endl;
-            std::cout << "           ---- QuadEdges : " << tmp_edges.size() << std::endl;
-            std::cout << "           ---- Quadrants : " << tmp_quadrants.size() << std::endl;
+            std::cout << "\t---- Points : " << tmp_points.size() << std::endl;
+            std::cout << "\t---- QuadEdges : " << tmp_edges.size() << std::endl;
+            std::cout << "\t---- Quadrants : " << tmp_quadrants.size() << std::endl;
 
 
         }
@@ -319,7 +311,6 @@ namespace Clobscode {
                                               Polyline &input) {
 
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
-        std::cout << NOMBRE_THREAD << std::endl;
 
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
             std::cout << "Invalid number of threads or not supported by computer" << std::endl;
@@ -417,7 +408,7 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "         * level " << i << " in "
+            cout << "\t* level " << i << " in "
                  << total;
             cout << " ms" << endl;
 
@@ -426,9 +417,9 @@ namespace Clobscode {
             //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
             //cout << endl;
 
-            std::cout << "           ---- Points : " << tmp_points.size() << std::endl;
-            std::cout << "           ---- QuadEdges : " << tmp_edges.size() << std::endl;
-            std::cout << "           ---- Quadrants : " << tmp_quadrants.size() << std::endl;
+            std::cout << "\t---- Points : " << tmp_points.size() << std::endl;
+            std::cout << "\t---- QuadEdges : " << tmp_edges.size() << std::endl;
+            std::cout << "\t---- Quadrants : " << tmp_quadrants.size() << std::endl;
 
         }
 
@@ -445,7 +436,6 @@ namespace Clobscode {
                                                 Polyline &input) {
 
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
-        std::cout << NOMBRE_THREAD << std::endl;
 
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
             std::cout << "Invalid number of threads or not supported by computer" << std::endl;
@@ -518,13 +508,13 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "         * level " << i << " in "
+            cout << "\t* level " << i << " in "
                  << total;
             cout << " ms" << endl;
 
-            std::cout << "           ---- Points : " << tmp_points.size() << std::endl;
-            std::cout << "           ---- QuadEdges : " << tmp_edges.size() << std::endl;
-            std::cout << "           ---- Quadrants : " << tmp_quadrants.size() << std::endl;
+            std::cout << "\t---- Points : " << tmp_points.size() << std::endl;
+            std::cout << "\t---- QuadEdges : " << tmp_edges.size() << std::endl;
+            std::cout << "\t---- Quadrants : " << tmp_quadrants.size() << std::endl;
 
         }
 
@@ -543,7 +533,6 @@ namespace Clobscode {
                                                 Polyline &input) {
 
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
-        std::cout << NOMBRE_THREAD << std::endl;
 
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
             std::cout << "Invalid number of threads or not supported by computer" << std::endl;
@@ -760,14 +749,13 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "         * level " << i << " in "
+            cout << "\t* level " << i << " in "
                  << total;
             cout << " ms" << endl;
 
-            std::cout << "           ---- Points : " << tmp_points.size() << std::endl;
-            std::cout << "           ---- QuadEdges : " << tmp_edges.size() << std::endl;
-            std::cout << "           ---- Quadrants : " << tmp_quadrants.size() << std::endl;
-
+            std::cout << "\t---- Points : " << tmp_points.size() << std::endl;
+            std::cout << "\t---- QuadEdges : " << tmp_edges.size() << std::endl;
+            std::cout << "\t---- Quadrants : " << tmp_quadrants.size() << std::endl;
         }
 
         std::cout << "----------------------------------------------------------" << std::endl;
@@ -783,12 +771,13 @@ namespace Clobscode {
                                                 const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                                 Polyline &input) {
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
-        std::cout << NOMBRE_THREAD << std::endl;
 
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
             std::cout << "Invalid number of threads or not supported by computer" << std::endl;
             return;
         }
+
+        std::cout << "Start refine mesh custom reduction V4 IntelTBB with " << nbThread << " threads." << std::endl;
 
         // TEST REDUCTION
         vector<MeshPoint> tmp_points(points.begin(), points.end());
@@ -946,13 +935,13 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "         * level " << i << " in "
+            cout << "\t* level " << i << " in "
                  << total;
             cout << " ms" << endl;
 
-            std::cout << "           ---- Points : " << tmp_points.size() << std::endl;
-            std::cout << "           ---- QuadEdges : " << tmp_edges.size() << std::endl;
-            std::cout << "           ---- Quadrants : " << tmp_quadrants.size() << std::endl;
+            std::cout << "\t---- Points : " << tmp_points.size() << std::endl;
+            std::cout << "\t---- QuadEdges : " << tmp_edges.size() << std::endl;
+            std::cout << "\t---- Quadrants : " << tmp_quadrants.size() << std::endl;
 
         }
 

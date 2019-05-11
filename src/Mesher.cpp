@@ -982,13 +982,18 @@ namespace Clobscode {
         // DONE
         const int maxThread = 12;
         for (int i = 1; i < maxThread; ++i) {
-            // refineMeshParallelTest1TBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-            // refineMeshReductionTBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-            // refineMeshCustomReductionTBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-            // refineCustomMeshReductionTBBV2(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-            // refineCustomMeshReductionTBBV3(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-            // refineMeshCustomReductionTBBV4(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-            // refineMeshReductionOpenMP(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input); //V1
+            std::cout << "| | | | |" << std::endl;
+            std::cout << "| | | | |" << std::endl;
+            std::cout << "| | | | |" << std::endl;
+            std::cout << "| | | | |" << std::endl;
+            std::cout << "Begin test of all functions with " << i << " threads." << std::endl;
+            refineMeshParallelTest1TBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            refineMeshReductionTBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            refineMeshCustomReductionTBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            refineCustomMeshReductionTBBV2(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            refineCustomMeshReductionTBBV3(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            refineMeshCustomReductionTBBV4(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            refineMeshReductionOpenMP(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input); //V1
             refineMeshReductionOpenMP(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input, false); //V2
             // TODO check if correct version and go
         }     

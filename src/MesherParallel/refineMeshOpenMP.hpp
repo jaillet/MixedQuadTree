@@ -499,12 +499,12 @@ namespace Clobscode {
                 long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();
                 
              	cout << "Level " << i << " in " << total << " ms" << endl;
-             	cout << "\t * Time in accumulation = " << totalAccumulationTime << "ms" << endl;
-             	cout << "\t * Time in reduce = " << totalReduceTime << "ms" << endl;
+             	cout << "\t* Time in accumulation = " << totalAccumulationTime << "ms" << endl;
+             	cout << "\t* Time in reduce = " << totalReduceTime << "ms" << endl;
 
-                cout << "---- Points : " << points.size() << endl;
-	            cout << "---- QuadEdge : " <<  QuadEdges.size() << endl;
-	            cout << "---- Quadrants : " << tmp_Quadrants.size() << endl; 
+                cout << "\t---- Points : " << points.size() << endl;
+	            cout << "\t---- QuadEdge : " <<  QuadEdges.size() << endl;
+	            cout << "\t---- Quadrants : " << tmp_Quadrants.size() << endl; 
 
 			} // END FOR REFINEMENT LEVEL
 
@@ -654,11 +654,11 @@ namespace Clobscode {
 		auto end_reduce_time = chrono::high_resolution_clock::now();		
 		long totalReduceTime = std::chrono::duration_cast<chrono::milliseconds>(end_reduce_time - start_reduce_time).count();             
 
-		std::cout << "Reduce V1 at level rl=" << rl << std::endl;
-		std::cout << "\t* Point time = " << totalPointTime << " ms" << std::endl;
-		std::cout << "\t* Edges time = " << totalEdgesTime << " ms" << std::endl;
-		std::cout << "\t* Quadrant time = " << totalQuadrantTime << " ms" << std::endl;
-		std::cout << "\t* Total time = " << totalReduceTime << " ms" << std::endl;
+		// std::cout << "Reduce V1 at level rl=" << rl << std::endl;
+		// std::cout << "\t* Point time = " << totalPointTime << " ms" << std::endl;
+		// std::cout << "\t* Edges time = " << totalEdgesTime << " ms" << std::endl;
+		// std::cout << "\t* Quadrant time = " << totalQuadrantTime << " ms" << std::endl;
+		// std::cout << "\t* Total time = " << totalReduceTime << " ms" << std::endl;
 	}
 
 	/**
@@ -780,10 +780,10 @@ namespace Clobscode {
 		auto end_reduce_time = chrono::high_resolution_clock::now();		
 		long totalReduceTime = std::chrono::duration_cast<chrono::milliseconds>(end_reduce_time - start_reduce_time).count();             
 
-		std::cout << "Reduce V2 at level rl=" << rl << std::endl;
-		std::cout << "\t* Edges And Point time = " << totalEdgesAndPointTime << " ms" << std::endl;
-		std::cout << "\t* Quadrant time = " << totalQuadrantTime << " ms" << std::endl;
-		std::cout << "\t* Total time = " << totalReduceTime << " ms" << std::endl;
+		// std::cout << "Reduce V2 at level rl=" << rl << std::endl;
+		// std::cout << "\t* Edges And Point time = " << totalEdgesAndPointTime << " ms" << std::endl;
+		// std::cout << "\t* Quadrant time = " << totalQuadrantTime << " ms" << std::endl;
+		// std::cout << "\t* Total time = " << totalReduceTime << " ms" << std::endl;
 	}
 
 }
