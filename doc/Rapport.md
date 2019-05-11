@@ -493,7 +493,6 @@ wrong number of points at level 9+
 
 Use a vector of RefineMeshReduction objects (class that do the parallel task), and do the join manually.
 
-
 Function refineMeshCustomReductionTBB
 
 ram issues
@@ -543,11 +542,11 @@ Improve of previous version, with a master join
            ---- QuadEdges : 789793
            ---- Quadrants : 257904
 
+           |
+           |
+           |
+           |
 
-           |
-           |
-           |
-           |
 
 * level 8 in 983 ms
            ---- Points : 69761
@@ -565,6 +564,10 @@ Improve of previous version, with a master join
 
 Set mutex sur une région proche -> a voir
 
+Algo analyse temps + graphes python
+
+Au travail!!
+
 Graphiques => POSTER
 
-Réunion prochaine : lundi 17h
+Réunion prochaine : lundi 13/05 17h00
