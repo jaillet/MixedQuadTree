@@ -17,7 +17,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
  */
 /**
-* @file CustomSplitVisitor.cpp
+* @file CustomSplitVisitorV3.cpp
 * @author Claudio Lobos, Fabrice Jaillet
 * @version 0.1
 * @brief
@@ -26,47 +26,53 @@
 #include "CustomSplitVisitorV3.h"
 #include "../../Quadrant.h"
 
+
+namespace std {
+    template <>
+    struct hash<Clobscode::QuadEdge> {
+        size_t operator()(const Clobscode::QuadEdge& k) const
+        {
+            // Compute individual hash values for two data members and combine them using XOR and bit shifting
+            return ((hash<unsigned int>()(k[0]) ^ (hash<unsigned int>()(k[1]) << 1)) >> 1);
+        }
+    };
+}
+
 namespace Clobscode
 {
-//vector<MeshPoint> *points;
-//list<Point3D> *new_pts;
-//set<QuadEdge> *edges;
-//vector<vector<unsigned int> > *new_eles;
-//vector<vector<Point3D> > *clipping;
-
-    CustomSplitVisitor::CustomSplitVisitor()
+    CustomSplitVisitorV3::CustomSplitVisitorV3()
         :points(NULL),new_pts(NULL),edges(NULL),new_eles(NULL),clipping(NULL)
     { }
 
-    void CustomSplitVisitor::setPoints(const vector<MeshPoint> &points) {
+    void CustomSplitVisitorV3::setPoints(const vector<MeshPoint> &points) {
         this->points = &points;
     }
     
-    void CustomSplitVisitor::setNewPts(vector<Point3D> &new_pts) {
+    void CustomSplitVisitorV3::setNewPts(vector<Point3D> &new_pts) {
         this->new_pts = &new_pts;
     }
 
-    void CustomSplitVisitor::setMapPts(std::tr1::unordered_map<size_t, unsigned int> &map_pts) {
+    void CustomSplitVisitorV3::setMapPts(std::tr1::unordered_map<size_t, unsigned int> &map_pts) {
         this->map_pts = &map_pts;
     }
 
-    void CustomSplitVisitor::setNewEdges(set<QuadEdge> &new_edges) {
+    void CustomSplitVisitorV3::setNewEdges(set<QuadEdge> &new_edges) {
         this->new_edges = &new_edges;
     }
     
-    void CustomSplitVisitor::setEdges(set<QuadEdge> &edges) {
+    void CustomSplitVisitorV3::setEdges(tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> &edges) {
         this->edges = &edges;
     }
     
-    void CustomSplitVisitor::setNewEles(vector<vector<unsigned int> > &new_eles) {
+    void CustomSplitVisitorV3::setNewEles(vector<vector<unsigned int> > &new_eles) {
         this->new_eles = &new_eles;
     }
     
-    void CustomSplitVisitor::setClipping(vector<vector<Point3D> > &clipping) {
+    void CustomSplitVisitorV3::setClipping(vector<vector<Point3D> > &clipping) {
         this->clipping = &clipping;
     }
 
-    bool CustomSplitVisitor::visit(Quadrant *o)
+    bool CustomSplitVisitorV3::visit(Quadrant *o)
     {
         //getting variables for modification
         //preferably by reference, to avoid unnecessary copying
@@ -74,7 +80,7 @@ namespace Clobscode
 
         new_eles->reserve(4);
 
-        unsigned int n_pts = points->size() + new_pts->size();
+        unsigned long n_pts = points->size() + new_pts->size();
         //the vector containing all nodes of this Quadrant (and sons)
         vector<unsigned int> all_pts(9,0);
 
@@ -128,7 +134,7 @@ namespace Clobscode
         //of course all the intern edges and mid point were never inserted
         //before, so this task is performed without asking
         Point3D pt (avg[0],avg[1],avg[2]);
-        map_pts->insert(std::pair<size_t, unsigned int>(pt.operator()(pt), n_pts -1));
+        map_pts->insert(std::pair<size_t, unsigned int>(pt.operator()(pt), n_pts));
         new_pts->push_back(pt);
         //new_pts->push_back(Point3D (avg[0],avg[1],avg[2]));
         //new_pts->insert(Point3D (avg[0],avg[1],avg[2]));
@@ -211,8 +217,8 @@ namespace Clobscode
 //--------------------------------------------------------------------------------
 
 
-    bool CustomSplitVisitor::splitEdge(unsigned int idx1, unsigned int idx2,
-                                 unsigned int &c_n_pts, unsigned int &mid_idx){
+    bool CustomSplitVisitorV3::splitEdge(unsigned int idx1, unsigned int idx2,
+                                 unsigned long &c_n_pts, unsigned int &mid_idx){
         
         QuadEdge this_edge (idx1,idx2);
 
@@ -239,7 +245,7 @@ namespace Clobscode
             mid_idx = this_edge[2];
 
         } else  {
-            found = edges->find(this_edge);
+            auto found = edges->find(this_edge);
 
             if (found != edges->end() && (*found)[2]!=0) {
                 //if the edge was already split, then save its mid_point and

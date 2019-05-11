@@ -1,17 +1,27 @@
-#include "CustomSplitVisitorV3.h"
+#include "../../ParallelizeTest/Join/CustomSplitVisitorV3.h"
+#include <tbb/blocked_range.h>
+#include <tr1/unordered_map>
 
 #include "../../Visitors/IntersectionsVisitor.h"
 #include "../../RefinementRegion.h"
 #include "../../Polyline.h"
 #include "../../Quadrant.h"
 
+/*
+using Clobscode::CustomSplitVisitor;
+using Clobscode::QuadEdge;
+using Clobscode::RefinementRegion;
+using Clobscode::Quadrant;
+using Clobscode::MeshPoint;
+using Clobscode::Polyline;
+using Clobscode::Point3D;*/
 using std::vector;
 using std::list;
 using std::set;
 
 namespace Clobscode {
 
-    class OpenMP_ReductionThread {
+    class RefineMeshReduction {
 
         //Private variables
         unsigned int m_rl;
@@ -45,10 +55,7 @@ namespace Clobscode {
 
     public:
 
-        
-        
-
-        OpenMP_ReductionThread(unsigned int refinementLevel, vector<Quadrant> &tmp_Quadrants, set<QuadEdge> &quadEdges,
+        RefineMeshReduction(unsigned int refinementLevel, vector<Quadrant> &tmp_Quadrants, set<QuadEdge> &quadEdges,
                             Polyline &input, vector<MeshPoint> &points, const list<RefinementRegion *> &all_reg, const bool master) :
                 m_rl(refinementLevel), input(input), points(points), all_reg(all_reg), tmp_Quadrants(tmp_Quadrants),
                 edges(quadEdges), master(master){
@@ -60,7 +67,7 @@ namespace Clobscode {
          * @brief Splitting constructor. Must be able to run concurrently with operator() and method join.
          * @details split is a dummy argument of type split, distinguishes the splitting constructor from a copy constructor.
          */
-        OpenMP_ReductionThread(OpenMP_ReductionThread &x, tbb::split) :
+        RefineMeshReduction(RefineMeshReduction &x, tbb::split) :
                 m_rl(x.m_rl), input(x.input), points(x.points), all_reg(x.all_reg), tmp_Quadrants(x.tmp_Quadrants),
                 edges(x.edges) {
             setSplitVisitor();
@@ -72,12 +79,7 @@ namespace Clobscode {
          * @brief Reduction.
          * @details Join results. The result in rmr should be merged into the result of this.
          */
-        void join(const OpenMP_ReductionThread &rmr) {
-
-            std::cout << "Start join" << (master ? " master" : "") << std::endl;
-
-            // TODO first call need to add local ?
-            // TODO choose smallest m_new_pts for comparison and swap ?
+        void join(const RefineMeshReduction &rmr) {
 
             numberOfJoint += rmr.numberOfJoint + 1;
 
@@ -104,7 +106,6 @@ namespace Clobscode {
             tbb::task_group tg;
 
             tg.run([&] { // run in task group
-                std::cout << "Edge start" << std::endl;
                 for (const QuadEdge &local_edge : rmr.m_new_edges) {
                     // build new edge with right index
                     vector<unsigned long> index(3, 0);
@@ -134,14 +135,11 @@ namespace Clobscode {
                         }
                     }
                 }
-
-                std::cout << "Edge end" << std::endl;
             });
 
             // Run another job concurrently with the loop above.
             // It can use up to the default number of threads.
             tg.run([&] { // run in task group
-                std::cout << "Quad start" << std::endl;
                 for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
                     // build new quad with right index
 
@@ -157,16 +155,15 @@ namespace Clobscode {
                     }
 
                     Quadrant quad(new_pointindex, m_rl);
+                    quad.intersected_edges = local_quad.intersected_edges;
+                    quad.intersected_features = local_quad.intersected_features;
                     m_new_Quadrants.push_back(quad);
 
                 }
-                std::cout << "Quad end" << std::endl;
             });
 
             // Wait for completion of the task group
             tg.wait();
-
-            std::cout << "End join" << (master ? " master" : "") << std::endl;
         }
 
         /**
@@ -208,7 +205,6 @@ namespace Clobscode {
                     // not used by other thread
                     if ((*reg_iter)->intersectsQuadrant(points, iter)) {
                         to_refine = true;
-                        //counterRefine.fetch_and_increment();
                         break;
                     }
                 }
@@ -217,7 +213,6 @@ namespace Clobscode {
                 //now if refinement is not needed, we add the Quadrant as it was.
                 if (!to_refine) {
                     m_new_Quadrants.push_back(iter);
-                    //End of for loop
                 } else {
                     //(paul) Idea : add a task here (only if to refined, check if faster..)
 
@@ -230,10 +225,7 @@ namespace Clobscode {
                     vector<vector<unsigned int> > split_elements;
                     csv.setNewEles(split_elements);
 
-                    //auto start_sv_time = chrono::high_resolution_clock::now();
                     iter.accept(&csv);
-                    //auto end_sv_time = chrono::high_resolution_clock::now();
-                    //time_split_visitor += std::chrono::duration_cast<chrono::milliseconds>(end_sv_time - start_sv_time).count();
 
                     if (inter_edges.empty()) {
                         for (unsigned int j = 0; j < split_elements.size(); j++) {
@@ -248,7 +240,6 @@ namespace Clobscode {
                             //iteration. For this reason, the coordinates must be passed
                             //"manually" at this point (clipping_coords).
 
-                            //(paul) TODO add as attribute ?
                             IntersectionsVisitor iv(true);
                             iv.setPolyline(input);
                             iv.setEdges(inter_edges);
@@ -310,6 +301,6 @@ namespace Clobscode {
 
 // https://www.threadingbuildingblocks.org/docs/help/tbb_userguide/parallel_reduce.html
 
-// OpenMP_ReductionThread rmr(a);
+// RefineMeshReduction rmr(a);
 // parallel_reduce( blocked_range<size_t>(0,n), rmr );
 // return rmr.my_sum;

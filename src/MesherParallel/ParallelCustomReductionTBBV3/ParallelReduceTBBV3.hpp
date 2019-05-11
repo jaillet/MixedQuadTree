@@ -1,6 +1,8 @@
-#include "CustomSplitVisitor.h"
+#include "CustomSplitVisitorV3.h"
 #include <tbb/blocked_range.h>
 #include <tr1/unordered_map>
+#include <tbb/task_group.h>
+#include <tbb/task_scheduler_init.h>
 
 #include "../../Visitors/IntersectionsVisitor.h"
 #include "../../RefinementRegion.h"
@@ -21,33 +23,26 @@ using std::set;
 
 namespace Clobscode {
 
-    class RefineMeshReduction {
+    class RefineMeshReductionV3 {
 
         //Private variables
         unsigned int m_rl;
 
         //Need to be read in reduction :
         vector<Quadrant> m_new_Quadrants;
-        vector<Point3D> m_new_pts; //Local new pts
+        vector<Point3D> m_new_pts; //Local new pts (not merged)
         std::tr1::unordered_map<size_t, unsigned int> m_map_new_pts;
         set<QuadEdge> m_new_edges;
 
         //Read only
         const Polyline &input;
-        const vector<MeshPoint> &points;
+        vector<MeshPoint> &points;
         const list<RefinementRegion *> &all_reg;
-        vector<Quadrant> &tmp_Quadrants;
-        set<QuadEdge> &edges;
+        tbb::concurrent_vector<Quadrant> &tmp_Quadrants;
+        tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> &edges;
 
-        CustomSplitVisitor csv;
-
-        int numberOfJoint;
+        CustomSplitVisitorV3 csv;
         bool master;
-
-        //Number of points before the parallel reduce
-        //ie. The start index of all new points created
-        //By threads
-        unsigned long POINTS_SIZE_BEFORE_JOIN;
 
         void setSplitVisitor() {
             csv.setPoints(points);
@@ -60,128 +55,14 @@ namespace Clobscode {
 
     public:
 
-        RefineMeshReduction(unsigned int refinementLevel, vector<Quadrant> &tmp_Quadrants, set<QuadEdge> &quadEdges,
-                            Polyline &input, vector<MeshPoint> &points, const list<RefinementRegion *> &all_reg, const bool master) :
+        RefineMeshReductionV3(unsigned int refinementLevel, tbb::concurrent_vector<Quadrant> &tmp_Quadrants, tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> &quadEdges,
+                              Polyline &input, vector<MeshPoint> &points, const list<RefinementRegion *> &all_reg,
+                              const bool master) :
                 m_rl(refinementLevel), input(input), points(points), all_reg(all_reg), tmp_Quadrants(tmp_Quadrants),
-                edges(quadEdges), master(master), POINTS_SIZE_BEFORE_JOIN(points.size()){
+                edges(quadEdges), master(master) {
             setSplitVisitor();
-            numberOfJoint = 0;
         }
 
-        /**
-         * @brief Splitting constructor. Must be able to run concurrently with operator() and method join.
-         * @details split is a dummy argument of type split, distinguishes the splitting constructor from a copy constructor.
-         */
-        RefineMeshReduction(RefineMeshReduction &x, tbb::split) :
-                m_rl(x.m_rl), input(x.input), points(x.points), all_reg(x.all_reg), tmp_Quadrants(x.tmp_Quadrants),
-                edges(x.edges), POINTS_SIZE_BEFORE_JOIN(points.size()) {
-            setSplitVisitor();
-            numberOfJoint = 0;
-            master = false;
-        }
-
-        /**
-         * @brief Reduction.
-         * @details Join results. The result in rmr should be merged into the result of this.
-         */
-        void join(const RefineMeshReduction &rmr) {
-
-            //std::cout << "Start join" << (master ? " master" : "") << std::endl;
-
-            // TODO first call need to add local ?
-            // TODO choose smallest m_new_pts for comparison and swap ?
-
-            numberOfJoint += rmr.numberOfJoint + 1;
-
-            // best than map for insert and access
-            std::tr1::unordered_map<unsigned int, unsigned int> taskToGlobal;
-
-            int total_nb_points = POINTS_SIZE_BEFORE_JOIN;
-            for (const Point3D &point : rmr.m_new_pts) {
-
-                size_t hashPoint = point.operator()(point);
-                auto found = m_map_new_pts.find(hashPoint);
-
-                if (found == m_map_new_pts.end()) {
-                    //We did not found the point
-                    //We add it in the global new_pts
-                    m_new_pts.push_back(point);
-                    //We add  
-                    m_map_new_pts[hashPoint] = total_nb_points;
-                    
-                }
-
-                taskToGlobal[total_nb_points++] = m_map_new_pts[hashPoint];
-            }
-
-            tbb::task_scheduler_init def_init; // Use the default number of threads.
-            tbb::task_group tg;
-
-            tg.run([&] { // run in task group
-                //std::cout << "Edge start" << std::endl;
-                for (const QuadEdge &local_edge : rmr.m_new_edges) {
-                    // build new edge with right index
-                    vector<unsigned long> index(3, 0);
-
-                    for (unsigned int i = 0; i < 3; i++) {
-                        if (local_edge[i] < POINTS_SIZE_BEFORE_JOIN) {
-                            // index refer point not created during this refinement level
-                            index[i] = local_edge[i];
-                        } else {
-                            // point created, need to update the point with correct index
-                            index[i] = taskToGlobal[local_edge[i]];
-                        }
-                    }
-
-                    QuadEdge edge(index[0], index[1], index[2]);
-
-                    auto found = m_new_edges.find(edge);
-
-                    if (found == m_new_edges.end()) {
-                        m_new_edges.insert(edge);
-                    } else {
-                        if (edge[2] != 0 && edge[2] != (*found)[2]) {
-                            // since all points have been replaced, if it's different then midpoint has been created
-                            // is it possible ?
-                            m_new_edges.erase(found);
-                            m_new_edges.insert(edge);
-                        }
-                    }
-                }
-
-                //std::cout << "Edge end" << std::endl;
-            });
-
-            // Run another job concurrently with the loop above.
-            // It can use up to the default number of threads.
-            tg.run([&] { // run in task group
-                //std::cout << "Quad start" << std::endl;
-                for (const Quadrant &local_quad : rmr.m_new_Quadrants) {
-                    // build new quad with right index
-
-                    vector<unsigned int> new_pointindex(4, 0);
-                    for (unsigned int i = 0; i < 4; i++) {
-                        if (local_quad.getPointIndex(i) < POINTS_SIZE_BEFORE_JOIN) {
-                            // index refer point not created during this refinement level
-                            new_pointindex[i] = local_quad.getPointIndex(i);
-                        } else {
-                            // point created, need to update the point with correct index
-                            new_pointindex[i] = taskToGlobal[local_quad.getPointIndex(i)];
-                        }
-                    }
-
-                    Quadrant quad(new_pointindex, m_rl);
-                    m_new_Quadrants.push_back(quad);
-
-                }
-                //std::cout << "Quad end" << std::endl;
-            });
-
-            // Wait for completion of the task group
-            tg.wait();
-
-            //std::cout << "End join" << (master ? " master" : "") << std::endl;
-        }
 
         /**
          * @brief Accumulate result for subrange.
@@ -191,7 +72,6 @@ namespace Clobscode {
             list<RefinementRegion *>::const_iterator reg_iter;
 
             for (auto i = range.begin(); i != range.end(); ++i) {
-
                 Quadrant &iter = tmp_Quadrants[i];
 
                 //Only check, can not modify after treatment
@@ -210,19 +90,12 @@ namespace Clobscode {
                         continue;
                     }
 
-                    //Get the two extreme nodes of the Quadrant to test intersection with
-                    //this RefinementRegion. If not, conserve it as it is.
-                    //unsigned int n_idx1 = (*iter).getPoints()[0];
-                    //unsigned int n_idx2 = (*iter).getPoints()[2];
-
-
                     // intersectQaudrant can modify the quadrant with
                     // function Polyline::getNbFeatures in RefinementboundaryRegion
                     // maybe no problem for parallelisation, as this information is
                     // not used by other thread
                     if ((*reg_iter)->intersectsQuadrant(points, iter)) {
                         to_refine = true;
-                        //counterRefine.fetch_and_increment();
                         break;
                     }
                 }
@@ -236,6 +109,7 @@ namespace Clobscode {
                     //(paul) Idea : add a task here (only if to refined, check if faster..)
 
                     list<unsigned int> &inter_edges = iter.getIntersectedEdges();
+
                     unsigned short qrl = iter.getRefinementLevel();
 
                     vector<vector<Point3D> > clipping_coords;
@@ -244,10 +118,7 @@ namespace Clobscode {
                     vector<vector<unsigned int> > split_elements;
                     csv.setNewEles(split_elements);
 
-                    //auto start_sv_time = chrono::high_resolution_clock::now();
                     iter.accept(&csv);
-                    //auto end_sv_time = chrono::high_resolution_clock::now();
-                    //time_split_visitor += std::chrono::duration_cast<chrono::milliseconds>(end_sv_time - start_sv_time).count();
 
                     if (inter_edges.empty()) {
                         for (unsigned int j = 0; j < split_elements.size(); j++) {
@@ -299,6 +170,8 @@ namespace Clobscode {
         inline vector<Point3D> &getNewPts() { return m_new_pts; }
 
         inline set<QuadEdge> &getNewEdges() { return m_new_edges; }
+
+        inline std::tr1::unordered_map<size_t, unsigned int> &getNewMaps() { return m_map_new_pts; }
 
         bool isItIn(const Polyline &mesh, const list<unsigned int> &faces, const vector<Point3D> &coords) const {
             //this method is meant to be used by Quadrants that don't

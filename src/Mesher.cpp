@@ -979,15 +979,17 @@ namespace Clobscode {
         //refine each Quadrant until the Refinement Level is reached
         //----------------------------------------------------------
 
-        // TEST MULTI THREAD FIRST
-        
-        //refineMeshParallelTest1TBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        
-        refineMeshReductionOpenMP(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        // DONE
+        //refineMeshParallelTest1TBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        //refineMeshReductionTBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        //refineMeshCustomReductionTBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        //refineCustomMeshReductionTBBV2(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        //refineCustomMeshReductionTBBV3(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        refineMeshCustomReductionTBBV4(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        //refineMeshReductionOpenMP(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 
-        //refineMeshReductionTBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        //refineCustomMeshReductionTBBV2(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        //refineMeshCustomReductionTBB(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+        // TODO check if correct version and go
+
 
         //this->refineMeshParallelOpenMP(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
 

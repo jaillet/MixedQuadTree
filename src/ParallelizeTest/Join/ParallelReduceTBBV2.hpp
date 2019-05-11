@@ -1,4 +1,4 @@
-#include "CustomSplitVisitor.h"
+#include "CustomSplitVisitorV3.h"
 #include <tbb/blocked_range.h>
 #include <tr1/unordered_map>
 #include <tbb/task_group.h>
@@ -155,7 +155,6 @@ namespace Clobscode {
                 tbb::task_group tg;
 
                 tg.run([&] { // run in task group
-                    ////std::cout << "Edge start" << std::endl;
                     auto start_quad = chrono::high_resolution_clock::now();
 
                     long timeInit = 0;

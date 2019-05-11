@@ -23,7 +23,7 @@
 * @brief
 **/
 
-#include "SplitVisitorTest1.h"
+#include "SplitVisitorTest1TBB.h"
 #include "../../Quadrant.h"
 
 namespace std {
@@ -43,30 +43,30 @@ namespace Clobscode {
 //vector<vector<unsigned int> > *new_eles;
 //vector<vector<Point3D> > *clipping;
 
-    SplitVisitorTest1::SplitVisitorTest1()
+    SplitVisitorTest1TBB::SplitVisitorTest1TBB()
             : points(NULL), new_pts(NULL), edges(NULL), new_eles(NULL), clipping(NULL), counter_points(NULL) {}
 
-    void SplitVisitorTest1::setPoints(const vector<MeshPoint> &points) {
+    void SplitVisitorTest1TBB::setPoints(const vector<MeshPoint> &points) {
         this->points = &points;
     }
 
-    void SplitVisitorTest1::setNewPts(tbb::concurrent_vector<Point3D> &new_pts) {
+    void SplitVisitorTest1TBB::setNewPts(tbb::concurrent_vector<Point3D> &new_pts) {
         this->new_pts = &new_pts;
     }
 
-    void SplitVisitorTest1::setEdges(tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> &edges) {
+    void SplitVisitorTest1TBB::setEdges(tbb::concurrent_unordered_set<QuadEdge, std::hash<QuadEdge>> &edges) {
         this->edges = &edges;
     }
 
-    void SplitVisitorTest1::setNewEles(vector<vector<unsigned int> > &new_eles) {
+    void SplitVisitorTest1TBB::setNewEles(vector<vector<unsigned int> > &new_eles) {
         this->new_eles = &new_eles;
     }
 
-    void SplitVisitorTest1::setClipping(vector<vector<Point3D> > &clipping) {
+    void SplitVisitorTest1TBB::setClipping(vector<vector<Point3D> > &clipping) {
         this->clipping = &clipping;
     }
 
-    bool SplitVisitorTest1::visit(Quadrant *o) {
+    bool SplitVisitorTest1TBB::visit(Quadrant *o) {
         //getting variables for modification
         //preferably by reference, to avoid unnecessary copying
         const vector<unsigned int> &pi = o->pointindex; // TODO add visitor to friend in Quadrant
@@ -119,7 +119,7 @@ namespace Clobscode {
         //of course all the intern edges and mid point were never inserted
         //before, so this task is performed without asking
         auto ite = new_pts->push_back(Point3D(avg[0], avg[1], avg[2]));
-        all_pts[8] = points->size() + int(ite - new_pts->begin()); // TODO c'est quoi ça ??
+        all_pts[8] = points->size() + int(ite - new_pts->begin());
 
 
 //        QuadEdge intern_edge1 (all_pts[4],all_pts[6]);
@@ -199,7 +199,7 @@ namespace Clobscode {
 //--------------------------------------------------------------------------------
 
 
-    bool SplitVisitorTest1::splitEdge(unsigned int idx1, unsigned int idx2, unsigned int &mid_idx,
+    bool SplitVisitorTest1TBB::splitEdge(unsigned int idx1, unsigned int idx2, unsigned int &mid_idx,
                                       double idx5, double idx6, double idx7) {
 
         QuadEdge this_edge(idx1, idx2);
@@ -246,14 +246,14 @@ namespace Clobscode {
         return true;
     }
 
-    void SplitVisitorTest1::setCounterPoints(unsigned int counter) {
+    void SplitVisitorTest1TBB::setCounterPoints(unsigned int counter) {
         this->counter_points = counter;
     }
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 
-    /*bool SplitVisitorTest1::splitFace(unsigned int idx1, unsigned int idx2,
+    /*bool SplitVisitorTest1TBB::splitFace(unsigned int idx1, unsigned int idx2,
                                  unsigned int idx3, unsigned int idx4,
                                  unsigned int &c_n_pts, unsigned int &mid_idx){
         QuadEdge e1 (idx1,idx3);

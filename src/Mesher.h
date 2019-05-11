@@ -137,26 +137,38 @@ namespace Clobscode
 
         // REMOVE HERE AFTER TEST
 
+
+        void refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+                                        set<QuadEdge> QuadEdges,
+                                        const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                        Polyline &input);
+
         void refineMeshReductionTBB(int nbThread, list<Quadrant> & Quadrants, vector<MeshPoint> & points,
                                     set<QuadEdge> & QuadEdges,
                                     const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                     Polyline &input);
+
+        void refineMeshCustomReductionTBB(int nbThread, list<Quadrant> & Quadrants, vector<MeshPoint> & points,
+                                          set<QuadEdge> & QuadEdges,
+                                          const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                          Polyline &input);
 
 		void refineCustomMeshReductionTBBV2(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
                                             set<QuadEdge> &QuadEdges,
                                             const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                             Polyline &input);
 
-		void refineMeshCustomReductionTBB(int nbThread, list<Quadrant> & Quadrants, vector<MeshPoint> & points,
-									set<QuadEdge> & QuadEdges,
-									const list<RefinementRegion *> &all_reg, const unsigned short &rl,
-									Polyline &input);
+        void refineCustomMeshReductionTBBV3(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
+                                            set<QuadEdge> &QuadEdges,
+                                            const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                            Polyline &input);
+
+        void refineMeshCustomReductionTBBV4(int nbThread, list<Quadrant> & Quadrants, vector<MeshPoint> & points,
+                                          set<QuadEdge> & QuadEdges,
+                                          const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                          Polyline &input);
 
 
-		void refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
-										set<QuadEdge> QuadEdges,
-										const list<RefinementRegion *> &all_reg, const unsigned short &rl,
-										Polyline &input);
 
     void refineMeshParallelOpenMP(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                         set<QuadEdge> QuadEdges,

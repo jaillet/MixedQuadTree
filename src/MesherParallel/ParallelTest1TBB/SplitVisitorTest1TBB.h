@@ -48,11 +48,11 @@ using std::set;
 
 namespace Clobscode
 {
-    class SplitVisitorTest1 : public Visitor {
+    class SplitVisitorTest1TBB : public Visitor {
 
     public:
         
-        SplitVisitorTest1();
+        SplitVisitorTest1TBB();
 
         bool visit(Quadrant *o) override;
 
