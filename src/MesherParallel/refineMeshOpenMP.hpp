@@ -6,6 +6,8 @@
 #include "SplitVisitorReductionOpenMP.h"
 
 #include <unordered_map>
+#include <tr1/unordered_map>
+#include <string>
 
 using namespace std;
 
@@ -13,8 +15,11 @@ namespace Clobscode {
 
 	void make_reduceV1(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants, 
 					unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl,
-					vector<Point3D> &new_pts, set<QuadEdge> &new_edges, vector<Quadrant> &new_quadrants);
+					vector<MeshPoint> &new_pts, set<QuadEdge> &new_edges, vector<Quadrant> &new_quadrants);
 
+	void make_reduceV2(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants, 
+					unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl,
+					vector<MeshPoint> &new_pts, set<QuadEdge> &new_edges, vector<Quadrant> &new_quadrants);
 
 	void Mesher::refineMeshParallelOpenMP(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                         set<QuadEdge> QuadEdges,
@@ -248,7 +253,7 @@ namespace Clobscode {
         void Mesher::refineMeshReductionOpenMP(const int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                         set<QuadEdge> QuadEdges,
                                         const list<RefinementRegion *> &all_reg, const unsigned short &rl,
-                                        Polyline &input) {
+                                        Polyline &input, bool V1) {
             int MAX_THREAD = omp_get_max_threads();
 
             if (nbThread > MAX_THREAD || nbThread < 0) {
@@ -257,7 +262,9 @@ namespace Clobscode {
             }
             omp_set_num_threads(nbThread);
 
-            std::cout << "Start refine mesh reduction Open MP with " << nbThread << " threads." << std::endl;
+            string version = V1?"V1":"V2";
+
+            std::cout << "Start refine mesh reduction " << version << " Open MP with " << nbThread << " threads." << std::endl;
 
             //Convert list into vector of temp Quadrants
             vector<Quadrant> tmp_Quadrants;
@@ -425,23 +432,6 @@ namespace Clobscode {
 							} //END ELSE INTER_EDGES EMPTY
 						} //END ELSE TO REFINE
 					} //END FOR QUADRANTS
-				
-
-					// Begin reduce
-
-
-					// //Wait all thread
-					// #pragma omp barrier
-
-					// 	#pragma omp critical
-					// 	{
-					// 		std::cout << "Thread number " << THREAD_NUMBER;
-					// 		std::cout << " nbQuadrants received = " << nbQuadPerThread[THREAD_NUMBER] << std::endl;
-					// 		std::cout << "nbPoints   " << thread_new_pts[THREAD_NUMBER].size() << std::endl;
-					// 		std::cout << "nbEdges   " <<thread_new_edges[THREAD_NUMBER].size() <<  std::endl;
-					// 		std::cout << "nbQuad   " << thread_new_Quadrants[THREAD_NUMBER].size() << std::endl;
-
-					// 	}
 
 				} // END PARALLEL REGION
 
@@ -449,17 +439,29 @@ namespace Clobscode {
 				long totalAccumulationTime = std::chrono::duration_cast<chrono::milliseconds>(end_accumulation_time - start_accumulation_time).count();
                 
 
-				vector<Point3D> new_pts;
-				set<QuadEdge> new_edges;
+				//vector<Point3D> new_pts;
+				//set<QuadEdge> new_edges;
 				vector<Quadrant> new_quadrants;
 
 				// Fill index 0 in arrays thread_new_pts, new_edges, new_Quadrants
 				// with a size=nbThread the result of the merge of all thread's new elements.
 				// points.size() is needed to know at which index threads have started
 				auto start_reduce_time = chrono::high_resolution_clock::now();
-				make_reduceV1(thread_new_pts, thread_new_edges, thread_new_Quadrants,
+
+
+
+				if (V1) {
+					make_reduceV1(thread_new_pts, thread_new_edges, thread_new_Quadrants,
 							nbThread, points.size(), i,
-							new_pts, new_edges, new_quadrants);
+							points, QuadEdges, new_quadrants);	
+				}
+				else {
+					make_reduceV2(thread_new_pts, thread_new_edges, thread_new_Quadrants,
+							nbThread, points.size(), i,
+							points, QuadEdges, new_quadrants);
+				}
+				
+
 				auto end_reduce_time = chrono::high_resolution_clock::now();
 				long totalReduceTime = std::chrono::duration_cast<chrono::milliseconds>(end_reduce_time - start_reduce_time).count();
 
@@ -467,10 +469,10 @@ namespace Clobscode {
 				//TODO fill new_edges directly in reduce....
 
 				//Update edges
-				for (set<QuadEdge>::iterator i = new_edges.begin(); i != new_edges.end(); ++i)
-				{
-					QuadEdges.insert(*i);
-				}
+				// for (set<QuadEdge>::iterator i = new_edges.begin(); i != new_edges.end(); ++i)
+				// {
+				// 	QuadEdges.insert(*i);
+				// }
 
 				// don't forget to update list
 				// tmp_Quadrants.reserve(tmp_Quadrants.size() + new_quadrants.size());
@@ -484,14 +486,14 @@ namespace Clobscode {
 
                 //if no points were added at this iteration, it is no longer
                 //necessary to continue the refinement.
-                if (new_pts.empty()) {
-                    cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
-                    break;
-                }
+                // if (new_pts.empty()) {
+                //     cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                //     break;
+                // }
 
-                //add the new points to the vector
-                points.reserve(points.size() + new_pts.size());
-                points.insert(points.end(), new_pts.begin(), new_pts.end());
+                // //add the new points to the vector
+                // points.reserve(points.size() + new_pts.size());
+                // points.insert(points.end(), new_pts.begin(), new_pts.end());
 
                 auto end_refine_rl_time = chrono::high_resolution_clock::now();
                 long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();
@@ -506,41 +508,40 @@ namespace Clobscode {
 
 			} // END FOR REFINEMENT LEVEL
 
-
-            // output result to mesher ! comment if not needed
-            //Quadrants.clear();
-            //Quadrants.assign(tmp_Quadrants.begin(), tmp_Quadrants.end());
-
-            //QuadEdges.clear();
-            //QuadEdges.insert(quadEdges.begin(), quadEdges.end());
-
             std::cout << "----------------------------------------------------------" << std::endl;
             std::cout << "----------------------------------------------------------" << std::endl;
-            std::cout << "---------------------END OF OPENMP REDUCTION------------------------" << std::endl;
+            std::cout << "---------------------END OF OPENMP REDUCTION " << version << "-----------" << std::endl;
             std::cout << "----------------------------------------------------------" << std::endl;
             std::cout << "----------------------------------------------------------" << std::endl;
         }
 
 
+    /**
+     * @brief Reduction of number_of_threads thread into new_pts, new_edges and new_quadrants.
+     * @details V1 of the algorithm of reduction, with a loop in points for the creation of
+     * the map that link local index of points to global
+     * 
+     * @param thread_new_pts array that contains the new_pts created by all threads during accumulation.
+     * @param thread_new_edges array that contains the new_edges created by all threads during accumulation.
+     * @param thread_new_quadrants array that contains the new_quadrants created by all threads during accumulation.
+     * @param number_of_threads number of threads
+     * @param total_nb_points_before_reduce Constant
+     * @param rl refinement level
+     * @param new_pts The resulting new_pts (start from old points)
+     * @param new_edges The resulting new_edges (start from old edges)
+     * @param new_quadrants The resulting new_quadrants (empty at the beginning)
+     */
 	void make_reduceV1(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants, 
 						unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl,
-						vector<Point3D> &new_pts, set<QuadEdge> &new_edges, vector<Quadrant> &new_quadrants) {
+						vector<MeshPoint> &new_pts, set<QuadEdge> &new_edges, vector<Quadrant> &new_quadrants) {
 
-
-		//std::cout << "\n---------------------------------\n";
-		//std::cout << "BEGIN REDUCE at level rl=" << rl << std::endl;
+		new_quadrants.clear();
 
 		auto start_reduce_time = chrono::high_resolution_clock::now();
 
 		long totalPointTime = 0;
 		long totalEdgesTime = 0;
 		long totalQuadrantTime = 0;
-
-
-		//The result :
-		// vector<Point3D> &new_pts = threads_new_pts[0];
-		// set<QuadEdge> &new_edges = threads_new_edges[0];
-		// vector<Quadrant> &new_quadrants = threads_new_quadrants[0];
 
 		//The current number of points
 		unsigned int total_nb_points = total_nb_points_before_reduce;
@@ -550,12 +551,10 @@ namespace Clobscode {
 		unordered_map<unsigned int, unsigned int> taskToGlobal;
 		for (int thread_number = 0; thread_number < number_of_threads; ++thread_number)
 		{
-			//std::cout << "Jointure thread number i=" << thread_number << std::endl;
-
 			//std::cout << "Points start" << std::endl;
 			auto start_point_time = chrono::high_resolution_clock::now();
 
-			vector<Point3D> &thread_new_pts = threads_new_pts[thread_number];
+			const vector<Point3D> &thread_new_pts = threads_new_pts[thread_number];
 			for (unsigned int i = 0; i < thread_new_pts.size(); ++i) {
 				const unsigned int indexNewPt = total_nb_points_before_reduce + i;
 				const Point3D& point = thread_new_pts[i];
@@ -592,7 +591,7 @@ namespace Clobscode {
 				// build new edge with right index
 		        vector<unsigned long> index(3, 0);
 
-		        bool all_created = true;
+		        //bool all_created = true;
 		        for (unsigned int j = 0; j < 3; j++) {
 		            if (local_edge[j] < total_nb_points_before_reduce || local_edge[j] == 0) {
 		            	//Don't forget midpoint = 0
@@ -601,14 +600,15 @@ namespace Clobscode {
 		            } else {
 		                // point created, need to update the point with correct index
 		                index[j] = taskToGlobal[local_edge[j]];
-		                all_created = false;
+		                //all_created = false;
 		            }
 		        }
 		        QuadEdge edge(index[0], index[1], index[2]);
 
 
 		        new_edges.insert(edge);
-		        
+				
+				//	Can't modify..		        
 		        // for (unsigned int j = 0; j < 3; j++) {
 		        // 	if (local_edge[j] >= total_nb_points_before_reduce || local_edge[j] != 0) {
 		        //         // point created, need to update the point with correct index
@@ -617,43 +617,10 @@ namespace Clobscode {
 		        // }
 		        // new_edges.insert(local_edge);
 
-
-
-
-		        //Not useful ? Because set is unique...
-
-
-		     //    //If all created, no need to search, we can insert directly
-		     //    if (all_created) {
-		     //    	new_edges.insert(edge);
-		     //    }
-		     //    else {
-		        	
-		     //    	//Look if we have already the same edge
-		     //    	//If so, don't add it
-			    //     auto found = new_edges.find(edge);
-			    //     if (found == new_edges.end()) {
-			    //         new_edges.insert(edge);
-			    //     } 
-
-			    //     // else {
-			        	
-			    //     //     if (edge[2] != 0 && edge[2] != (*found)[2]) {
-			    //     //     	assert(false);	
-			    //     //         // since all points have been replaced, if it's different then midpoint has been created
-			    //     //         // is it possible ?
-			    //     //         //assert(false);
-			    //     //         new_edges.erase(found);
-			    //     //         new_edges.insert(edge);
-			    //     //     }
-			    //     // }
-			    // }
 			}
 
 			auto end_edges_time = chrono::high_resolution_clock::now();
-
-			totalEdgesTime += std::chrono::duration_cast<chrono::milliseconds>(end_edges_time - start_edges_time).count();             
-
+			totalEdgesTime += std::chrono::duration_cast<chrono::milliseconds>(end_edges_time - start_edges_time).count();
 			//std::cout << "Edge end" << std::endl;
 
 			//std::cout << "Quad start" << std::endl;
@@ -661,20 +628,8 @@ namespace Clobscode {
 
 			vector<Quadrant> &thread_new_quadrants = threads_new_quadrants[thread_number];
 			for(Quadrant &local_quad : thread_new_quadrants) {
-				// build new quad with right index
-		        
-		        // vector<unsigned int> new_pointindex(4, 0);
-		        // for (unsigned int j = 0; j < 4; j++) {
-		        //     if (local_quad.getPointIndex(j) < total_nb_points_before_reduce) {
-		        //         // index refer point not created during this refinement level
-		        //         new_pointindex[j] = local_quad.getPointIndex(j);
-		        //     } else {
-		        //         // point created, need to update the point with correct index
-		        //         new_pointindex[j] = taskToGlobal[local_quad.getPointIndex(j)];
-		        //     }
-		        // }
-
-		        //vector<unsigned int> new_pointindex(4, 0);
+				// update new quad with right index
+				//Keep intersected edges
 		        unsigned int pointIndex;
 		        for (unsigned int j = 0; j < 4; j++) {
 		        	pointIndex = local_quad.getPointIndex(j);
@@ -686,191 +641,149 @@ namespace Clobscode {
 		                local_quad.setPointIndexAt(j, taskToGlobal[pointIndex]);
 		            }
 		        }
-
-
-		        // Quadrant quad(new_pointindex, rlC);
-		   
-		        // //Don't forget intersected edges
-		        // quad.setIntersectedEdges(local_quad.getIntersectedEdges());
-		        // new_quadrants.push_back(quad);
-				
-
-				//TODO Don't rebuild it, modify only point index
-				//And keep intersected edges
-				//(better memory, performance..)
 				new_quadrants.push_back(local_quad);
 			}	
 
 			auto end_quadrant_time = chrono::high_resolution_clock::now();
-
 			totalQuadrantTime += std::chrono::duration_cast<chrono::milliseconds>(end_quadrant_time - start_quadrant_time).count();
-
 
 	    	//std::cout << "Quad end" << std::endl;
 
-
 		} // END FOR ALL THREAD
 
-		auto end_reduce_time = chrono::high_resolution_clock::now();
-
-		
+		auto end_reduce_time = chrono::high_resolution_clock::now();		
 		long totalReduceTime = std::chrono::duration_cast<chrono::milliseconds>(end_reduce_time - start_reduce_time).count();             
 
-
-		std::cout << "Reduce at level rl=" << rl << std::endl;
+		std::cout << "Reduce V1 at level rl=" << rl << std::endl;
 		std::cout << "\t* Point time = " << totalPointTime << " ms" << std::endl;
 		std::cout << "\t* Edges time = " << totalEdgesTime << " ms" << std::endl;
 		std::cout << "\t* Quadrant time = " << totalQuadrantTime << " ms" << std::endl;
 		std::cout << "\t* Total time = " << totalReduceTime << " ms" << std::endl;
-		//std::cout << "---------------------------------------" << std::endl;
-
-
 	}
 
+	/**
+     * @brief Reduction of number_of_threads thread into new_pts, new_edges and new_quadrants.
+     * @details V1 of the algorithm of reduction, with a loop in points for the creation of
+     * the map that link local index of points to global
+     * 
+     * @param thread_new_pts array that contains the new_pts created by all threads during accumulation.
+     * @param thread_new_edges array that contains the new_edges created by all threads during accumulation.
+     * @param thread_new_quadrants array that contains the new_quadrants created by all threads during accumulation.
+     * @param number_of_threads number of threads
+     * @param total_nb_points_before_reduce Constant
+     * @param rl refinement level
+     * @param new_pts The resulting new_pts, start from old points (filled)
+     * @param new_edges The resulting new_edges. Must contains old edges at the beginning
+     * @param new_quadrants The resulting new_quadrants
+     */
 	void make_reduceV2(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants, 
-						unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl) {
+						unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl,
+						vector<MeshPoint> &new_pts, set<QuadEdge> &new_edges, vector<Quadrant> &new_quadrants) {
+		new_quadrants.clear();
+		auto start_reduce_time = chrono::high_resolution_clock::now();
 
+		long totalEdgesAndPointTime = 0;
+		long totalQuadrantTime = 0;
 
-		std::cout << "\n---------------------------------\n";
-		std::cout << "BEGIN REDUCE V2 at level rl=" << rl << std::endl;
-
-		//The result :
-		vector<Point3D> &new_pts = threads_new_pts[0];
-		set<QuadEdge> &new_edges = threads_new_edges[0];
-		vector<Quadrant> &new_quadrants = threads_new_quadrants[0];
-
-		//The current number of points
-		unsigned int total_nb_points = total_nb_points_before_reduce;
-		// The map to link real index of new_pts
-		unordered_map<unsigned int, unsigned int> map_new_pts;
-		// The task to global
-		unordered_map<unsigned int, unsigned int> taskToGlobal;
-		for (int thread_number = 1; thread_number < number_of_threads; ++thread_number)
+		std::tr1::unordered_map<unsigned int, unsigned int> threadMap;
+		for (int thread_number = 0; thread_number < number_of_threads; ++thread_number)
 		{
-			
-
-			std::cout << "Jointure thread number i=" << thread_number << std::endl;
-
-			std::cout << "Points start" << std::endl;
-
-			vector<Point3D> &thread_new_pts = threads_new_pts[thread_number];
-			for(const Point3D& point : thread_new_pts) {
-				size_t hashPoint = point.operator()(point);
-		        auto found = map_new_pts.find(hashPoint);
-
-		        if (found == map_new_pts.end()) {
-		            //We did not found the point
-		            //We add it in the global new_pts
-		            new_pts.push_back(point);
-		            //We add
-		            map_new_pts[hashPoint] = total_nb_points;
-		            
-		        }
-		        //Else we found it
-		        taskToGlobal[total_nb_points] = map_new_pts[hashPoint];
-		        total_nb_points++;
-
-			}
-
-			std::cout << "Points end" << std::endl;
-
-			std::cout << "Edge start" << std::endl;
+			//std::cout << "Edge start" << std::endl;
+			auto start_edges_time = chrono::high_resolution_clock::now();
 
 			set<QuadEdge> &thread_new_edges = threads_new_edges[thread_number];
-			
-			for(const QuadEdge& local_edge : thread_new_edges)
-			{
+			const vector<Point3D> &thread_new_pts = threads_new_pts[thread_number];
+			threadMap.clear();
+            for (const QuadEdge &local_edge : thread_new_edges) {
 
-				
+                if (local_edge[0] < total_nb_points_before_reduce && local_edge[1] < total_nb_points_before_reduce) {
+                    // midpoint created on existing thread
+                    auto found = new_edges.find(local_edge);
 
-				// build new edge with right index
-		        vector<unsigned long> index(3, 0);
+                    if ((*found)[2] != 0) {
+                        // midpoint already created by another thread
+                        threadMap.insert(pair<unsigned long, unsigned long>(local_edge[2], (*found)[2]));
+                    } else {
+                        // midpoint created only by this thread for now
+                        // add midpoint in point and update edge midpoint
+                        //(*found).updateMidPoint(tmp_points.size());
+                        QuadEdge quadEdge(local_edge);
+                        quadEdge.updateMidPoint(new_pts.size());
+                        auto pos = new_edges.erase(found);
+                        new_edges.insert(pos, quadEdge);
 
-		        bool all_created = true;
-		        for (unsigned int j = 0; j < 3; j++) {
-		            if (local_edge[j] < total_nb_points_before_reduce || local_edge[j] == 0) {
-		            	//Don't forget midpoint = 0
-		                // index refer point not created during this refinement level
-		                index[j] = local_edge[j];
-		            } else {
-		                // point created, need to update the point with correct index
-		                index[j] = taskToGlobal[local_edge[j]];
-		                all_created = false;
-		            }
-		        }
+                        threadMap.insert(pair<unsigned long, unsigned long>(local_edge[2], new_pts.size()));
+                        new_pts.emplace_back(thread_new_pts[local_edge[2] - total_nb_points_before_reduce]);
+                    }
+                } else {
+                    // it not about midpoint created on "old" edge but totally new edge
+                    // check if index need to be created or change
 
-		        QuadEdge edge(index[0], index[1], index[2]);
+                    // build new edge with correct index
+                    vector<unsigned int> index(3, 0);
 
+                    for (unsigned int j = 0; j < 3; j++) {
+                        if (local_edge[j] < total_nb_points_before_reduce) {
+                            // index refer point not created during this refinement level
+                            index[j] = local_edge[j];
+                        } else {
+                            // point created locally, need to update the point with correct index
+                            if (threadMap.find(local_edge[j]) != threadMap.end()) {
+                                index[j] = threadMap[local_edge[j]];
+                            } else {
+                                index[j] = new_pts.size();
+                                threadMap.insert(
+                                        pair<unsigned int, unsigned int>(local_edge[j], new_pts.size()));
+                                new_pts.emplace_back(thread_new_pts[local_edge[j] - total_nb_points_before_reduce]);
+                            }
+                        }
+                    }
 
-		        //If all created, no need to search, we can insert directly
-		        if (all_created) {
-		        	new_edges.insert(edge);
-		        }
-		        else {
-			        auto found = new_edges.find(edge);
-			        if (found == new_edges.end()) {
-			            new_edges.insert(edge);
-			        } else {
-			            if (edge[2] != 0 && edge[2] != (*found)[2]) {
-			                // since all points have been replaced, if it's different then midpoint has been created
-			                // is it possible ?
-			                assert(false);
-			                new_edges.erase(found);
-			                new_edges.insert(edge);
-			            }
-			        }
-			    }
-			}
+                    QuadEdge edge(index[0], index[1], index[2]);
 
-			std::cout << "Edge end" << std::endl;
+                    new_edges.insert(edge); // try insert
+                }
+            }
 
-			std::cout << "Quad start" << std::endl;
+			auto end_edges_time = chrono::high_resolution_clock::now();
+			totalEdgesAndPointTime += std::chrono::duration_cast<chrono::milliseconds>(end_edges_time - start_edges_time).count();
+			//std::cout << "Edge end" << std::endl;
+
+			//std::cout << "Quad start" << std::endl;
+			auto start_quadrant_time = chrono::high_resolution_clock::now();
+
 			vector<Quadrant> &thread_new_quadrants = threads_new_quadrants[thread_number];
-			
-			for(const Quadrant &local_quad : thread_new_quadrants) {
-				// build new quad with right index
-		        vector<unsigned int> new_pointindex(4, 0);
-		        for (unsigned int j = 0; j < 4; j++) {
-		            if (local_quad.getPointIndex(j) < total_nb_points_before_reduce) {
-		                // index refer point not created during this refinement level
-		                new_pointindex[j] = local_quad.getPointIndex(j);
-		            } else {
-		                // point created, need to update the point with correct index
-		                new_pointindex[j] = taskToGlobal[local_quad.getPointIndex(j)];
-		            }
-		        }
+			for (Quadrant &local_quad : thread_new_quadrants) {
+                // build new quad with right index
+                vector<unsigned int> new_pointindex(4, 0);
 
-		        Quadrant quad(new_pointindex, rl);
-		        new_quadrants.push_back(quad);
-			
-			}
+                for (unsigned int j = 0; j < 4; j++) {
+                    if (local_quad.getPointIndex(j) < total_nb_points_before_reduce) {
+                        // index refer point not created during this refinement level
+                        new_pointindex[j] = local_quad.getPointIndex(j);
+                    } else {
+                        // point created, need to update the point with correct index
+                        new_pointindex[j] = threadMap[local_quad.getPointIndex(j)];
+                    }
+                }
 
+                new_quadrants.emplace_back(new_pointindex, local_quad);
+            }
 
+			auto end_quadrant_time = chrono::high_resolution_clock::now();
+			totalQuadrantTime += std::chrono::duration_cast<chrono::milliseconds>(end_quadrant_time - start_quadrant_time).count();
 
-	    	std::cout << "Quad end" << std::endl;
-
-
-
-	    	std::cout << "Edge start" << std::endl;
-
-			//set<QuadEdge> &thread_new_edges = threads_new_edges[thread_number];
-			
-			for(const QuadEdge& local_edge : thread_new_edges)
-			{
-				//set ordonné selon les deux premiers indices croissants
-
-
-				
-			}
-
-			std::cout << "Edge end" << std::endl;
+	    	//std::cout << "Quad end" << std::endl;
 
 		} // END FOR ALL THREAD
 
-		std::cout << "END REDUCE at level rl=" << rl << std::endl;
-		std::cout << "---------------------------------------" << std::endl;
+		auto end_reduce_time = chrono::high_resolution_clock::now();		
+		long totalReduceTime = std::chrono::duration_cast<chrono::milliseconds>(end_reduce_time - start_reduce_time).count();             
 
-
+		std::cout << "Reduce V2 at level rl=" << rl << std::endl;
+		std::cout << "\t* Edges And Point time = " << totalEdgesAndPointTime << " ms" << std::endl;
+		std::cout << "\t* Quadrant time = " << totalQuadrantTime << " ms" << std::endl;
+		std::cout << "\t* Total time = " << totalReduceTime << " ms" << std::endl;
 	}
 
 }

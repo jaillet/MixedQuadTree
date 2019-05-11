@@ -63,6 +63,7 @@ namespace Clobscode
 		
         virtual unsigned int operator[](unsigned int pos) const;
 
+        //Added for reduction openmp
         virtual unsigned int& operator[](unsigned int pos);
 		
 //        virtual QuadEdge& operator=(const QuadEdge &e);

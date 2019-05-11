@@ -980,22 +980,20 @@ namespace Clobscode {
         //----------------------------------------------------------
 
         // DONE
-        //refineMeshParallelTest1TBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        //refineMeshReductionTBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        //refineMeshCustomReductionTBB(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        //refineCustomMeshReductionTBBV2(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        //refineCustomMeshReductionTBBV3(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        refineMeshCustomReductionTBBV4(8, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-        //refineMeshReductionOpenMP(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-
-        // TODO check if correct version and go
-
-
-        //this->refineMeshParallelOpenMP(4, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
-
+        const int maxThread = 12;
+        for (int i = 1; i < maxThread; ++i) {
+            // refineMeshParallelTest1TBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            // refineMeshReductionTBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            // refineMeshCustomReductionTBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            // refineCustomMeshReductionTBBV2(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            // refineCustomMeshReductionTBBV3(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            // refineMeshCustomReductionTBBV4(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
+            // refineMeshReductionOpenMP(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input); //V1
+            refineMeshReductionOpenMP(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input, false); //V2
+            // TODO check if correct version and go
+        }     
 
         int counterRefine = 0;
-
         for (unsigned short i = 0; i < rl; i++) {
             auto start_refine_rl_time = chrono::high_resolution_clock::now();
 
