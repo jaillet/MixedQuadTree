@@ -26,21 +26,23 @@ namespace std {
 namespace Clobscode {
 
     string Mesher::refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
-                                            set<QuadEdge> QuadEdges,
-                                            const list<RefinementRegion *> &all_reg, const unsigned short &rl,
-                                            Polyline &input) {
+                                              set<QuadEdge> QuadEdges,
+                                              const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                              Polyline &input) {
+
+        string result;
 
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
 
         //OpenMP
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
-            std::cout << "Invalid number of threads or not supported by computer" << std::endl;
-            return;
+            result += "Invalid number of threads or not supported by computer\n";
+            return result;
         }
 
         tbb::task_scheduler_init test(nbThread);
 
-        std::cout << "Start refine mesh parallel test 1 IntelTBB with " << nbThread << " threads." << std::endl;
+        // result += "Start refine mesh parallel test 1 IntelTBB with "  + nbThread << " threads.\n";
 
         //list of temp Quadrants
         vector<Quadrant> tmp_Quadrants;
@@ -191,7 +193,7 @@ namespace Clobscode {
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
             if (new_pts.empty()) {
-                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                result += "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
                 break;
             }
 
@@ -202,41 +204,42 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "\t* level " << i << " in "
-                 << total;
-            cout << " ms" << endl;
-
-            std::cout << "\t---- Points : " << points.size() << std::endl;
-            std::cout << "\t---- QuadEdges : " << quadEdges.size() << std::endl;
-            std::cout << "\t---- Quadrants : " << tmp_Quadrants.size() << std::endl;
+            result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
+            result += "Points " + std::to_string(points.size()) + "\n";
+            result += "QuadEdges " + std::to_string(quadEdges.size()) + "\n";
+            result += "Quadrants " + std::to_string(tmp_Quadrants.size()) + "\n";
 
 
         } //END FOR REFINEMENT LEVEL
 
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "---------------------END OF TEST 1 INTELTBB---------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
+        /*
+        result += "----------------------------------------------------------\n";
+        result += "----------------------------------------------------------\n";
+        result += "---------------------END OF TEST 1 INTELTBB---------------\n";
+        result += "----------------------------------------------------------\n";
+        result += "----------------------------------------------------------\n";
+         */
+
+        return result;
 
     }
 
 
     string Mesher::refineMeshReductionTBB(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
-                                        set<QuadEdge> &QuadEdges,
-                                        const list<RefinementRegion *> &all_reg, const unsigned short &rl,
-                                        Polyline &input) {
+                                          set<QuadEdge> &QuadEdges,
+                                          const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                          Polyline &input) {
+
+        string result;
 
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
 
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
-            std::cout << "Invalid number of threads or not supported by computer" << std::endl;
-            return;
+            result += "Invalid number of threads or not supported by computer\n";
+            return result;
         }
 
         tbb::task_scheduler_init test(nbThread);
-
-        std::cout << "Start refine mesh reduction IntelTBB with " << nbThread << " threads." << std::endl;
 
         // TEST REDUCTION
         list<Point3D> new_pts;
@@ -262,7 +265,7 @@ namespace Clobscode {
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
             if (rmr.getNewPts().empty()) {
-                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                result += "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
                 break;
             }
 
@@ -284,43 +287,44 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "\t* level " << i << " in "
-                 << total;
-            cout << " ms" << endl;
-
-            std::cout << "\t---- Points : " << tmp_points.size() << std::endl;
-            std::cout << "\t---- QuadEdges : " << tmp_edges.size() << std::endl;
-            std::cout << "\t---- Quadrants : " << tmp_quadrants.size() << std::endl;
+            result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
+            result += "Points " + std::to_string(points.size()) + "\n";
+            result += "QuadEdges " + std::to_string(tmp_edges.size()) + "\n";
+            result += "Quadrants " + std::to_string(tmp_Quadrants.size()) + "\n";
 
 
         }
 
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "---------------------END OF REDUCTION TBB--------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
+        /*
 
+        result += "----------------------------------------------------------\n";
+        result += "----------------------------------------------------------\n";
+        result += "---------------------END OF REDUCTION TBB--------------\n";
+        result += "----------------------------------------------------------\n";
+        result += "----------------------------------------------------------\n";
+         */
 
+        return result;
     }
 
 
     string Mesher::refineMeshCustomReductionTBB(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
-                                              set<QuadEdge> &QuadEdges,
-                                              const list<RefinementRegion *> &all_reg, const unsigned short &rl,
-                                              Polyline &input) {
+                                                set<QuadEdge> &QuadEdges,
+                                                const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                                Polyline &input) {
+
+        string result;
 
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
 
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
-            std::cout << "Invalid number of threads or not supported by computer" << std::endl;
-            return;
+            result += "Invalid number of threads or not supported by computer\n";
+            return result;
         }
 
         tbb::task_scheduler_init test(nbThread);
         tbb::task_group tg;
 
-        std::cout << "Start refine mesh custom reduction V1 IntelTBB with " << nbThread << " threads." << std::endl;
 
         // TEST REDUCTION
         list<Point3D> new_pts;
@@ -336,7 +340,7 @@ namespace Clobscode {
 
             int split = tmp_quadrants.size() / (nbThread) + 1;
             split = std::max(split, 5000);
-            //std::cout << split << std::endl;
+            //result += split << std::endl;
 
             vector<RefineMeshReduction *> threads;
 
@@ -360,7 +364,7 @@ namespace Clobscode {
 
 
                 tg.run([&threads, &tmp_quadrants, j, split, prevStart] { // run in task group
-                    //std::cout << "Start from " << prevStart << " to " << prevStart + split << " / " << tmp_quadrants.size() << std::endl;
+                    //result += "Start from " << prevStart << " to " << prevStart + split << " / " << tmp_quadrants.size() << std::endl;
                     threads[j]->operator()(tbb::blocked_range<size_t>(prevStart, (prevStart + split)));
                 });
 
@@ -384,7 +388,7 @@ namespace Clobscode {
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
             if (rmr.getNewPts().empty()) {
-                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                result += "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
                 break;
             }
 
@@ -408,38 +412,37 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "\t* level " << i << " in "
-                 << total;
-            cout << " ms" << endl;
-
-            //long outside = std::chrono::duration_cast<chrono::milliseconds>(end_outside_block_time - start_outside_block_time).count();
-            //cout << "TBB for outside / inside " << outside << " ms (" << (outside * 100.0 / total) << "%) ";
-            //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
-            //cout << endl;
-
-            std::cout << "\t---- Points : " << tmp_points.size() << std::endl;
-            std::cout << "\t---- QuadEdges : " << tmp_edges.size() << std::endl;
-            std::cout << "\t---- Quadrants : " << tmp_quadrants.size() << std::endl;
+            result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
+            result += "Points " + std::to_string(points.size()) + "\n";
+            result += "QuadEdges " + std::to_string(tmp_edges.size()) + "\n";
+            result += "Quadrants " + std::to_string(tmp_Quadrants.size()) + "\n";
 
         }
 
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "---------------------END OF CUSTOM REDUCTION TBB-----------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
+        return result;
+
+        /*
+        result += "----------------------------------------------------------\n";
+        result += "----------------------------------------------------------\n";
+        result += "---------------------END OF CUSTOM REDUCTION TBB-----------\n";
+        result += "----------------------------------------------------------\n";
+        result += "----------------------------------------------------------\n";
+         */
     }
 
-    string Mesher::refineCustomMeshReductionTBBV2(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
-                                                set<QuadEdge> &QuadEdges,
-                                                const list<RefinementRegion *> &all_reg, const unsigned short &rl,
-                                                Polyline &input) {
+    string
+    Mesher::refineCustomMeshReductionTBBV2(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
+                                           set<QuadEdge> &QuadEdges,
+                                           const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                           Polyline &input) {
+
+        string result;
 
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
 
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
-            std::cout << "Invalid number of threads or not supported by computer" << std::endl;
-            return;
+            result += "Invalid number of threads or not supported by computer\n";
+            return result;
         }
 
         tbb::task_scheduler_init test(nbThread);
@@ -499,7 +502,7 @@ namespace Clobscode {
             //necessary to continue the refinement.
 
             if (rmr.getNewPts().empty()) {
-                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                result += "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
                 break;
             }
 
@@ -508,29 +511,31 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "\t* level " << i << " in "
-                 << total;
-            cout << " ms" << endl;
-
-            std::cout << "\t---- Points : " << tmp_points.size() << std::endl;
-            std::cout << "\t---- QuadEdges : " << tmp_edges.size() << std::endl;
-            std::cout << "\t---- Quadrants : " << tmp_quadrants.size() << std::endl;
+            result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
+            result += "Points " + std::to_string(points.size()) + "\n";
+            result += "QuadEdges " + std::to_string(tmp_edges.size()) + "\n";
+            result += "Quadrants " + std::to_string(tmp_Quadrants.size()) + "\n";
 
         }
 
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "---------------------END OF REDUCTION V2 TBB--------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
+        return result;
+
+        /*
+        result += "----------------------------------------------------------\n";
+        result += "----------------------------------------------------------\n";
+        result += "---------------------END OF REDUCTION V2 TBB--------------\n";
+        result += "----------------------------------------------------------\n";
+        result += "----------------------------------------------------------\n";
+         */
 
     }
 
 
-    string Mesher::refineCustomMeshReductionTBBV3(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
-                                                set<QuadEdge> &QuadEdges,
-                                                const list<RefinementRegion *> &all_reg, const unsigned short &rl,
-                                                Polyline &input) {
+    string
+    Mesher::refineCustomMeshReductionTBBV3(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
+                                           set<QuadEdge> &QuadEdges,
+                                           const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                           Polyline &input) {
 
         string result = "";
 
