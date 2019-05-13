@@ -288,9 +288,9 @@ namespace Clobscode {
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
             result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
-            result += "Points " + std::to_string(points.size()) + "\n";
+            result += "Points " + std::to_string(tmp_points.size()) + "\n";
             result += "QuadEdges " + std::to_string(tmp_edges.size()) + "\n";
-            result += "Quadrants " + std::to_string(tmp_Quadrants.size()) + "\n";
+            result += "Quadrants " + std::to_string(tmp_quadrants.size()) + "\n";
 
 
         }
@@ -413,9 +413,9 @@ namespace Clobscode {
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
             result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
-            result += "Points " + std::to_string(points.size()) + "\n";
+            result += "Points " + std::to_string(tmp_points.size()) + "\n";
             result += "QuadEdges " + std::to_string(tmp_edges.size()) + "\n";
-            result += "Quadrants " + std::to_string(tmp_Quadrants.size()) + "\n";
+            result += "Quadrants " + std::to_string(tmp_quadrants.size()) + "\n";
 
         }
 
@@ -512,9 +512,9 @@ namespace Clobscode {
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
             result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
-            result += "Points " + std::to_string(points.size()) + "\n";
+            result += "Points " + std::to_string(tmp_points.size()) + "\n";
             result += "QuadEdges " + std::to_string(tmp_edges.size()) + "\n";
-            result += "Quadrants " + std::to_string(tmp_Quadrants.size()) + "\n";
+            result += "Quadrants " + std::to_string(tmp_quadrants.size()) + "\n";
 
         }
 
@@ -758,9 +758,9 @@ namespace Clobscode {
                     end_refine_rl_time - start_refine_rl_time).count();
             
             result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
-            result += "Points : " + std::to_string(tmp_points.size()) + "\n";
-            result += "QuadEdges : " + std::to_string(tmp_edges.size()) + "\n";
-            result += "Quadrants : " + std::to_string(tmp_quadrants.size()) + "\n";
+            result += "Points " + std::to_string(tmp_points.size()) + "\n";
+            result += "QuadEdges " + std::to_string(tmp_edges.size()) + "\n";
+            result += "Quadrants " + std::to_string(tmp_quadrants.size()) + "\n";
         }
 
         return result;
@@ -946,9 +946,9 @@ namespace Clobscode {
                     end_refine_rl_time - start_refine_rl_time).count();
 
             result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
-            result += "Points : " + std::to_string(tmp_points.size()) + "\n";
-            result += "QuadEdges : " + std::to_string(tmp_edges.size()) + "\n";
-            result += "Quadrants : " + std::to_string(tmp_quadrants.size()) + "\n";
+            result += "Points " + std::to_string(tmp_points.size()) + "\n";
+            result += "QuadEdges " + std::to_string(tmp_edges.size()) + "\n";
+            result += "Quadrants " + std::to_string(tmp_quadrants.size()) + "\n";
 
         }
 

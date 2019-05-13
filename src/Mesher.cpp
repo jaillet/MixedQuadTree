@@ -1044,14 +1044,14 @@ namespace Clobscode {
             } //End tries
 
             //save output 0 to file test1TBB
-            saveFile(folderName + "/test1TBB", output[0]);
-            saveFile(folderName + "/reductionTBB", output[1]);
-            saveFile(folderName + "/customReductionTBB", output[2]);
-            saveFile(folderName + "/customReductionTBBV2", output[3]);
-            saveFile(folderName + "/customReductionTBBV3", output[4]);
-            saveFile(folderName + "/customReductionTBBV4", output[5]);
-            saveFile(folderName + "/reductionOpenMPV1", output[6]);
-            saveFile(folderName + "/reductionOpenMPV2", output[7]);
+            saveFile(folderName + "/test1TBB.txt", output[0]);
+            saveFile(folderName + "/reductionTBB.txt", output[1]);
+            saveFile(folderName + "/customReductionTBB.txt", output[2]);
+            saveFile(folderName + "/customReductionTBBV2.txt", output[3]);
+            saveFile(folderName + "/customReductionTBBV3.txt", output[4]);
+            saveFile(folderName + "/customReductionTBBV4.txt", output[5]);
+            saveFile(folderName + "/reductionOpenMPV1.txt", output[6]);
+            saveFile(folderName + "/reductionOpenMPV2.txt", output[7]);
             //save output 1 to file reduction TBB
 
         } //End thread

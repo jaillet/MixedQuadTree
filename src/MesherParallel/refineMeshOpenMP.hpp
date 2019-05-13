@@ -254,7 +254,7 @@ namespace Clobscode {
         }
 
         
-        string Mesher::refineMeshReductionOpenMP(const int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+        string Mesher::commrefineMeshReductionOpenMP(const int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                         set<QuadEdge> QuadEdges,
                                         const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                         Polyline &input, bool V1) {
@@ -508,9 +508,9 @@ namespace Clobscode {
              	//result += "Time in accumulation = " + std::to_string(totalAccumulationTime) + "ms\n";
              	//result += "Time in reduce = " + std::to_string(totalReduceTime) + "ms\n";
 
-                result += "Points : " + std::to_string(points.size()) + "\n";
-	            result += "QuadEdge : " +  std::to_string(QuadEdges.size()) + "\n";
-	            result += "Quadrants : " + std::to_string(tmp_Quadrants.size()) + "\n";
+                result += "Points " + std::to_string(points.size()) + "\n";
+	            result += "QuadEdge " +  std::to_string(QuadEdges.size()) + "\n";
+	            result += "Quadrants " + std::to_string(tmp_Quadrants.size()) + "\n";
 
 			} // END FOR REFINEMENT LEVEL
 
