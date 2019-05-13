@@ -836,6 +836,14 @@ namespace Clobscode {
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
 
+
+    static void saveFile(string name, string content) {
+        ofstream file;
+        file.open (name);
+        file << content;
+        file.close();
+    }
+
     void Mesher::generateQuadtreeMesh(const unsigned short &rl, Polyline &input,
                                       const list<RefinementRegion *> &all_reg,
                                       const string &name) {
@@ -996,22 +1004,20 @@ namespace Clobscode {
         
         vector<string> output;
         string resultFolder = "analyse_mesher";
+
+        system("mkdir " + resultFolder);
+
         const int maxThread = 12;
         const int nbTries = 10;
-
         for (int i = 1; i <= maxThread; ++i) {
-            std::cout << "| | | | |" << std::endl;
-            std::cout << "| | | | |" << std::endl;
-            std::cout << "| | | | |" << std::endl;
-            std::cout << "| | | | |" << std::endl;
-            std::cout << "Begin test of all functions with " << i << " threads." << std::endl;
-            
             //Clear output
+            output.clear();
+            output.resize(8);
 
             //Create folder analyse_mesher_thread_i
+            system("mkdir " + resultFolder + "_thread_" + std::to_string(i));
 
             for (int i = 0; i < nbTries; ++i) {
-                     
                 //Fill output
                 output[0] += refineMeshParallelTest1TBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
                 output[1] += refineMeshReductionTBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
@@ -1026,17 +1032,21 @@ namespace Clobscode {
                 {
                     output[j] += "END TRY = " + std::to_string(nbTries) + "\n";
                 }
-                
-            }
+
+            } //End tries
 
             //save output 0 to file test1TBB
+            saveFile("test1TBB", output[0]);
+            saveFile("reductionTBB", output[1]);
+            saveFile("customReductionTBB", output[2]);
+            saveFile("customReductionTBBV2", output[3]);
+            saveFile("customReductionTBBV3", output[4]);
+            saveFile("customReductionTBBV4", output[5]);
+            saveFile("reductionOpenMPV1", output[6]);
+            saveFile("reductionOpenMPV2", output[7]);
             //save output 1 to file reduction TBB
-
-
-        }
-
-        std::cout << "End of threads test." << std::endl;
-        std::cout << "\n\n\n";
+            
+        } //End thread
 
         int counterRefine = 0;
         for (unsigned short i = 0; i < rl; i++) {
