@@ -995,22 +995,20 @@ namespace Clobscode {
         //Show cpu info
         CPUInfo cinfo;
         //6 lines of info
-        string result;
+        string result = "";
         result += "Processor : \n";
         result += "CPU vendor = " + cinfo.vendor() + "\n";
         result += "CPU Brand String = " + cinfo.model() + "\n";
-        result += "# of cores = " + std::to_string(cinfo.cores()) + " ";
+        result += "# of cores = " + std::to_string(cinfo.cores()) + "\n";
         result += "# of logical cores = " + std::to_string(cinfo.logicalCpus()) + "\n";
         result += "# of thread (std::thread) = " + std::to_string(std::thread::hardware_concurrency()) + "\n";
         result += "Is CPU Hyper threaded = " + std::to_string(cinfo.isHyperThreaded()) + "\n";
         
         vector<string> output;
 
-        auto time = std::chrono::system_clock::now();
+        //auto time = std::chrono::system_clock::now();
 
-
-
-        string resultFolder = "analyse_mesher" + std::chrono::duration_cast<chrono::milliseconds>(time);
+        string resultFolder = "analyse_mesher";
 
         string cmd = "mkdir " + resultFolder;
         system(cmd.c_str());

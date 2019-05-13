@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <tr1/unordered_map>
 #include <string>
+#include <thread>
 
 using namespace std;
 
@@ -27,7 +28,7 @@ namespace Clobscode {
                                         Polyline &input) {
 		string result;
 
-            int MAX_THREAD = omp_get_max_threads();
+            int MAX_THREAD = std::thread::hardware_concurrency();
 
             if (nbThread > MAX_THREAD || nbThread < 0) {
                 std::cout << "Invalid number of threads or not supported by computer" << std::endl;
@@ -260,7 +261,7 @@ namespace Clobscode {
                                         Polyline &input, bool V1) {
 			string result = "";
 
-            int MAX_THREAD = omp_get_max_threads();
+            int MAX_THREAD = std::thread::hardware_concurrency();
 
             if (nbThread > MAX_THREAD || nbThread < 0) {
                 result = "Invalid number of threads or not supported by computer\n";
