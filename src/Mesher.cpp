@@ -842,6 +842,7 @@ namespace Clobscode {
         ofstream file;
         file.open(name);
         file << content;
+        file.flush();
         file.close();
     }
 
@@ -1182,7 +1183,7 @@ namespace Clobscode {
 
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();
-            cout << "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms";
+            result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
 
             //long outside = std::chrono::duration_cast<chrono::milliseconds>(end_outside_block_time - start_outside_block_time).count();
             //cout << "TBB for outside / inside " << outside << " ms (" << (outside * 100.0 / total) << "%) ";
