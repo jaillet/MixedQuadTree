@@ -994,7 +994,7 @@ namespace Clobscode {
         //Show cpu info
         CPUInfo cinfo;
         //6 lines of info
-        string result;
+        string result = "";
         result += "Processor : \n";
         result += "CPU vendor = " + cinfo.vendor() + "\n";
         //result += "CPU Brand String = " + cinfo.model() + "\n";
@@ -1009,7 +1009,6 @@ namespace Clobscode {
         auto time = chrono::high_resolution_clock::now();
 
         string resultFolder = "analyse_mesher_" + std::to_string(time.time_since_epoch().count());
-
         string cmd = "mkdir " + resultFolder;
         system(cmd.c_str());
 
