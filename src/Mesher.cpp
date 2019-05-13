@@ -996,6 +996,7 @@ namespace Clobscode {
         CPUInfo cinfo;
         //6 lines of info
         string result;
+        /*
         result += "Processor : \n";
         result += "CPU vendor = " + cinfo.vendor() + "\n";
         result += "CPU Brand String = " + cinfo.model() + "\n";
@@ -1003,14 +1004,13 @@ namespace Clobscode {
         result += "# of logical cores = " + std::to_string(cinfo.logicalCpus()) + "\n";
         result += "# of thread (std::thread) = " + std::to_string(std::thread::hardware_concurrency()) + "\n";
         result += "Is CPU Hyper threaded = " + std::to_string(cinfo.isHyperThreaded()) + "\n";
+         */
         
         vector<string> output;
 
-        auto time = std::chrono::system_clock::now();
+        auto time = chrono::high_resolution_clock::now();
 
-
-
-        string resultFolder = "analyse_mesher" + std::chrono::duration_cast<chrono::milliseconds>(time);
+        string resultFolder = "analyse_mesher_" + std::to_string(time.time_since_epoch().count());
 
         string cmd = "mkdir " + resultFolder;
         system(cmd.c_str());
@@ -1178,7 +1178,7 @@ namespace Clobscode {
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
             if (new_pts.empty()) {
-                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                result += "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
                 break;
             }
 
@@ -1200,7 +1200,7 @@ namespace Clobscode {
             result += "Quadrants " + std::to_string( tmp_Quadrants.size()) + "\n";
         }
 
-        saveFile(resultFolder + "/sequential", result);
+        saveFile(resultFolder + "/sequential.txt", result);
 
         std::cout << counterRefine << std::endl;
 
