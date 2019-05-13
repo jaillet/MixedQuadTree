@@ -979,7 +979,6 @@ namespace Clobscode {
             Services::WriteVTK(tmp_name, bound_octree);
         }
 #endif
-
         unsigned short max_rl = i;
 
         auto end_refine_rl_time = chrono::high_resolution_clock::now();
@@ -996,15 +995,14 @@ namespace Clobscode {
         CPUInfo cinfo;
         //6 lines of info
         string result;
-        /*
         result += "Processor : \n";
         result += "CPU vendor = " + cinfo.vendor() + "\n";
-        result += "CPU Brand String = " + cinfo.model() + "\n";
+        //result += "CPU Brand String = " + cinfo.model() + "\n";
         result += "# of cores = " + std::to_string(cinfo.cores()) + " ";
         result += "# of logical cores = " + std::to_string(cinfo.logicalCpus()) + "\n";
         result += "# of thread (std::thread) = " + std::to_string(std::thread::hardware_concurrency()) + "\n";
         result += "Is CPU Hyper threaded = " + std::to_string(cinfo.isHyperThreaded()) + "\n";
-         */
+
         
         vector<string> output;
 
