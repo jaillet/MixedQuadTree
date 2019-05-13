@@ -1017,10 +1017,10 @@ namespace Clobscode {
             output.resize(8);
 
             //Create folder analyse_mesher_thread_i
-            cmd = "mkdir " + resultFolder + "_thread_" + std::to_string(i);
+            cmd = "mkdir " + resultFolder + "/thread_" + std::to_string(i);
             system(cmd.c_str());
 
-            for (int i = 0; i < nbTries; ++i) {
+            for (int nb = 0; nb < nbTries; ++nb) {
                 //Fill output
                 output[0] += refineMeshParallelTest1TBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
                 output[1] += refineMeshReductionTBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);
