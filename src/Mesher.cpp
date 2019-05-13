@@ -1005,7 +1005,8 @@ namespace Clobscode {
         vector<string> output;
         string resultFolder = "analyse_mesher";
 
-        system("mkdir " + resultFolder);
+        string cmd = "mkdir " + resultFolder;
+        system(cmd.c_str());
 
         const int maxThread = 12;
         const int nbTries = 10;
@@ -1015,7 +1016,8 @@ namespace Clobscode {
             output.resize(8);
 
             //Create folder analyse_mesher_thread_i
-            system("mkdir " + resultFolder + "_thread_" + std::to_string(i));
+            cmd = "mkdir " + resultFolder + "_thread_" + std::to_string(i);
+            system(cmd.c_str());
 
             for (int i = 0; i < nbTries; ++i) {
                 //Fill output
@@ -1045,7 +1047,7 @@ namespace Clobscode {
             saveFile("reductionOpenMPV1", output[6]);
             saveFile("reductionOpenMPV2", output[7]);
             //save output 1 to file reduction TBB
-            
+
         } //End thread
 
         int counterRefine = 0;
