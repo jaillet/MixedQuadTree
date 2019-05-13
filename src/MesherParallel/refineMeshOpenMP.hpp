@@ -244,11 +244,11 @@ namespace Clobscode {
             //QuadEdges.clear();
             //QuadEdges.insert(quadEdges.begin(), quadEdges.end());
 
-            std::cout << "----------------------------------------------------------" << std::endl;
-            std::cout << "----------------------------------------------------------" << std::endl;
-            std::cout << "---------------------END OF OPENMP------------------------" << std::endl;
-            std::cout << "----------------------------------------------------------" << std::endl;
-            std::cout << "----------------------------------------------------------" << std::endl;
+            // std::cout << "----------------------------------------------------------" << std::endl;
+            // std::cout << "----------------------------------------------------------" << std::endl;
+            // std::cout << "---------------------END OF OPENMP------------------------" << std::endl;
+            // std::cout << "----------------------------------------------------------" << std::endl;
+            // std::cout << "----------------------------------------------------------" << std::endl;
 
             return result;
         }
@@ -505,8 +505,8 @@ namespace Clobscode {
                 long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();
                 
              	result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
-             	result += "Time in accumulation = " + std::to_string(totalAccumulationTime) + "ms\n";
-             	result += "Time in reduce = " + std::to_string(totalReduceTime) + "ms\n";
+             	//result += "Time in accumulation = " + std::to_string(totalAccumulationTime) + "ms\n";
+             	//result += "Time in reduce = " + std::to_string(totalReduceTime) + "ms\n";
 
                 result += "Points : " + std::to_string(points.size()) + "\n";
 	            result += "QuadEdge : " +  std::to_string(QuadEdges.size()) + "\n";

@@ -1004,7 +1004,12 @@ namespace Clobscode {
         std::cout << "Is CPU Hyper threaded = " << cinfo.isHyperThreaded() << std::endl;
         
         vector<string> output;
-        string resultFolder = "analyse_mesher";
+
+        auto time = std::chrono::system_clock::now();
+
+
+
+        string resultFolder = "analyse_mesher" + std::chrono::duration_cast<chrono::milliseconds>(time);
 
         string cmd = "mkdir " + resultFolder;
         system(cmd.c_str());
