@@ -994,14 +994,14 @@ namespace Clobscode {
         //Show cpu info
         CPUInfo cinfo;
         //6 lines of info
-        std::cout << "Processor : " << std::endl;
-        std::cout << std::boolalpha; //Cout true for 1, false for 0
-        std::cout << "CPU vendor = " << cinfo.vendor() << std::endl;
-        std::cout << "CPU Brand String = " << cinfo.model() << std::endl;
-        std::cout << "# of cores = " << cinfo.cores() << " ";
-        std::cout << "# of logical cores = " << cinfo.logicalCpus() << std::endl;
-        std::cout << "# of thread (std::thread) = " << std::thread::hardware_concurrency() << std::endl;
-        std::cout << "Is CPU Hyper threaded = " << cinfo.isHyperThreaded() << std::endl;
+        string result;
+        result += "Processor : \n";
+        result += "CPU vendor = " + cinfo.vendor() + "\n";
+        result += "CPU Brand String = " + cinfo.model() + "\n";
+        result += "# of cores = " + std::to_string(cinfo.cores()) + " ";
+        result += "# of logical cores = " + std::to_string(cinfo.logicalCpus()) + "\n";
+        result += "# of thread (std::thread) = " + std::to_string(std::thread::hardware_concurrency()) + "\n";
+        result += "Is CPU Hyper threaded = " + std::to_string(cinfo.isHyperThreaded()) + "\n";
         
         vector<string> output;
         string resultFolder = "analyse_mesher";
@@ -1182,19 +1182,19 @@ namespace Clobscode {
 
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();
-            cout << "         * level " << i << " in "
-                 << total;
-            cout << " ms" << endl;
+            cout << "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms";
 
             //long outside = std::chrono::duration_cast<chrono::milliseconds>(end_outside_block_time - start_outside_block_time).count();
             //cout << "TBB for outside / inside " << outside << " ms (" << (outside * 100.0 / total) << "%) ";
             //cout << " split visitor " << time_split_visitor << " ms (" << (time_split_visitor * 100.0 / outside) << "% of time) ";
             //cout << endl;
 
-            std::cout << "           ---- Points : " << points.size() << std::endl;
-            std::cout << "           ---- QuadEdges : " << QuadEdges.size() << std::endl;
-            std::cout << "           ---- Quadrants : " << tmp_Quadrants.size() << std::endl;
+            result += "Points " + std::to_string(points.size()) + "\n";
+            result += "QuadEdges " + std::to_string( QuadEdges.size()) + "\n";
+            result += "Quadrants " + std::to_string( tmp_Quadrants.size()) + "\n";
         }
+
+        saveFile(resultFolder + "/sequential", result);
 
         std::cout << counterRefine << std::endl;
 
