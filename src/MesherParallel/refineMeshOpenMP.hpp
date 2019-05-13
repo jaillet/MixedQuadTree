@@ -21,15 +21,17 @@ namespace Clobscode {
 					unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl,
 					vector<MeshPoint> &new_pts, set<QuadEdge> &new_edges, vector<Quadrant> &new_quadrants);
 
-	void Mesher::refineMeshParallelOpenMP(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+	string Mesher::refineMeshParallelOpenMP(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                         set<QuadEdge> QuadEdges,
                                         const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                         Polyline &input) {
+		string result;
+
             int MAX_THREAD = omp_get_max_threads();
 
             if (nbThread > MAX_THREAD || nbThread < 0) {
                 std::cout << "Invalid number of threads or not supported by computer" << std::endl;
-                return;
+                return result;
             }
             omp_set_num_threads(nbThread);
 
@@ -247,6 +249,8 @@ namespace Clobscode {
             std::cout << "---------------------END OF OPENMP------------------------" << std::endl;
             std::cout << "----------------------------------------------------------" << std::endl;
             std::cout << "----------------------------------------------------------" << std::endl;
+
+            return result;
         }
 
         
