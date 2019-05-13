@@ -21,7 +21,7 @@ namespace Clobscode {
 					unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl,
 					vector<MeshPoint> &new_pts, set<QuadEdge> &new_edges, vector<Quadrant> &new_quadrants);
 
-	string Mesher::refineMeshParallelOpenMP(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+	void Mesher::refineMeshParallelOpenMP(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                         set<QuadEdge> QuadEdges,
                                         const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                         Polyline &input) {
@@ -250,21 +250,23 @@ namespace Clobscode {
         }
 
         
-        void Mesher::refineMeshReductionOpenMP(const int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+        string Mesher::refineMeshReductionOpenMP(const int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                         set<QuadEdge> QuadEdges,
                                         const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                         Polyline &input, bool V1) {
+			string result = "";
+
             int MAX_THREAD = omp_get_max_threads();
 
             if (nbThread > MAX_THREAD || nbThread < 0) {
-                std::cout << "Invalid number of threads or not supported by computer" << std::endl;
-                return;
+                result = "Invalid number of threads or not supported by computer\n";
+                return result;
             }
             omp_set_num_threads(nbThread);
 
             string version = V1?"V1":"V2";
 
-            std::cout << "Start refine mesh reduction " << version << " Open MP with " << nbThread << " threads." << std::endl;
+            //std::cout << "Start refine mesh reduction " << version << " Open MP with " << nbThread << " threads." << std::endl;
 
             //Convert list into vector of temp Quadrants
             vector<Quadrant> tmp_Quadrants;
@@ -498,21 +500,23 @@ namespace Clobscode {
                 auto end_refine_rl_time = chrono::high_resolution_clock::now();
                 long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();
                 
-             	cout << "Level " << i << " in " << total << " ms" << endl;
-             	cout << "\t* Time in accumulation = " << totalAccumulationTime << "ms" << endl;
-             	cout << "\t* Time in reduce = " << totalReduceTime << "ms" << endl;
+             	result += "Level " + std::to_string(i) + " in " + std::to_string(total) + " ms\n";
+             	result += "Time in accumulation = " + std::to_string(totalAccumulationTime) + "ms\n";
+             	result += "Time in reduce = " + std::to_string(totalReduceTime) + "ms\n";
 
-                cout << "\t---- Points : " << points.size() << endl;
-	            cout << "\t---- QuadEdge : " <<  QuadEdges.size() << endl;
-	            cout << "\t---- Quadrants : " << tmp_Quadrants.size() << endl; 
+                result += "Points : " + std::to_string(points.size()) + "\n";
+	            result += "QuadEdge : " +  std::to_string(QuadEdges.size()) + "\n";
+	            result += "Quadrants : " + std::to_string(tmp_Quadrants.size()) + "\n";
 
 			} // END FOR REFINEMENT LEVEL
 
-            std::cout << "----------------------------------------------------------" << std::endl;
-            std::cout << "----------------------------------------------------------" << std::endl;
-            std::cout << "---------------------END OF OPENMP REDUCTION " << version << "-----------" << std::endl;
-            std::cout << "----------------------------------------------------------" << std::endl;
-            std::cout << "----------------------------------------------------------" << std::endl;
+			return result;
+
+            // std::cout << "----------------------------------------------------------" << std::endl;
+            // std::cout << "----------------------------------------------------------" << std::endl;
+            // std::cout << "---------------------END OF OPENMP REDUCTION " << version << "-----------" << std::endl;
+            // std::cout << "----------------------------------------------------------" << std::endl;
+            // std::cout << "----------------------------------------------------------" << std::endl;
         }
 
 

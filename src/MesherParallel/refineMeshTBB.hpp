@@ -532,11 +532,13 @@ namespace Clobscode {
                                                 const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                                 Polyline &input) {
 
+        string result = "";
+
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
 
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
-            std::cout << "Invalid number of threads or not supported by computer" << std::endl;
-            return;
+            result = "Invalid number of threads or not supported by computer\n";
+            return result;
         }
 
         // TEST REDUCTION
@@ -628,7 +630,7 @@ namespace Clobscode {
             //necessary to continue the refinement.
 
             if (old_points_size == tmp_points.size()) {
-                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                result += "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
                 break;
             }
 
@@ -749,20 +751,20 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "\t* level " << i << " in "
-                 << total;
-            cout << " ms" << endl;
-
-            std::cout << "\t---- Points : " << tmp_points.size() << std::endl;
-            std::cout << "\t---- QuadEdges : " << tmp_edges.size() << std::endl;
-            std::cout << "\t---- Quadrants : " << tmp_quadrants.size() << std::endl;
+            
+            result += "Level " + i + " in " + total + " ms\n";
+            result += "Points : " + std::to_string(tmp_points.size()) + "\n";
+            result += "QuadEdges : " + std::to_string(tmp_edges.size()) + "\n";
+            result += "Quadrants : " + std::to_string(tmp_quadrants.size()) + "\n";
         }
 
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "---------------------END OF REDUCTION V3 TBB--------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
+        return result;
+
+        // std::cout << "----------------------------------------------------------" << std::endl;
+        // std::cout << "----------------------------------------------------------" << std::endl;
+        // std::cout << "---------------------END OF REDUCTION V3 TBB--------------" << std::endl;
+        // std::cout << "----------------------------------------------------------" << std::endl;
+        // std::cout << "----------------------------------------------------------" << std::endl;
 
     }
 
@@ -770,14 +772,16 @@ namespace Clobscode {
                                                 set<QuadEdge> &QuadEdges,
                                                 const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                                 Polyline &input) {
+        string result = "";
+
         int NOMBRE_THREAD = tbb::task_scheduler_init::default_num_threads();
 
         if (nbThread > NOMBRE_THREAD || nbThread < 0) {
-            std::cout << "Invalid number of threads or not supported by computer" << std::endl;
-            return;
+            result = "Invalid number of threads or not supported by computer\n";
+            return result;
         }
 
-        std::cout << "Start refine mesh custom reduction V4 IntelTBB with " << nbThread << " threads." << std::endl;
+        //std::cout << "Start refine mesh custom reduction V4 IntelTBB with " << nbThread << " threads." << std::endl;
 
         // TEST REDUCTION
         vector<MeshPoint> tmp_points(points.begin(), points.end());
@@ -935,21 +939,19 @@ namespace Clobscode {
             auto end_refine_rl_time = chrono::high_resolution_clock::now();
             long total = std::chrono::duration_cast<chrono::milliseconds>(
                     end_refine_rl_time - start_refine_rl_time).count();
-            cout << "\t* level " << i << " in "
-                 << total;
-            cout << " ms" << endl;
 
-            std::cout << "\t---- Points : " << tmp_points.size() << std::endl;
-            std::cout << "\t---- QuadEdges : " << tmp_edges.size() << std::endl;
-            std::cout << "\t---- Quadrants : " << tmp_quadrants.size() << std::endl;
+            result += "Level " + i + " in " + total + " ms\n";
+            result += "Points : " + std::to_string(tmp_points.size()) + "\n";
+            result += "QuadEdges : " + std::to_string(tmp_edges.size()) + "\n";
+            result += "Quadrants : " + std::to_string(tmp_quadrants.size()) + "\n";
 
         }
 
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "---------------------END OF REDUCTION V4 TBB--------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
-        std::cout << "----------------------------------------------------------" << std::endl;
+        // std::cout << "----------------------------------------------------------" << std::endl;
+        // std::cout << "----------------------------------------------------------" << std::endl;
+        // std::cout << "---------------------END OF REDUCTION V4 TBB--------------" << std::endl;
+        // std::cout << "----------------------------------------------------------" << std::endl;
+        // std::cout << "----------------------------------------------------------" << std::endl;
 
     }
 
