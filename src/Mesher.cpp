@@ -838,9 +838,9 @@ namespace Clobscode {
     //--------------------------------------------------------------------------------
 
 
-    static void saveFile(string name, string content) {
+    static void saveFile(const string &name, const string &content) {
         ofstream file;
-        file.open (name);
+        file.open(name);
         file << content;
         file.close();
     }
@@ -1017,7 +1017,8 @@ namespace Clobscode {
             output.resize(8);
 
             //Create folder analyse_mesher_thread_i
-            cmd = "mkdir " + resultFolder + "/thread_" + std::to_string(i);
+            string folderName = resultFolder + "/thread_" + std::to_string(i);
+            cmd = "mkdir " + folderName;
             system(cmd.c_str());
 
             for (int nb = 0; nb < nbTries; ++nb) {
@@ -1039,14 +1040,14 @@ namespace Clobscode {
             } //End tries
 
             //save output 0 to file test1TBB
-            saveFile("test1TBB", output[0]);
-            saveFile("reductionTBB", output[1]);
-            saveFile("customReductionTBB", output[2]);
-            saveFile("customReductionTBBV2", output[3]);
-            saveFile("customReductionTBBV3", output[4]);
-            saveFile("customReductionTBBV4", output[5]);
-            saveFile("reductionOpenMPV1", output[6]);
-            saveFile("reductionOpenMPV2", output[7]);
+            saveFile(folderName + "/test1TBB", output[0]);
+            saveFile(folderName + "/reductionTBB", output[1]);
+            saveFile(folderName + "/customReductionTBB", output[2]);
+            saveFile(folderName + "/customReductionTBBV2", output[3]);
+            saveFile(folderName + "/customReductionTBBV3", output[4]);
+            saveFile(folderName + "/customReductionTBBV4", output[5]);
+            saveFile(folderName + "/reductionOpenMPV1", output[6]);
+            saveFile(folderName + "/reductionOpenMPV2", output[7]);
             //save output 1 to file reduction TBB
 
         } //End thread
