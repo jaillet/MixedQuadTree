@@ -8,17 +8,16 @@
 #include <unordered_map>
 #include <tr1/unordered_map>
 #include <string>
-#include <thread>
 
 using namespace std;
 
 namespace Clobscode {
 
-	void make_reduceV1(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants, 
+	void make_reduceV1(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants,
 					unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl,
 					vector<MeshPoint> &new_pts, set<QuadEdge> &new_edges, vector<Quadrant> &new_quadrants);
 
-	void make_reduceV2(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants, 
+	void make_reduceV2(	vector<Point3D> *threads_new_pts, set<QuadEdge> *threads_new_edges, vector<Quadrant> *threads_new_quadrants,
 					unsigned int number_of_threads, const unsigned int total_nb_points_before_reduce, unsigned int rl,
 					vector<MeshPoint> &new_pts, set<QuadEdge> &new_edges, vector<Quadrant> &new_quadrants);
 
@@ -28,7 +27,7 @@ namespace Clobscode {
                                         Polyline &input) {
 		string result;
 
-            int MAX_THREAD = std::thread::hardware_concurrency();
+            int MAX_THREAD = omp_get_max_threads();
 
             if (nbThread > MAX_THREAD || nbThread < 0) {
                 std::cout << "Invalid number of threads or not supported by computer" << std::endl;
@@ -71,7 +70,7 @@ namespace Clobscode {
 				  //auto start_block_time = chrono::high_resolution_clock::now();
 
 
-                
+
 
 			  #pragma omp parallel shared(nb_points, new_Quadrants, new_pts, QuadEdges, points)
 			  	{
@@ -82,7 +81,7 @@ namespace Clobscode {
 				sv.setNewPts(new_pts); // INSERT / READ
 
 				//schedule(dynamic)
-				#pragma omp for 
+				#pragma omp for
 			  	for (unsigned int j = 0; j < tmp_Quadrants.size(); ++j) {
 			  		Quadrant &iter = tmp_Quadrants[j];
 
@@ -215,14 +214,14 @@ namespace Clobscode {
 
                 auto end_refine_rl_time = chrono::high_resolution_clock::now();
                 long total = std::chrono::duration_cast<chrono::milliseconds>(end_refine_rl_time - start_refine_rl_time).count();
-                
+
              	cout << "         * level " << i << " in "
                      << total;
                 cout << " ms" << endl;
 
                 std::cout << "           ---- Points : " << points.size() << std::endl;
 	            std::cout << "           ---- QuadEdge : " <<  QuadEdges.size() << std::endl;
-	            std::cout << "           ---- Quadrants : " << tmp_Quadrants.size() << std::endl; 
+	            std::cout << "           ---- Quadrants : " << tmp_Quadrants.size() << std::endl;
 
                 // inside / split / outside stats
 
@@ -235,7 +234,7 @@ namespace Clobscode {
 
 
 
-	            
+
             } //END FOR REFINEMENT LEVEL
 
             // output result to mesher ! comment if not needed
@@ -254,14 +253,14 @@ namespace Clobscode {
             return result;
         }
 
-        
-        string Mesher::commrefineMeshReductionOpenMP(const int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+
+        string Mesher::refineMeshReductionOpenMP(const int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                         set<QuadEdge> QuadEdges,
                                         const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                         Polyline &input, bool V1) {
 			string result = "";
 
-            int MAX_THREAD = std::thread::hardware_concurrency();
+            int MAX_THREAD = omp_get_max_threads();
 
             if (nbThread > MAX_THREAD || nbThread < 0) {
                 result = "Invalid number of threads or not supported by computer\n";
