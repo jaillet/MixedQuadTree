@@ -998,6 +998,7 @@ namespace Clobscode {
         string resultFolder = "analyse_mesher";
         const int maxThread = 12;
         const int nbTries = 10;
+        
         for (int i = 1; i <= maxThread; ++i) {
             std::cout << "| | | | |" << std::endl;
             std::cout << "| | | | |" << std::endl;
@@ -1012,7 +1013,7 @@ namespace Clobscode {
             for (int i = 0; i < nbTries; ++i) {
                      
                 //Fill output
-                output[0].push_back(refineMeshParallelTest1TBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input);)
+                output[0].push_back(refineMeshParallelTest1TBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input));
                 output[1].push_back(refineMeshReductionTBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input));
                 output[2].push_back(refineMeshCustomReductionTBB(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input));
                 output[3].push_back(refineCustomMeshReductionTBBV2(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input));
@@ -1022,7 +1023,7 @@ namespace Clobscode {
                 output[7].push_back(refineMeshReductionOpenMP(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input, false)); //V2
                 
             }
-            
+
             //save output 0 to file test1TBB
             //save output 1 to file reduction TBB
 
