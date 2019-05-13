@@ -1010,7 +1010,10 @@ namespace Clobscode {
             refineMeshReductionOpenMP(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input); //V1
             refineMeshReductionOpenMP(i, tmp_Quadrants, points, QuadEdges, all_reg, rl, input, false); //V2
             // TODO check if correct version and go
-        }     
+        }
+
+        std::cout << "End of threads test." << std::endl;
+        std::cout << "\n\n\n";
 
         int counterRefine = 0;
         for (unsigned short i = 0; i < rl; i++) {
