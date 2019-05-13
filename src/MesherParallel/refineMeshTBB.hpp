@@ -25,7 +25,7 @@ namespace std {
 
 namespace Clobscode {
 
-    void Mesher::refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+    string Mesher::refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
                                             set<QuadEdge> QuadEdges,
                                             const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                             Polyline &input) {
@@ -222,7 +222,7 @@ namespace Clobscode {
     }
 
 
-    void Mesher::refineMeshReductionTBB(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
+    string Mesher::refineMeshReductionTBB(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
                                         set<QuadEdge> &QuadEdges,
                                         const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                         Polyline &input) {
@@ -305,7 +305,7 @@ namespace Clobscode {
     }
 
 
-    void Mesher::refineMeshCustomReductionTBB(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
+    string Mesher::refineMeshCustomReductionTBB(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
                                               set<QuadEdge> &QuadEdges,
                                               const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                               Polyline &input) {
@@ -430,7 +430,7 @@ namespace Clobscode {
         std::cout << "----------------------------------------------------------" << std::endl;
     }
 
-    void Mesher::refineCustomMeshReductionTBBV2(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
+    string Mesher::refineCustomMeshReductionTBBV2(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
                                                 set<QuadEdge> &QuadEdges,
                                                 const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                                 Polyline &input) {
@@ -527,7 +527,7 @@ namespace Clobscode {
     }
 
 
-    void Mesher::refineCustomMeshReductionTBBV3(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
+    string Mesher::refineCustomMeshReductionTBBV3(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
                                                 set<QuadEdge> &QuadEdges,
                                                 const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                                 Polyline &input) {
@@ -766,7 +766,7 @@ namespace Clobscode {
 
     }
 
-    void Mesher::refineMeshCustomReductionTBBV4(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
+    string Mesher::refineMeshCustomReductionTBBV4(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
                                                 set<QuadEdge> &QuadEdges,
                                                 const list<RefinementRegion *> &all_reg, const unsigned short &rl,
                                                 Polyline &input) {
