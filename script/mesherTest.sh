@@ -6,12 +6,12 @@ cd $LOCATION/../build
 PROG="mesher_roi"
 DATE=$(date '+%Y-%m-%d_%H:%M:%S')
 DIR="analyse_mesher_"$DATE
-MAXRL=5
+MAXRL=13
 
 
 mkdir -p $DIR
 
-for OPTION in a s
+for OPTION in s a
 do
 	echo "Launch mesher_roi on a.poly with option : -$OPTION $MAXRL"
 	mkdir -p $DIR/${OPTION}_${MAXRL}
@@ -19,7 +19,7 @@ do
     for TRY in {1..10}
     do
     	echo "Try number $TRY"
-        RES=$(./$PROG -p ../data/a.poly -$OPTION $MAXRL | tr '\0' '\n')
-        echo "$RES" > $DIR/${OPTION}_${MAXRL}/test_number_${TRY}.txt
+        ./$PROG -p ../data/a.poly -$OPTION $MAXRL > $DIR/${OPTION}_${MAXRL}/test_number_${TRY}.txt
+      
     done
 done
