@@ -2,8 +2,8 @@
 #include <omp.h>
 
 #include <iostream>
-#include "SplitVisitorOpenMP.h"
-#include "SplitVisitorReductionOpenMP.h"
+#include "ReductionOpenMP/SplitVisitorOpenMP.h"
+#include "ReductionOpenMP/SplitVisitorReductionOpenMP.h"
 
 #include <unordered_map>
 #include <tr1/unordered_map>
