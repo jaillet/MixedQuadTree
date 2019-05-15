@@ -1,0 +1,410 @@
+Level 0 in 1 ms
+Points 21
+QuadEdges 48
+Quadrants 6
+Level 1 in 2 ms
+Points 45
+QuadEdges 120
+Quadrants 14
+Level 2 in 1 ms
+Points 97
+QuadEdges 280
+Quadrants 37
+Level 3 in 2 ms
+Points 229
+QuadEdges 692
+Quadrants 105
+Level 4 in 6 ms
+Points 591
+QuadEdges 1836
+Quadrants 346
+Level 5 in 22 ms
+Points 1730
+QuadEdges 5498
+Quadrants 1201
+Level 6 in 79 ms
+Points 5538
+QuadEdges 17918
+Quadrants 4369
+Level 7 in 304 ms
+Points 19061
+QuadEdges 62440
+Quadrants 16622
+Level 8 in 1234 ms
+Points 69761
+QuadEdges 230328
+Quadrants 64953
+Level 9 in 5210 ms
+Points 266291
+QuadEdges 883200
+Quadrants 255663
+END TRY = 10
+Level 0 in 1 ms
+Points 21
+QuadEdges 48
+Quadrants 6
+Level 1 in 1 ms
+Points 45
+QuadEdges 120
+Quadrants 14
+Level 2 in 0 ms
+Points 97
+QuadEdges 280
+Quadrants 37
+Level 3 in 2 ms
+Points 229
+QuadEdges 692
+Quadrants 105
+Level 4 in 6 ms
+Points 591
+QuadEdges 1836
+Quadrants 346
+Level 5 in 22 ms
+Points 1730
+QuadEdges 5498
+Quadrants 1201
+Level 6 in 79 ms
+Points 5538
+QuadEdges 17918
+Quadrants 4369
+Level 7 in 309 ms
+Points 19061
+QuadEdges 62440
+Quadrants 16622
+Level 8 in 1226 ms
+Points 69761
+QuadEdges 230328
+Quadrants 64953
+Level 9 in 5229 ms
+Points 266291
+QuadEdges 883200
+Quadrants 255663
+END TRY = 10
+Level 0 in 1 ms
+Points 21
+QuadEdges 48
+Quadrants 6
+Level 1 in 2 ms
+Points 45
+QuadEdges 120
+Quadrants 14
+Level 2 in 1 ms
+Points 97
+QuadEdges 280
+Quadrants 37
+Level 3 in 2 ms
+Points 229
+QuadEdges 692
+Quadrants 105
+Level 4 in 6 ms
+Points 591
+QuadEdges 1836
+Quadrants 346
+Level 5 in 23 ms
+Points 1730
+QuadEdges 5498
+Quadrants 1201
+Level 6 in 79 ms
+Points 5538
+QuadEdges 17918
+Quadrants 4369
+Level 7 in 306 ms
+Points 19061
+QuadEdges 62440
+Quadrants 16622
+Level 8 in 1227 ms
+Points 69761
+QuadEdges 230328
+Quadrants 64953
+Level 9 in 5214 ms
+Points 266291
+QuadEdges 883200
+Quadrants 255663
+END TRY = 10
+Level 0 in 1 ms
+Points 21
+QuadEdges 48
+Quadrants 6
+Level 1 in 1 ms
+Points 45
+QuadEdges 120
+Quadrants 14
+Level 2 in 1 ms
+Points 97
+QuadEdges 280
+Quadrants 37
+Level 3 in 2 ms
+Points 229
+QuadEdges 692
+Quadrants 105
+Level 4 in 6 ms
+Points 591
+QuadEdges 1836
+Quadrants 346
+Level 5 in 23 ms
+Points 1730
+QuadEdges 5498
+Quadrants 1201
+Level 6 in 79 ms
+Points 5538
+QuadEdges 17918
+Quadrants 4369
+Level 7 in 308 ms
+Points 19061
+QuadEdges 62440
+Quadrants 16622
+Level 8 in 1220 ms
+Points 69761
+QuadEdges 230328
+Quadrants 64953
+Level 9 in 5198 ms
+Points 266291
+QuadEdges 883200
+Quadrants 255663
+END TRY = 10
+Level 0 in 1 ms
+Points 21
+QuadEdges 48
+Quadrants 6
+Level 1 in 2 ms
+Points 45
+QuadEdges 120
+Quadrants 14
+Level 2 in 1 ms
+Points 97
+QuadEdges 280
+Quadrants 37
+Level 3 in 2 ms
+Points 229
+QuadEdges 692
+Quadrants 105
+Level 4 in 6 ms
+Points 591
+QuadEdges 1836
+Quadrants 346
+Level 5 in 25 ms
+Points 1730
+QuadEdges 5498
+Quadrants 1201
+Level 6 in 79 ms
+Points 5538
+QuadEdges 17918
+Quadrants 4369
+Level 7 in 306 ms
+Points 19061
+QuadEdges 62440
+Quadrants 16622
+Level 8 in 1241 ms
+Points 69761
+QuadEdges 230328
+Quadrants 64953
+Level 9 in 5228 ms
+Points 266291
+QuadEdges 883200
+Quadrants 255663
+END TRY = 10
+Level 0 in 1 ms
+Points 21
+QuadEdges 48
+Quadrants 6
+Level 1 in 2 ms
+Points 45
+QuadEdges 120
+Quadrants 14
+Level 2 in 1 ms
+Points 97
+QuadEdges 280
+Quadrants 37
+Level 3 in 2 ms
+Points 229
+QuadEdges 692
+Quadrants 105
+Level 4 in 6 ms
+Points 591
+QuadEdges 1836
+Quadrants 346
+Level 5 in 22 ms
+Points 1730
+QuadEdges 5498
+Quadrants 1201
+Level 6 in 79 ms
+Points 5538
+QuadEdges 17918
+Quadrants 4369
+Level 7 in 307 ms
+Points 19061
+QuadEdges 62440
+Quadrants 16622
+Level 8 in 1220 ms
+Points 69761
+QuadEdges 230328
+Quadrants 64953
+Level 9 in 5230 ms
+Points 266291
+QuadEdges 883200
+Quadrants 255663
+END TRY = 10
+Level 0 in 1 ms
+Points 21
+QuadEdges 48
+Quadrants 6
+Level 1 in 2 ms
+Points 45
+QuadEdges 120
+Quadrants 14
+Level 2 in 1 ms
+Points 97
+QuadEdges 280
+Quadrants 37
+Level 3 in 2 ms
+Points 229
+QuadEdges 692
+Quadrants 105
+Level 4 in 6 ms
+Points 591
+QuadEdges 1836
+Quadrants 346
+Level 5 in 22 ms
+Points 1730
+QuadEdges 5498
+Quadrants 1201
+Level 6 in 79 ms
+Points 5538
+QuadEdges 17918
+Quadrants 4369
+Level 7 in 305 ms
+Points 19061
+QuadEdges 62440
+Quadrants 16622
+Level 8 in 1239 ms
+Points 69761
+QuadEdges 230328
+Quadrants 64953
+Level 9 in 5234 ms
+Points 266291
+QuadEdges 883200
+Quadrants 255663
+END TRY = 10
+Level 0 in 1 ms
+Points 21
+QuadEdges 48
+Quadrants 6
+Level 1 in 1 ms
+Points 45
+QuadEdges 120
+Quadrants 14
+Level 2 in 0 ms
+Points 97
+QuadEdges 280
+Quadrants 37
+Level 3 in 2 ms
+Points 229
+QuadEdges 692
+Quadrants 105
+Level 4 in 6 ms
+Points 591
+QuadEdges 1836
+Quadrants 346
+Level 5 in 22 ms
+Points 1730
+QuadEdges 5498
+Quadrants 1201
+Level 6 in 83 ms
+Points 5538
+QuadEdges 17918
+Quadrants 4369
+Level 7 in 306 ms
+Points 19061
+QuadEdges 62440
+Quadrants 16622
+Level 8 in 1232 ms
+Points 69761
+QuadEdges 230328
+Quadrants 64953
+Level 9 in 5205 ms
+Points 266291
+QuadEdges 883200
+Quadrants 255663
+END TRY = 10
+Level 0 in 1 ms
+Points 21
+QuadEdges 48
+Quadrants 6
+Level 1 in 2 ms
+Points 45
+QuadEdges 120
+Quadrants 14
+Level 2 in 1 ms
+Points 97
+QuadEdges 280
+Quadrants 37
+Level 3 in 2 ms
+Points 229
+QuadEdges 692
+Quadrants 105
+Level 4 in 6 ms
+Points 591
+QuadEdges 1836
+Quadrants 346
+Level 5 in 22 ms
+Points 1730
+QuadEdges 5498
+Quadrants 1201
+Level 6 in 79 ms
+Points 5538
+QuadEdges 17918
+Quadrants 4369
+Level 7 in 316 ms
+Points 19061
+QuadEdges 62440
+Quadrants 16622
+Level 8 in 1216 ms
+Points 69761
+QuadEdges 230328
+Quadrants 64953
+Level 9 in 5204 ms
+Points 266291
+QuadEdges 883200
+Quadrants 255663
+END TRY = 10
+Level 0 in 1 ms
+Points 21
+QuadEdges 48
+Quadrants 6
+Level 1 in 2 ms
+Points 45
+QuadEdges 120
+Quadrants 14
+Level 2 in 1 ms
+Points 97
+QuadEdges 280
+Quadrants 37
+Level 3 in 2 ms
+Points 229
+QuadEdges 692
+Quadrants 105
+Level 4 in 6 ms
+Points 591
+QuadEdges 1836
+Quadrants 346
+Level 5 in 23 ms
+Points 1730
+QuadEdges 5498
+Quadrants 1201
+Level 6 in 79 ms
+Points 5538
+QuadEdges 17918
+Quadrants 4369
+Level 7 in 308 ms
+Points 19061
+QuadEdges 62440
+Quadrants 16622
+Level 8 in 1230 ms
+Points 69761
+QuadEdges 230328
+Quadrants 64953
+Level 9 in 5204 ms
+Points 266291
+QuadEdges 883200
+Quadrants 255663
+END TRY = 10
