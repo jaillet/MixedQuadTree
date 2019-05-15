@@ -1,0 +1,66 @@
+\documentclass{article}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{tabto}
+
+\renewcommand{\algorithmicforall}{\textbf{for each}}
+
+
+\begin{document}
+
+\begin{algorithm}
+\caption{Calculate $y = x^n$}
+\begin{algorithmic}
+\RETURN $fe$
+\REQUIRE all threads have done the accumulation part :
+\newline \tabto{1.3cm} * They have new points in accumulatePoints
+\newline \tabto{1.3cm} * They have new edges in accumulateEdges
+\newline \tabto{1.3cm} * They have new quadrants in accumulateQuad
+
+
+\ENSURE the number of quadrants, edges and points are the same than in the \tabto{1.3cm} sequential version.
+\newline \tabto{1.3cm} new\_pts, new\_edges and new\_quad have all their content with good \tabto{1.3cm}index.
+\STATE
+\STATE First fill the map that link local index to global
+\STATE $nbPointsBeforeJoin \leftarrow points.size() (constant)$
+\FORALL{$thread$ T}
+	\STATE $taskToGlobal \leftarrow map<int, int>$ 
+	\FORALL{$point$ in $T.accumulatePoints$} 
+		\IF{$point$ not in $new\_pts$}
+			\STATE new\_pts.add(point)
+			\STATE $map\_new\_pts[point] \leftarrow totalNbPoints$
+			\STATE $totalNbPoints \leftarrow totalNbPoints + 1$
+		\ENDIF
+		\STATE // At this time, map\_new\_pts contains real index of the global index of the local point
+		\STATE $index \leftarrow point.localIndex \texttt{ + } nbPointsBeforeJoin$
+		\STATE $taskToGlobal[index]\leftarrow map\_new\_pts[point]$
+	\ENDFOR
+
+    \STATE
+	\FORALL{$edge$ in $T.accumulateEdges$}
+		\FORALL{$index$ in $edge$} 
+			\IF{$index$ \sup $nbPointsBeforeReduce$}
+				\STATE // we need to update to global index
+				\STATE $index \leftarrow taskToGlobal[index]$
+			\ENDIF
+			\ENDFOR
+		\STATE new\_edges.add(edge)
+        
+    \STATE
+	\FORALL{$quad$ in $T.accumulateQuad$} 
+
+		\FORALL{$index$ in $quad.pointIndex$} 
+			\IF{$index$ \sup $nbPointsBeforeReduce$}
+				\STATE // we need to update to global index
+				\STATE $index \leftarrow taskToGlobal[index]$
+			\ENDIF
+		\ENDFOR
+		\STATE new\_quad.add(quad)
+\STATE
+\RETURN new\_pts, new\_edges, new\_quad
+\ENDFOR
+
+\end{algorithmic}
+\end{algorithm}
+\end{document}
