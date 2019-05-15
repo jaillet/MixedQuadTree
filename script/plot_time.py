@@ -11,7 +11,8 @@ data = {}
 data2 = {}
 data3 = {}
 
-onlyfiles = glob.glob("analyse_time_2019-03-20_17:51:37/time_size*.txt")
+#onlyfiles = glob.glob("analyse_time_2019-03-20_17:51:37/time_size*.txt")
+onlyfiles = glob.glob("analyse_time_2019-03-07_14:39:03/time_size*.txt")
 
 get_process = False
 
@@ -213,8 +214,8 @@ def plot_elements_times2():
 
     for type, type_values in sorted(data3.items()):
 
-        #plt.figure(counter)
-        ax = plt.subplot(3, 3, counter)
+        plt.figure(counter)
+        #ax = plt.subplot(3, 3, counter)
 
         plt.title(str(type))
         plt.ylabel("Execution time (ms)")
@@ -230,6 +231,7 @@ def plot_elements_times2():
             #type : OpenMP_vector, IntelTBB_deque, etc..
 
             x = list(nb_threads_values.keys())
+
             x.sort()
 
 
@@ -241,13 +243,22 @@ def plot_elements_times2():
                 for val in lst:
                     values.append(val[1])
 
+                x = x[3:]
+                values = values[3:]
+
                 print("X :", x)
                 print("Value (Y) :", values)
 
                 #x.pop(0)
                 #values.pop(0)
 
-                l = plt.plot(x, values, '-x', label=nb_threads, markersize=15)
+                t = " thread" if nb_threads == 1 else " threads"
+
+
+                l = plt.plot(x, values, '-x', label=str(nb_threads) + t , markersize=15)
+
+
+                plt.text(x[-1], values[-1], str(values[-1]))
 
                 #For figure legend:
                 if not done:
@@ -257,11 +268,11 @@ def plot_elements_times2():
             for nb_elements in x:
                 print(type, nb_threads, nb_elements, nb_threads_values[nb_elements])
 
-        #plt.legend()
+        plt.legend()
         counter += 1
         done = True
 
-        ax.legend()
+        #ax.legend()
     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.25, hspace=0.4)
     plt.show()
 
@@ -280,7 +291,7 @@ def plot_strong_scaling_speedup():
 
     #Fullscreen:
     mng = plt.get_current_fig_manager()
-    #mng.resize(*mng.window.maxsize())
+    mng.resize(*mng.window.maxsize())
 
     #List of (pyplot lines, label) -> for legend
     #do it once (same legend for everyone??)
@@ -294,8 +305,8 @@ def plot_strong_scaling_speedup():
         if nb_elements == 100:
             continue
 
-        #plt.figure(counter)
-        ax = plt.subplot(2, 3, counter)
+        plt.figure(counter)
+        #ax = plt.subplot(2, 3, counter)
 
         plt.title(str(nb_elements) + " elements.")
         plt.ylabel("Speedup")
@@ -345,7 +356,7 @@ def plot_strong_scaling_speedup():
         counter += 1
         done = True
 
-    ax.legend(bbox_to_anchor=(1.15, 0.5), loc='lower left', borderaxespad=0.)
+    #ax.legend(bbox_to_anchor=(1.15, 0.5), loc='lower left', borderaxespad=0.)
     plt.show()
 
 
@@ -421,6 +432,6 @@ def plot_strong_scaling_speedup2():
     ax.legend(bbox_to_anchor=(1.15, 0.5), loc='lower left', borderaxespad=0.)
     plt.show()
 
-#plot_elements_times2()
+plot_elements_times2()
 #plot_threads_times()
-plot_strong_scaling_speedup()
+#plot_strong_scaling_speedup()
