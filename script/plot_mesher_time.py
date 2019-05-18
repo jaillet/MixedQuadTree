@@ -27,7 +27,7 @@ def getData(option):
             #Sum of all time for each level
             data[nbThread][methodName] = [0 for i in range(maxRL)]
 
-            for number, line in enumerate(file):
+            for line in file:
                 line = line.split(' ')
                 if line[0] == "Level":
                     data[nbThread][methodName][int(line[1])] += int(line[3])
@@ -36,73 +36,65 @@ def getData(option):
         for method in data[nbThread]:
             data[nbThread][method] = [x / nbTries for x in data[nbThread][method]]
 
+    #Get sequential
+    file = open(folderName + "analyse_mesher_" + option + "/sequential.txt")
+    data[0] = []
+    for line in file:
+        line = line.split(' ')
+        if line[0] == "Level":
+            data[0].append(line[3]) 
+
     return data
 
 dataA = getData('a')
 dataS = getData('s')
 
-"""
-def plot_threads_times():
+print(dataA[0])
+
+
+def plot(data, opt):
+
+    levels = [i for i in range(maxRL)]
+
     counter = 1
 
-    fig = plt.figure()
-    fig.suptitle("Graph of average thread execution time for different number of elements", fontsize=16)
+    #fig = plt.figure()
+    #fig.suptitle("Graph of average thread execution time for different number of elements", fontsize=16)
 
-    #Fullscreen:
-    mng = plt.get_current_fig_manager()
-    #mng.resize(*mng.window.maxsize())
+    for nbThread in range(6,nbThreads+1,2):
 
-    #List of (pyplot lines, label) -> for legend
-    #do it once (same legend for everyone??)
-    legendLines = []
-    legendLabel = []
-    done = False
+        t = " thread" if nbThread == 1 else " threads"
+        plt.figure(counter)
+        plt.title("Option -" + opt + " with " + str(nbThread) + t)
+        plt.ylabel("Execution time(ms)")
+        plt.xlabel("Level number")
 
-    for nb_elements, nb_elements_values in sorted(data.items()):
+        #Fullscreen:
+        #mng = plt.get_current_fig_manager()
+        #mng.resize(*mng.window.maxsize())
 
-        #100 elem = 0..
-        if nb_elements == 100:
-            continue
+        for methodName, timesList in data[nbThread].items():
 
-        #plt.figure(counter)
-        ax = plt.subplot(2, 3, counter)
+            #print(timesList)
 
-        plt.title(str(nb_elements) + " elements.")
-        plt.ylabel("Execution time (ms)")
-        plt.xlabel("Number of threads")
+            if timesList[-1] == 0:
+                continue
 
-        for type, type_values in nb_elements_values.items():
-            #type_value : {nbThread : timeValue}
-            #type : OpenMP_vector, IntelTBB_deque, etc..
+            plt.plot(levels, timesList, '-x', label=methodName, markersize=15)
+            plt.text(levels[-1] + 0.5, timesList[-1], str(timesList[-1]))
 
-            x = list(type_values.keys())
-            x.sort()
+        
+        #plot sequential
+        #There is a problem !! When plot sequential, 
+        #all yvalues are not shown correctly
+        #WHY ????
+        #plt.plot(levels, data[0])
+        #plt.text(levels[-1], data[0][-1], str(data[0][-1]))
 
-            print(x)
-            print(type_values)
-
-            if len(x) == len(type_values.items()):
-                lst = list(type_values.items())
-                lst.sort(key=takeFirst)
-                values = list()
-
-                for val in lst:
-                    values.append(val[1])
-                l = plt.plot(x, values, '-x', label=type, markersize=15)
-
-                #For figure legend:
-                if not done:
-                    legendLines.append(l)
-                    legendLabel.append(type)
-
-            for nb_threads in x:
-                print(nb_elements, type, nb_threads, type_values[nb_threads])
-
-        #plt.legend()
+        plt.legend()
         counter += 1
-        done = True
 
-    ax.legend(bbox_to_anchor=(1.15, 0.5), loc='lower left', borderaxespad=0.)
     plt.show()
 
-"""
+plot(dataA, 'a')
+plot(dataS, 's')
