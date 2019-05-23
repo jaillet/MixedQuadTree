@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 folderName = "analyse_mesher_1557901/"
-maxRL = 10
+startLevel = 8
+maxRL = 12
 nbThreads = 12
 nbTries = 10
 
@@ -23,8 +24,8 @@ def getData(option):
 
         for fileStr in files:
 
-            #if 'eduction' in fileStr or 'sequential' in fileStr:
-            if 'TBBV3' in fileStr or 'TBBV4' in fileStr or 'sequential' in fileStr:
+            if 'eduction' not in fileStr or 'sequential' in fileStr:
+            #if 'TBBV3' in fileStr or 'TBBV4' in fileStr or 'sequential' in fileStr:
 
                 file = open(fileStr, 'r')
 
@@ -89,7 +90,7 @@ def plot(data, opt):
             plt.plot(levels, timesList, '-x', label=methodName, markersize=15)
             plt.text(levels[-1] + 0.5, timesList[-1], str(timesList[-1]))
 
-        
+
         #plot sequential
         #There is a problem !! When plot sequential, 
         #all yvalues are not shown correctly
@@ -109,19 +110,18 @@ def plot(data, opt):
 
 def plotMutex(data, opt):
 
-    levels = [i for i in range(maxRL)]
+    levels = [i for i in range(startLevel, maxRL)]
 
     counter = 1
 
     plt.figure(counter)
-    plt.title("Option -" + opt + " reduction version")
+    plt.title("Option -" + opt + " mutex version")
     plt.ylabel("Execution time(ms)")
+    #plt.yscale("log")
     plt.xlabel("Level number")
 
     seq_draw = False
 
-    #fig = plt.figure()
-    #fig.suptitle("Graph of average thread execution time for different number of elements", fontsize=16)
 
     for nbThread in range(4,nbThreads+1,4):
 
@@ -129,15 +129,22 @@ def plotMutex(data, opt):
         #mng = plt.get_current_fig_manager()
         #mng.resize(*mng.window.maxsize())
 
+
+
         for methodName, timesList in data[nbThread].items():
 
             #print(timesList)
+
+            timesList = timesList[startLevel:]
+
 
             if seq_draw and "sequential" in methodName:
                 continue
 
             if timesList[-1] == 0:
                 continue
+            else:
+                print(methodName, timesList)
 
             label = methodName + " - " + str(nbThread) + " threads"
 
@@ -146,9 +153,7 @@ def plotMutex(data, opt):
                 label = methodName
 
             plt.plot(levels, timesList, '-x', label=label, markersize=15)
-            plt.text(levels[-1] + 0.5, timesList[-1], str(timesList[-1]))
-
-
+            plt.text(levels[-1] + 0.3, timesList[-1], str(timesList[-1]))
 
 
         #plot sequential
