@@ -19,19 +19,19 @@ Level 3 in 1 ms
 Points 229
 QuadEdges 692
 Quadrants 105
-Level 4 in 3 ms
+Level 4 in 2 ms
 Points 569
 QuadEdges 1736
 Quadrants 304
-Level 5 in 7 ms
+Level 5 in 6 ms
 Points 1381
 QuadEdges 4192
 Quadrants 745
-Level 6 in 15 ms
+Level 6 in 14 ms
 Points 3047
 QuadEdges 9192
 Quadrants 1561
-Level 7 in 31 ms
+Level 7 in 30 ms
 Points 6407
 QuadEdges 19276
 Quadrants 3230
@@ -39,7 +39,15 @@ Level 8 in 62 ms
 Points 13104
 QuadEdges 39370
 Quadrants 6720
-Level 9 in 128 ms
+Level 9 in 127 ms
 Points 26493
 QuadEdges 79540
 Quadrants 12615
+Level 10 in 272 ms
+Points 53264
+QuadEdges 159854
+Quadrants 27460
+Level 11 in 562 ms
+Points 106819
+QuadEdges 320520
+Quadrants 55533
