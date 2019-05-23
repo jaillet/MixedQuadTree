@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 folderName = "analyse_mesher_1557901/"
-startLevel = 8
-maxRL = 12
+startLevel = 6
+maxRL = 10
 nbThreads = 12
 nbTries = 10
 
@@ -24,8 +24,8 @@ def getData(option):
 
         for fileStr in files:
 
-            if 'eduction' not in fileStr or 'sequential' in fileStr:
-            #if 'TBBV3' in fileStr or 'TBBV4' in fileStr or 'sequential' in fileStr:
+            #if 'eduction' not in fileStr or 'sequential' in fileStr:
+            if 'TBBV3' in fileStr or 'sequential' in fileStr:
 
                 file = open(fileStr, 'r')
 
@@ -115,7 +115,7 @@ def plotMutex(data, opt):
     counter = 1
 
     plt.figure(counter)
-    plt.title("Option -" + opt + " mutex version")
+    plt.title("Option -" + opt + " reduction version")
     plt.ylabel("Execution time(ms)")
     #plt.yscale("log")
     plt.xlabel("Level number")
@@ -146,14 +146,14 @@ def plotMutex(data, opt):
             else:
                 print(methodName, timesList)
 
-            label = methodName + " - " + str(nbThread) + " threads"
+            label = "parallel - " + str(nbThread) + " threads"
 
             if "sequential" in methodName:
                 seq_draw = True
                 label = methodName
 
             plt.plot(levels, timesList, '-x', label=label, markersize=15)
-            plt.text(levels[-1] + 0.3, timesList[-1], str(timesList[-1]))
+            plt.text(levels[-1] + 0.2, timesList[-1] if nbThread != 12 else timesList[-1] - 10, str(timesList[-1]))
 
 
         #plot sequential
