@@ -115,8 +115,8 @@ def plotMutex(data, opt):
     counter = 1
 
     plt.figure(counter)
-    plt.title("Option -" + opt + " reduction version")
-    plt.ylabel("Execution time(ms)")
+    plt.title("Option -" + opt + " mutex version")
+    plt.ylabel("Speed up")
     #plt.yscale("log")
     plt.xlabel("Level number")
 
@@ -152,8 +152,10 @@ def plotMutex(data, opt):
                 seq_draw = True
                 label = methodName
 
+            timesList = [data[nbThread]["sequential"][x] / timesList[x - startLevel] for x in range(startLevel, startLevel + len(timesList))]
+
             plt.plot(levels, timesList, '-x', label=label, markersize=15)
-            plt.text(levels[-1] + 0.2, timesList[-1] if nbThread != 12 else timesList[-1] - 10, str(timesList[-1]))
+            plt.text(levels[-1] + 0.2, timesList[-1] if nbThread != 12 else timesList[-1], str(timesList[-1]))
 
 
         #plot sequential
