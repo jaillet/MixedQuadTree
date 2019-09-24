@@ -389,7 +389,7 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     list<unsigned int> Polyline::getFeatureProjection(const Quadrant &q,
-                                                 vector<MeshPoint> &mp) {
+                                                 vector<MeshPoint> &mp) const {
         
         list<unsigned int> iEdges = q.getIntersectedEdges();
         list<unsigned int> fes;
@@ -576,7 +576,7 @@ namespace Clobscode
         return pProjP;
     }
 
-    Point3D Polyline::checkNormalToPlane() {
+    Point3D Polyline::checkNormalToPlane() const {
         Point3D W;
         if (mVertices.size()>=3) {
             Point3D U=mVertices[1]-mVertices[0], V;

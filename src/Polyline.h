@@ -85,7 +85,7 @@ namespace Clobscode
         virtual unsigned int getNbFeatures(Quadrant &q, const vector<MeshPoint> &mp) const;
 
         virtual list<unsigned int> getFeatureProjection(const Quadrant &q,
-                                                   vector<MeshPoint> &mp);
+                                                   vector<MeshPoint> &mp) const;
 
         //projection of a Point to Edge iedg
         virtual Point3D getProjection(const Point3D &pPoint, int iedg) const;
@@ -99,7 +99,7 @@ namespace Clobscode
 								 
         virtual void update();
 
-        virtual Point3D checkNormalToPlane();
+        virtual Point3D checkNormalToPlane() const;
 
         virtual Point3D getCentroid() const;
 
