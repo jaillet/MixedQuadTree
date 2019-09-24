@@ -39,6 +39,11 @@
 #include "Point3D.h"
 #include "QuadEdge.h"
 
+//Test
+#include "MesherParallel/ParallelTest1TBB/SplitVisitorTest1TBB.h"
+#include "MesherParallel/SplitVisitorOpenMP.h"
+#include "MesherParallel/SplitVisitorReductionOpenMP.h"
+
 using Clobscode::MeshPoint;
 using Clobscode::QuadEdge;
 using Clobscode::Point3D;
@@ -60,10 +65,22 @@ namespace Clobscode
         friend class SurfaceTemplatesVisitor;
         friend class RemoveSubElementsVisitor;
 
+        //Test
+        friend class SplitVisitorTest1TBB;
+        friend class RefineMeshReduction;
+        friend class RefineMeshReductionV2;
+        friend class SplitVisitorOpenMP;
+        friend class SplitVisitorReductionOpenMP;
+
+
+
 	public:
 		
 		Quadrant(vector<unsigned int> &epts, 
 			   const unsigned short &ref_level);
+
+        Quadrant(vector<unsigned int> &epts,
+                 const Quadrant & quad);
 		
 		virtual ~Quadrant();
 
@@ -113,7 +130,11 @@ namespace Clobscode
         virtual const list<unsigned int>& getIntersectedFeatures() const;
         virtual list<unsigned int>& getIntersectedFeatures();
         virtual bool hasIntersectedFeatures() const;
-        
+
+
+        friend bool operator==(const Quadrant &p1, const Quadrant &p2) {
+            return p1.pointindex[0] == p2.pointindex[0] && p1.pointindex[1] == p2.pointindex[1] && p1.pointindex[2] == p2.pointindex[2] && p1.pointindex[3] == p2.pointindex[3];
+        }
         
         /***** BEGIN Debugging methods *******/
         virtual void setDebugging();
@@ -122,6 +143,11 @@ namespace Clobscode
         
         virtual double getAngle(unsigned int &nIdx, const vector<MeshPoint> &mp) const;
         /***** END Debugging methods *******/
+
+        //Modification, added for parallel reduction
+        virtual void setPointIndexAt(unsigned int index, unsigned int newPointIndex) {
+            pointindex[index] = newPointIndex;
+        }
 
     protected:
         

@@ -1,0 +1,14 @@
+Launching tests with 1000 elements and 4 threads
+Processor:
+.
+.
+.
+.
+.
+OpenMP_vector 1.1 ms.
+IntelTBB_vector 1 ms.
+OpenMP_list_copy 1.3 ms.
+OpenMP_list_copy2 1 ms.
+IntelTBB_list 1 ms.
+OpenMP_deque 1.2 ms.
+IntelTBB_deque 1 ms.

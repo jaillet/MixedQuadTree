@@ -3,7 +3,7 @@ project(mesher_roi)
 
 #set(CMAKE_BUILD_TYPE Release)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ltbb -std=c++11 -fopenmp")
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # Update if necessary
@@ -24,9 +24,33 @@ set(SOURCE_FILES Main
         Visitors/OneIrregularVisitor Visitors/PointMovedVisitor
         Visitors/TransitionPatternVisitor Visitors/SurfaceTemplatesVisitor
         Visitors/RemoveSubElementsVisitor
+
+        MesherParallel/ParallelTest1TBB/SplitVisitorTest1TBB.cpp
+        MesherParallel/ParallelTest1TBB/SplitVisitorTest1TBB.h
+        ParallelizeTest/Join/CustomSplitVisitor.cpp
+        ParallelizeTest/Join/CustomSplitVisitorV3.h
+        MesherParallel/ParallelCustomReductionTBB
+        MesherParallel/ParallelCustomReductionTBBV2
+        MesherParallel/ParallelCustomReductionTBBV3
+        MesherParallel/ParallelCustomReductionTBBV3/CustomSplitVisitorV3.h
+        MesherParallel/ParallelCustomReductionTBBV3/CustomSplitVisitorV3.cpp
+        MesherParallel/ParallelReductionTBB/ParallelReduceTBB.hpp
+        ParallelizeTest/Join/ParallelReduceTBBV2.hpp
+
+        MesherParallel/refineMeshTBB.hpp
+        MesherParallel/refineMeshOpenMP.hpp
+        MesherParallel/SplitVisitorOpenMP.h
+        MesherParallel/SplitVisitorOpenMP.cpp
+        MesherParallel/SplitVisitorReductionOpenMP.h
+        MesherParallel/SplitVisitorReductionOpenMP.cpp
         )
 
+set(SOURCE_MEANTIME MeanTimePerformance/Main)
+set(SOURCE_PARALLELIZE ParallelizeTest/ParallelizeTest.cpp ParallelizeTest/TimeDecorator.hpp)
+
 add_executable(mesher_roi ${SOURCE_FILES})
+add_executable(meanTime ${SOURCE_MEANTIME})
+add_executable(parallelize_test ${SOURCE_PARALLELIZE})
 
 # obsolete 3D files to be removed
 

@@ -42,6 +42,14 @@ namespace Clobscode
         /***** END Debugging variables *******/
 		sub_elements.assign(1,pointindex);
 	}
+
+    Quadrant::Quadrant(vector<unsigned int> &epts, const Quadrant &quad) : pointindex(epts),
+                                                                           ref_level(quad.ref_level), surface(quad.surface), debugging(quad.debugging),
+                                                                           max_dis(quad.max_dis) {
+        sub_elements.assign(1,pointindex);
+        intersected_edges = quad.intersected_edges;
+        intersected_features = quad.intersected_features;
+    }
 	
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------

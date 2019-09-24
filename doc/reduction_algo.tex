@@ -1,0 +1,57 @@
+\documentclass{article}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{tabto}
+
+\renewcommand{\algorithmicforall}{\textbf{for each}}
+
+
+\begin{document}
+
+\begin{algorithm}
+\caption{Reduction of parallelized accumulation}
+\begin{algorithmic}
+
+\STATE First fill the map that link local index to global
+\STATE $nbPointsBeforeJoin \leftarrow points.size() (constant)$
+\FORALL{$thread$ T}
+	\STATE $taskToGlobal \leftarrow map<int, int>$ 
+	\FORALL{$point$ in $T.accumulatePoints$} 
+		\IF{$point$ not in $new\_pts$}
+			\STATE new\_pts.add(point)
+			\STATE $map\_new\_pts[point] \leftarrow totalNbPoints$
+			\STATE $totalNbPoints \leftarrow totalNbPoints + 1$
+		\ENDIF
+		\STATE // At this time, map\_new\_pts contains real index of the global index of the local point
+		\STATE $index \leftarrow point.localIndex \texttt{ + } nbPointsBeforeJoin$
+		\STATE $taskToGlobal[index]\leftarrow map\_new\_pts[point]$
+	\ENDFOR
+
+    \STATE
+	\FORALL{$edge$ in $T.accumulateEdges$}
+		\FORALL{$index$ in $edge$} 
+			\IF{$index$ \ge $ nbPointsBeforeReduce$}
+				\STATE // we need to update to global index
+				\STATE $index \leftarrow taskToGlobal[index]$
+			\ENDIF
+			\ENDFOR
+		\STATE new\_edges.add(edge)
+        
+    \STATE
+	\FORALL{$quad$ in $T.accumulateQuad$} 
+
+		\FORALL{$index$ in $quad.pointIndex$} 
+			\IF{$index$ \ge $ nbPointsBeforeReduce$}
+				\STATE // we need to update to global index
+				\STATE $index \leftarrow taskToGlobal[index]$
+			\ENDIF
+		\ENDFOR
+		\STATE new\_quad.add(quad)
+\STATE
+\ENDFOR
+\RETURN new\_pts, new\_edges, new\_quad
+
+\end{algorithmic}
+\end{algorithm}
+\end{document}

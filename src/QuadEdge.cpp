@@ -35,7 +35,7 @@ namespace Clobscode
 	}
 	
     QuadEdge::QuadEdge(unsigned int point1, unsigned int point2, unsigned int mid){
-        info.resize(3);
+        info.resize(2);
         if (point1<point2) {
             info[0]=point1;
             info[1]=point2;
@@ -46,6 +46,13 @@ namespace Clobscode
         }
         info[2]=mid;
     }
+
+	QuadEdge::QuadEdge(const QuadEdge & other) {
+		info.resize(3);
+		info[0] = other[0];
+		info[1] = other[1];
+		info[2] = other[2];
+	}
 
 	QuadEdge::~QuadEdge(){
 		

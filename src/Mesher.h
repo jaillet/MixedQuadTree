@@ -51,6 +51,8 @@
 #include <string.h>
 #include <chrono>
 
+
+
 using std::vector;
 using std::list;
 using std::set;
@@ -133,7 +135,51 @@ namespace Clobscode
         virtual void projectCloseToBoundaryNodes(Polyline &input);
 
 
-		
+        // REMOVE HERE AFTER TEST
+
+
+        string refineMeshParallelTest1TBB(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+                                        set<QuadEdge> QuadEdges,
+                                        const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                        Polyline &input);
+
+        string refineMeshReductionTBB(int nbThread, list<Quadrant> & Quadrants, vector<MeshPoint> & points,
+                                    set<QuadEdge> & QuadEdges,
+                                    const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                    Polyline &input);
+
+        string refineMeshCustomReductionTBB(int nbThread, list<Quadrant> & Quadrants, vector<MeshPoint> & points,
+                                          set<QuadEdge> & QuadEdges,
+                                          const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                          Polyline &input);
+
+		string refineCustomMeshReductionTBBV2(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
+                                            set<QuadEdge> &QuadEdges,
+                                            const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                            Polyline &input);
+
+        string refineCustomMeshReductionTBBV3(int nbThread, list<Quadrant> &tmp_Quadrants, vector<MeshPoint> &points,
+                                            set<QuadEdge> &QuadEdges,
+                                            const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                            Polyline &input);
+
+        string refineMeshCustomReductionTBBV4(int nbThread, list<Quadrant> & Quadrants, vector<MeshPoint> & points,
+                                          set<QuadEdge> & QuadEdges,
+                                          const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                          Polyline &input);
+
+
+
+    string refineMeshParallelOpenMP(int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+                                        set<QuadEdge> QuadEdges,
+                                        const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                        Polyline &input);
+
+    string refineMeshReductionOpenMP(const int nbThread, list<Quadrant> Quadrants, vector<MeshPoint> points,
+                                        set<QuadEdge> QuadEdges,
+                                        const list<RefinementRegion *> &all_reg, const unsigned short &rl,
+                                        Polyline &input, bool V1 = true);
+		    // END TEST
 	protected:
 		
 		vector<MeshPoint> points;
