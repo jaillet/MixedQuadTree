@@ -19,9 +19,9 @@ set(SOURCE_FILES Main
         RefinementRegion RefinementCubeRegion RefinementSurfaceRegion
         RefinementInputSurfaceRegion RefinementAllRegion RefinementBoundaryRegion
         GeometricTransform Services
-        Visitors/Visitor Visitors/SplitVisitor Visitors/EdgeVisitor 
+        Visitors/Visitor Visitors/SplitVisitor  
 	Visitors/IntersectionsVisitor
-        Visitors/OneIrregularVisitor Visitors/PointMovedVisitor
+        Visitors/OneIrregularVisitor
         Visitors/TransitionPatternVisitor Visitors/SurfaceTemplatesVisitor
         Visitors/RemoveSubElementsVisitor
         )

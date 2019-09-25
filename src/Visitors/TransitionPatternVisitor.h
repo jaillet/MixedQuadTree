@@ -31,15 +31,14 @@
 #include "../QuadTransition.h"
 
 #include "Visitor.h"
-#include "EdgeVisitor.h"
 
 #include <list>
 #include <set>
+#include <map>
 #include <vector>
 
 using Clobscode::MeshPoint;
 using Clobscode::QuadEdge;
-using Clobscode::EdgeVisitor;
 using std::list;
 using std::set;
 using std::vector;
@@ -54,14 +53,12 @@ namespace Clobscode
 
         bool visit(Quadrant *o) override;
 
-//FJA points never used!
-//        void setPoints(const vector<MeshPoint> &points);
-        void setEdges(const set<QuadEdge> &edges);
+        void setMapEdges(const map<QuadEdge, unsigned int> &mapedges);
         void setMaxRefLevel(const unsigned short &max_ref_level);
 
     private:
-//        const vector<MeshPoint> *points;
-        const set<QuadEdge> *edges;
+        
+        const map<QuadEdge, unsigned int> *mapedges;
         const unsigned short *max_ref_level;
     };
 }

@@ -34,15 +34,17 @@ namespace Clobscode
 //const unsigned short *max_ref_level;
 
 
-    OneIrregularVisitor::OneIrregularVisitor() :edges(NULL), max_ref_level(NULL)
+    OneIrregularVisitor::OneIrregularVisitor() :mapedges(NULL), max_ref_level(NULL)
     { }
 
-    OneIrregularVisitor::OneIrregularVisitor(const set<QuadEdge> *edges, const unsigned short *max_ref_level)
-        :edges(edges), max_ref_level(max_ref_level)
+    OneIrregularVisitor::OneIrregularVisitor(const map<QuadEdge, unsigned int> *mapedges,
+                                             const unsigned short *max_ref_level)
+        :mapedges(mapedges), max_ref_level(max_ref_level)
     { }
 
-    void OneIrregularVisitor::setEdges(const set<QuadEdge> &edges) {
-        this->edges = &edges;
+    
+    void OneIrregularVisitor::setMapEdges(const map<QuadEdge, unsigned int> &mapedges) {
+        this->mapedges = &mapedges;
     }
 
     void OneIrregularVisitor::setMaxRefLevel(const unsigned short &max_ref_level) {
@@ -55,21 +57,17 @@ namespace Clobscode
             return true;
         }
 
-        //EdgeVisitor ev;
+        const vector<unsigned int> &pi = o->pointindex;
         for (unsigned int i=0; i<4; i++) {
+
+            QuadEdge ee(pi[i],pi[(i+1)%4]);
             
-            QuadEdge ee;
-            EdgeVisitor::getEdge(o,i,ee);
-            set<QuadEdge>::const_iterator my_edge, sub_edge;
-            my_edge = edges->find(ee);
-            
-            if (my_edge==edges->end()) {
-                cerr << "Error at Quadrant::isOneIrregular!!!\n";
-                cerr << "Edge not found\n";
-                std::abort();
+            auto search = mapedges->find(ee);
+            if (search==mapedges->end()) {
+                cerr << "Edge not found at OneIrregularVisitor::visit\n";
             }
 
-            unsigned int mid_idx = (*my_edge)[2];
+            unsigned int mid_idx = mapedges->at(ee);
 
             //if the edge is not split, check the others
             if (mid_idx==0) {
@@ -81,13 +79,23 @@ namespace Clobscode
             //one-irregular
 
             QuadEdge sub1(ee[0],mid_idx);
-            sub_edge = edges->find(sub1);
-            if ((*sub_edge)[2]!=0) {
+            
+            search = mapedges->find(sub1);
+            if (search==mapedges->end()) {
+                cerr << "Edge not found at OneIrregularVisitor::visit\n";
+            }
+            
+            if (mapedges->at(sub1)!=0) {
                 return false;
             }
             QuadEdge sub2(ee[1],mid_idx);
-            sub_edge = edges->find(sub2);
-            if ((*sub_edge)[2]!=0) {
+            
+            search = mapedges->find(sub2);
+            if (search==mapedges->end()) {
+                cerr << "Edge not found at OneIrregularVisitor::visit\n";
+            }
+            
+            if (mapedges->at(sub2)!=0) {
                 return false;
             }
         }

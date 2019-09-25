@@ -123,7 +123,7 @@ int main(int argc,char** argv){
     //for reading an Quadrant mesh as starting point.
     vector<MeshPoint> oct_points;
     vector<Quadrant> oct_Quadrants;
-    set<QuadEdge> oct_edges;
+    map<QuadEdge,unsigned int> oct_edges;
     vector<unsigned int> oct_ele_link;
     GeometricTransform gt;
     

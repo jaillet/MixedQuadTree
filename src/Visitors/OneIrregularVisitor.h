@@ -31,29 +31,27 @@
 #include "../Point3D.h"
 
 #include <set>
+#include <map>
 #include <vector>
 
 #include "Visitor.h"
-#include "EdgeVisitor.h"
 
 namespace Clobscode
 {
     class OneIrregularVisitor : public Visitor {
     public:
         OneIrregularVisitor();
-        OneIrregularVisitor(const set<QuadEdge> *edges,const unsigned short *max_ref_level);
+        OneIrregularVisitor(const map<QuadEdge, unsigned int> *mapedges,
+                            const unsigned short *max_ref_level);
 
         bool visit(Quadrant *o) override; // Quad is const, but no const for override...
-
-        void setEdges(const set<QuadEdge> &edges);
+        void setMapEdges(const map<QuadEdge, unsigned int> &mapedges);
         void setMaxRefLevel(const unsigned short &max_ref_level);
 
     protected:
-        const set<QuadEdge> *edges;
+
+        const map<QuadEdge, unsigned int> *mapedges;
         const unsigned short *max_ref_level;
-        //FJA const *, really??
-        //and why not const set<QuadEdge> *, as well?
-        //and in any other visitors...
     };
 
 }

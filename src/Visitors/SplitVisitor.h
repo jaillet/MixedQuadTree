@@ -29,6 +29,7 @@
 #include <list>
 #include <set>
 #include <vector>
+#include <map>
 
 #include "../MeshPoint.h"
 #include "../Point3D.h"
@@ -42,6 +43,7 @@ using Clobscode::QuadEdge;
 using Clobscode::Point3D;
 using std::vector;
 using std::list;
+using std::map;
 using std::set;
 
 
@@ -61,6 +63,8 @@ namespace Clobscode
         
         void setEdges(set<QuadEdge> &edges);
         
+        void setMapEdges(map<QuadEdge, unsigned int> &mapedges);
+        
         void setNewEles(vector<vector<unsigned int> > &new_eles);
         
         void setClipping(vector<vector<Point3D> > &clipping);
@@ -71,6 +75,8 @@ namespace Clobscode
         const vector<MeshPoint> *points;
         list<Point3D> *new_pts;
         set<QuadEdge> *edges;
+        map<QuadEdge, unsigned int> *mapedges;
+        
         vector<vector<unsigned int> > *new_eles;
         vector<vector<Point3D> > *clipping;
 

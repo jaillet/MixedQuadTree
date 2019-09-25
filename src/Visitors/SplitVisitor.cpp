@@ -35,7 +35,7 @@ namespace Clobscode
 //vector<vector<Point3D> > *clipping;
 
     SplitVisitor::SplitVisitor()
-        :points(NULL),new_pts(NULL),edges(NULL),new_eles(NULL),clipping(NULL)
+        :points(NULL),new_pts(NULL),mapedges(NULL),new_eles(NULL),clipping(NULL)
     { }
 
     void SplitVisitor::setPoints(const vector<MeshPoint> &points) {
@@ -46,8 +46,8 @@ namespace Clobscode
         this->new_pts = &new_pts;
     }
     
-    void SplitVisitor::setEdges(set<QuadEdge> &edges) {
-        this->edges = &edges;
+    void SplitVisitor::setMapEdges(map<QuadEdge, unsigned int> &mapedges) {
+        this->mapedges = &mapedges;
     }
     
     void SplitVisitor::setNewEles(vector<vector<unsigned int> > &new_eles) {
@@ -109,20 +109,29 @@ namespace Clobscode
         new_pts->push_back(Point3D (avg[0],avg[1],avg[2]));
         all_pts[8] = n_pts;
 
-//        QuadEdge intern_edge1 (all_pts[4],all_pts[6]);
-//        intern_edge1.updateMidPoint(all_pts[8]);
-//        QuadEdge intern_edge2 (all_pts[5],all_pts[7]);
-//        intern_edge2.updateMidPoint(all_pts[8]);
-//        edges->insert(intern_edge1);
-//        edges->insert(intern_edge2);
-
-        edges->emplace(all_pts[4],all_pts[6],all_pts[8]);
-        edges->emplace(all_pts[5],all_pts[7],all_pts[8]);
-
-        edges->emplace(all_pts[4],all_pts[8]);
-        edges->emplace(all_pts[6],all_pts[8]);
-        edges->emplace(all_pts[5],all_pts[8]);
-        edges->emplace(all_pts[7],all_pts[8]);
+        //NOTE: edge (4,6) and (5,7) with mid_point 8 (the center of the
+        //Quad are not inserted because those edges ((4,6) and (5,7)) don't
+        //belong to any element. These edges would only increase the use of
+        //memory without adding necessary information.
+        //edges->emplace(all_pts[4],all_pts[6],all_pts[8]);
+        //edges->emplace(all_pts[5],all_pts[7],all_pts[8]);
+        QuadEdge qeY(all_pts[4],all_pts[6]);
+        mapedges->emplace(qeY,all_pts[8]);
+        
+        QuadEdge qeX(all_pts[5],all_pts[7]);
+        mapedges->emplace(qeX,all_pts[8]);
+        
+        QuadEdge qe1(all_pts[4],all_pts[8]);
+        mapedges->emplace(qe1,0);
+        
+        QuadEdge qe2(all_pts[6],all_pts[8]);
+        mapedges->emplace(qe2,0);
+        
+        QuadEdge qe3(all_pts[5],all_pts[8]);
+        mapedges->emplace(qe3,0);
+        
+        QuadEdge qe4(all_pts[7],all_pts[8]);
+        mapedges->emplace(qe4,0);
         
         //now that all edges were inserted, the elements can be easily built
         vector<unsigned int> son_element (4,0);
@@ -190,15 +199,12 @@ namespace Clobscode
                                  unsigned int &c_n_pts, unsigned int &mid_idx){
         
         QuadEdge this_edge (idx1,idx2);
-        set<QuadEdge>::const_iterator found = edges->find(this_edge);
 
-        if ((*found)[2]!=0) {
-            //if the edge was already split, then save its mid_point and
-            //return false (the current process didn't split the edge)
-            mid_idx = (*found)[2];
+        mid_idx = (*mapedges)[this_edge];
+        if (mid_idx!=0) {
             return false;
         }
-
+        
         //this edge is about to be split. Note that no edge can have point index
         //0 as its mid_point. For this reason, we know that the edge was not
         //split by other Quadrant before. The current edge must be replaced in the
@@ -208,18 +214,13 @@ namespace Clobscode
         //for this new point and will insert the two new edges (derived from the
         //splitting process of the current edge). Note that c_n_pts will be
         //increased for next splitting process of another edge.
-
-        // std::set doesn't permit to update an element
-        // we should erase and reinsert...
-        this_edge.updateMidPoint(c_n_pts++);
-        found = edges->erase(found);
-        edges->insert(found,this_edge); //using found as hint for insertion
-
-        // bulding and inserting, with hint if possible
-        edges->emplace_hint(found, this_edge[0],this_edge[2]);
-        edges->emplace_hint(found, this_edge[2],this_edge[1]);
-
-        mid_idx = this_edge[2];
+        
+        mid_idx = c_n_pts;
+        QuadEdge qe1(idx1,c_n_pts), qe2(idx2,c_n_pts);
+        mapedges->emplace(qe1,0);
+        mapedges->emplace(qe2,0);
+        (*mapedges)[this_edge] = c_n_pts++;
+        
         return true;
     }
 

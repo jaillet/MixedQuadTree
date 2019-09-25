@@ -27,7 +27,6 @@
 #include "../QuadSurfTemplate.h"
 
 #include "Visitor.h"
-#include "EdgeVisitor.h"
 
 #include <set>
 #include <vector>

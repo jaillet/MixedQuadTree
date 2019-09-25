@@ -100,7 +100,7 @@ public:
     //-------------------------------------------------------------------
     static bool ReadQuadMesh(std::string name, vector<MeshPoint> &points,
                              vector<Quadrant> &Quadrants,
-                             set<QuadEdge> &edges,
+                             map<QuadEdge, unsigned int> &edges,
                              vector<unsigned int> &ele_oct_ref,
                              GeometricTransform &gt,
                              unsigned short &minrl,
@@ -110,7 +110,7 @@ public:
     //-------------------------------------------------------------------
     static bool WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &points,
                                   const vector<Quadrant> &Quadrants,
-                                  const set<QuadEdge> &edges,
+                                  const map<QuadEdge, unsigned int> &edges,
                                   unsigned int nels,
                                   const GeometricTransform &gt);
 

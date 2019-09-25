@@ -38,7 +38,6 @@
 #include "Visitors/SplitVisitor.h"
 #include "Visitors/IntersectionsVisitor.h"
 #include "Visitors/OneIrregularVisitor.h"
-#include "Visitors/PointMovedVisitor.h"
 #include "Visitors/TransitionPatternVisitor.h"
 #include "Visitors/SurfaceTemplatesVisitor.h"
 #include "Visitors/RemoveSubElementsVisitor.h"
@@ -46,6 +45,7 @@
 #include <list>
 #include <vector>
 #include <set>
+#include <map>
 #include <cstdlib>
 #include <ctime>
 #include <string.h>
@@ -80,7 +80,7 @@ namespace Clobscode
 
         
         virtual void setInitialState(vector<MeshPoint> &epts, vector<Quadrant> &eocts,
-                                     set<QuadEdge> &eedgs);
+                                     map<QuadEdge, unsigned int> &medgs);
         
 	protected:
         
@@ -92,7 +92,8 @@ namespace Clobscode
         virtual void generateQuadtreeMesh(const unsigned short &rl, Polyline &input,
                                         const list<RefinementRegion *> &all_reg, const string &name);
 
-        virtual bool isItIn(const Polyline &mesh, const list<unsigned int> &faces, const vector<Point3D> &coords) const;
+        virtual bool isItIn(const Polyline &mesh, const list<unsigned int> &faces,
+                            const vector<Point3D> &coords) const;
 
         virtual bool rotateGridMesh(Polyline &input,
 									list<RefinementRegion *> &all_reg,
@@ -138,7 +139,7 @@ namespace Clobscode
 		
 		vector<MeshPoint> points;
 		vector<Quadrant> Quadrants;
-		set<QuadEdge> QuadEdges;
+        map<QuadEdge, unsigned int> MapEdges;
 		list<RefinementRegion *> regions;
 
 
@@ -146,10 +147,10 @@ namespace Clobscode
 	};
     
     inline void Mesher::setInitialState(vector<MeshPoint> &epts, vector<Quadrant> &eocts,
-                                        set<QuadEdge> &eedgs) {
+                                        map<QuadEdge, unsigned int> &medgs) {
         Quadrants = eocts;
         points = epts;
-        QuadEdges = eedgs;
+        MapEdges = medgs;
     }
 	
 	

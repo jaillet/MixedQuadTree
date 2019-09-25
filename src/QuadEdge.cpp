@@ -31,20 +31,12 @@ namespace Clobscode
 // vector<unsigned int> info; //info[2] midpoint
 
 	QuadEdge::QuadEdge(){
-		info.assign(3,0);
+		info.assign(2,0);
 	}
 	
-    QuadEdge::QuadEdge(unsigned int point1, unsigned int point2, unsigned int mid){
-        info.resize(3);
-        if (point1<point2) {
-            info[0]=point1;
-            info[1]=point2;
-        }
-        else {
-            info[1]=point1;
-            info[0]=point2;
-        }
-        info[2]=mid;
+    QuadEdge::QuadEdge(unsigned int point1, unsigned int point2){
+        info.resize(2);
+        assign(point1, point2);
     }
 
 	QuadEdge::~QuadEdge(){
@@ -64,7 +56,7 @@ namespace Clobscode
 		}
 	}
 	
-	bool QuadEdge::split(set<QuadEdge> &allQuadEdges, unsigned int maxp){
+	/*bool QuadEdge::split(set<QuadEdge> &allQuadEdges, unsigned int maxp){
 		
 		pair<set<QuadEdge>::iterator , bool> result;
 		//create possible new QuadEdge
@@ -87,12 +79,11 @@ namespace Clobscode
 		}
 		return true;
 
-	}
+	}*/
 	
 	ostream& operator<<(ostream& o, const QuadEdge &e){
 		o << e[0] << " ";
-		o << e[1] << " ";
-		o << e[2];
+        o << e[1];
 		return o;
 	}
 	

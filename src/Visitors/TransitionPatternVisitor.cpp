@@ -29,16 +29,12 @@
 namespace Clobscode
 {
 
-    TransitionPatternVisitor::TransitionPatternVisitor()
-        :/*points(NULL),*/edges(NULL),max_ref_level(NULL)
+    TransitionPatternVisitor::TransitionPatternVisitor():mapedges(NULL),max_ref_level(NULL)
     {    }
 
-//    void TransitionPatternVisitor::setPoints(const vector<MeshPoint> &points) {
-//        this->points = &points;
-//    }
-
-    void TransitionPatternVisitor::setEdges(const set<QuadEdge> &edges) {
-        this->edges = &edges;
+    
+    void TransitionPatternVisitor::setMapEdges(const map<QuadEdge, unsigned int> &mapedges) {
+        this->mapedges = &mapedges;
     }
 
     void TransitionPatternVisitor::setMaxRefLevel(const unsigned short &max_ref_level) {
@@ -64,18 +60,19 @@ namespace Clobscode
             nodes[i] = pointindex[i];
         }
         //search for nodes inserted in edges
+        const vector<unsigned int> &pi = o->pointindex;
         for (unsigned int i=0; i<4; i++) {
-            QuadEdge ee;
-            EdgeVisitor::getEdge(o,i,ee);
-            set<QuadEdge>::const_iterator my_edge = edges->find(ee);
-            if (my_edge==edges->end()) {
-                cout << "  edge " << ee << " not found at applyTransitionPattern\n";
+            QuadEdge ee(pi[i],pi[(i+1)%4]);
+            
+            auto search = mapedges->find(ee);
+            if (search==mapedges->end()) {
+                cerr << "Edge not found at TransitionPatternVisitor::visit\n";
             }
-            else {
-                if ((*my_edge)[2]!=0) {
-                    nodes[i+4] = (*my_edge)[2];
-                    quantity++;
-                }
+            
+            unsigned int mid_e = mapedges->at(ee);
+            if (mid_e!=0) {
+                nodes[i+4] = mid_e;
+                quantity++;
             }
         }
         //if this elements do not present nodes inserted in its edges

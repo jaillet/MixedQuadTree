@@ -531,7 +531,7 @@ bool Services::ReadQuadrantList(std::string name, list<unsigned int> &olist,
 //-------------------------------------------------------------------
 bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
                             vector<Quadrant> &Quadrants,
-                            set<QuadEdge> &edges,
+                            map<QuadEdge, unsigned int> &edges,
                             vector<unsigned int> &ele_oct_ref,
                             GeometricTransform &gt,
                             unsigned short &minrl,
@@ -567,8 +567,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
         y=atof(word);
         std::fscanf(file,"%s",word);
         z=atof(word);
-        Point3D p (x,y,z);
-        points.push_back(p);
+        points.push_back(Point3D (x,y,z));
     }
 
     //read edges
@@ -576,10 +575,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
         std::fscanf(file,"%i",&e1);
         std::fscanf(file,"%i",&e2);
         std::fscanf(file,"%i",&e3);
-        QuadEdge oe(e1,e2);
-        unsigned int mid = (unsigned int)e3;
-        oe.setMidPoint(mid);
-        edges.insert(oe);
+        edges.emplace(QuadEdge (e1,e2),(unsigned int)e3);
     }
 
     //read the element Quadrant link
@@ -671,14 +667,14 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
 //-------------------------------------------------------------------
 bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &points,
                                  const vector<Quadrant> &Quadrants,
-                                 const set<QuadEdge> &edges,
+                                 const map<QuadEdge, unsigned int> &edges,
                                  unsigned int nels,
                                  const GeometricTransform &gt){
 
     auto start_time = chrono::high_resolution_clock::now();
 
     //            QuadEdge qe;
-    set<QuadEdge>::const_iterator my_edge;
+    //<QuadEdge>::const_iterator my_edge;
 
     string vol_name = name+".oct";
 
@@ -698,10 +694,14 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
     fprintf(f,"\n");
 
     //write edges
-    for(my_edge=edges.begin();my_edge!=edges.end();my_edge++){
+    for (const auto qe: edges) {
+        fprintf(f,"%i %i %i\n",qe.first[0],qe.first[1],qe.second);
+    }
+    
+    /*for(my_edge=edges.begin();my_edge!=edges.end();my_edge++){
         QuadEdge me = *my_edge;
         fprintf(f,"%i %i %i\n",me[0],me[1],me[2]);
-    }
+    }*/
     fprintf(f,"\n");
 
     //pair sub-elements with Quadrant index.

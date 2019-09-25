@@ -81,7 +81,7 @@ namespace Clobscode
         
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
-        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
+        Services::WriteQuadtreeMesh(name,points,Quadrants,MapEdges,nels,gt);        //Debbuging
         
         
         //CL Debbuging
@@ -179,7 +179,7 @@ namespace Clobscode
         //CL Debbuging
         {
             //save pure octree mesh
-            std::shared_ptr<FEMesh> grid_octree=make_shared<FEMesh>();
+            std::shared_ptr<FEMesh> grid_octree = make_shared<FEMesh>();
             saveOutputMesh(grid_octree,points,Quadrants);
             string tmp_name = name + "_grid";
             Services::WriteVTK(tmp_name,grid_octree);
@@ -198,12 +198,12 @@ namespace Clobscode
         
         //Now that we have all the elements, we can save the Quadrant mesh.
         unsigned int nels = Quadrants.size();
-        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
+        Services::WriteQuadtreeMesh(name,points,Quadrants,MapEdges,nels,gt);        //Debbuging
         
         //CL Debbuging
         {
             //save pure octree mesh
-            std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
+            std::shared_ptr<FEMesh> pure_octree = make_shared<FEMesh>();
             saveOutputMesh(pure_octree,points,Quadrants);
             string tmp_name = name + "_quads";
             Services::WriteVTK(tmp_name,pure_octree);
@@ -214,7 +214,7 @@ namespace Clobscode
         //CL Debbuging
         {
             //save pure octree mesh
-            std::shared_ptr<FEMesh> closeto_octree=make_shared<FEMesh>();
+            std::shared_ptr<FEMesh> closeto_octree = make_shared<FEMesh>();
             saveOutputMesh(closeto_octree,points,Quadrants);
             string tmp_name = name + "_closeto";
             Services::WriteVTK(tmp_name,closeto_octree);
@@ -228,7 +228,7 @@ namespace Clobscode
         //CL Debbuging
         {
             //save pure octree mesh
-            std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
+            std::shared_ptr<FEMesh> pure_octree = make_shared<FEMesh>();
             saveOutputMesh(pure_octree,points,Quadrants);
             string tmp_name = name + "_remSur";
             Services::WriteVTK(tmp_name,pure_octree);
@@ -240,7 +240,7 @@ namespace Clobscode
         //CL Debbuging
         {
             //save pure octree mesh
-            std::shared_ptr<FEMesh> shrink_octree=make_shared<FEMesh>();
+            std::shared_ptr<FEMesh> shrink_octree = make_shared<FEMesh>();
             saveOutputMesh(shrink_octree,points,Quadrants);
             string tmp_name = name + "_shrink";
             Services::WriteVTK(tmp_name,shrink_octree);
@@ -350,7 +350,10 @@ namespace Clobscode
             iv.setPolyline(input);
             iv.setPoints(points);
             if (o.accept(&iv)) {
-                EdgeVisitor::insertEdges(&o, QuadEdges);
+                for (unsigned int j=0; j<4; j++) {
+                    QuadEdge etmp(elements[i][j],elements[i][(j+1)%4]);
+                    MapEdges.emplace(etmp,0);
+                }
                 Quadrants.push_back(o);
             }
         }
@@ -393,7 +396,7 @@ namespace Clobscode
         //create visitors and give them variables
         SplitVisitor sv;
         sv.setPoints(points);
-        sv.setEdges(QuadEdges);
+        sv.setMapEdges(MapEdges);
         sv.setNewPts(new_pts);
         
         auto start_refine_quad_time = chrono::high_resolution_clock::now();
@@ -648,7 +651,7 @@ namespace Clobscode
         
         //visitor oneIrregular
         OneIrregularVisitor oiv;
-        oiv.setEdges(QuadEdges);
+        oiv.setMapEdges(MapEdges);
         oiv.setMaxRefLevel(omaxrl);
         
         while (!balanced) {
@@ -744,8 +747,7 @@ namespace Clobscode
         
         //TransitionPatternVisitor section
         TransitionPatternVisitor tpv;
-//        tpv.setPoints(points);
-        tpv.setEdges(QuadEdges);
+        tpv.setMapEdges(MapEdges);
         tpv.setMaxRefLevel(omaxrl);
         new_pts.clear();
         
@@ -822,7 +824,7 @@ namespace Clobscode
         //create visitors and give them variables
         SplitVisitor sv;
         sv.setPoints(points);
-        sv.setEdges(QuadEdges);
+        sv.setMapEdges(MapEdges);
         sv.setNewPts(new_pts);
         
         auto start_refine_quad_time = chrono::high_resolution_clock::now();
@@ -1107,7 +1109,7 @@ namespace Clobscode
         
         //visitor oneIrregular
         OneIrregularVisitor oiv;
-        oiv.setEdges(QuadEdges);
+        oiv.setMapEdges(MapEdges);
         oiv.setMaxRefLevel(max_rl);
         
         /* //if pointMoved is ever needed, uncomment this:
@@ -1211,8 +1213,7 @@ namespace Clobscode
         
         //TransitionPatternVisitor section
         TransitionPatternVisitor tpv;
-//        tpv.setPoints(points);
-        tpv.setEdges(QuadEdges);
+        tpv.setMapEdges(MapEdges);
         tpv.setMaxRefLevel(max_rl);
         new_pts.clear();
         
