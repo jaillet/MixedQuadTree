@@ -17,14 +17,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
 */
 /**
-* @file QuadEdge.h
+* @file EdgeInfo.h
 * @author Claudio Lobos, Fabrice Jaillet
 * @version 0.1
 * @brief
 **/
 
-#ifndef QuadEdge_h
-#define QuadEdge_h 1
+#ifndef EdgeInfo_h
+#define EdgeInfo_h 1
 
 #include <iostream>
 #include <vector>
@@ -34,48 +34,43 @@ using std::vector;
 using std::ostream;
 using std::set;
 using std::cout;
+using std::cerr;
 using std::pair;
 
 namespace Clobscode
 {
 	
-	//class QuadEdge;
-	
-	class QuadEdge{
+	class EdgeInfo{
 		
 	public:
         
-		QuadEdge();
+		EdgeInfo();
 		
-        QuadEdge(const unsigned int &idx1, const unsigned int &idx2);
-
-        //use this constructor when sure point1<point2 
-        QuadEdge(const unsigned int &idx1, const unsigned int &idx2, const bool &forced);
+        EdgeInfo(const unsigned int &mid_idx, const unsigned int &q1, const unsigned int &q2);
         
-		virtual ~QuadEdge();
+        EdgeInfo(const unsigned int &pos, const unsigned int &value);
+        
+		virtual ~EdgeInfo();
 		
-        virtual void assign(unsigned int idx1, unsigned int idx2);
-		
-        virtual unsigned int operator[](unsigned int pos) const;
+        virtual unsigned int operator[](const unsigned int &pos) const;
+        
+        virtual unsigned int &operator[](const unsigned int &pos);
 
-		friend ostream& operator<<(ostream& o, const QuadEdge &e);
-		
-        friend bool operator==(const QuadEdge &e1, const QuadEdge &e2);
-		
-        friend bool operator!=(const QuadEdge &e1, const QuadEdge &e2);
-		
-        friend bool operator<(const QuadEdge &e1, const QuadEdge &e2);
+		friend ostream& operator<<(ostream& o, const EdgeInfo &e);
 		
 		
 	protected:
 		
-        vector<unsigned int> info;
+        unsigned int info [3];
 
 	};
 
-    inline unsigned int QuadEdge::operator[](unsigned int pos) const{
-        return info[pos]; //no position validity check
+    inline unsigned int EdgeInfo::operator[](const unsigned int &pos) const{
+        return info[pos];
     }
 	
+    inline unsigned int &EdgeInfo::operator[](const unsigned int &pos){
+        return info[pos];
+    }
 }
 #endif

@@ -35,8 +35,8 @@ namespace Clobscode
 //vector<vector<Point3D> > *clipping;
 
     SplitVisitor::SplitVisitor()
-        :points(NULL),new_pts(NULL),mapedges(NULL),new_eles(NULL),clipping(NULL)
-    { }
+        :points(NULL),new_pts(NULL),MapEdges(NULL),new_eles(NULL),clipping(NULL)
+    { idx = 0; }
 
     void SplitVisitor::setPoints(const vector<MeshPoint> &points) {
         this->points = &points;
@@ -46,12 +46,16 @@ namespace Clobscode
         this->new_pts = &new_pts;
     }
     
-    void SplitVisitor::setMapEdges(map<QuadEdge, unsigned int> &mapedges) {
-        this->mapedges = &mapedges;
+    void SplitVisitor::setMapEdges(map<QuadEdge, EdgeInfo> &MapEdges) {
+        this->MapEdges = &MapEdges;
     }
     
     void SplitVisitor::setNewEles(vector<vector<unsigned int> > &new_eles) {
         this->new_eles = &new_eles;
+    }
+    
+    void SplitVisitor::setStartIndex(const unsigned int &sidx) {
+        this->idx = sidx;
     }
     
     void SplitVisitor::setClipping(vector<vector<Point3D> > &clipping) {
@@ -80,29 +84,94 @@ namespace Clobscode
         const Point3D avg = (max-min)/2 + min;
 
         //inserting node 4 between nodes 0 and 1
-        if (splitEdge(all_pts[0],all_pts[1],n_pts,all_pts[4])) {
+        unsigned int nq_idx;
+        if (splitEdge(all_pts[0],all_pts[1],idx,idx+1,1,n_pts,nq_idx,all_pts[4])) {
+            
+            cout << "edge (" << all_pts[0] << "," << all_pts[1] << ") not split.";
+            cout << " Adding midpoint " << n_pts << "\n";
+            
+            //save the new mid_edge index
+            all_pts[4] = n_pts;
+            //create the Edges with parent neighbor
+            MapEdges->emplace(QuadEdge (all_pts[0],n_pts,true), EdgeInfo (0,idx,nq_idx));
+            MapEdges->emplace(QuadEdge (all_pts[1],n_pts,true), EdgeInfo (0,idx+1,nq_idx));
+            //increase the index
+            n_pts++;
             //the coordinates of node 8 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (avg[0],min[1],avg[2]));
         }
+        
+        //inserting node 4 between nodes 0 and 1
+        /*if (splitEdge(all_pts[0],all_pts[1],n_pts,all_pts[4],idx,idx+1,1)) {
+            //the coordinates of node 8 must be computed and added to
+            //new_pts list of points
+            new_pts->push_back(Point3D (avg[0],min[1],avg[2]));
+        }*/
+        
+        
         //inserting node 5 between nodes 1 and 2
-        if (splitEdge(all_pts[1],all_pts[2],n_pts,all_pts[5])) {
+        if (splitEdge(all_pts[1],all_pts[2],idx+1,idx+2,1,n_pts,nq_idx,all_pts[5])) {
+            //save the new mid_edge index
+            all_pts[5] = n_pts;
+            //create the Edges with parent neighbor
+            MapEdges->emplace(QuadEdge (all_pts[1],n_pts,true), EdgeInfo (0,idx+1,nq_idx));
+            MapEdges->emplace(QuadEdge (all_pts[2],n_pts,true), EdgeInfo (0,idx+2,nq_idx));
+            //increase the index
+            n_pts++;
             //the coordinates of node 9 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (max[0],avg[1],avg[2]));
         }
+        
+        //inserting node 5 between nodes 1 and 2
+        /*if (splitEdge(all_pts[1],all_pts[2],n_pts,all_pts[5],idx+1,idx+2,1)) {
+            //the coordinates of node 9 must be computed and added to
+            //new_pts list of points
+            new_pts->push_back(Point3D (max[0],avg[1],avg[2]));
+        }*/
+        
         //inserting node 6 between nodes 2 and 3
-        if (splitEdge(all_pts[2],all_pts[3],n_pts,all_pts[6])) {
+        if (splitEdge(all_pts[2],all_pts[3],idx+2,idx+3,2,n_pts,nq_idx,all_pts[6])) {
+            //save the new mid_edge index
+            all_pts[6] = n_pts;
+            //create the Edges with parent neighbor
+            MapEdges->emplace(QuadEdge (all_pts[2],n_pts,true), EdgeInfo (0,nq_idx,idx+2));
+            MapEdges->emplace(QuadEdge (all_pts[3],n_pts,true), EdgeInfo (0,nq_idx,idx+3));
+            //increase the index
+            n_pts++;
             //the coordinates of node 10 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (avg[0],max[1],avg[2]));
         }
+        
+        //inserting node 6 between nodes 2 and 3
+        /*if (splitEdge(all_pts[2],all_pts[3],n_pts,all_pts[6],idx+2,idx+3,2)) {
+            //the coordinates of node 10 must be computed and added to
+            //new_pts list of points
+            new_pts->push_back(Point3D (avg[0],max[1],avg[2]));
+        }*/
+        
         //inserting node 7 between nodes 3 and 0
-        if (splitEdge(all_pts[0],all_pts[3],n_pts,all_pts[7])) {
+        if (splitEdge(all_pts[0],all_pts[3],idx+3,idx,2,n_pts,nq_idx,all_pts[7])) {
+            //save the new mid_edge index
+            all_pts[7] = n_pts;
+            //create the Edges with parent neighbor
+            MapEdges->emplace(QuadEdge (all_pts[3],n_pts,true), EdgeInfo (0,nq_idx,idx+3));
+            MapEdges->emplace(QuadEdge (all_pts[0],n_pts,true), EdgeInfo (0,nq_idx,idx));
+            //increase the index
+            n_pts++;
             //the coordinates of node 11 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (min[0],avg[1],avg[2]));
         }
+        
+        //inserting node 7 between nodes 3 and 0
+        /*if (splitEdge(all_pts[0],all_pts[3],n_pts,all_pts[7],idx+3,idx,2)) {
+            //the coordinates of node 11 must be computed and added to
+            //new_pts list of points
+            new_pts->push_back(Point3D (min[0],avg[1],avg[2]));
+        }*/
 
         //of course all the intern edges and mid point were never inserted
         //before, so this task is performed without asking
@@ -115,23 +184,16 @@ namespace Clobscode
         //memory without adding necessary information.
         //edges->emplace(all_pts[4],all_pts[6],all_pts[8]);
         //edges->emplace(all_pts[5],all_pts[7],all_pts[8]);
-        QuadEdge qeY(all_pts[4],all_pts[6]);
-        mapedges->emplace(qeY,all_pts[8]);
+        /*QuadEdge qeY(all_pts[4],all_pts[6]);
+        MapEdges->emplace(qeY,all_pts[8]);
         
         QuadEdge qeX(all_pts[5],all_pts[7]);
-        mapedges->emplace(qeX,all_pts[8]);
+        MapEdges->emplace(qeX,all_pts[8]);*/
         
-        QuadEdge qe1(all_pts[4],all_pts[8]);
-        mapedges->emplace(qe1,0);
-        
-        QuadEdge qe2(all_pts[6],all_pts[8]);
-        mapedges->emplace(qe2,0);
-        
-        QuadEdge qe3(all_pts[5],all_pts[8]);
-        mapedges->emplace(qe3,0);
-        
-        QuadEdge qe4(all_pts[7],all_pts[8]);
-        mapedges->emplace(qe4,0);
+        MapEdges->emplace(QuadEdge (all_pts[4],all_pts[8],true),EdgeInfo (0,idx,idx+1));
+        MapEdges->emplace(QuadEdge (all_pts[6],all_pts[8],true),EdgeInfo (0,idx+3,idx+2));
+        MapEdges->emplace(QuadEdge (all_pts[5],all_pts[8],true),EdgeInfo (0,idx+2,idx+1));
+        MapEdges->emplace(QuadEdge (all_pts[7],all_pts[8],true),EdgeInfo (0,idx+3,idx));
         
         //now that all edges were inserted, the elements can be easily built
         vector<unsigned int> son_element (4,0);
@@ -191,17 +253,51 @@ namespace Clobscode
         return true;
     }
 
-//--------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------
-
-
-    bool SplitVisitor::splitEdge(unsigned int idx1, unsigned int idx2,
-                                 unsigned int &c_n_pts, unsigned int &mid_idx){
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+     bool SplitVisitor::splitEdge(const unsigned int &idx1, const unsigned int &idx2,
+                                  const unsigned int &q1, const unsigned int &q2,
+                                  const unsigned int &pos, const unsigned int &nidx,
+                                  unsigned int &nquad, unsigned int &mid_idx) {
+         
+         //If the Edge was split, update Quad info. Else: return the Quad index
+         //of the other side of the edge
+         auto help = MapEdges->find(QuadEdge (idx1,idx2));
+         mid_idx = (help->second)[0];
+         
+         if (mid_idx!=0) {
+             //update Quad neighbor info in EdgeInfo
+             (MapEdges->find(QuadEdge (idx1,mid_idx))->second)[pos] = q1;
+             (MapEdges->find(QuadEdge (idx2,mid_idx))->second)[pos] = q2;
+             return false;
+         }
+         
+         //update the main edge idx1-idx2 without any Quad at pos
+         (help->second)[pos] = 0;
+         
+         //Save in the current edge the new mid_index
+         (help->second)[0] = nidx;
+         
+         //return neighbor quad index
+         nquad = (help->second)[3-pos];
+         return true;
+     }
+    
+    
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    /*bool SplitVisitor::splitEdge(const unsigned int &idx1, const unsigned int &idx2,
+                                 unsigned int &c_n_pts, unsigned int &mid_idx,
+                                 const unsigned int &q1, const unsigned int &q2,
+                                 const unsigned int &pos) {
         
-        QuadEdge this_edge (idx1,idx2);
-
-        mid_idx = (*mapedges)[this_edge];
+        auto help = MapEdges->find(QuadEdge (idx1,idx2));
+        mid_idx = (help->second)[0];
+        
         if (mid_idx!=0) {
+            //update Quad neighbor info in EdgeInfo
+            (MapEdges->find(QuadEdge (idx1,mid_idx))->second)[pos] = q1;
+            (MapEdges->find(QuadEdge (idx2,mid_idx))->second)[pos] = q2;
             return false;
         }
         
@@ -216,13 +312,14 @@ namespace Clobscode
         //increased for next splitting process of another edge.
         
         mid_idx = c_n_pts;
-        QuadEdge qe1(idx1,c_n_pts), qe2(idx2,c_n_pts);
-        mapedges->emplace(qe1,0);
-        mapedges->emplace(qe2,0);
-        (*mapedges)[this_edge] = c_n_pts++;
+        
+        MapEdges->emplace_hint(help,QuadEdge (idx1,c_n_pts,true), EdgeInfo (pos,q1));
+        MapEdges->emplace_hint(help,QuadEdge (idx2,c_n_pts,true), EdgeInfo (pos,q2));
+        
+        (help->second)[0] = c_n_pts++;
         
         return true;
-    }
+    }*/
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------

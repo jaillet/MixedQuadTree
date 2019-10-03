@@ -23,6 +23,7 @@
 * @brief
 **/
 
+#include "EdgeInfo.h"
 #include "Mesher.h"
 #include "Polyline.h"
 #include "FEMesh.h"
@@ -52,6 +53,7 @@ using Clobscode::RefinementAllRegion;
 using Clobscode::RefinementInputSurfaceRegion;
 using Clobscode::Point3D;
 using Clobscode::Services;
+using Clobscode::EdgeInfo;
 
 namespace chrono = std::chrono;
 
@@ -123,7 +125,7 @@ int main(int argc,char** argv){
     //for reading an Quadrant mesh as starting point.
     vector<MeshPoint> oct_points;
     vector<Quadrant> oct_Quadrants;
-    map<QuadEdge,unsigned int> oct_edges;
+    map<QuadEdge, EdgeInfo> oct_edges;
     vector<unsigned int> oct_ele_link;
     GeometricTransform gt;
     

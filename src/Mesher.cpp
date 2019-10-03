@@ -350,10 +350,52 @@ namespace Clobscode
             iv.setPolyline(input);
             iv.setPoints(points);
             if (o.accept(&iv)) {
-                for (unsigned int j=0; j<4; j++) {
-                    QuadEdge etmp(elements[i][j],elements[i][(j+1)%4]);
-                    MapEdges.emplace(etmp,0);
+                auto found = MapEdges.find(QuadEdge (elements[i][0],elements[i][1]));
+                if (found!=MapEdges.end()) {
+                    (found->second)[1] = i;
                 }
+                else {
+                    MapEdges.emplace(QuadEdge (elements[i][0],elements[i][1]),
+                                     EdgeInfo (0,i,0));
+                }
+                
+                found = MapEdges.find(QuadEdge (elements[i][1],elements[i][2]));
+                if (found!=MapEdges.end()) {
+                    (found->second)[1] = i;
+                }
+                else {
+                    MapEdges.emplace(QuadEdge (elements[i][1],elements[i][2]),
+                                     EdgeInfo (0,i,0));
+                }
+                
+                found = MapEdges.find(QuadEdge (elements[i][2],elements[i][3]));
+                if (found!=MapEdges.end()) {
+                    (found->second)[2] = i;
+                }
+                else {
+                    MapEdges.emplace(QuadEdge (elements[i][2],elements[i][3]),
+                                     EdgeInfo (0,0,i));
+                }
+                
+                found = MapEdges.find(QuadEdge (elements[i][3],elements[i][0]));
+                if (found!=MapEdges.end()) {
+                    (found->second)[2] = i;
+                }
+                else {
+                    MapEdges.emplace(QuadEdge (elements[i][3],elements[i][0]),
+                                     EdgeInfo (0,0,i));
+                }
+
+                
+                
+                /*for (unsigned int j=0; j<4; j++) {
+                    //create the edge
+                    QuadEdge etmp(elements[i][j],elements[i][(j+1)%4]);
+                    //manage mid point index map
+                    MapEdges.emplace(etmp,EdgeInfo ());
+                    //manage quad neighboring info
+
+                }*/
                 Quadrants.push_back(o);
             }
         }
@@ -865,6 +907,8 @@ namespace Clobscode
                     
                     vector<vector<unsigned int> > split_elements;
                     sv.setNewEles(split_elements);
+                    
+                    sv.setStartIndex(new_Quadrants.size());
                     
                     //iter->split(points,new_pts,QuadEdges,split_elements,clipping_coords);
                     //cout << "Accept" << endl;

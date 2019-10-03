@@ -13,7 +13,7 @@ endif()
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 set(SOURCE_FILES Main
-        Point3D Polyline PolyEdge  Quadrant QuadEdge
+        Point3D Polyline PolyEdge  Quadrant QuadEdge EdgeInfo
 	QuadTransition QuadSurfTemplate 
         Mesher GridMesher MeshPoint
         RefinementRegion RefinementCubeRegion RefinementSurfaceRegion

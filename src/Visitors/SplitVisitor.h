@@ -34,6 +34,7 @@
 #include "../MeshPoint.h"
 #include "../Point3D.h"
 #include "../QuadEdge.h"
+#include "../EdgeInfo.h"
 
 #include "Visitor.h"
 
@@ -61,11 +62,11 @@ namespace Clobscode
         
         void setNewPts(list<Point3D> &new_pts);
         
-        void setEdges(set<QuadEdge> &edges);
-        
-        void setMapEdges(map<QuadEdge, unsigned int> &mapedges);
+        void setMapEdges(map<QuadEdge, EdgeInfo> &MapEdges);
         
         void setNewEles(vector<vector<unsigned int> > &new_eles);
+        
+        void setStartIndex(const unsigned int &sidx);
         
         void setClipping(vector<vector<Point3D> > &clipping);
 
@@ -74,16 +75,22 @@ namespace Clobscode
         //references
         const vector<MeshPoint> *points;
         list<Point3D> *new_pts;
-        set<QuadEdge> *edges;
-        map<QuadEdge, unsigned int> *mapedges;
+        map<QuadEdge, EdgeInfo> *MapEdges;
         
         vector<vector<unsigned int> > *new_eles;
         vector<vector<Point3D> > *clipping;
+        
+        unsigned int idx;
 
-        bool splitEdge(unsigned int idx1,
-                       unsigned int idx2,
-                       unsigned int &c_n_pts,
-                       unsigned int &mid_idx);
+        /*bool splitEdge(const unsigned int &idx1, const unsigned int &idx2,
+                       unsigned int &c_n_pts, unsigned int &mid_idx,
+                       const unsigned int &q1, const unsigned int &q2,
+                       const unsigned int &pos);*/
+        
+        bool splitEdge(const unsigned int &idx1, const unsigned int &idx2,
+                       const unsigned int &q1, const unsigned int &q2,
+                       const unsigned int &pos, const unsigned int &nidx,
+                       unsigned int &nquad, unsigned int &mid_idx);
 
     };
 }

@@ -531,7 +531,7 @@ bool Services::ReadQuadrantList(std::string name, list<unsigned int> &olist,
 //-------------------------------------------------------------------
 bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
                             vector<Quadrant> &Quadrants,
-                            map<QuadEdge, unsigned int> &edges,
+                            map<QuadEdge, EdgeInfo> &edges,
                             vector<unsigned int> &ele_oct_ref,
                             GeometricTransform &gt,
                             unsigned short &minrl,
@@ -575,7 +575,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
         std::fscanf(file,"%i",&e1);
         std::fscanf(file,"%i",&e2);
         std::fscanf(file,"%i",&e3);
-        edges.emplace(QuadEdge (e1,e2),(unsigned int)e3);
+        edges.emplace(QuadEdge (e1,e2),EdgeInfo ((unsigned int)e3,0,0));
     }
 
     //read the element Quadrant link
@@ -667,7 +667,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
 //-------------------------------------------------------------------
 bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &points,
                                  const vector<Quadrant> &Quadrants,
-                                 const map<QuadEdge, unsigned int> &edges,
+                                 const map<QuadEdge, EdgeInfo> &edges,
                                  unsigned int nels,
                                  const GeometricTransform &gt){
 
@@ -695,7 +695,7 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
 
     //write edges
     for (const auto qe: edges) {
-        fprintf(f,"%i %i %i\n",qe.first[0],qe.first[1],qe.second);
+        fprintf(f,"%i %i %i\n",qe.first[0],qe.first[1],(qe.second)[0]);
     }
     
     /*for(my_edge=edges.begin();my_edge!=edges.end();my_edge++){

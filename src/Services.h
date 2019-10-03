@@ -35,6 +35,7 @@
 #include "MeshPoint.h"
 #include "Quadrant.h"
 #include "QuadEdge.h"
+#include "EdgeInfo.h"
 #include <stdlib.h>
 #include <memory>
 
@@ -43,6 +44,7 @@ using Clobscode::Polyline;
 using Clobscode::MeshPoint;
 using Clobscode::Quadrant;
 using Clobscode::QuadEdge;
+using Clobscode::EdgeInfo;
 using std::vector;
 
 namespace Clobscode
@@ -100,7 +102,7 @@ public:
     //-------------------------------------------------------------------
     static bool ReadQuadMesh(std::string name, vector<MeshPoint> &points,
                              vector<Quadrant> &Quadrants,
-                             map<QuadEdge, unsigned int> &edges,
+                             map<QuadEdge, EdgeInfo> &edges,
                              vector<unsigned int> &ele_oct_ref,
                              GeometricTransform &gt,
                              unsigned short &minrl,
@@ -110,7 +112,7 @@ public:
     //-------------------------------------------------------------------
     static bool WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &points,
                                   const vector<Quadrant> &Quadrants,
-                                  const map<QuadEdge, unsigned int> &edges,
+                                  const map<QuadEdge, EdgeInfo> &edges,
                                   unsigned int nels,
                                   const GeometricTransform &gt);
 

@@ -17,52 +17,44 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
  */
 /**
-* @file TransitionPatternVisitor.h
+* @file EdgeInfo.cpp
 * @author Claudio Lobos, Fabrice Jaillet
 * @version 0.1
 * @brief
 **/
 
-#ifndef TransitionPatternVisitor_h
-#define TransitionPatternVisitor_h 1
-
-#include "../QuadEdge.h"
-#include "../EdgeInfo.h"
-#include "../MeshPoint.h"
-#include "../QuadTransition.h"
-
-#include "Visitor.h"
-
-#include <list>
-#include <set>
-#include <map>
-#include <vector>
-
-using Clobscode::MeshPoint;
-using Clobscode::QuadEdge;
-using std::list;
-using std::set;
-using std::vector;
-
-
+#include "EdgeInfo.h"
 
 namespace Clobscode
 {
-    class TransitionPatternVisitor : public Visitor{
-    public:
-        TransitionPatternVisitor();
 
-        bool visit(Quadrant *o) override;
-
-        void setMapEdges(const map<QuadEdge, EdgeInfo> &MapEdges);
-        void setMaxRefLevel(const unsigned short &max_ref_level);
-
-    private:
-        
-        const map<QuadEdge, EdgeInfo> *MapEdges;
-        const unsigned short *max_ref_level;
-    };
+	EdgeInfo::EdgeInfo(){
+        for (unsigned int i=0; i<3; i++) {
+            info[i] = 0;
+        }
+	}
+	
+    EdgeInfo::EdgeInfo(const unsigned int &mid_idx, const unsigned int &q1,
+                       const unsigned int &q2) {
+        info[0] = mid_idx;
+        info[1] = q1;
+        info[2] = q2;
+    }
+    
+    EdgeInfo::EdgeInfo(const unsigned int &pos, const unsigned int &value) {
+        info[0] = 0;
+        info[pos] = value;
+        info[3-pos] = 0;
+    }
+    
+    EdgeInfo::~EdgeInfo() {
+    
+    }
+	
+	ostream& operator<<(ostream& o, const EdgeInfo &e){
+		o << e[0] << " ";
+        o << e[1] << " ";
+        o << e[2];
+		return o;
+	}
 }
-
-
-#endif //MESHER_ROI_TRANSITIONPATTERNVISITOR_H

@@ -34,17 +34,17 @@ namespace Clobscode
 //const unsigned short *max_ref_level;
 
 
-    OneIrregularVisitor::OneIrregularVisitor() :mapedges(NULL), max_ref_level(NULL)
+    OneIrregularVisitor::OneIrregularVisitor() :MapEdges(NULL), max_ref_level(NULL)
     { }
 
-    OneIrregularVisitor::OneIrregularVisitor(const map<QuadEdge, unsigned int> *mapedges,
+    OneIrregularVisitor::OneIrregularVisitor(const map<QuadEdge, EdgeInfo> *MapEdges,
                                              const unsigned short *max_ref_level)
-        :mapedges(mapedges), max_ref_level(max_ref_level)
+        :MapEdges(MapEdges), max_ref_level(max_ref_level)
     { }
 
     
-    void OneIrregularVisitor::setMapEdges(const map<QuadEdge, unsigned int> &mapedges) {
-        this->mapedges = &mapedges;
+    void OneIrregularVisitor::setMapEdges(const map<QuadEdge, EdgeInfo> &MapEdges) {
+        this->MapEdges = &MapEdges;
     }
 
     void OneIrregularVisitor::setMaxRefLevel(const unsigned short &max_ref_level) {
@@ -62,12 +62,13 @@ namespace Clobscode
 
             QuadEdge ee(pi[i],pi[(i+1)%4]);
             
-            auto search = mapedges->find(ee);
-            if (search==mapedges->end()) {
+            auto search = MapEdges->find(ee);
+            if (search==MapEdges->end()) {
+                cerr << ee << " ";
                 cerr << "Edge not found at OneIrregularVisitor::visit\n";
             }
 
-            unsigned int mid_idx = mapedges->at(ee);
+            unsigned int mid_idx = (search->second)[0];
 
             //if the edge is not split, check the others
             if (mid_idx==0) {
@@ -77,25 +78,22 @@ namespace Clobscode
             //"sub-edges" must be checked. If at least one of
             //them is also split, then this element is not
             //one-irregular
-
-            QuadEdge sub1(ee[0],mid_idx);
             
-            search = mapedges->find(sub1);
-            if (search==mapedges->end()) {
+            search = MapEdges->find(QuadEdge (ee[0],mid_idx));
+            if (search==MapEdges->end()) {
                 cerr << "Edge not found at OneIrregularVisitor::visit\n";
             }
             
-            if (mapedges->at(sub1)!=0) {
+            if ((search->second)[0]!=0) {
                 return false;
             }
-            QuadEdge sub2(ee[1],mid_idx);
             
-            search = mapedges->find(sub2);
-            if (search==mapedges->end()) {
+            search = MapEdges->find(QuadEdge (ee[1],mid_idx));
+            if (search==MapEdges->end()) {
                 cerr << "Edge not found at OneIrregularVisitor::visit\n";
             }
             
-            if (mapedges->at(sub2)!=0) {
+            if ((search->second)[0]!=0) {
                 return false;
             }
         }

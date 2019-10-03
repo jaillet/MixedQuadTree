@@ -28,6 +28,7 @@
 
 #include "../MeshPoint.h"
 #include "../QuadEdge.h"
+#include "../EdgeInfo.h"
 #include "../Point3D.h"
 
 #include <set>
@@ -41,16 +42,16 @@ namespace Clobscode
     class OneIrregularVisitor : public Visitor {
     public:
         OneIrregularVisitor();
-        OneIrregularVisitor(const map<QuadEdge, unsigned int> *mapedges,
+        OneIrregularVisitor(const map<QuadEdge, EdgeInfo> *MapEdges,
                             const unsigned short *max_ref_level);
 
         bool visit(Quadrant *o) override; // Quad is const, but no const for override...
-        void setMapEdges(const map<QuadEdge, unsigned int> &mapedges);
+        void setMapEdges(const map<QuadEdge, EdgeInfo> &MapEdges);
         void setMaxRefLevel(const unsigned short &max_ref_level);
 
     protected:
 
-        const map<QuadEdge, unsigned int> *mapedges;
+        const map<QuadEdge, EdgeInfo> *MapEdges;
         const unsigned short *max_ref_level;
     };
 

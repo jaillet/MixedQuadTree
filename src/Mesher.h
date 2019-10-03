@@ -31,6 +31,7 @@
 #include "GridMesher.h"
 #include "Quadrant.h"
 #include "QuadEdge.h"
+#include "EdgeInfo.h"
 #include "Services.h"
 #include "RefinementRegion.h"
 #include "RefinementCubeRegion.h"
@@ -80,7 +81,7 @@ namespace Clobscode
 
         
         virtual void setInitialState(vector<MeshPoint> &epts, vector<Quadrant> &eocts,
-                                     map<QuadEdge, unsigned int> &medgs);
+                                     map<QuadEdge, EdgeInfo> &medgs);
         
 	protected:
         
@@ -139,7 +140,8 @@ namespace Clobscode
 		
 		vector<MeshPoint> points;
 		vector<Quadrant> Quadrants;
-        map<QuadEdge, unsigned int> MapEdges;
+        //Map that for each edge saves its mid point index (0 by default).
+        map<QuadEdge, EdgeInfo> MapEdges;
 		list<RefinementRegion *> regions;
 
 
@@ -147,7 +149,7 @@ namespace Clobscode
 	};
     
     inline void Mesher::setInitialState(vector<MeshPoint> &epts, vector<Quadrant> &eocts,
-                                        map<QuadEdge, unsigned int> &medgs) {
+                                        map<QuadEdge, EdgeInfo> &medgs) {
         Quadrants = eocts;
         points = epts;
         MapEdges = medgs;
