@@ -355,8 +355,7 @@ namespace Clobscode
                     (found->second)[1] = i;
                 }
                 else {
-                    MapEdges.emplace(QuadEdge (elements[i][0],elements[i][1]),
-                                     EdgeInfo (0,i,0));
+                    MapEdges.emplace(QuadEdge (elements[i][0],elements[i][1]), EdgeInfo (1,i));
                 }
                 
                 found = MapEdges.find(QuadEdge (elements[i][1],elements[i][2]));
@@ -364,8 +363,7 @@ namespace Clobscode
                     (found->second)[1] = i;
                 }
                 else {
-                    MapEdges.emplace(QuadEdge (elements[i][1],elements[i][2]),
-                                     EdgeInfo (0,i,0));
+                    MapEdges.emplace(QuadEdge (elements[i][1],elements[i][2]), EdgeInfo (1,i));
                 }
                 
                 found = MapEdges.find(QuadEdge (elements[i][2],elements[i][3]));
@@ -373,8 +371,7 @@ namespace Clobscode
                     (found->second)[2] = i;
                 }
                 else {
-                    MapEdges.emplace(QuadEdge (elements[i][2],elements[i][3]),
-                                     EdgeInfo (0,0,i));
+                    MapEdges.emplace(QuadEdge (elements[i][2],elements[i][3]), EdgeInfo (2,i));
                 }
                 
                 found = MapEdges.find(QuadEdge (elements[i][3],elements[i][0]));
@@ -382,8 +379,7 @@ namespace Clobscode
                     (found->second)[2] = i;
                 }
                 else {
-                    MapEdges.emplace(QuadEdge (elements[i][3],elements[i][0]),
-                                     EdgeInfo (0,0,i));
+                    MapEdges.emplace(QuadEdge (elements[i][3],elements[i][0]), EdgeInfo (2,i));
                 }
 
                 
@@ -399,6 +395,13 @@ namespace Clobscode
                 Quadrants.push_back(o);
             }
         }
+        
+        cout << "Initial Grid MapEdges (at line 403)\n";
+        
+        for (auto me: MapEdges) {
+            cout << me.first << " value " << me.second << "\n";
+        }
+        
         /* debug log
          std::cerr << "QuadEdges cont:";
          for (auto it=QuadEdges.begin(); it!=QuadEdges.end(); ++it)
@@ -908,6 +911,10 @@ namespace Clobscode
                     vector<vector<unsigned int> > split_elements;
                     sv.setNewEles(split_elements);
                     
+                    /*for (auto cnq: new_Quadrants) {
+                        cout << cnq << "\n";
+                    }*/
+                    
                     sv.setStartIndex(new_Quadrants.size());
                     
                     //iter->split(points,new_pts,QuadEdges,split_elements,clipping_coords);
@@ -960,6 +967,7 @@ namespace Clobscode
                 }
                 // remove yet processed Quad
                 tmp_Quadrants.pop_front();
+                
             } // while
             
             // don't forget to update list
@@ -1014,6 +1022,9 @@ namespace Clobscode
             while (!tmp_Quadrants.empty()) {
                 iter=tmp_Quadrants.begin();
                 
+                cout << "line 1025 for Quad " << *iter;
+                cout << " start idx " << new_Quadrants.size() << "\n";
+                
                 bool to_refine = false;
                 
                 for (reg_iter=all_reg.begin(),reg_iter++; reg_iter!=all_reg.end(); ++reg_iter) {
@@ -1054,6 +1065,13 @@ namespace Clobscode
                     
                     vector<vector<unsigned int> > split_elements;
                     sv.setNewEles(split_elements);
+                    
+                    sv.setStartIndex(new_Quadrants.size());
+                    
+                    
+                    for (auto cnq: new_Quadrants) {
+                        cout << cnq << "\n";
+                    }
                     
                     //iter->split(points,new_pts,QuadEdges,split_elements,clipping_coords);
                     //cout << "Accept" << endl;
@@ -1105,6 +1123,13 @@ namespace Clobscode
                 }
                 // remove yet processed Quad
                 tmp_Quadrants.pop_front();
+                
+                cout << "MapEdges (at line 1117)\n";
+                
+                for (auto me: MapEdges) {
+                    cout << me.first << " value " << me.second << "\n";
+                }
+                
             } // while
             
             // don't forget to update list

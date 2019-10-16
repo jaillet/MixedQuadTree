@@ -29,9 +29,9 @@ namespace Clobscode
 {
 
 	EdgeInfo::EdgeInfo(){
-        for (unsigned int i=0; i<3; i++) {
-            info[i] = 0;
-        }
+        info[0] = 0;
+        info[1] = std::numeric_limits<unsigned int>::max();
+        info[2] = std::numeric_limits<unsigned int>::max();
 	}
 	
     EdgeInfo::EdgeInfo(const unsigned int &mid_idx, const unsigned int &q1,
@@ -44,7 +44,7 @@ namespace Clobscode
     EdgeInfo::EdgeInfo(const unsigned int &pos, const unsigned int &value) {
         info[0] = 0;
         info[pos] = value;
-        info[3-pos] = 0;
+        info[3-pos] = std::numeric_limits<unsigned int>::max();
     }
     
     EdgeInfo::~EdgeInfo() {

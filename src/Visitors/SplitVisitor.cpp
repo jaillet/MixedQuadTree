@@ -153,7 +153,7 @@ namespace Clobscode
         }*/
         
         //inserting node 7 between nodes 3 and 0
-        if (splitEdge(all_pts[0],all_pts[3],idx+3,idx,2,n_pts,nq_idx,all_pts[7])) {
+        if (splitEdge(all_pts[3],all_pts[0],idx+3,idx,2,n_pts,nq_idx,all_pts[7])) {
             //save the new mid_edge index
             all_pts[7] = n_pts;
             //create the Edges with parent neighbor
@@ -269,6 +269,11 @@ namespace Clobscode
              //update Quad neighbor info in EdgeInfo
              (MapEdges->find(QuadEdge (idx1,mid_idx))->second)[pos] = q1;
              (MapEdges->find(QuadEdge (idx2,mid_idx))->second)[pos] = q2;
+             
+             cout << "Edge already split. Info\n";
+             cout << "  for (" << idx1 << "," << mid_idx << ") -> " << q1 << "\n";
+             cout << "  for (" << idx2 << "," << mid_idx << ") -> " << q2 << "\n";
+             
              return false;
          }
          
