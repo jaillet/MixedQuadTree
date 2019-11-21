@@ -61,6 +61,18 @@ namespace Clobscode
     void SplitVisitor::setClipping(vector<vector<Point3D> > &clipping) {
         this->clipping = &clipping;
     }
+    
+    void SplitVisitor::setProcessedQuadVector(vector<Quadrant> &proQuadVec) {
+        this->proQuadVec = &proQuadVec;
+    }
+    
+    void SplitVisitor::setMapProcessed(map<unsigned int, unsigned int> &proQuadMap) {
+        this->proQuadMap = &proQuadMap;
+    }
+    
+    void SplitVisitor::setToBalanceList(list<pair<unsigned int,unsigned int> > &unBalanced) {
+        this->unBalanced = &unBalanced;
+    }
 
     bool SplitVisitor::visit(Quadrant *o)
     {
@@ -82,33 +94,42 @@ namespace Clobscode
         const Point3D &min = points->at(pi[0]).getPoint();
         const Point3D &max = points->at(pi[2]).getPoint();
         const Point3D avg = (max-min)/2 + min;
+        
+        unsigned int son_rl = o->getRefinementLevel() + 1;
 
         //inserting node 4 between nodes 0 and 1
         unsigned int nq_idx;
         if (splitEdge(all_pts[0],all_pts[1],idx,idx+1,1,n_pts,nq_idx,all_pts[4])) {
-            
-            cout << "edge (" << all_pts[0] << "," << all_pts[1] << ") not split.";
-            cout << " Adding midpoint " << n_pts << "\n";
             
             //save the new mid_edge index
             all_pts[4] = n_pts;
             //create the Edges with parent neighbor
             MapEdges->emplace(QuadEdge (all_pts[0],n_pts,true), EdgeInfo (0,idx,nq_idx));
             MapEdges->emplace(QuadEdge (all_pts[1],n_pts,true), EdgeInfo (0,idx+1,nq_idx));
+            
+            /*cout << "New neighbor info (" << all_pts[0] << "," << n_pts << ")->(";
+            cout << idx << "," << nq_idx << ")\n";
+            cout << "New neighbor info (" << all_pts[1] << "," << n_pts << ")->(";
+            cout << idx+1 << "," << nq_idx << ")\n";
+            */
+            
             //increase the index
             n_pts++;
             //the coordinates of node 8 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (avg[0],min[1],avg[2]));
+            //We have to check if neighbor Quad is unBalanced
+            auto found = proQuadMap->find(nq_idx);
+            if (found!=proQuadMap->end()) {
+                unsigned int nrl = (proQuadVec->at(found->second)).getRefinementLevel();
+                int diff = nrl - son_rl;
+                
+                if (diff>1 or diff<-1) {
+                    unBalanced->push_back(*found);
+                    //cout << "(" << idx << "," << idx+1 << " " << found->first << ")";
+                }
+            }
         }
-        
-        //inserting node 4 between nodes 0 and 1
-        /*if (splitEdge(all_pts[0],all_pts[1],n_pts,all_pts[4],idx,idx+1,1)) {
-            //the coordinates of node 8 must be computed and added to
-            //new_pts list of points
-            new_pts->push_back(Point3D (avg[0],min[1],avg[2]));
-        }*/
-        
         
         //inserting node 5 between nodes 1 and 2
         if (splitEdge(all_pts[1],all_pts[2],idx+1,idx+2,1,n_pts,nq_idx,all_pts[5])) {
@@ -117,19 +138,30 @@ namespace Clobscode
             //create the Edges with parent neighbor
             MapEdges->emplace(QuadEdge (all_pts[1],n_pts,true), EdgeInfo (0,idx+1,nq_idx));
             MapEdges->emplace(QuadEdge (all_pts[2],n_pts,true), EdgeInfo (0,idx+2,nq_idx));
+            
+            /*cout << "New neighbor info (" << all_pts[1] << "," << n_pts << ")->(";
+            cout << idx+1 << "," << nq_idx << ")\n";
+            cout << "New neighbor info (" << all_pts[2] << "," << n_pts << ")->(";
+            cout << idx+2 << "," << nq_idx << ")\n";
+            */
+            
             //increase the index
             n_pts++;
             //the coordinates of node 9 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (max[0],avg[1],avg[2]));
+            //We have to check if neighbor Quad is unBalanced
+            auto found = proQuadMap->find(nq_idx);
+            if (found!=proQuadMap->end()) {
+                unsigned int nrl = (proQuadVec->at(found->second)).getRefinementLevel();
+                int diff = nrl - son_rl;
+                
+                if (diff>1 or diff<-1) {
+                    unBalanced->push_back(*found);
+                    //cout << "(" << idx+1 << "," << idx+2 << " " << found->first << ")";
+                }
+            }
         }
-        
-        //inserting node 5 between nodes 1 and 2
-        /*if (splitEdge(all_pts[1],all_pts[2],n_pts,all_pts[5],idx+1,idx+2,1)) {
-            //the coordinates of node 9 must be computed and added to
-            //new_pts list of points
-            new_pts->push_back(Point3D (max[0],avg[1],avg[2]));
-        }*/
         
         //inserting node 6 between nodes 2 and 3
         if (splitEdge(all_pts[2],all_pts[3],idx+2,idx+3,2,n_pts,nq_idx,all_pts[6])) {
@@ -138,19 +170,30 @@ namespace Clobscode
             //create the Edges with parent neighbor
             MapEdges->emplace(QuadEdge (all_pts[2],n_pts,true), EdgeInfo (0,nq_idx,idx+2));
             MapEdges->emplace(QuadEdge (all_pts[3],n_pts,true), EdgeInfo (0,nq_idx,idx+3));
+            
+            /*cout << "New neighbor info (" << all_pts[2] << "," << n_pts << ")->(";
+            cout << nq_idx << "," << idx+2 << ")\n";
+            cout << "New neighbor info (" << all_pts[3] << "," << n_pts << ")->(";
+            cout << nq_idx << "," << idx+3 << ")\n";
+            */
+            
             //increase the index
             n_pts++;
             //the coordinates of node 10 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (avg[0],max[1],avg[2]));
+            //We have to check if neighbor Quad is unBalanced
+            auto found = proQuadMap->find(nq_idx);
+            if (found!=proQuadMap->end()) {
+                unsigned int nrl = (proQuadVec->at(found->second)).getRefinementLevel();
+                int diff = nrl - son_rl;
+                
+                if (diff>1 or diff<-1) {
+                    unBalanced->push_back(*found);
+                    //cout << "(" << idx+2 << "," << idx+3 << " " << found->first << ")";
+                }
+            }
         }
-        
-        //inserting node 6 between nodes 2 and 3
-        /*if (splitEdge(all_pts[2],all_pts[3],n_pts,all_pts[6],idx+2,idx+3,2)) {
-            //the coordinates of node 10 must be computed and added to
-            //new_pts list of points
-            new_pts->push_back(Point3D (avg[0],max[1],avg[2]));
-        }*/
         
         //inserting node 7 between nodes 3 and 0
         if (splitEdge(all_pts[3],all_pts[0],idx+3,idx,2,n_pts,nq_idx,all_pts[7])) {
@@ -159,19 +202,30 @@ namespace Clobscode
             //create the Edges with parent neighbor
             MapEdges->emplace(QuadEdge (all_pts[3],n_pts,true), EdgeInfo (0,nq_idx,idx+3));
             MapEdges->emplace(QuadEdge (all_pts[0],n_pts,true), EdgeInfo (0,nq_idx,idx));
+        
+            /*cout << "New neighbor info (" << all_pts[3] << "," << n_pts << ")->(";
+            cout << nq_idx << "," << idx+3 << ")\n";
+            cout << "New neighbor info (" << all_pts[0] << "," << n_pts << ")->(";
+            cout << nq_idx << "," << idx << ")\n";
+            */
+            
             //increase the index
             n_pts++;
             //the coordinates of node 11 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (min[0],avg[1],avg[2]));
+            //We have to check if neighbor Quad is unBalanced
+            auto found = proQuadMap->find(nq_idx);
+            if (found!=proQuadMap->end()) {
+                unsigned int nrl = (proQuadVec->at(found->second)).getRefinementLevel();
+                int diff = nrl - son_rl;
+                
+                if (diff>1 or diff<-1) {
+                    unBalanced->push_back(*found);
+                    //cout << "(" << idx+3 << "," << idx << " " << found->first << ")";
+                }
+            }
         }
-        
-        //inserting node 7 between nodes 3 and 0
-        /*if (splitEdge(all_pts[0],all_pts[3],n_pts,all_pts[7],idx+3,idx,2)) {
-            //the coordinates of node 11 must be computed and added to
-            //new_pts list of points
-            new_pts->push_back(Point3D (min[0],avg[1],avg[2]));
-        }*/
 
         //of course all the intern edges and mid point were never inserted
         //before, so this task is performed without asking
@@ -266,19 +320,48 @@ namespace Clobscode
          mid_idx = (help->second)[0];
          
          if (mid_idx!=0) {
-             //update Quad neighbor info in EdgeInfo
-             (MapEdges->find(QuadEdge (idx1,mid_idx))->second)[pos] = q1;
-             (MapEdges->find(QuadEdge (idx2,mid_idx))->second)[pos] = q2;
              
-             cout << "Edge already split. Info\n";
+             //cout << "\nedge nodes:" << idx1 << "," << idx2 << "," << mid_idx << "\n";
+             
+             //update Quad neighbor info in EdgeInfo
+             auto e1 = MapEdges->find(QuadEdge (idx1,mid_idx));
+             //cout << "updating edge " << e1->first << " from " << e1->second << " to ";
+             e1->second[pos] = q1;
+             //cout << e1->second << "\n";
+             
+             auto e2 = MapEdges->find(QuadEdge (idx2,mid_idx));
+             //cout << "updating edge " << e2->first << " from " << e2->second << " to ";
+             e2->second[pos] = q2;
+             //cout << e2->second << "\n";
+             
+             //Important note. It is possible that edges (idxX,mid_idx) have been already
+             //split. In order to mantain updated info, it is necessary to chek for
+             //evetual edge sons and make them congruent.
+             
+             auto sub1 = MapEdges->find(QuadEdge (idx1,mid_idx));
+             unsigned int sub_mid = (sub1->second)[0];
+             if (sub_mid!=0) {
+                 (MapEdges->find(QuadEdge (idx1,sub_mid))->second)[pos] = q1;
+                 //cout << "updating (" << idx1 << "," << sub_mid << " ne " << q1 << ")\n";
+                 (MapEdges->find(QuadEdge (mid_idx,sub_mid))->second)[pos] = q1;
+                 //cout << "updating (" << mid_idx << "," << sub_mid << " ne " << q1 << ")\n";
+             }
+             
+             auto sub2 = MapEdges->find(QuadEdge (idx2,mid_idx));
+             sub_mid = (sub2->second)[0];
+             if (sub_mid!=0) {
+                 (MapEdges->find(QuadEdge (idx2,sub_mid))->second)[pos] = q2;
+                 //cout << "updating (" << idx2 << "," << sub_mid << " ne " << q2 << ")\n";
+                 (MapEdges->find(QuadEdge (mid_idx,sub_mid))->second)[pos] = q2;
+                 //cout << "updating (" << mid_idx << "," << sub_mid << " ne " << q2 << ")\n";
+             }
+             
+             /*cout << "Edge already split. Info\n";
              cout << "  for (" << idx1 << "," << mid_idx << ") -> " << q1 << "\n";
-             cout << "  for (" << idx2 << "," << mid_idx << ") -> " << q2 << "\n";
+             cout << "  for (" << idx2 << "," << mid_idx << ") -> " << q2 << "\n";*/
              
              return false;
          }
-         
-         //update the main edge idx1-idx2 without any Quad at pos
-         (help->second)[pos] = 0;
          
          //Save in the current edge the new mid_index
          (help->second)[0] = nidx;

@@ -46,6 +46,7 @@ using std::vector;
 using std::list;
 using std::map;
 using std::set;
+using std::pair;
 
 
 namespace Clobscode
@@ -69,6 +70,12 @@ namespace Clobscode
         void setStartIndex(const unsigned int &sidx);
         
         void setClipping(vector<vector<Point3D> > &clipping);
+        
+        void setProcessedQuadVector(vector<Quadrant> &proQuadVec);
+        
+        void setMapProcessed(map<unsigned int, unsigned int> &proQuadMap);
+        
+        void setToBalanceList(list<pair<unsigned int,unsigned int> > &unBalanced);
 
     protected:
         
@@ -76,9 +83,11 @@ namespace Clobscode
         const vector<MeshPoint> *points;
         list<Point3D> *new_pts;
         map<QuadEdge, EdgeInfo> *MapEdges;
-        
         vector<vector<unsigned int> > *new_eles;
         vector<vector<Point3D> > *clipping;
+        vector<Quadrant> *proQuadVec;
+        map<unsigned int, unsigned int> *proQuadMap;
+        list<pair<unsigned int,unsigned int> > *unBalanced;
         
         unsigned int idx;
 

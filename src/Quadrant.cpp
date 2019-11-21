@@ -32,9 +32,9 @@ namespace Clobscode
 	
 	//--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-	Quadrant::Quadrant(vector<unsigned int> &epts, 
-                   const unsigned short &ref_level)
-        :pointindex(epts),ref_level(ref_level),
+	Quadrant::Quadrant(vector<unsigned int> &epts, const unsigned short &ref_level,
+                       const unsigned int &q_id)
+        :pointindex(epts),ref_level(ref_level),q_id(q_id),
           surface(false),max_dis(numeric_limits<double>::infinity()) {
         
         /***** BEGIN Debugging variables *******/

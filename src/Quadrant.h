@@ -62,8 +62,8 @@ namespace Clobscode
 
 	public:
 		
-		Quadrant(vector<unsigned int> &epts, 
-			   const unsigned short &ref_level);
+		Quadrant(vector<unsigned int> &epts, const unsigned short &ref_level,
+                 const unsigned int &q_id);
 		
 		virtual ~Quadrant();
 
@@ -114,6 +114,8 @@ namespace Clobscode
         virtual list<unsigned int>& getIntersectedFeatures();
         virtual bool hasIntersectedFeatures() const;
         
+        virtual const unsigned int&getIndex();
+        
         
         /***** BEGIN Debugging methods *******/
         virtual void setDebugging();
@@ -133,6 +135,9 @@ namespace Clobscode
         //the level at which this Quadrant is found in the
         //the tree structure (Quadtree). Used for optimization
 		unsigned short ref_level;
+        
+        //the quad unique identifier
+        unsigned int q_id;
 		
 		bool surface;
 		
@@ -286,6 +291,10 @@ namespace Clobscode
     inline void Quadrant::setIntersectedEdges(list<unsigned int> &iedges){
         intersected_edges = iedges;
 	}
+    
+    inline const unsigned int&Quadrant::getIndex() {
+        return q_id;
+    }
 	
     std::ostream& operator<<(ostream& o, const Quadrant &q);
 }

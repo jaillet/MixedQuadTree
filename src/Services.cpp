@@ -622,7 +622,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
             std::fscanf(file,"%u",&ni);
             ofcs.push_back(ni);
         }
-        Quadrant Quadrant (opts,orl);
+        Quadrant Quadrant (opts,orl,no);
         Quadrant.setIntersectedEdges(ofcs);
         Quadrants.push_back(Quadrant);
 
