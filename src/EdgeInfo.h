@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
 #include <iostream>
 #include <vector>
 #include <set>
+#include <limits>
 
 using std::vector;
 using std::ostream;
