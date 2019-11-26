@@ -121,6 +121,7 @@ int main(int argc,char** argv){
     bool getfem=false, gmshformat=false, vtkformat=false, Quadrant_start=false, m3dfor=false;
     bool mvmfor=false, offfor=false;
     bool decoration=false; //if supported, write quality attributes to output file
+    bool region_ref = false;//to write region refinement in vtk format
     
     //for reading an Quadrant mesh as starting point.
     vector<MeshPoint> oct_points;
@@ -280,9 +281,9 @@ int main(int argc,char** argv){
                 Quadrant_start = true;
                 Services::ReadQuadMesh(argv[i+1], oct_points, oct_Quadrants,
                                          oct_edges,oct_ele_link,gt,cminrl,omaxrl);
-                if (ref_level<omaxrl) {
+                /*if (ref_level<omaxrl) {
                     ref_level = omaxrl;
-                }
+                }*/
                 i++;
                 break;
             case 'l':
@@ -335,17 +336,16 @@ int main(int argc,char** argv){
 	Clobscode::Mesher mesher;
     std::shared_ptr<Clobscode::FEMesh> output;
     
+    //Boundary: add in first position a Region dedicated to handle correctly the boundary
+    //see if force rotation enable
+    RefinementBoundaryRegion *rb =new RefinementBoundaryRegion(inputs.at(0),0);//std::numeric_limits<unsigned short>::max());
+    //    if (argv[i][2]=='r') {
+    //        rb->forceInputRotation();
+    //    }
+    all_regions.push_front(rb);
+    
     // and next proceed with mesh generation or refinement
     if (!Quadrant_start) {
-        
-
-        //Boundary: add in first position a Region dedicated to handle correctly the boundary
-        //see if force rotation enable
-        RefinementBoundaryRegion *rb =new RefinementBoundaryRegion(inputs.at(0),0);//std::numeric_limits<unsigned short>::max());
-        //    if (argv[i][2]=='r') {
-        //        rb->forceInputRotation();
-        //    }
-        all_regions.push_front(rb);
 
         output = mesher.generateMesh(inputs.at(0),ref_level,out_name,all_regions,decoration);
     }

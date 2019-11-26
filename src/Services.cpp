@@ -121,8 +121,7 @@ bool Services::readSurfaceRefinementRegion(string name,
                                            const unsigned short &rrl){
 
     vector<Polyline> tmp;
-    tmp.reserve(1);
-    if (!ReadMdlMesh(name,tmp)) {
+    if (!ReadPolyFile(name,tmp)) {
         return false;
     }
     RefinementRegion *rr = new RefinementSurfaceRegion(tmp[0],rrl);
@@ -622,7 +621,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
             std::fscanf(file,"%u",&ni);
             ofcs.push_back(ni);
         }
-        Quadrant Quadrant (opts,orl,no);
+        Quadrant Quadrant (opts,orl,i);
         Quadrant.setIntersectedEdges(ofcs);
         Quadrants.push_back(Quadrant);
 
@@ -726,9 +725,11 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
             nopts=4;
             fprintf(f,"4 ");
         }
+        
         for (unsigned int j=0; j<nopts; j++) {
             fprintf(f,"%u ",opts[j]);
         }
+        
         fprintf(f,"%u\n",Quadrants[i].getRefinementLevel());
         list<unsigned int> ofcs = Quadrants[i].getIntersectedEdges();
         list<unsigned int>::iterator fiter;

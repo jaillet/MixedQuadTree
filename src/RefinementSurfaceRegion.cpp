@@ -29,8 +29,9 @@ namespace Clobscode
 {	
 	//--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    RefinementSurfaceRegion::RefinementSurfaceRegion(const Polyline &input, const unsigned short &level)
-        :RefinementRegion(level,true,true),ply(input)
+    RefinementSurfaceRegion::RefinementSurfaceRegion(const Polyline &inputs,
+                                                     const unsigned short &level)
+        :RefinementRegion(level,true,true),ply(inputs)
 	{
 //        this->ply = input;
 //		refine_level = level;
@@ -98,7 +99,7 @@ namespace Clobscode
         }
 
         //(Point3D &p1, Point3D &p2), diagonal extremities
-        const Point3D &p1 = points[oct.getPointIndex()[0]].getPoint();
+        /*const Point3D &p1 = points[oct.getPointIndex()[0]].getPoint();
         const Point3D &p2 = points[oct.getPointIndex()[2]].getPoint();
 
         //test if any node of the mesh is inside the Quadrant
@@ -124,8 +125,7 @@ namespace Clobscode
             if (edgeClipping(p1,p2,p3,p4)) {
                 return true;
             }
-        }
-                
+        }*/
         return false;
 	}
 

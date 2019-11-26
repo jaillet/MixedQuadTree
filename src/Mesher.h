@@ -86,12 +86,14 @@ namespace Clobscode
 	protected:
         
         virtual void splitQuadrants(const unsigned short &rl, Polyline &input,
-                                  list<unsigned int> &roctli,
-                                  list<RefinementRegion *> &all_reg, const string &name,
-                                  const unsigned short &minrl, const unsigned short &omaxrl);
+                                    list<unsigned int> &roctli,
+                                    list<RefinementRegion *> &all_reg, const string &name,
+                                    const unsigned short &minrl, const unsigned short &maxrl);
 		
         virtual void generateQuadtreeMesh(const unsigned short &rl, Polyline &input,
-                                        const list<RefinementRegion *> &all_reg, const string &name);
+                                          const list<RefinementRegion *> &all_reg,
+                                          const string &name, const unsigned short &minrl,
+                                          const unsigned short &givenmaxrl=0);
 
         virtual bool isItIn(const Polyline &mesh, const list<unsigned int> &faces,
                             const vector<Point3D> &coords) const;

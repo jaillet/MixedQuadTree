@@ -50,7 +50,7 @@ namespace Clobscode
 	public:
 		
 		// Construction / destruction
-        RefinementSurfaceRegion(const Polyline &input, const unsigned short &level);
+        RefinementSurfaceRegion(const Polyline &inputs, const unsigned short &level);
 		
 		virtual ~RefinementSurfaceRegion();
         
