@@ -32,6 +32,7 @@
 #include "RefinementSurfaceRegion.h"
 #include "RefinementInputSurfaceRegion.h"
 #include "RefinementAllRegion.h"
+#include "RefinementFunctionRegion.h"
 #include "MeshPoint.h"
 #include "Quadrant.h"
 #include "QuadEdge.h"

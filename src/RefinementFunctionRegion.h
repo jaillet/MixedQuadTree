@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2019>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -17,43 +17,37 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
  */
 /**
-* @file RefinementAllRegion.h
+* @file RefinementFunctionRegion.h
 * @author Claudio Lobos, Fabrice Jaillet
 * @version 0.1
 * @brief
 **/
 
-#ifndef RefinementAllRegion_h
-#define RefinementAllRegion_h 1
+#ifndef RefinementFunctionRegion_h
+#define RefinementFunctionRegion_h 1
 
 #include <vector>
-#include <set>
 #include <iostream>
 #include "RefinementRegion.h"
-#include "Polyline.h"
-#include "Quadrant.h"
 
 using Clobscode::Point3D;
 using std::vector;
 using std::cout;
-using std::set;
 using Clobscode::RefinementRegion;
-using Clobscode::Polyline;
 using Clobscode::Quadrant;
 
 namespace Clobscode
 {
-	class RefinementAllRegion : public RefinementRegion
+    class RefinementFunctionRegion : public RefinementRegion
 	{
 	public:
-		
-		// Construction / destruction
-		RefinementAllRegion(const unsigned short &level);
-		
-		virtual ~RefinementAllRegion();
+				
+        RefinementFunctionRegion(const unsigned short &level);
+				
+        virtual ~RefinementFunctionRegion();
         
         virtual GeometricTransform rotateWithinYou(Polyline &input) override;
-        
+		
         virtual void rotate(GeometricTransform &gt) override;
 		
         virtual bool intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &q) const override;
