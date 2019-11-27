@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2019>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -30,6 +30,8 @@
 #include "Services.h"
 #include "RefinementCubeRegion.h"
 #include "RefinementSurfaceRegion.h"
+#include "RefinementFunctionRegion.h"
+#include "RefinementDrawingRegion.h"
 #include "RefinementInputSurfaceRegion.h"
 #include "RefinementBoundaryRegion.h"
 #include "RefinementAllRegion.h"
@@ -51,6 +53,8 @@ using Clobscode::RefinementSurfaceRegion;
 using Clobscode::RefinementBoundaryRegion;
 using Clobscode::RefinementAllRegion;
 using Clobscode::RefinementInputSurfaceRegion;
+using Clobscode::RefinementFunctionRegion;
+using Clobscode::RefinementDrawingRegion;
 using Clobscode::Point3D;
 using Clobscode::Services;
 using Clobscode::EdgeInfo;
@@ -77,6 +81,9 @@ void endMsg(){
     cerr << "    -b Refine block regions provided in file file.reg\n";
     cerr << "    -r Refine surface region. Will refine all the elements\n";
     cerr << "       in the provided input_surface at level rl\n";
+    cerr << "    -f Refine Quadrants that interects a function at level rl\n";
+    cerr << "    -w Refine Quadrants that interects a Drawing a level rl\n";
+    cerr << "       Segments (not necessarily connected) are given in a Polyline file.\n";
     cerr << "    -q if supported (only VTK by now), write quality attributes to output file.\n";
     cerr << "    -g save output mesh in GetFem format (gmf) \n";
     cerr << "    -v save output mesh + input in VTK ASCII format (vtk)\n";
@@ -147,6 +154,7 @@ int main(int argc,char** argv){
             case 'i':
             case 'o':
             case 'q':
+            case 'w':
                 inout = true;
                 break;
             default:
@@ -269,24 +277,49 @@ int main(int argc,char** argv){
                 }
                 i++;
                 break;
-            case 'r':
-                rl = atoi(argv[i+2]);
-                Services::readSurfaceRefinementRegion(argv[i+1],all_regions,rl);
-                if (ref_level<rl) {
-                    ref_level = rl;
-                }
-                i+=2;
-                break;
-            case 'c':
-                Quadrant_start = true;
-                Services::ReadQuadMesh(argv[i+1], oct_points, oct_Quadrants,
-                                         oct_edges,oct_ele_link,gt,cminrl,omaxrl);
-                /*if (ref_level<omaxrl) {
+        case 'r':
+            rl = atoi(argv[i+2]);
+            Services::readSurfaceRefinementRegion(argv[i+1],all_regions,rl);
+            if (ref_level<rl) {
+                ref_level = rl;
+            }
+            i+=2;
+            break;
+        case 'f':
+            rl = atoi(argv[i+1]);
+            if (ref_level<rl) {
+                ref_level = rl;
+            }
+            //+-10 is an arbitrary number to ensure the Bbox contains
+            //the entire input mesh
+            rr = new RefinementFunctionRegion(rl);
+
+            //see if force rotation enable
+            if (argv[i][2]=='r') {
+                rr->forceInputRotation();
+            }
+
+            all_regions.push_back(rr);
+            i++;
+            break;
+        case 'w':
+            rl = atoi(argv[i+2]);
+            Services::readDrawingRefinementRegion(argv[i+1],all_regions,rl);
+            if (ref_level<rl) {
+                ref_level = rl;
+            }
+            i+=2;
+            break;
+        case 'c':
+            Quadrant_start = true;
+            Services::ReadQuadMesh(argv[i+1], oct_points, oct_Quadrants,
+                    oct_edges,oct_ele_link,gt,cminrl,omaxrl);
+            /*if (ref_level<omaxrl) {
                     ref_level = omaxrl;
                 }*/
-                i++;
-                break;
-            case 'l':
+            i++;
+            break;
+        case 'l':
                 if (Quadrant_start) {
                     Services::ReadQuadrantList(argv[i+1],roctli,oct_ele_link);
                     list<unsigned int>::iterator oeiter;

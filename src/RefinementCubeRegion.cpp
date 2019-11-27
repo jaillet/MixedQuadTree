@@ -71,11 +71,11 @@ namespace Clobscode
 	
 	//--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
-    bool RefinementCubeRegion::intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &oct) const
+    bool RefinementCubeRegion::intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &q) const
     {
         
-        Point3D p1 = points[oct.getPointIndex()[0]].getPoint();
-        Point3D p2 = points[oct.getPointIndex()[6]].getPoint();
+        Point3D p1 = points[q.getPointIndex()[0]].getPoint();
+        Point3D p2 = points[q.getPointIndex()[2]].getPoint();
      
         //if the input mesh was rotated w.r.t. this cube, apply inverse
         
@@ -85,8 +85,7 @@ namespace Clobscode
         }
         
         if (p2[0]<=pts[0][0] || pts[1][0] <= p1[0] ||
-            p2[1]<=pts[0][1] || pts[1][1] <= p1[1] ||
-            p2[2]<=pts[0][2] || pts[1][2] <= p1[2]) {
+            p2[1]<=pts[0][1] || pts[1][1] <= p1[1]) {
             return false;
         }
         

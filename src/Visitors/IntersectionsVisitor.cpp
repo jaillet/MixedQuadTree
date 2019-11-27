@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2019>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -59,7 +59,6 @@ namespace Clobscode
     void IntersectionsVisitor::setCoords(const vector<Point3D> &coords){
         this->coords = &coords;
     }
-
 
     bool IntersectionsVisitor::visit(Quadrant *q) {
         //cout << "IntersectionsVisitor" << endl;
@@ -426,6 +425,38 @@ namespace Clobscode
 
         return sides;
     }
+
+
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    /* IntersectionsDrawingVisitor */
+    //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    IntersectionsDrawingVisitor::IntersectionsDrawingVisitor()
+        :IntersectionsVisitor()
+    {    }
+
+    bool IntersectionsDrawingVisitor::visit(Quadrant *q) {
+
+        //check intersections with all input edges
+        if (points == nullptr || ply==nullptr)
+            throw std::runtime_error(std::string("Calling IntersectionsDrawingVisitor with wrong parameters!"));
+        const vector<unsigned int> &pointindex = q->pointindex;
+
+        const vector<PolyEdge> &edges = ply->getEdges();
+        const vector<Point3D> &input_pts = ply->getPoints();
+
+        for (unsigned int j=0; j<edges.size(); j++) {
+            if (intersectsEdge(edges[j],input_pts,
+                               points->at(pointindex[0]).getPoint(),  //bbox vertices
+                               points->at(pointindex[2]).getPoint()))
+//            {
+                return true;
+//            }
+        }
+        return false;
+    }
+
 }
 
 

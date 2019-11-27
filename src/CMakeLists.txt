@@ -16,8 +16,8 @@ set(SOURCE_FILES Main
         Point3D Polyline PolyEdge  Quadrant QuadEdge EdgeInfo
 	QuadTransition QuadSurfTemplate 
         Mesher GridMesher MeshPoint
-        RefinementRegion RefinementCubeRegion RefinementSurfaceRegion
-        RefinementInputSurfaceRegion RefinementAllRegion RefinementBoundaryRegion
+	RefinementRegion RefinementFunctionRegion RefinementCubeRegion RefinementSurfaceRegion
+	RefinementInputSurfaceRegion RefinementAllRegion RefinementBoundaryRegion RefinementDrawingRegion
         GeometricTransform Services
         Visitors/Visitor Visitors/SplitVisitor  
 	Visitors/IntersectionsVisitor
