@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2019>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -71,6 +71,13 @@ namespace Clobscode
         vector<vector<Point3D>> getEdges(const Point3D &pmin, const Point3D &pmax) const;
 
 
+    };
+
+    class IntersectionsDrawingVisitor : public IntersectionsVisitor{
+
+    public:
+        IntersectionsDrawingVisitor();
+        bool visit(Quadrant *q) override;
     };
 }
 

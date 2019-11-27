@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2019>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -125,6 +125,22 @@ bool Services::readSurfaceRefinementRegion(string name,
         return false;
     }
     RefinementRegion *rr = new RefinementSurfaceRegion(tmp[0],rrl);
+    regions.push_back(rr);
+
+    return true;
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+bool Services::readDrawingRefinementRegion(string name,
+                                           list<RefinementRegion *> &regions,
+                                           const unsigned short &rrl){
+
+    vector<Polyline> tmp;
+    if (!ReadPolyFile(name,tmp)) {
+        return false;
+    }
+    RefinementRegion *rr = new RefinementDrawingRegion(tmp[0],rrl);
     regions.push_back(rr);
 
     return true;

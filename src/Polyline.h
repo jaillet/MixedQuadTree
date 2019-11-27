@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2019>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -30,7 +30,6 @@
 #include "PolyEdge.h"
 #include "Quadrant.h"
 #include "MeshPoint.h"
-//FJA no more used #include "SurfEdgeContainer.h"
 #include <limits>
 #include <map>
 #include <algorithm>    // std::sort
@@ -40,7 +39,6 @@ using std::vector;
 using std::map;
 using Clobscode::Point3D;
 using PolyMesh::PolyEdge;
-//FJA?? using SurfMesh::SurfEdgeContainer;
 
 namespace Clobscode
 {

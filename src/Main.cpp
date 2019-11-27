@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2019>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -31,6 +31,7 @@
 #include "RefinementCubeRegion.h"
 #include "RefinementSurfaceRegion.h"
 #include "RefinementFunctionRegion.h"
+#include "RefinementDrawingRegion.h"
 #include "RefinementInputSurfaceRegion.h"
 #include "RefinementBoundaryRegion.h"
 #include "RefinementAllRegion.h"
@@ -53,6 +54,7 @@ using Clobscode::RefinementBoundaryRegion;
 using Clobscode::RefinementAllRegion;
 using Clobscode::RefinementInputSurfaceRegion;
 using Clobscode::RefinementFunctionRegion;
+using Clobscode::RefinementDrawingRegion;
 using Clobscode::Point3D;
 using Clobscode::Services;
 using Clobscode::EdgeInfo;
@@ -80,6 +82,8 @@ void endMsg(){
     cerr << "    -r Refine surface region. Will refine all the elements\n";
     cerr << "       in the provided input_surface at level rl\n";
     cerr << "    -f Refine Quadrants that interects a function at level rl\n";
+    cerr << "    -w Refine Quadrants that interects a Drawing a level rl\n";
+    cerr << "       Segments (not necessarily connected) are given in a Polyline file.\n";
     cerr << "    -q if supported (only VTK by now), write quality attributes to output file.\n";
     cerr << "    -g save output mesh in GetFem format (gmf) \n";
     cerr << "    -v save output mesh + input in VTK ASCII format (vtk)\n";
@@ -150,6 +154,7 @@ int main(int argc,char** argv){
             case 'i':
             case 'o':
             case 'q':
+            case 'w':
                 inout = true;
                 break;
             default:
@@ -296,6 +301,14 @@ int main(int argc,char** argv){
 
             all_regions.push_back(rr);
             i++;
+            break;
+        case 'w':
+            rl = atoi(argv[i+2]);
+            Services::readDrawingRefinementRegion(argv[i+1],all_regions,rl);
+            if (ref_level<rl) {
+                ref_level = rl;
+            }
+            i+=2;
             break;
         case 'c':
             Quadrant_start = true;

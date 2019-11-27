@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2019>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -33,6 +33,7 @@
 #include "RefinementInputSurfaceRegion.h"
 #include "RefinementAllRegion.h"
 #include "RefinementFunctionRegion.h"
+#include "RefinementDrawingRegion.h"
 #include "MeshPoint.h"
 #include "Quadrant.h"
 #include "QuadEdge.h"
@@ -65,6 +66,12 @@ public:
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
     static bool readSurfaceRefinementRegion(string name,
+                                            list<RefinementRegion *> &regions,
+                                            const unsigned short &rrl);
+
+    //-------------------------------------------------------------------
+    //-------------------------------------------------------------------
+    static bool readDrawingRefinementRegion(string name,
                                             list<RefinementRegion *> &regions,
                                             const unsigned short &rrl);
 
