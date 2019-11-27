@@ -17,13 +17,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.txt>
  */
 /**
-* @file RefinementAllRegion.cpp
+* @file RefinementFunctionRegion.cpp
 * @author Claudio Lobos, Fabrice Jaillet
 * @version 0.1
 * @brief
 **/
 
 #include "RefinementFunctionRegion.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 namespace Clobscode
 {
@@ -67,13 +69,14 @@ namespace Clobscode
     {
         uint nbIn=0;
         //Ellipse parameters
-        Point3D center(0.5,0.75,0.0);
+        Point3D center(0.75,0.5,0.0);
         double xradius=.25,yradius=.5;
 
         // Check whether some points are inside the ellipse
         for (auto quaNoIdx:q.getPointIndex()){
+            // 1.001 is to enclose points laying right on the curve
             if (pow((points[quaNoIdx].getPoint()[0]-center[0])/xradius,2) +
-                    pow((points[quaNoIdx].getPoint()[1]-center[1])/yradius,2 )<= 1)
+                    pow((points[quaNoIdx].getPoint()[1]-center[1])/yradius,2 )<= 1.001)
                 ++nbIn;
         }
 
@@ -84,9 +87,14 @@ namespace Clobscode
             // test if ellipse center is inside Quad
             const Point3D& p1 = points[q.getPointIndex()[0]].getPoint();
             const Point3D& p2 = points[q.getPointIndex()[2]].getPoint();
-            if ( p1[0]<=center[0] && center[0]<=p2[0] &&
-                 p1[1]<=center[1] && center[1]<=p2[1]) {
-                return true;
+
+            // sample the ellipse and test whether 1 point is inside the Quad
+            for (double t=0; t< M_PI; t+= M_PI/20.) {
+                Point3D pt(center[0]+xradius*cos(t),center[1]+yradius*sin(t));
+                if ( p1[0]<=pt[0] && pt[0]<=p2[0] &&
+                     p1[1]<=pt[1] && pt[1]<=p2[1]) {
+                    return true;
+                }
             }
         }
         return false;
