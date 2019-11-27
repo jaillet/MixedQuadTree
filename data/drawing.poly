@@ -1,0 +1,16 @@
+# A Drawing in 2D, no attributes, one boundary marker.
+5 2 0 1
+# Outer box has these vertices:
+ 1   0.2 0.8   0
+ 2   0.3 0.1   0
+ 3   0.5 0.2   0
+ 4   0.7 0.1   0
+ 5   0.8 0.8   0
+# segments with boundary markers.
+3 1
+ 1   1 2   5
+ 2   2 3   6
+ 3   4 5   7
+# One hole in the middle of the inner square.
+0
+ 0
