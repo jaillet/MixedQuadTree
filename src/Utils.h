@@ -26,6 +26,7 @@
 #ifndef Utils_h
 #define Utils_h 1
 
+
 namespace Clobscode
 {
 #define BOOL(x) (!(!(x)))
