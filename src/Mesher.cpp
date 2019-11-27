@@ -991,23 +991,15 @@ namespace Clobscode
                         continue;
                     }
                     
+                    //in the case of a Region Refinement (a surface) this will change
+                    //the state of inregion = true.
                     if ((*reg_iter)->intersectsQuadrant(points,quad)) {
                         to_refine = true;
                     }
                 }
                 
-                /*unsigned int qidx = quad.getIndex();
-                if (qidx==0 or qidx==5 or qidx==9) {
-                    to_refine = true;
-                }*/
-                
-                //unsigned int cqidx = quad.getIndex();
-                //cout << " " << cqidx;
-                
                 //now if refinement is not needed, we add the Quadrant as it was.
                 if (!to_refine) {
-                    //cout << "old quad " << quad.getIndex() << " now is at ";
-                    //cout << processed.size() << endl;
                     idx_pos_map[quad.getIndex()] = processed.size();
                     processed.push_back(quad);
                     continue;
@@ -1026,9 +1018,12 @@ namespace Clobscode
 
                     quad.accept(&sv);
                     
+                    //bool reg_state = quad.isInRegion();
+                    
                     if (inter_edges.empty()) {
                         for (unsigned int j=0; j<split_elements.size(); j++) {
                             Quadrant o (split_elements[j], qrl+1, new_q_idx++);
+                            //o.setInRegionState(reg_state);
                             new_candidates.push_back(o);
                         }
                     }
@@ -1047,6 +1042,7 @@ namespace Clobscode
                             iv.setCoords(clipping_coords[j]);
                             
                             if (o.accept(&iv)) {
+                                //o.setInRegionState(reg_state);
                                 new_candidates.push_back(o);
                             }
                             else {
@@ -1055,6 +1051,7 @@ namespace Clobscode
                                 //Only in the first case add it to new_Quadrants.
                                 //Test this with parent Quadrant faces only.
                                 if (isItIn(input,inter_edges,clipping_coords[j])) {
+                                    //o.setInRegionState(reg_state);
                                     new_candidates.push_back(o);
                                 }
                                 else {
@@ -1098,6 +1095,8 @@ namespace Clobscode
             
             cout << "\n\n\nBalancing\n";*/
             
+            unsigned int tbiter = 0;
+            
             //Refine non balanced Quads
             while (!toBalance.empty()) {
                 
@@ -1109,9 +1108,20 @@ namespace Clobscode
                 while (!tmp_toBalance.empty()) {
                     unsigned int key = tmp_toBalance.begin()->first;
                     unsigned int val = tmp_toBalance.begin()->second;
+                    tmp_toBalance.pop_front();
+
+                    auto delquad = idx_pos_map.find(key);
+                    if (delquad == idx_pos_map.end()) {
+                        //Note: let us say that quad N is in the tmp_to_balance list at current
+                        //iteration. Before arriving to it, a neighbor of N is refined to such
+                        //level that adds N to list to_balance (for the next iteration). However
+                        //as N is in the current tmp_to_balance it will be removed from the
+                        //map and in next iteration it will be attempt to be split and removed
+                        //once more in the mesh. Therefore, this if avoids this case.
+                        continue;
+                    }
                     
                     Quadrant quad = processed[val];
-                    tmp_toBalance.pop_front();
                     list<unsigned int> &inter_edges = quad.getIntersectedEdges();
                     unsigned short qrl = quad.getRefinementLevel();
                     
@@ -1179,8 +1189,9 @@ namespace Clobscode
                     }
                     //To mantain congruency in the map, we must erase all
                     //Quadrants (index) that have been split due to balancing.
-                    auto delquad = idx_pos_map.find(key);
-                    idx_pos_map.erase(delquad);
+                    if (delquad != idx_pos_map.end()) {
+                        idx_pos_map.erase(delquad);
+                    }
                 }
             }
             

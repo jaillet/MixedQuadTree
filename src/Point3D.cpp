@@ -103,12 +103,12 @@ namespace Clobscode
             result=360.-result;
         }
 
-        if (V1.Norm()<10E-6) {
+        if (V1.Norm()<1E-6) {
             cerr << "Warning Point3D::angle3Points V1 " << V1 << "\nangle: ";
             cerr << result << "\n";
         }
         
-        if (V2.Norm()<10E-6) {
+        if (V2.Norm()<1E-6) {
             cerr << "Warning Point3D::angle3Points V2 " << V2 << "\nangle: ";
             cerr << result << "\n";
         }

@@ -89,43 +89,29 @@ namespace Clobscode
 
     bool RefinementSurfaceRegion::intersectsQuadrant(const vector<MeshPoint> &points, Quadrant &oct) const
     {
+     
+        /*if (oct.isInRegion()) {
+            return true;
+        }*/
+        
+        //unsigned int nin = 0;
         
         //test if any node of the Quadrant is Inside the Mesh.
         for (unsigned int i=0; i< oct.getPointIndex().size(); i++) {
             if (ply.pointIsInMesh(points[oct.getPointIndex(i)].getPoint())) {
                 return true;
+                //nin++;
             }
-
-        }
-
-        //(Point3D &p1, Point3D &p2), diagonal extremities
-        /*const Point3D &p1 = points[oct.getPointIndex()[0]].getPoint();
-        const Point3D &p2 = points[oct.getPointIndex()[2]].getPoint();
-
-        //test if any node of the mesh is inside the Quadrant
-        vector<Point3D> tmpts = ply.getPoints();
-        for (unsigned int i=0; i<tmpts.size(); i++) {
-            if (tmpts[i][0]<p1[0] || p2[0]<tmpts[i][0]) {
-                continue;
-            }
-            if (tmpts[i][1]<p1[1] || p2[1]<tmpts[i][1]) {
-                continue;
-            }
-            if (tmpts[i][2]<p1[2] || p2[2]<tmpts[i][2]) {
-                continue;
-            }
-            return true;
         }
         
-        //to implement: adapt from Quadrant - triangle intersection test in order to
-        //test if an edge (of Region Surface Mesh) intersects the Quadrant.
-        for (auto &edge:ply.getEdges()) {
-            const Point3D &p3 = ply.getPoints()[edge[0]];
-            const Point3D &p4 = ply.getPoints()[edge[1]];
-            if (edgeClipping(p1,p2,p3,p4)) {
-                return true;
-            }
+        /*if (nin==oct.getPointIndex().size()) {
+            oct.setInRegionState(true);
+        }
+        
+        if (nin>0) {
+            return true;
         }*/
+        
         return false;
 	}
 
@@ -255,8 +241,8 @@ namespace Clobscode
     //--------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------
     bool RefinementSurfaceRegion::edgeClipping(const Point3D &oct_p1, const Point3D &oct_p2,
-                                                   const Point3D &seg_p1, const Point3D &seg_p2) const
-	{
+                                               const Point3D &seg_p1, const Point3D &seg_p2)
+    const {
         //This code is based on the Cohen-Sutherland algorithm
 		//for image clipping over a given window. In this case
 		//the "window" is the Quadrant (cube), and the "line"

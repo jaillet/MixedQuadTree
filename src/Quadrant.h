@@ -114,6 +114,9 @@ namespace Clobscode
         virtual list<unsigned int>& getIntersectedFeatures();
         virtual bool hasIntersectedFeatures() const;
         
+        //virtual void setInRegionState(const bool &value);
+        //virtual const bool &isInRegion();
+        
         virtual const unsigned int&getIndex();
         
         
@@ -139,7 +142,9 @@ namespace Clobscode
         //the quad unique identifier
         unsigned int q_id;
 		
-		bool surface;
+        //inregion is set to true when this quadrant, and therfore their childs,
+        //intersects a RefinementRegion, allowing to avoid asking again.
+        bool surface;//, inregion;
 		
         /***** BEGIN Debugging variables *******/
         bool debugging;
@@ -157,6 +162,14 @@ namespace Clobscode
         return debugging;
     }
     /***** END Debugging methods *******/
+    
+    /*inline void Quadrant::setInRegionState(const bool &value) {
+        inregion = value;
+    }
+    
+    inline const bool &Quadrant::isInRegion() {
+        return inregion;
+    }*/
     
     
     inline void Quadrant::setIntersectedFeatures(const list<unsigned int> &iFeatures) {
