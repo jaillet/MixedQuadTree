@@ -1,0 +1,16 @@
+# A unit squared box with 4 points in 2D, no attributes, one boundary marker.
+4 2 0 1
+# Outer box has these vertices:
+ 1   0 -1   0
+ 2   1 -1   0
+ 3   1  0   0
+ 4   0  0  33     # A special marker for this point.
+# Four segments with boundary markers.
+4 1
+ 1   1 2   5      # bottom side of outer box.
+ 2   2 3   5      # left side of outer box.
+ 3   3 4   5      # top side of outer box.
+ 4   4 1   5      # right side of outer box.
+# No hole
+0
+
