@@ -701,7 +701,11 @@ namespace Clobscode
             }
             //Continue with the rest of the refinement and apply transition patterns
             generateQuadtreeMesh(rl,input,all_reg,name,minrl,maxrl);
+            return;
         }
+        
+        //If there are no more refinement regions, we must apply transition patterns
+        //at this moment and the finish the process.
 
         //----------------------------------------------------------
         // apply transition patterns
