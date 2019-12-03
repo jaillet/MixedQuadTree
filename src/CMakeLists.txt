@@ -21,7 +21,6 @@ set(SOURCE_FILES Main
         GeometricTransform Services
         Visitors/Visitor Visitors/SplitVisitor  
 	Visitors/IntersectionsVisitor
-        #Visitors/OneIrregularVisitor
         Visitors/TransitionPatternVisitor Visitors/SurfaceTemplatesVisitor
         Visitors/RemoveSubElementsVisitor
         )
