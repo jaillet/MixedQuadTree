@@ -26,9 +26,7 @@
 #ifndef RemoveSubElementsVisitor_h
 #define RemoveSubElementsVisitor_h 1
 
-#include "../QuadEdge.h"
 #include "../MeshPoint.h"
-
 #include "Visitor.h"
 
 #include <list>
@@ -36,9 +34,7 @@
 #include <vector>
 
 using Clobscode::MeshPoint;
-using Clobscode::QuadEdge;
 using std::list;
-using std::set;
 using std::vector;
 
 

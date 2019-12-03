@@ -38,7 +38,6 @@
 
 #include "Visitors/SplitVisitor.h"
 #include "Visitors/IntersectionsVisitor.h"
-#include "Visitors/OneIrregularVisitor.h"
 #include "Visitors/TransitionPatternVisitor.h"
 #include "Visitors/SurfaceTemplatesVisitor.h"
 #include "Visitors/RemoveSubElementsVisitor.h"
