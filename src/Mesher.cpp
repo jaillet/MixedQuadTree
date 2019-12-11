@@ -456,7 +456,6 @@ namespace Clobscode
         //----------------------------------------------------------
         //refine once each Quadrant in the list
         //----------------------------------------------------------
-        unsigned int cindex = 0;
         
         //note: roctli is an index list sorted when readed.
         //First we need to build the map with actual index
