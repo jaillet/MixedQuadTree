@@ -40,6 +40,7 @@
 #include "EdgeInfo.h"
 #include <stdlib.h>
 #include <memory>
+#include <limits>
 
 using Clobscode::Point3D;
 using Clobscode::Polyline;

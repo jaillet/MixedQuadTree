@@ -107,15 +107,9 @@ namespace Clobscode
             MapEdges->emplace(QuadEdge (all_pts[0],n_pts,true), EdgeInfo (0,idx,nq_idx));
             MapEdges->emplace(QuadEdge (all_pts[1],n_pts,true), EdgeInfo (0,idx+1,nq_idx));
             
-            /*cout << "New neighbor info (" << all_pts[0] << "," << n_pts << ")->(";
-            cout << idx << "," << nq_idx << ")\n";
-            cout << "New neighbor info (" << all_pts[1] << "," << n_pts << ")->(";
-            cout << idx+1 << "," << nq_idx << ")\n";
-            */
-            
             //increase the index
             n_pts++;
-            //the coordinates of node 8 must be computed and added to
+            //the coordinates of node 4 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (avg[0],min[1],avg[2]));
             //We have to check if neighbor Quad is unBalanced
@@ -126,7 +120,6 @@ namespace Clobscode
                 
                 if (diff>1 or diff<-1) {
                     unBalanced->push_back(*found);
-                    //cout << "(" << idx << "," << idx+1 << " " << found->first << ")";
                 }
             }
         }
@@ -139,15 +132,9 @@ namespace Clobscode
             MapEdges->emplace(QuadEdge (all_pts[1],n_pts,true), EdgeInfo (0,idx+1,nq_idx));
             MapEdges->emplace(QuadEdge (all_pts[2],n_pts,true), EdgeInfo (0,idx+2,nq_idx));
             
-            /*cout << "New neighbor info (" << all_pts[1] << "," << n_pts << ")->(";
-            cout << idx+1 << "," << nq_idx << ")\n";
-            cout << "New neighbor info (" << all_pts[2] << "," << n_pts << ")->(";
-            cout << idx+2 << "," << nq_idx << ")\n";
-            */
-            
             //increase the index
             n_pts++;
-            //the coordinates of node 9 must be computed and added to
+            //the coordinates of node 5 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (max[0],avg[1],avg[2]));
             //We have to check if neighbor Quad is unBalanced
@@ -158,7 +145,6 @@ namespace Clobscode
                 
                 if (diff>1 or diff<-1) {
                     unBalanced->push_back(*found);
-                    //cout << "(" << idx+1 << "," << idx+2 << " " << found->first << ")";
                 }
             }
         }
@@ -171,15 +157,9 @@ namespace Clobscode
             MapEdges->emplace(QuadEdge (all_pts[2],n_pts,true), EdgeInfo (0,nq_idx,idx+2));
             MapEdges->emplace(QuadEdge (all_pts[3],n_pts,true), EdgeInfo (0,nq_idx,idx+3));
             
-            /*cout << "New neighbor info (" << all_pts[2] << "," << n_pts << ")->(";
-            cout << nq_idx << "," << idx+2 << ")\n";
-            cout << "New neighbor info (" << all_pts[3] << "," << n_pts << ")->(";
-            cout << nq_idx << "," << idx+3 << ")\n";
-            */
-            
             //increase the index
             n_pts++;
-            //the coordinates of node 10 must be computed and added to
+            //the coordinates of node 6 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (avg[0],max[1],avg[2]));
             //We have to check if neighbor Quad is unBalanced
@@ -190,7 +170,6 @@ namespace Clobscode
                 
                 if (diff>1 or diff<-1) {
                     unBalanced->push_back(*found);
-                    //cout << "(" << idx+2 << "," << idx+3 << " " << found->first << ")";
                 }
             }
         }
@@ -202,16 +181,10 @@ namespace Clobscode
             //create the Edges with parent neighbor
             MapEdges->emplace(QuadEdge (all_pts[3],n_pts,true), EdgeInfo (0,nq_idx,idx+3));
             MapEdges->emplace(QuadEdge (all_pts[0],n_pts,true), EdgeInfo (0,nq_idx,idx));
-        
-            /*cout << "New neighbor info (" << all_pts[3] << "," << n_pts << ")->(";
-            cout << nq_idx << "," << idx+3 << ")\n";
-            cout << "New neighbor info (" << all_pts[0] << "," << n_pts << ")->(";
-            cout << nq_idx << "," << idx << ")\n";
-            */
             
             //increase the index
             n_pts++;
-            //the coordinates of node 11 must be computed and added to
+            //the coordinates of node 7 must be computed and added to
             //new_pts list of points
             new_pts->push_back(Point3D (min[0],avg[1],avg[2]));
             //We have to check if neighbor Quad is unBalanced
@@ -222,7 +195,6 @@ namespace Clobscode
                 
                 if (diff>1 or diff<-1) {
                     unBalanced->push_back(*found);
-                    //cout << "(" << idx+3 << "," << idx << " " << found->first << ")";
                 }
             }
         }
@@ -321,44 +293,32 @@ namespace Clobscode
          
          if (mid_idx!=0) {
              
-             //cout << "\nedge nodes:" << idx1 << "," << idx2 << "," << mid_idx << "\n";
-             
              //update Quad neighbor info in EdgeInfo
              auto e1 = MapEdges->find(QuadEdge (idx1,mid_idx));
-             //cout << "updating edge " << e1->first << " from " << e1->second << " to ";
              e1->second[pos] = q1;
-             //cout << e1->second << "\n";
              
              auto e2 = MapEdges->find(QuadEdge (idx2,mid_idx));
-             //cout << "updating edge " << e2->first << " from " << e2->second << " to ";
              e2->second[pos] = q2;
-             //cout << e2->second << "\n";
              
              //Important note. It is possible that edges (idxX,mid_idx) have been already
-             //split. In order to mantain updated info, it is necessary to chek for
+             //split. In order to mantain updated info, it is necessary to check for
              //evetual edge sons and make them congruent.
              
-             auto sub1 = MapEdges->find(QuadEdge (idx1,mid_idx));
-             unsigned int sub_mid = (sub1->second)[0];
+             //auto sub1 = MapEdges->find(QuadEdge (idx1,mid_idx));
+             //unsigned int sub_mid = (sub1->second)[0];
+             unsigned int sub_mid = (e1->second)[0];
              if (sub_mid!=0) {
                  (MapEdges->find(QuadEdge (idx1,sub_mid))->second)[pos] = q1;
-                 //cout << "updating (" << idx1 << "," << sub_mid << " ne " << q1 << ")\n";
                  (MapEdges->find(QuadEdge (mid_idx,sub_mid))->second)[pos] = q1;
-                 //cout << "updating (" << mid_idx << "," << sub_mid << " ne " << q1 << ")\n";
              }
              
-             auto sub2 = MapEdges->find(QuadEdge (idx2,mid_idx));
-             sub_mid = (sub2->second)[0];
+             //auto sub2 = MapEdges->find(QuadEdge (idx2,mid_idx));
+             //sub_mid = (sub2->second)[0];
+             sub_mid = (e2->second)[0];
              if (sub_mid!=0) {
                  (MapEdges->find(QuadEdge (idx2,sub_mid))->second)[pos] = q2;
-                 //cout << "updating (" << idx2 << "," << sub_mid << " ne " << q2 << ")\n";
                  (MapEdges->find(QuadEdge (mid_idx,sub_mid))->second)[pos] = q2;
-                 //cout << "updating (" << mid_idx << "," << sub_mid << " ne " << q2 << ")\n";
              }
-             
-             /*cout << "Edge already split. Info\n";
-             cout << "  for (" << idx1 << "," << mid_idx << ") -> " << q1 << "\n";
-             cout << "  for (" << idx2 << "," << mid_idx << ") -> " << q2 << "\n";*/
              
              return false;
          }
@@ -370,80 +330,6 @@ namespace Clobscode
          nquad = (help->second)[3-pos];
          return true;
      }
-    
-    
-    //--------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------
-    /*bool SplitVisitor::splitEdge(const unsigned int &idx1, const unsigned int &idx2,
-                                 unsigned int &c_n_pts, unsigned int &mid_idx,
-                                 const unsigned int &q1, const unsigned int &q2,
-                                 const unsigned int &pos) {
-        
-        auto help = MapEdges->find(QuadEdge (idx1,idx2));
-        mid_idx = (help->second)[0];
-        
-        if (mid_idx!=0) {
-            //update Quad neighbor info in EdgeInfo
-            (MapEdges->find(QuadEdge (idx1,mid_idx))->second)[pos] = q1;
-            (MapEdges->find(QuadEdge (idx2,mid_idx))->second)[pos] = q2;
-            return false;
-        }
-        
-        //this edge is about to be split. Note that no edge can have point index
-        //0 as its mid_point. For this reason, we know that the edge was not
-        //split by other Quadrant before. The current edge must be replaced in the
-        //set by the same one plus a mid_point equal to c_n_pts (current number
-        //of points). The coordinates of this new point will be inserted by the
-        //split method above. The splitEdge method will only compute the index
-        //for this new point and will insert the two new edges (derived from the
-        //splitting process of the current edge). Note that c_n_pts will be
-        //increased for next splitting process of another edge.
-        
-        mid_idx = c_n_pts;
-        
-        MapEdges->emplace_hint(help,QuadEdge (idx1,c_n_pts,true), EdgeInfo (pos,q1));
-        MapEdges->emplace_hint(help,QuadEdge (idx2,c_n_pts,true), EdgeInfo (pos,q2));
-        
-        (help->second)[0] = c_n_pts++;
-        
-        return true;
-    }*/
-
-//--------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------
-
-    /*bool SplitVisitor::splitFace(unsigned int idx1, unsigned int idx2,
-                                 unsigned int idx3, unsigned int idx4,
-                                 unsigned int &c_n_pts, unsigned int &mid_idx){
-        QuadEdge e1 (idx1,idx3);
-        set<QuadEdge>::iterator found = edges->find(e1);
-
-        if (found==edges->end()) {
-            //this face wasn't split before->
-            e1.updateMidPoint(c_n_pts);
-            edges->insert(e1);
-
-            QuadEdge e2 (idx2, idx4);
-            e2.updateMidPoint(c_n_pts);
-            edges->insert(e2);
-
-            //splitting edge e1
-            edges->insert(QuadEdge (idx1,c_n_pts));
-            edges->insert(QuadEdge (idx3,c_n_pts));
-            //splitting edge e2
-            edges->insert(QuadEdge (idx2,c_n_pts));
-            edges->insert(QuadEdge (idx4,c_n_pts));
-
-            //increase the number fo total points
-            mid_idx = c_n_pts++;
-
-            return true;
-        }
-
-        //at this point, the face was already split. Update the mid index
-        mid_idx = (*found)[2];
-        return false;
-    }*/
 
 }
 

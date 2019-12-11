@@ -68,7 +68,7 @@ void endMsg(){
     cout << std::flush;
     cerr << "use: ./mesher [-p] input.poly [-u] output\n";
     cerr << "              [-s] ref_level [-a] ref_level [-b] file.reg\n";
-    cerr << "              [-r] input_surface rl [-g] [-v]\n";
+    cerr << "              [-r] input_surface rl [-g] [-v] [-e]\n";
     cerr << "where:\n";
     cerr << "  one of the parameters must be an input surface mesh in\n";
     cerr << "  mdl or poly format. If output name is not provided it\n";
@@ -84,6 +84,7 @@ void endMsg(){
     cerr << "    -f Refine Quadrants that interects a function at level rl\n";
     cerr << "    -w Refine Quadrants that interects a Drawing a level rl\n";
     cerr << "       Segments (not necessarily connected) are given in a Polyline file.\n";
+    cerr << "    -e Debugging mode\n";
     cerr << "    -q if supported (only VTK by now), write quality attributes to output file.\n";
     cerr << "    -g save output mesh in GetFem format (gmf) \n";
     cerr << "    -v save output mesh + input in VTK ASCII format (vtk)\n";
@@ -129,6 +130,7 @@ int main(int argc,char** argv){
     bool mvmfor=false, offfor=false;
     bool decoration=false; //if supported, write quality attributes to output file
     bool region_ref = false;//to write region refinement in vtk format
+    bool debugging = false;
     
     //for reading an Quadrant mesh as starting point.
     vector<MeshPoint> oct_points;
@@ -155,6 +157,7 @@ int main(int argc,char** argv){
             case 'o':
             case 'q':
             case 'w':
+            case 'e':
                 inout = true;
                 break;
             default:
@@ -277,49 +280,49 @@ int main(int argc,char** argv){
                 }
                 i++;
                 break;
-        case 'r':
-            rl = atoi(argv[i+2]);
-            Services::readSurfaceRefinementRegion(argv[i+1],all_regions,rl);
-            if (ref_level<rl) {
-                ref_level = rl;
-            }
-            i+=2;
-            break;
-        case 'f':
-            rl = atoi(argv[i+1]);
-            if (ref_level<rl) {
-                ref_level = rl;
-            }
-            //+-10 is an arbitrary number to ensure the Bbox contains
-            //the entire input mesh
-            rr = new RefinementFunctionRegion(rl);
-
-            //see if force rotation enable
-            if (argv[i][2]=='r') {
-                rr->forceInputRotation();
-            }
-
-            all_regions.push_back(rr);
-            i++;
-            break;
-        case 'w':
-            rl = atoi(argv[i+2]);
-            Services::readDrawingRefinementRegion(argv[i+1],all_regions,rl);
-            if (ref_level<rl) {
-                ref_level = rl;
-            }
-            i+=2;
-            break;
-        case 'c':
-            Quadrant_start = true;
-            Services::ReadQuadMesh(argv[i+1], oct_points, oct_Quadrants,
-                    oct_edges,oct_ele_link,gt,cminrl,omaxrl);
-            /*if (ref_level<omaxrl) {
-                    ref_level = omaxrl;
-                }*/
-            i++;
-            break;
-        case 'l':
+            case 'r':
+                rl = atoi(argv[i+2]);
+                Services::readSurfaceRefinementRegion(argv[i+1],all_regions,rl);
+                if (ref_level<rl) {
+                    ref_level = rl;
+                }
+                i+=2;
+                break;
+            case 'f':
+                rl = atoi(argv[i+1]);
+                if (ref_level<rl) {
+                    ref_level = rl;
+                }
+                //+-10 is an arbitrary number to ensure the Bbox contains
+                //the entire input mesh
+                rr = new RefinementFunctionRegion(rl);
+                
+                //see if force rotation enable
+                if (argv[i][2]=='r') {
+                    rr->forceInputRotation();
+                }
+                
+                all_regions.push_back(rr);
+                i++;
+                break;
+            case 'w':
+                rl = atoi(argv[i+2]);
+                Services::readDrawingRefinementRegion(argv[i+1],all_regions,rl);
+                if (ref_level<rl) {
+                    ref_level = rl;
+                }
+                i+=2;
+                break;
+            case 'c':
+                Quadrant_start = true;
+                Services::ReadQuadMesh(argv[i+1], oct_points, oct_Quadrants,
+                                       oct_edges,oct_ele_link,gt,cminrl,omaxrl);
+                /*if (ref_level<omaxrl) {
+                 ref_level = omaxrl;
+                 }*/
+                i++;
+                break;
+            case 'l':
                 if (Quadrant_start) {
                     Services::ReadQuadrantList(argv[i+1],roctli,oct_ele_link);
                     list<unsigned int>::iterator oeiter;
@@ -335,6 +338,9 @@ int main(int argc,char** argv){
                     cerr << " mesh (option -c) skipping\n";
                 }
                 i++;
+                break;
+            case 'e':
+                debugging = true;
                 break;
             default:
                 cerr << "Warning: unknown option " << argv[i] << " skipping\n";
@@ -380,15 +386,15 @@ int main(int argc,char** argv){
     // and next proceed with mesh generation or refinement
     if (!Quadrant_start) {
 
-        output = mesher.generateMesh(inputs.at(0),ref_level,out_name,all_regions,decoration);
+        output = mesher.generateMesh(inputs.at(0),ref_level,out_name,all_regions,debugging,decoration);
     }
     else {
         mesher.setInitialState(oct_points,oct_Quadrants,oct_edges);
         if (omaxrl<ref_level) {
             omaxrl = ref_level;
         }
-        output = mesher.refineMesh(inputs.at(0),ref_level,out_name,roctli,
-                                   all_regions,gt,cminrl,omaxrl,decoration);
+        output = mesher.refineMesh(inputs.at(0),ref_level,out_name,roctli,all_regions,gt,
+                                   cminrl,omaxrl,debugging,decoration);
     }
     
     auto gen_time = chrono::high_resolution_clock::now();

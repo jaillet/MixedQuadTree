@@ -21,9 +21,12 @@ set(SOURCE_FILES Main
         GeometricTransform Services
         Visitors/Visitor Visitors/SplitVisitor  
 	Visitors/IntersectionsVisitor
-        #Visitors/OneIrregularVisitor
-        Visitors/TransitionPatternVisitor Visitors/SurfaceTemplatesVisitor
+        Visitors/TransitionPatternVisitor 
+	Visitors/SurfaceTemplatesVisitor
         Visitors/RemoveSubElementsVisitor
+	Visitors/EdgeVisitor
+	#For debuggin
+        Visitors/OneIrregularVisitor
         )
 
 add_executable(mesher_roi ${SOURCE_FILES})

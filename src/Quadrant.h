@@ -69,7 +69,7 @@ namespace Clobscode
 		virtual ~Quadrant();
 
         bool accept(Visitor *v);
-		
+        
 		//access methods
         virtual const vector<unsigned int> &getPointIndex() const; // read only
         virtual unsigned int getPointIndex(unsigned int i) const;

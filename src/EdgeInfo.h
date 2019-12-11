@@ -56,6 +56,8 @@ namespace Clobscode
         virtual unsigned int operator[](const unsigned int &pos) const;
         
         virtual unsigned int &operator[](const unsigned int &pos);
+        
+        virtual bool oneNeighbor();
 
 		friend ostream& operator<<(ostream& o, const EdgeInfo &e);
 		
@@ -73,5 +75,10 @@ namespace Clobscode
     inline unsigned int &EdgeInfo::operator[](const unsigned int &pos){
         return info[pos];
     }
+    
+    inline bool EdgeInfo::oneNeighbor() {
+        return info[1]==std::numeric_limits<unsigned int>::max() || info[2] ==std::numeric_limits<unsigned int>::max();
+    }
+    
 }
 #endif

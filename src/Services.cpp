@@ -555,7 +555,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
 
     char word [256];
     double x,y,z;
-    int e1,e2,e3;
+    unsigned int e1,e2,e3,e4,e5;
     unsigned int elem;
     unsigned int np=0, ne=0, no=0, nl=0;
 
@@ -587,10 +587,13 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
 
     //read edges
     for(unsigned int i=0;i<ne;i++){
-        std::fscanf(file,"%i",&e1);
-        std::fscanf(file,"%i",&e2);
-        std::fscanf(file,"%i",&e3);
-        edges.emplace(QuadEdge (e1,e2),EdgeInfo ((unsigned int)e3,0,0));
+        std::fscanf(file,"%u",&e1);
+        std::fscanf(file,"%u",&e2);
+        std::fscanf(file,"%u",&e3);
+        //Neighbor Quads must be re-computed in method: Mesher::setInitialState
+        //we leave them as 0 index for the moment.
+        unsigned int non = std::numeric_limits<unsigned int>::max();
+        edges.emplace(QuadEdge (e1,e2),EdgeInfo (e3,non,non));
     }
 
     //read the element Quadrant link
@@ -612,7 +615,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
     minrl = 100;
     maxrl = 0;
 
-    //            unsigned int noregular=0;
+    //unsigned int noregular=0;
     for (unsigned int i=0; i<no; i++) {
         vector<unsigned int> opts;
         list<unsigned int> ofcs;
@@ -710,13 +713,12 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
 
     //write edges
     for (const auto qe: edges) {
-        fprintf(f,"%i %i %i\n",qe.first[0],qe.first[1],(qe.second)[0]);
+        //index of both nodes defining the edge, as well as its mid-node
+        fprintf(f,"%u %u %u\n",qe.first[0],qe.first[1],(qe.second)[0]);
+        //the two quad neighbor index must be recomputed at reading procees,
+        //therefore we wont write them in the file.
     }
     
-    /*for(my_edge=edges.begin();my_edge!=edges.end();my_edge++){
-        QuadEdge me = *my_edge;
-        fprintf(f,"%i %i %i\n",me[0],me[1],me[2]);
-    }*/
     fprintf(f,"\n");
 
     //pair sub-elements with Quadrant index.

@@ -41,6 +41,8 @@
 #include "Visitors/TransitionPatternVisitor.h"
 #include "Visitors/SurfaceTemplatesVisitor.h"
 #include "Visitors/RemoveSubElementsVisitor.h"
+#include "Visitors/EdgeVisitor.h"
+#include "Visitors/OneIrregularVisitor.h"
 
 #include <list>
 #include <vector>
@@ -70,13 +72,15 @@ namespace Clobscode
 		virtual ~Mesher();
 				
         virtual std::shared_ptr<FEMesh> generateMesh(Polyline &input, const unsigned short &rl,
-                                    const string &name, list<RefinementRegion *> &all_reg, bool decoration=false);
+                                  const string &name, list<RefinementRegion *> &all_reg,
+                                  const bool &debugging, bool decoration=false);
 		
         virtual std::shared_ptr<FEMesh> refineMesh(Polyline &input, const unsigned short &rl,
                                   const string &name, list<unsigned int> &roctli,
                                   list<RefinementRegion *> &all_reg,
                                   GeometricTransform &gt, const unsigned short &minrl,
-                                  const unsigned short &omaxrl, bool decoration=false);
+                                  const unsigned short &omaxrl, const bool &debuggin,
+                                  bool decoration=false);
 
         
         virtual void setInitialState(vector<MeshPoint> &epts, vector<Quadrant> &eocts,
@@ -87,12 +91,14 @@ namespace Clobscode
         virtual void splitQuadrants(const unsigned short &rl, Polyline &input,
                                     list<unsigned int> &roctli,
                                     list<RefinementRegion *> &all_reg, const string &name,
-                                    const unsigned short &minrl, const unsigned short &maxrl);
+                                    const unsigned short &minrl, const unsigned short &maxrl,
+                                    const bool &debugging=false);
 		
         virtual void generateQuadtreeMesh(const unsigned short &rl, Polyline &input,
                                           const list<RefinementRegion *> &all_reg,
                                           const string &name, const unsigned short &minrl,
-                                          const unsigned short &givenmaxrl=0);
+                                          const unsigned short &givenmaxrl=0,
+                                          const bool &debugging=false);
 
         virtual bool isItIn(const Polyline &mesh, const list<unsigned int> &faces,
                             const vector<Point3D> &coords) const;
@@ -127,11 +133,16 @@ namespace Clobscode
 		
         virtual unsigned int saveOutputMesh(const shared_ptr<FEMesh> &mesh,
                                             vector<MeshPoint> &points,
-                                            list<Quadrant> &elements);
+                                            list<Quadrant> &elements,
+                                            const bool &debugging=false,
+                                            const list<Point3D> &extra_pts=list<Point3D> ());
         
         virtual unsigned int saveOutputMesh(const shared_ptr<FEMesh> &mesh,
-                                            const vector<MeshPoint> &points,
-                                            const vector<Quadrant> &elements);
+                                            vector<MeshPoint> &points,
+                                            vector<Quadrant> &elements,
+                                            const bool &debugging=false,
+                                            const list<Point3D> &extra_pts=list<Point3D> ());
+
 
         virtual void projectCloseToBoundaryNodes(Polyline &input);
 
@@ -148,14 +159,5 @@ namespace Clobscode
 
 
 	};
-    
-    inline void Mesher::setInitialState(vector<MeshPoint> &epts, vector<Quadrant> &eocts,
-                                        map<QuadEdge, EdgeInfo> &medgs) {
-        Quadrants = eocts;
-        points = epts;
-        MapEdges = medgs;
-    }
-	
-	
 }
 #endif
