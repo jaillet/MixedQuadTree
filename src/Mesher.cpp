@@ -190,7 +190,7 @@ namespace Clobscode
         //is starting from scratch, this value is set to 0. When refining
         //an existing mesh, this value may change.
         //The output will be a one-irregular mesh.
-        generateQuadtreeMesh(rl,input,all_reg,name,0);
+        generateQuadtreeMesh(rl,input,all_reg,name,0,rl);
         
         //link element and node info for code optimization, also
         //detect Quadrants with features.
@@ -983,7 +983,7 @@ namespace Clobscode
                 
                 bool to_refine = false;
                 
-                for (reg_iter=all_reg.begin(),reg_iter++; reg_iter!=all_reg.end(); ++reg_iter) {
+                for (reg_iter=all_reg.begin()/*,reg_iter++*/; reg_iter!=all_reg.end(); ++reg_iter) {
                     
                     unsigned short region_rl = (*reg_iter)->getRefinementLevel();
                     if (region_rl<i) {
@@ -995,6 +995,8 @@ namespace Clobscode
                         continue;
                     }
                     
+                    //needed for Boundary Region
+                    quad.computeMaxDistance(points); //TODO, avoid recompute if already checked
                     //in the case of a Region Refinement (a surface) this will change
                     //the state of inregion = true.
                     if ((*reg_iter)->intersectsQuadrant(points,quad)) {
