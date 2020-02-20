@@ -74,17 +74,26 @@ namespace Clobscode
         //The output will be a one-irregular mesh.
         splitQuadrants(rl,input,roctli,all_reg,name,minrl,omaxrl,debugging);
         
+        //Save the Octant mesh for further refinement.
+        Services::WriteQuadtreeMesh(name,points,Quadrants,MapEdges,gt);
+        //Some Quads will be then removed due to proximity with the surface.
+        //However we must preserve them if the oct mesh to avoid congruency
+        //problems. For this reason we will keep track of removed quads
+        //so we can easily link elements to quad index when reading an oct
+        //mesh file.
+        map<unsigned int, bool> removedquads;
+        list<unsigned int> quadmeshidx;
+        for (auto q: Quadrants) {
+            removedquads[q.getIndex()] = true;
+            quadmeshidx.push_back(q.getIndex());
+        }
+        
         //link element and node info for code optimization, also
         //detect Quadrants with features.
         detectFeatureQuadrants(input);
         linkElementsToNodes();
         detectInsideNodes(input);
         computeNodeMaxDist();
-        
-        //Now that we have all the elements, we can save the Quadrant mesh.
-        unsigned int nels = Quadrants.size();
-        Services::WriteQuadtreeMesh(name,points,Quadrants,MapEdges,nels,gt);        //Debbuging
-        
         
         //CL Debbuging
         {
@@ -154,6 +163,9 @@ namespace Clobscode
         //save the data of the mesh in its final state
         saveOutputMesh(mesh,decoration);
         
+        //Write element-quad info the file
+        Services::addOctElemntInfo(name,Quadrants,removedquads,quadmeshidx);
+        
         return mesh;
     }
     
@@ -196,16 +208,26 @@ namespace Clobscode
         //The output will be a one-irregular mesh.
         generateQuadtreeMesh(rl,input,all_reg,name,0,debugging);
         
+        Services::WriteQuadtreeMesh(name,points,Quadrants,MapEdges,gt);
+        //Some Quads will be then removed due to proximity with the surface.
+        //However we must preserve them if the oct mesh to avoid congruency
+        //problems. For this reason we will keep track of removed quads
+        //so we can easily link elements to quad index when reading an oct
+        //mesh file.
+        map<unsigned int, bool> removedquads;
+        list<unsigned int> quadmeshidx;
+        for (auto q: Quadrants) {
+            removedquads[q.getIndex()] = true;
+            quadmeshidx.push_back(q.getIndex());
+        }
+        
+        
         //link element and node info for code optimization, also
         //detect Quadrants with features.
         detectFeatureQuadrants(input);
         linkElementsToNodes();
         detectInsideNodes(input);
         computeNodeMaxDist();
-        
-        //Now that we have all the elements, we can save the Quadrant mesh.
-        unsigned int nels = Quadrants.size();
-        Services::WriteQuadtreeMesh(name,points,Quadrants,MapEdges,nels,gt);        //Debbuging
         
         //CL Debbuging
         {
@@ -265,6 +287,9 @@ namespace Clobscode
         
         //save the data of the mesh in its final state
         saveOutputMesh(mesh,decoration);
+        
+        //Write element-quad info the file
+        Services::addOctElemntInfo(name,Quadrants,removedquads,quadmeshidx);
         
         return mesh;
     }
@@ -447,7 +472,7 @@ namespace Clobscode
         
         auto start_refine_quad_time = chrono::high_resolution_clock::now();
         
-        bool listref = false;
+        bool listref = false, localmax = false;
         if (!roctli.empty()) {
             listref = true;
         }
@@ -488,6 +513,10 @@ namespace Clobscode
                 //start refinement process for current quadrant.
                 list<unsigned int> &inter_edges = quad.getIntersectedEdges();
                 unsigned short qrl = quad.getRefinementLevel();
+                
+                if (qrl==maxrl) {
+                    localmax = true;
+                }
                 
                 vector<vector<Point3D> > clipping_coords;
                 sv.setClipping(clipping_coords);
@@ -540,6 +569,8 @@ namespace Clobscode
         
             //Erase the list to refine
             refine_tmp.erase(refine_tmp.begin(),refine_tmp.end());
+            
+            //cout << "To balance list has " << toBalance.size() << " quads\n";
         
             while (!toBalance.empty()) {
                 
@@ -640,42 +671,8 @@ namespace Clobscode
             
         }
         
-        //If there are more refinement regions, continue with the process
-        //were the quads positions will change in the final vector due to
-        //map indexing that allows to optimize the research of neighbors.
-        if (!all_reg.empty()) {
-            
-            
-            //insert will reserve space as well
-            Quadrants.insert(Quadrants.end(),make_move_iterator(candidates.begin()),make_move_iterator(candidates.end()));
-            // better to erase as let in a indeterminate state by move
-            candidates.erase(candidates.begin(),candidates.end());
-            Quadrants.insert(Quadrants.end(),make_move_iterator(clean_processed.begin()),make_move_iterator(clean_processed.end()));
-            clean_processed.erase(clean_processed.begin(),clean_processed.end());
-            
-            auto end_time = chrono::high_resolution_clock::now();
-            cout << "       * List refinement in "
-            << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_refine_quad_time).count();
-            cout << " ms"<< endl;
-            
-            if (listref) {
-                
-                //CL Debbuging
-                {
-                    //save pure octree mesh
-                    std::shared_ptr<FEMesh> refined_octree=make_shared<FEMesh>();
-                    saveOutputMesh(refined_octree,points,Quadrants);
-                    string tmp_name = name + "_listRefinement";
-                    Services::WriteVTK(tmp_name,refined_octree);
-                }
-            }
-            //Continue with the rest of the refinement and apply transition patterns
-            generateQuadtreeMesh(rl,input,all_reg,name,minrl,maxrl,debugging);
-            return;
-        }
-        
         //If there are no more refinement regions, we must apply transition patterns
-        //at this moment and the finish the process.
+        //at this moment and then finish the process.
 
         //----------------------------------------------------------
         // apply transition patterns
@@ -686,7 +683,12 @@ namespace Clobscode
         //TransitionPatternVisitor section
         TransitionPatternVisitor tpv;
         tpv.setMapEdges(MapEdges);
-        tpv.setMaxRefLevel(maxrl);
+        if (localmax) {
+            tpv.setMaxRefLevel(maxrl+1);
+        }
+        else {
+            tpv.setMaxRefLevel(maxrl);
+        }
         new_pts.clear();
 
         //Apply transition patterns to remaining Quads
@@ -701,7 +703,6 @@ namespace Clobscode
                 mixedn++;
             }
         }
-
         
         //if no points were added at this iteration, it is no longer
         //necessary to continue the refinement.
@@ -725,6 +726,39 @@ namespace Clobscode
             saveOutputMesh(transition_octree,points,Quadrants);
             string tmp_name = name + "_transition";
             Services::WriteVTK(tmp_name,transition_octree);
+        }
+        
+        //If there are more refinement regions, continue with the process
+        //were the quads positions will change in the final vector due to
+        //map indexing that allows to optimize the research of neighbors.
+        if (all_reg.size()>1) {
+            
+            /*//insert will reserve space as well
+            Quadrants.insert(Quadrants.end(),make_move_iterator(candidates.begin()),make_move_iterator(candidates.end()));
+            // better to erase as let in a indeterminate state by move
+            candidates.erase(candidates.begin(),candidates.end());
+            Quadrants.insert(Quadrants.end(),make_move_iterator(clean_processed.begin()),make_move_iterator(clean_processed.end()));
+            clean_processed.erase(clean_processed.begin(),clean_processed.end());*/
+            
+            auto end_time = chrono::high_resolution_clock::now();
+            cout << "       * List refinement in "
+            << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_refine_quad_time).count();
+            cout << " ms"<< endl;
+            
+            if (listref) {
+                
+                //CL Debbuging
+                {
+                    //save pure octree mesh
+                    std::shared_ptr<FEMesh> refined_octree=make_shared<FEMesh>();
+                    saveOutputMesh(refined_octree,points,Quadrants);
+                    string tmp_name = name + "_listRefinement";
+                    Services::WriteVTK(tmp_name,refined_octree);
+                }
+            }
+            //Continue with the rest of the refinement and apply transition patterns
+            generateQuadtreeMesh(rl,input,all_reg,name,minrl,maxrl,debugging);
+            return;
         }
         
         auto end_time = chrono::high_resolution_clock::now();
@@ -751,7 +785,7 @@ namespace Clobscode
         
         //The list of candidate quads to refine and the tmp version of
         //adding those how are still candidates for the next iteration.
-        list<Quadrant> candidates, new_candidates, clean_processed, refine_tmp;
+        list<Quadrant> candidates, new_candidates, refine_tmp, clean_processed;
         
         //The Quads that don't need further refinement.
         vector<Quadrant> processed;
@@ -915,6 +949,8 @@ namespace Clobscode
         else {
             max_rl = givenmaxrl;
         }
+        
+        //cout << "rl : [" << minrl << "," << max_rl << "]\n";
         
         
         auto end_refine_rl_time = chrono::high_resolution_clock::now();

@@ -122,8 +122,11 @@ public:
     static bool WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &points,
                                   const vector<Quadrant> &Quadrants,
                                   const map<QuadEdge, EdgeInfo> &edges,
-                                  unsigned int nels,
                                   const GeometricTransform &gt);
+    
+    static bool addOctElemntInfo(std::string name, vector<Quadrant> &Quadrants,
+                                 map<unsigned, bool> &removedquads,
+                                 const list<unsigned int> &quadmeshidx);
 
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
