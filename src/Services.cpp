@@ -596,16 +596,6 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
         edges.emplace(QuadEdge (e1,e2),EdgeInfo (e3,non,non));
     }
 
-    //read the element Quadrant link
-    ele_oct_ref.reserve(nl);
-    //            unsigned int checksum = 0;
-    for (unsigned int i=0; i<no; i++) {
-        std::fscanf(file,"%u",&elem);
-        for (unsigned int j=0; j<elem; j++) {
-            ele_oct_ref.push_back(i);
-        }
-    }
-
     //read the Quadrants, its refinement level and
     //the input faces intersected by it.
     Quadrants.reserve(no);
@@ -670,6 +660,16 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
     gt.setXAxis(x);
     gt.setYAxis(y);
     gt.setZAxis(z);
+    
+    //read the element Quadrant link
+    ele_oct_ref.reserve(nl);
+    //            unsigned int checksum = 0;
+    for (unsigned int i=0; i<no; i++) {
+        std::fscanf(file,"%u",&elem);
+        for (unsigned int j=0; j<elem; j++) {
+            ele_oct_ref.push_back(i);
+        }
+    }
 
     fclose(file);
 
@@ -686,7 +686,6 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
 bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &points,
                                  const vector<Quadrant> &Quadrants,
                                  const map<QuadEdge, EdgeInfo> &edges,
-                                 unsigned int nels,
                                  const GeometricTransform &gt){
 
     auto start_time = chrono::high_resolution_clock::now();
@@ -702,7 +701,7 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
     unsigned int no = Quadrants.size();
     unsigned int ne = edges.size();
 
-    fprintf(f,"%u %u %u %u\n\n", np, ne, no, nels);
+    fprintf(f,"%u %u %u\n\n", np, ne, no);
 
     //write points
     for(unsigned int i=0;i<np;i++){
@@ -725,11 +724,11 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
     //this info is printed per Quadrant and the elements are
     //printed in order in the mesh file so we can compute
     //for each element to which Quadrant it belongs.
-    for (unsigned int i=0; i<Quadrants.size(); i++) {
+    /*for (unsigned int i=0; i<Quadrants.size(); i++) {
         unsigned int nse = Quadrants[i].getSubElements().size();
         fprintf(f,"%u ",nse);
     }
-    fprintf(f,"\n\n");
+    fprintf(f,"\n\n");*/
 
     for (unsigned int i=0; i<Quadrants.size(); i++) {
         const vector<unsigned int> &opts = Quadrants[i].getPointIndex();
@@ -762,7 +761,7 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
     fprintf(f,"\nGeometric Transform\n");
     Point3D c = gt.getCentroid();
     fprintf(f,"%f %f %f\n",c[0],c[1],c[2]);
-    fprintf(f,"%f %f %f\n",gt.getXAxis(),gt.getYAxis(),gt.getZAxis());
+    fprintf(f,"%f %f %f\n\n",gt.getXAxis(),gt.getYAxis(),gt.getZAxis());
 
     fclose(f);
 
@@ -773,6 +772,61 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
 
     return true;
 }
+    
+    
+    //-------------------------------------------------------------------
+    //-------------------------------------------------------------------
+    bool Services::addOctElemntInfo(std::string name, vector<Quadrant> &quadrants,
+                                    map<unsigned, bool> &removedquads,
+                                    const list<unsigned int> &quadmeshidx){
+        
+        string vol_name = name+".oct";
+        
+        //write the volume mesh
+        FILE *f = fopen(vol_name.c_str(),"a");
+        unsigned int no = quadrants.size();
+        
+        
+        
+        
+        //Now we must update the .oct file with information linking
+        //elements to octants. To this purpose we update the removedoct map
+        //setting to false any octant remaining in the octant vector.
+        //We also need a map from octant index -> octant position in vector
+        map<unsigned int, unsigned int> quadpos;
+        for (unsigned int i=0;i<quadrants.size();i++) {
+            unsigned int oi = quadrants[i].getIndex();
+            removedquads[oi] = false;
+            quadpos[oi] = i;
+        }
+        
+        
+        
+        //pair sub-elements with octant index.
+        //this info is printed per octant and the elements are
+        //printed in order in the mesh file so we can compute
+        //for each element to which octant it belongs.
+        //If 0 is printed means that the octant has 0 sub-elements.
+        //This octant was later removed in the mesh generation process
+        //due to proximity to the boundary. However, to refine a mesh
+        //from an existing one, it is still necessary.
+        for (auto o: quadmeshidx) {
+            if (removedquads[o]) {
+                fprintf(f,"%u ",0);
+            }
+            else {
+                unsigned int nse = quadrants[quadpos[o]].getSubElements().size();
+                fprintf(f,"%u ",nse);
+            }
+        }
+        
+        fprintf(f,"\n");
+        
+        fclose(f);
+        
+        return true;
+    }
+
 
 //-------------------------------------------------------------------
 // http://gmsh.info/doc/texinfo/gmsh.html#MSH-ASCII-file-format

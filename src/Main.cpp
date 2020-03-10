@@ -325,13 +325,13 @@ int main(int argc,char** argv){
             case 'l':
                 if (Quadrant_start) {
                     Services::ReadQuadrantList(argv[i+1],roctli,oct_ele_link);
-                    list<unsigned int>::iterator oeiter;
+                    /*list<unsigned int>::iterator oeiter;
                     for (oeiter=roctli.begin(); oeiter!=roctli.end(); oeiter++) {
                         rl = oct_Quadrants[*oeiter].getRefinementLevel();
                         if (ref_level<=rl) {
                             ref_level = rl+1;
                         }
-                    }
+                    }*/
                 }
                 else {
                     cerr << "Warning: option -l needs a previously provided Quadrant";
