@@ -150,7 +150,7 @@ In our case, Quadrants will be continuously split until a maximum provided level
 \begin{algorithm}[H]
 \SetAlgoLined
 \KwResult{A mixed-elements mesh}
-  \tcc{Generating quadtree:}
+  \tcc{Generating balanced quadtree:}
  \nl  \Repeat {desired Refinement Level}{
 \ForEach{Quadrant}{
 \nl {Subdivide Quadrant\label{alg:subdivide}}\; 
@@ -158,9 +158,9 @@ In our case, Quadrants will be continuously split until a maximum provided level
    \If{Intersects Input \textit{or} Is Inside}{\nl Insert Sub-Quadrant\label{alg:insertsub}}
     }
   }
+\nl Create balanced quadtree\; \label{alg:goto}
   }
   \tcc{ Creating conformal mesh:}
-\nl Create balanced quadtree\; \label{alg:goto}
  \nl Apply Transition Patterns\; \label{alg:trans}
  \caption{Generation process}
  \label{alg:generate}
