@@ -254,9 +254,6 @@ namespace Clobscode
         //update element and node info.
         linkElementsToNodes();
         
-        //apply the surface Patterns
-        applySurfacePatterns(input);
-        
         //CL Debbuging
         {
             //save pure octree mesh
@@ -269,7 +266,8 @@ namespace Clobscode
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
         
-        //update element and node info.
+        //apply the surface Patterns
+        applySurfacePatterns(input);
         
         if (rotated) {
             // rotate the mesh
