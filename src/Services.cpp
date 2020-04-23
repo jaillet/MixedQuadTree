@@ -570,7 +570,6 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
     std::fscanf(file,"%u",&np);
     std::fscanf(file,"%u",&ne);
     std::fscanf(file,"%u",&no);
-    std::fscanf(file,"%u",&nl);
 
     //read each node
     points.reserve(np);
@@ -662,7 +661,7 @@ bool Services::ReadQuadMesh(std::string name, vector<MeshPoint> &points,
     gt.setZAxis(z);
     
     //read the element Quadrant link
-    ele_oct_ref.reserve(nl);
+    ele_oct_ref.reserve(no);
     //            unsigned int checksum = 0;
     for (unsigned int i=0; i<no; i++) {
         std::fscanf(file,"%u",&elem);

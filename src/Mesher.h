@@ -98,8 +98,9 @@ namespace Clobscode
                                           const list<RefinementRegion *> &all_reg,
                                           const string &name, const unsigned short &minrl,
                                           const unsigned short &givenmaxrl=0,
-                                          const bool &debugging=false);
-
+                                          const bool &debugging=false,
+                                          unsigned int new_q_idx=0);
+        
         virtual bool isItIn(const Polyline &mesh, const list<unsigned int> &faces,
                             const vector<Point3D> &coords) const;
 
