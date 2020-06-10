@@ -58,6 +58,8 @@ using Clobscode::QuadEdge;
 using Clobscode::Polyline;
 using Clobscode::RefinementRegion;
 
+#define VTKOUT false
+
 namespace Clobscode
 {
 	

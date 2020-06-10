@@ -59,7 +59,7 @@ namespace Clobscode
             gt.rotatePolyline(input);
         }
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> grid_octree=make_shared<FEMesh>();
@@ -67,7 +67,8 @@ namespace Clobscode
             string tmp_name = name + "_grid";
             Services::WriteVTK(tmp_name,grid_octree);
         }
-        
+#endif
+
         //split Quadrants until the refinement level (rl) is achieved.
         //The output will be a one-irregular mesh.
         splitQuadrants(rl,input,roctli,all_reg,name,minrl,omaxrl);
@@ -84,7 +85,7 @@ namespace Clobscode
         Services::WriteQuadtreeMesh(name,points,Quadrants,MapEdges,nels,gt);        //Debbuging
         
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
@@ -92,10 +93,11 @@ namespace Clobscode
             string tmp_name = name + "_quads";
             Services::WriteVTK(tmp_name,pure_octree);
         }
-        
+#endif
+
         projectCloseToBoundaryNodes(input);
-        
-        //CL Debbuging
+
+#if (VTKOUT==true) //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> closeto_octree=make_shared<FEMesh>();
@@ -103,13 +105,14 @@ namespace Clobscode
             string tmp_name = name + "_closeto";
             Services::WriteVTK(tmp_name,closeto_octree);
         }
+#endif
         
         removeOnSurfaceSafe(input);
         
         //update element and node info.
         linkElementsToNodes();
         
-        //CL Debbuging
+#if (VTKOUT==true)        //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
@@ -117,11 +120,12 @@ namespace Clobscode
             string tmp_name = name + "_remSur";
             Services::WriteVTK(tmp_name,pure_octree);
         }
-        
+#endif
+
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
         
-        //CL Debbuging
+#if (VTKOUT==true)        //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> shrink_octree=make_shared<FEMesh>();
@@ -129,7 +133,8 @@ namespace Clobscode
             string tmp_name = name + "_shrink";
             Services::WriteVTK(tmp_name,shrink_octree);
         }
-        
+#endif
+
         //apply the surface Patterns
         applySurfacePatterns(input);
         //removeOnSurface(input);
@@ -176,7 +181,7 @@ namespace Clobscode
         //generate root Quadrants
         generateGridMesh(input);
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> grid_octree = make_shared<FEMesh>();
@@ -184,6 +189,7 @@ namespace Clobscode
             string tmp_name = name + "_grid";
             Services::WriteVTK(tmp_name,grid_octree);
         }
+#endif
         
         //split Quadrants until the refinement level (rl) is achieved.
         //the last 0 correspond to min RL in the mesh. As this mesh
@@ -203,7 +209,7 @@ namespace Clobscode
         unsigned int nels = Quadrants.size();
         Services::WriteQuadtreeMesh(name,points,Quadrants,MapEdges,nels,gt);        //Debbuging
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> pure_octree = make_shared<FEMesh>();
@@ -211,10 +217,11 @@ namespace Clobscode
             string tmp_name = name + "_quads";
             Services::WriteVTK(tmp_name,pure_octree);
         }
-        
+#endif
+
         projectCloseToBoundaryNodes(input);
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> closeto_octree = make_shared<FEMesh>();
@@ -222,13 +229,14 @@ namespace Clobscode
             string tmp_name = name + "_closeto";
             Services::WriteVTK(tmp_name,closeto_octree);
         }
-        
+#endif
+
         removeOnSurfaceSafe(input);
         
         //update element and node info.
         linkElementsToNodes();
         
-        //CL Debbuging
+#if (VTKOUT==true)        //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> pure_octree = make_shared<FEMesh>();
@@ -236,11 +244,12 @@ namespace Clobscode
             string tmp_name = name + "_remSur";
             Services::WriteVTK(tmp_name,pure_octree);
         }
-        
+#endif
+
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
         
-        //CL Debbuging
+#if (VTKOUT==true)        //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> shrink_octree = make_shared<FEMesh>();
@@ -248,7 +257,8 @@ namespace Clobscode
             string tmp_name = name + "_shrink";
             Services::WriteVTK(tmp_name,shrink_octree);
         }
-        
+#endif
+
         //update element and node info.
         //linkElementsToNodes();
         
@@ -688,7 +698,7 @@ namespace Clobscode
             << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_refine_quad_time).count();
             cout << " ms"<< endl;
             
-            //CL Debbuging
+#if (VTKOUT==true)            //CL Debbuging
             {
                 /*for (auto pq: processed) {
                  candidates.push_back(pq);
@@ -699,6 +709,7 @@ namespace Clobscode
                 string tmp_name = name + "_listRefinement";
                 Services::WriteVTK(tmp_name,refined_octree);
             }
+#endif
             //Continue with the rest of the refinement and apply transition patterns
             generateQuadtreeMesh(rl,input,all_reg,name,minrl,maxrl);
             return;
@@ -932,14 +943,16 @@ namespace Clobscode
             ++i;
         } while (!new_pts.empty());
         
-        //CL Debbuging
+        #if (VTKOUT==true) //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> bound_octree=make_shared<FEMesh>();
             saveOutputMesh(bound_octree,points,new_candidates);
             string tmp_name = name + "_bound";
             Services::WriteVTK(tmp_name,bound_octree);
-        }*/
+        }
+        #endif */
+
         unsigned short max_rl;
         if (givenmaxrl==0) {
             max_rl = i;
@@ -1221,7 +1234,8 @@ namespace Clobscode
             cout << " ms"<< endl;
         }
         
-        //CL Debbuging
+
+#if (VTKOUT==true) //CL Debbuging
         {
             /*for (auto pq: processed) {
                 candidates.push_back(pq);
@@ -1232,7 +1246,8 @@ namespace Clobscode
             string tmp_name = name + "_refined";
             Services::WriteVTK(tmp_name,refined_octree);
         }
-        
+#endif
+
         auto end_refine_quad_time = chrono::high_resolution_clock::now();
         cout << "       * Refine Quad in "
         << std::chrono::duration_cast<chrono::milliseconds>(end_refine_quad_time-start_refine_quad_time).count();
@@ -1264,6 +1279,7 @@ namespace Clobscode
         processed.erase(processed.begin(),processed.end());
         
         
+#if (VTKOUT==true) //CL Debbuging
         {
             /*for (auto pq: processed) {
              candidates.push_back(pq);
@@ -1274,8 +1290,7 @@ namespace Clobscode
             string tmp_name = name + "_processed";
             Services::WriteVTK(tmp_name,refined_octree);
         }
-        
-        
+#endif
         
         //Apply transition patterns to remaining Quads
         unsigned mixedn = 0;
@@ -1290,15 +1305,16 @@ namespace Clobscode
             }
         }
         
-        //Debbuging
-        /*{
+        /*#if (VTKOUT==true) //CL Debbuging
+        {
          //save pure octree mesh
          FEMesh pure_octree;
          saveOutputMesh(pure_octree,points,tmp_Quadrants);
          string tmp_name = name + "_oct";
          Services::WriteVTK(tmp_name,pure_octree);
          //Services::WriteMixedVolumeMesh(tmp_name,pure_octree);
-         }*/
+         }
+        #endif */
         
         //if no points were added at this iteration, it is no longer
         //necessary to continue the refinement.
@@ -1315,7 +1331,7 @@ namespace Clobscode
         Quadrants.insert(Quadrants.end(),make_move_iterator(clean_processed.begin()),make_move_iterator(clean_processed.end()));
         clean_processed.erase(clean_processed.begin(),clean_processed.end());
         
-        //CL Debbuging
+#if (VTKOUT==true) //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> transition_octree=make_shared<FEMesh>();
@@ -1323,7 +1339,8 @@ namespace Clobscode
             string tmp_name = name + "_transition";
             Services::WriteVTK(tmp_name,transition_octree);
         }
-        
+#endif
+
         auto end_time = chrono::high_resolution_clock::now();
         cout << "       * Transition Patterns in "
         << std::chrono::duration_cast<chrono::milliseconds>(end_time-end_refine_quad_time).count();

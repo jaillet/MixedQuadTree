@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2019>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2020>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -85,6 +85,7 @@ void endMsg(){
     cerr << "    -w Refine Quadrants that interects a Drawing a level rl\n";
     cerr << "       Segments (not necessarily connected) are given in a Polyline file.\n";
     cerr << "    -q if supported (only VTK by now), write quality attributes to output file.\n";
+    cerr << "    -t just for testing... Do not use!\n";
     cerr << "    -g save output mesh in GetFem format (gmf) \n";
     cerr << "    -v save output mesh + input in VTK ASCII format (vtk)\n";
     cerr << "    -m save output mesh in M3D ASCII format (m3d)\n";
