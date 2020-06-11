@@ -84,7 +84,7 @@ namespace Clobscode
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    // Compute Angle at P0P1-P1P2 in radians
+    // Compute Angle at P0P1-P1P2 in degrees
     // P0 previous, this=P1 mid, P2 next point
     double Point3D::angle3Points(const Point3D &prev, const Point3D &next) const {
 

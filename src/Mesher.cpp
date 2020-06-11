@@ -25,6 +25,7 @@
 
 #include "Mesher.h"
 #include <math.h>
+#include <iomanip>
 
 namespace Clobscode
 {
@@ -1372,11 +1373,14 @@ namespace Clobscode
         
         vector<vector<unsigned int> > out_els;
         vector<unsigned short > out_els_ref_level, out_els_surf, out_els_deb;
-        vector<double > out_els_min_angle;
-        
+        vector<double > out_els_min_angle, out_els_max_angle;
+        array <unsigned int,18> out_els_angle_tri_histogram = {0},
+                out_els_angle_quad_histogram = {0};
+
         //even if we don't know the quantity of elements, it will be at least the
         //number of quadrants, so we reserve for the vectors of VTK decoration.
         out_els_min_angle.reserve(Quadrants.size());
+        out_els_max_angle.reserve(Quadrants.size());
         out_els_ref_level.reserve(Quadrants.size());
         out_els_surf.reserve(Quadrants.size());
         
@@ -1435,7 +1439,7 @@ namespace Clobscode
                     }
                 }
                 if (decoration) {
-                    //surface regardring quad
+                    //surface regarding quad
                     if (Quadrants[i].isSurface()) {
                         out_els_surf.push_back(1);
                     }
@@ -1452,18 +1456,26 @@ namespace Clobscode
                     
                     //refinment level herited from quad
                     out_els_ref_level.push_back(Quadrants[i].getRefinementLevel());
-                    //compute minAngle
+                    //compute minAngle and maxAngle
                     unsigned int np=sub_ele_new_idxs.size(); //nb points of the element
-                    double minAngle=std::numeric_limits<double>::infinity();
+                    double minAngle=std::numeric_limits<double>::max();
+                    double maxAngle=std::numeric_limits<double>::min();
                     for (unsigned int k=0; k<np; ++k) {
                         
                         const Point3D &P0 = out_pts[sub_ele_new_idxs[(k-1+np)%np]];
                         const Point3D &P1 = out_pts[sub_ele_new_idxs[k]];
                         const Point3D &P2 = out_pts[sub_ele_new_idxs[(k+1)%np]];
                         
-                        minAngle=std::min(minAngle, P1.angle3Points(P0,P2));
+                        double angle=P1.angle3Points(P0,P2);
+                        minAngle=std::min(minAngle, angle);
+                        maxAngle=std::max(maxAngle, angle);
+                        if (np==3)
+                            out_els_angle_tri_histogram[ min(17,((int)( round(angle)/10.)) %18) ]++;
+                        else
+                            out_els_angle_quad_histogram[ min(17,((int)(round(angle)/10.)) %18) ]++;
                     }
                     out_els_min_angle.push_back(minAngle);
+                    out_els_max_angle.push_back(maxAngle);
                 }
                 out_els.push_back(sub_ele_new_idxs);
             }
@@ -1473,6 +1485,9 @@ namespace Clobscode
         mesh->setElements(out_els);
         mesh->setRefLevels(out_els_ref_level);
         mesh->setMinAngles(out_els_min_angle);
+        mesh->setMaxAngles(out_els_max_angle);
+        mesh->setAnglesTriHistogram(out_els_angle_tri_histogram);
+        mesh->setAnglesQuadHistogram(out_els_angle_quad_histogram);
         mesh->setSurfState(out_els_surf);
         mesh->setDebugging(out_els_deb);
         
@@ -1480,7 +1495,6 @@ namespace Clobscode
         cout << "    * SaveOutputMesh in "
         << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
         cout << " ms"<< endl;
-        
         
         return out_els.size();
     }

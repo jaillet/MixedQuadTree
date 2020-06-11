@@ -429,6 +429,11 @@ int main(int argc,char** argv){
     cout << "  All done in " << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
     cout << " ms"<< endl;
 	
+    // printing Histogram
+    if (decoration) {
+        Services::WriteHistogram(out_name,output);
+    }
+
     list<RefinementRegion *>::iterator rriter;
     for (rriter = all_regions.begin(); rriter!=all_regions.end(); rriter++) {
         delete *rriter;
