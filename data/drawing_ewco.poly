@@ -1,0 +1,50 @@
+# A Drawing in 2D, no attributes, no boundary marker.
+# EWCO letters drawing in a unit_square
+19 2 0 0
+# E letter:
+ 1   0.2 0.8
+ 2   0.2 0.7
+ 3   0.2 0.6
+ 4   0.3 0.8
+ 5   0.25 0.7
+ 6   0.3 0.6
+# W letter:
+ 7   0.6 0.8
+ 8   0.65 0.6
+ 9   0.7 0.7
+10   0.75 0.6
+11   0.8 0.8
+# C letter:
+12   0.3 0.4
+13   0.2 0.4
+14   0.2 0.2
+15   0.3 0.2
+# O letter:
+16   0.78 0.4
+17   0.62 0.4
+18   0.62 0.2
+19   0.78 0.2
+# segments with no boundary markers.
+15 0
+# E letter:
+ 1   1 3
+ 2   1 4
+ 3   2 5
+ 4   3 6
+# W letter:
+ 5   7 8
+ 6   8 9
+ 7   9 10
+ 8  10 11
+# C letter:
+ 9  12 13
+10  13 14
+11  14 15
+# O letter:
+12  16 17
+13  17 18
+14  18 19
+15  19 16
+# No hole
+0
+ 0
