@@ -206,7 +206,7 @@ namespace Clobscode
         //is starting from scratch, this value is set to 0. When refining
         //an existing mesh, this value may change.
         //The output will be a one-irregular mesh.
-        generateQuadtreeMesh(rl,input,all_reg,name,0,debugging);
+        generateQuadtreeMesh(rl,input,all_reg,name,0,debugging,Quadrants.size());
         
         Services::WriteQuadtreeMesh(name,points,Quadrants,MapEdges,gt);
         //Some Quads will be then removed due to proximity with the surface.
@@ -254,9 +254,6 @@ namespace Clobscode
         //update element and node info.
         linkElementsToNodes();
         
-        //apply the surface Patterns
-        applySurfacePatterns(input);
-        
         //CL Debbuging
         {
             //save pure octree mesh
@@ -269,7 +266,8 @@ namespace Clobscode
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
         
-        //update element and node info.
+        //apply the surface Patterns
+        applySurfacePatterns(input);
         
         if (rotated) {
             // rotate the mesh
@@ -457,6 +455,7 @@ namespace Clobscode
         
         //The starting point for assignaiting indexes
         unsigned int new_q_idx = candidates.size();
+        unsigned int future_q_idx = new_q_idx + 4*(unsigned int)roctli.size();
         
         //Erase previous quadrants to save memory
         Quadrants.erase(Quadrants.begin(),Quadrants.end());
@@ -678,7 +677,7 @@ namespace Clobscode
         // apply transition patterns
         //----------------------------------------------------------
         
-        auto end_refine_quad_time = chrono::high_resolution_clock::now();
+        /*auto end_refine_quad_time = chrono::high_resolution_clock::now();
         
         //TransitionPatternVisitor section
         TransitionPatternVisitor tpv;
@@ -710,7 +709,7 @@ namespace Clobscode
             //add the new points to the vector
             points.reserve(points.size() + new_pts.size());
             points.insert(points.end(),new_pts.begin(),new_pts.end());
-        }
+        }*/
         
         //insert will reserve space as well
         Quadrants.insert(Quadrants.end(),make_move_iterator(candidates.begin()),make_move_iterator(candidates.end()));
@@ -728,17 +727,17 @@ namespace Clobscode
             Services::WriteVTK(tmp_name,transition_octree);
         }
         
+        if (localmax) {
+            generateQuadtreeMesh(rl,input,all_reg,name,minrl,maxrl+1,debugging,future_q_idx);
+        }
+        else {
+            generateQuadtreeMesh(rl,input,all_reg,name,minrl,maxrl,debugging,future_q_idx);
+        }
+        
         //If there are more refinement regions, continue with the process
         //were the quads positions will change in the final vector due to
         //map indexing that allows to optimize the research of neighbors.
-        if (all_reg.size()>1) {
-            
-            /*//insert will reserve space as well
-            Quadrants.insert(Quadrants.end(),make_move_iterator(candidates.begin()),make_move_iterator(candidates.end()));
-            // better to erase as let in a indeterminate state by move
-            candidates.erase(candidates.begin(),candidates.end());
-            Quadrants.insert(Quadrants.end(),make_move_iterator(clean_processed.begin()),make_move_iterator(clean_processed.end()));
-            clean_processed.erase(clean_processed.begin(),clean_processed.end());*/
+        /*if (all_reg.size()>1) {
             
             auto end_time = chrono::high_resolution_clock::now();
             cout << "       * List refinement in "
@@ -767,7 +766,7 @@ namespace Clobscode
         cout << " ms"<< endl;
         cout << "    * generateQuadtreeMesh in "
         << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_refine_quad_time).count();
-        cout << " ms"<< endl;
+        cout << " ms"<< endl;*/
         
     }
     
@@ -778,7 +777,8 @@ namespace Clobscode
                                       const list<RefinementRegion *> &all_reg,
                                       const string &name, const unsigned short &minrl,
                                       const unsigned short &givenmaxrl,
-                                      const bool &debugging) {
+                                      const bool &debugging,
+                                      unsigned int new_q_idx) {
         
         
         auto start_time = chrono::high_resolution_clock::now();
@@ -804,9 +804,6 @@ namespace Clobscode
         //initialising the vector and the map
         candidates.assign(make_move_iterator(Quadrants.begin()),
                           make_move_iterator(Quadrants.end()));
-        
-        //The starting point for assignaiting indexes
-        unsigned int new_q_idx = candidates.size();
         
         //Erase previous quadrants to save memory
         Quadrants.clear();
