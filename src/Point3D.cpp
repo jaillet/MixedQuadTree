@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2019>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2020>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU  Lesser General Public License as published by
@@ -84,7 +84,7 @@ namespace Clobscode
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    // Compute Angle at P0P1-P1P2 in radians
+    // Compute Angle at P0P1-P1P2 in degrees
     // P0 previous, this=P1 mid, P2 next point
     double Point3D::angle3Points(const Point3D &prev, const Point3D &next) const {
 

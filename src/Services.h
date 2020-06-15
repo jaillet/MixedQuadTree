@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2019>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2020>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -159,6 +159,10 @@ public:
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
     static bool WriteMeshGetfem(std::string name, const std::shared_ptr<FEMesh> &output);
+
+    //-------------------------------------------------------------------
+    //-------------------------------------------------------------------
+    static bool WriteHistogram(std::string name, const std::shared_ptr<FEMesh> &output);
 };
 
 }
