@@ -1464,8 +1464,8 @@ bool Services::WriteHistogram(std::string name, const shared_ptr<FEMesh> &output
     // printing "Triangle like" angle Histogram
     const vector <double> &minAngles= output->getMinAngles();
     const vector <double> &maxAngles= output->getMaxAngles();
-    const array <unsigned int,18> &anglesTriHistogram= output->getAnglesTriHistogram();
-    const array <unsigned int,18> &anglesQuadHistogram= output->getAnglesQuadHistogram();
+    const array <unsigned int,180> &anglesTriHistogram= output->getAnglesTriHistogram();
+    const array <unsigned int,180> &anglesQuadHistogram= output->getAnglesQuadHistogram();
     double minAngleTri=std::numeric_limits<int>::max();
     double minAngleQuad=std::numeric_limits<int>::max();
     double maxAngleTri=std::numeric_limits<int>::min();
@@ -1490,24 +1490,37 @@ bool Services::WriteHistogram(std::string name, const shared_ptr<FEMesh> &output
     fprintf(f,"   |  Largest angle:           %g", maxAngleTri);
     fprintf(f,"\nAngle histogram:\n");
 
-    for (unsigned int i=0; i<9; ++i) {
-        fprintf(f,"%3d - %3d degrees:\t %6d | ", i*10, (i+1)*10,anglesTriHistogram[i]);
-        fprintf(f,"%3d - %3d degrees:\t %6d\n", (i+9)*10, (i+10)*10, anglesTriHistogram[i+9]) ;
+    // case interval 10
+//    for (unsigned int i=0; i<9; ++i) {
+//        fprintf(f,"%3d - %3d degrees:\t %6d | ", i*10, (i+1)*10,anglesTriHistogram[i]);
+//        fprintf(f,"%3d - %3d degrees:\t %6d\n", (i+9)*10, (i+10)*10, anglesTriHistogram[i+9]) ;
+//    }
+    // case interval 1
+    for (unsigned int i=0; i<90; ++i) {
+        fprintf(f,"%3d - %3d degrees:\t %6d | ", i, (i+1),anglesTriHistogram[i]);
+        fprintf(f,"%3d - %3d degrees:\t %6d\n", (i+90), (i+91), anglesTriHistogram[i+90]) ;
     }
     fprintf(f,"For Quads:\n");
     fprintf(f,"Smallest angle:          %g", minAngleQuad);
     fprintf(f,"   |  Largest angle:           %g", maxAngleQuad);
     fprintf(f,"\nAngle histogram:\n");
-    for (unsigned int i=0; i<9; ++i) {
-        fprintf(f,"%3d - %3d degrees:\t %6d | ", i*10, (i+1)*10,anglesQuadHistogram[i]);
-        fprintf(f,"%3d - %3d degrees:\t %6d\n", (i+9)*10, (i+10)*10, anglesQuadHistogram[i+9]) ;
+    // case interval 10
+//    for (unsigned int i=0; i<9; ++i) {
+//        fprintf(f,"%3d - %3d degrees:\t %6d | ", i*10, (i+1)*10,anglesQuadHistogram[i]);
+//        fprintf(f,"%3d - %3d degrees:\t %6d\n", (i+9)*10, (i+10)*10, anglesQuadHistogram[i+9]) ;
+//    }
+    // case interval 1
+    for (unsigned int i=0; i<90; ++i) {
+        fprintf(f,"%3d - %3d degrees:\t %6d | ", i, (i+1),anglesQuadHistogram[i]);
+        fprintf(f,"%3d - %3d degrees:\t %6d\n", (i+90), (i+91), anglesQuadHistogram[i+90]) ;
     }
 
     // printing data for Gnuplot
     fprintf(f2,"Angle  Triangles  Quadrangles\n");
-    for (unsigned int i=0; i<18; ++i) {
+    for (unsigned int i=0; i<180; ++i) {
 //        fprintf(f2," %d-%d",i*10,(i+1)*10);
-        fprintf(f2," %d %3d %3d\n",i*10,anglesTriHistogram[i],anglesQuadHistogram[i]);
+// case interval 10        fprintf(f2," %d %3d %3d\n",i*10,anglesTriHistogram[i],anglesQuadHistogram[i]);
+        fprintf(f2," %d %3d %3d\n",i,anglesTriHistogram[i],anglesQuadHistogram[i]);
     }
     fprintf(f2," %d %3d %3d\n",180,0,0);
 

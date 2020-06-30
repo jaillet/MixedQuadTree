@@ -1324,7 +1324,7 @@ namespace Clobscode
         vector<vector<unsigned int> > out_els;
         vector<unsigned short > out_els_ref_level, out_els_surf, out_els_deb;
         vector<double > out_els_min_angle, out_els_max_angle;
-        array <unsigned int,18> out_els_angle_tri_histogram = {0},
+        array <unsigned int,180> out_els_angle_tri_histogram = {0},
                 out_els_angle_quad_histogram = {0};
 
         //even if we don't know the quantity of elements, it will be at least the
@@ -1393,9 +1393,9 @@ namespace Clobscode
                         minAngle=std::min(minAngle, angle);
                         maxAngle=std::max(maxAngle, angle);
                         if (np==3)
-                            out_els_angle_tri_histogram[ min(17,((int)( round(angle)/10.)) %18) ]++;
+                            out_els_angle_tri_histogram[ min(179,((int)( round(angle)/*/10.*/)) %180) ]++;
                         else
-                            out_els_angle_quad_histogram[ min(17,((int)(round(angle)/10.)) %18) ]++;
+                            out_els_angle_quad_histogram[ min(179,((int)(round(angle)/*/10.*/)) %180) ]++;
                     }
                     out_els_min_angle.push_back(minAngle);
                     out_els_max_angle.push_back(maxAngle);
