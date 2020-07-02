@@ -266,8 +266,21 @@ namespace Clobscode
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
         
+        //CL Debbuging
+        {
+            //save pure octree mesh
+            std::shared_ptr<FEMesh> pure_octree = make_shared<FEMesh>();
+            saveOutputMesh(pure_octree,points,Quadrants);
+            string tmp_name = name + "_shrink";
+            Services::WriteVTK(tmp_name,pure_octree);
+        }
+        
+        
         //apply the surface Patterns
         applySurfacePatterns(input);
+        
+        
+        
         
         if (rotated) {
             // rotate the mesh
