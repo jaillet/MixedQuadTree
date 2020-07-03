@@ -1379,23 +1379,27 @@ namespace Clobscode
                     
                     //refinment level herited from quad
                     out_els_ref_level.push_back(Quadrants[i].getRefinementLevel());
-                    //compute minAngle and maxAngle
+
+
+                    //compute minAngle and maxAngle (only for elements on the surface)
                     unsigned int np=sub_ele_new_idxs.size(); //nb points of the element
                     double minAngle=std::numeric_limits<double>::max();
                     double maxAngle=std::numeric_limits<double>::min();
-                    for (unsigned int k=0; k<np; ++k) {
-                        
-                        const Point3D &P0 = out_pts[sub_ele_new_idxs[(k-1+np)%np]];
-                        const Point3D &P1 = out_pts[sub_ele_new_idxs[k]];
-                        const Point3D &P2 = out_pts[sub_ele_new_idxs[(k+1)%np]];
-                        
-                        double angle=P1.angle3Points(P0,P2);
-                        minAngle=std::min(minAngle, angle);
-                        maxAngle=std::max(maxAngle, angle);
-                        if (np==3)
-                            out_els_angle_tri_histogram[ min(179,((int)( round(angle)/*/10.*/)) %180) ]++;
-                        else
-                            out_els_angle_quad_histogram[ min(179,((int)(round(angle)/*/10.*/)) %180) ]++;
+                    if (Quadrants[i].isSurface()) {
+                        for (unsigned int k=0; k<np; ++k) {
+
+                            const Point3D &P0 = out_pts[sub_ele_new_idxs[(k-1+np)%np]];
+                            const Point3D &P1 = out_pts[sub_ele_new_idxs[k]];
+                            const Point3D &P2 = out_pts[sub_ele_new_idxs[(k+1)%np]];
+
+                            double angle=P1.angle3Points(P0,P2);
+                            minAngle=std::min(minAngle, angle);
+                            maxAngle=std::max(maxAngle, angle);
+                            if (np==3)
+                                out_els_angle_tri_histogram[ min(179,((int)( round(angle)/*/10.*/)) %180) ]++;
+                            else if (angle<89.5 || angle>91.5)
+                                out_els_angle_quad_histogram[ min(179,((int)(round(angle)/*/10.*/)) %180) ]++;
+                        }
                     }
                     out_els_min_angle.push_back(minAngle);
                     out_els_max_angle.push_back(maxAngle);
