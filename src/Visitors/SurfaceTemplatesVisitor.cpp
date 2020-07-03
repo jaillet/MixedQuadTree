@@ -152,8 +152,7 @@ namespace Clobscode
                         }
                     }
                 }
-                
-                if (nin==2) {
+                else if (nin==2) {
                     for (unsigned int i=0; i<pointindex.size(); i++) {
                         if (!in[i]) {
                             double angle = o->getAngle(i,*meshpts);
