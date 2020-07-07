@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2020>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -76,6 +76,7 @@ void endMsg(){
     cerr << "    -r Refine surface region. Will refine all the elements\n";
     cerr << "       in the provided input_surface at level rl\n";
     cerr << "    -q if supported (only VTK by now), write quality attributes to output file.\n";
+    cerr << "    -t just for testing... Do not use!\n";
     cerr << "    -g save output mesh in GetFem format (gmf) \n";
     cerr << "    -v save output mesh + input in VTK ASCII format (vtk)\n";
     cerr << "    -m save output mesh in M3D ASCII format (m3d)\n";
@@ -119,6 +120,8 @@ int main(int argc,char** argv){
     bool getfem=false, gmshformat=false, vtkformat=false, Quadrant_start=false, m3dfor=false;
     bool mvmfor=false, offfor=false;
     bool decoration=false; //if supported, write quality attributes to output file
+    bool region_ref = false;//to write region refinement in vtk format
+    bool debugging = false;
     
     //for reading an Quadrant mesh as starting point.
     vector<MeshPoint> oct_points;
@@ -389,6 +392,11 @@ int main(int argc,char** argv){
     cout << "  All done in " << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
     cout << " ms"<< endl;
 	
+    // printing Histogram
+    if (decoration) {
+        Services::WriteHistogram(out_name,output);
+    }
+
     list<RefinementRegion *>::iterator rriter;
     for (rriter = all_regions.begin(); rriter!=all_regions.end(); rriter++) {
         delete *rriter;

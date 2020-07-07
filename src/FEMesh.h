@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2020>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -27,6 +27,7 @@
 #define FEMesh_h 1
 
 #include <vector>
+#include <array>
 #include "Point3D.h"
 
 using std::vector;
@@ -65,7 +66,14 @@ namespace Clobscode
 
         virtual const vector <double> &getMinAngles() const;
         virtual void setMinAngles(const vector<double> &ma);
-        
+        virtual const vector <double> &getMaxAngles() const;
+        virtual void setMaxAngles(const vector<double> &ma);
+
+        virtual const array <unsigned int,180> &getAnglesTriHistogram() const;
+        virtual void setAnglesTriHistogram(const array<unsigned int,180> &ah);
+        virtual const array <unsigned int,180> &getAnglesQuadHistogram() const;
+        virtual void setAnglesQuadHistogram(const array<unsigned int,180> &ah);
+
         virtual const vector<unsigned short> &getSurfState() const;
         virtual void setSurfState(const vector<unsigned short> &surf);
         
@@ -77,9 +85,10 @@ namespace Clobscode
 		vector<Point3D> points;
         vector<vector<unsigned int> > elements;
         vector <unsigned short> ref_levels, surf_state, deb_state;
-        vector <double> min_angles;
+        vector <double> min_angles, max_angles;
+        array<unsigned int,180> angles_tri_histogram,  angles_quad_histogram;
         vector<unsigned int> color;
-		list<unsigned int> outpts;
+        list<unsigned int> outpts;
 		
 	};
     
@@ -88,7 +97,14 @@ namespace Clobscode
 
     inline const vector<double> &FEMesh::getMinAngles() const {return min_angles;}
     inline void FEMesh::setMinAngles(const vector<double> &ma) {min_angles=ma;}
-    
+    inline const vector<double> &FEMesh::getMaxAngles() const {return max_angles;}
+    inline void FEMesh::setMaxAngles(const vector<double> &ma) {max_angles=ma;}
+
+    inline const array<unsigned int,180> &FEMesh::getAnglesTriHistogram() const {return angles_tri_histogram;}
+    inline void FEMesh::setAnglesTriHistogram(const array<unsigned int,180> &ah) {angles_tri_histogram=ah;}
+    inline const array<unsigned int,180> &FEMesh::getAnglesQuadHistogram() const {return angles_quad_histogram;}
+    inline void FEMesh::setAnglesQuadHistogram(const array<unsigned int,180> &ah) {angles_quad_histogram=ah;}
+
     inline const vector<unsigned short> &FEMesh::getSurfState() const {return surf_state;}
     inline void FEMesh::setSurfState(const vector<unsigned short> &surf) {surf_state=surf;}
     

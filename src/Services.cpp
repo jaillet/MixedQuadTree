@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
 
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2020>  <Claudio Lobos> All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -764,7 +764,7 @@ bool Services::WriteGMSH(std::string name, const shared_ptr<FEMesh> &output){
     vector<vector<unsigned int> > elements = output->getElements();
 
     if (elements.empty()) {
-        std::cout << "no output elements\n";
+        std::cerr << "no output elements\n";
         return false;
     }
 
@@ -819,7 +819,7 @@ bool Services::WriteVTK(std::string name, const shared_ptr<FEMesh> &output){
     vector<vector<unsigned int> > elements = output->getElements();
 
     if (elements.empty()) {
-        std::cout << "no output elements\n";
+        std::cerr << "no output elements\n";
         return false;
     }
 
@@ -909,22 +909,54 @@ bool Services::WriteVTK(std::string name, const shared_ptr<FEMesh> &output){
     }
     //write minAngles if computed before (-q option, decoration==true)
     const vector <double> &minAngles= output->getMinAngles();
+    double minAngleTri=std::numeric_limits<int>::max();
+    double minAngleQuad=std::numeric_limits<int>::max();
+    double maxAngleTri=std::numeric_limits<int>::min();
+    double maxAngleQuad=std::numeric_limits<int>::min();
     if (minAngles.size()>0) {
         fprintf(f,"\n\nSCALARS minAngle int 1");
         fprintf(f,"\nLOOKUP_TABLE min");
         for (unsigned int i=0; i<minAngles.size(); i++) {
+            int angle;
             if (i%30==0) {fprintf(f,"\n");}
-            if (elements[i].size()==3) //triangle
+            if (elements[i].size()==3) { //triangle
                 fprintf(f," %d", (int) (60.-minAngles[i]));
-            else //quad
+                minAngleTri=min(minAngleTri,minAngles[i]);
+            }
+            else { //quad
                 fprintf(f," %d", (int) (90.-minAngles[i]));
+                minAngleQuad=min(minAngleQuad,minAngles[i]);
+            }
         }
+        cout << "    min Tri and Quad angles "
+        << minAngleTri << " " << minAngleQuad << endl;
     }
-    
+
+    //write maxAngles if computed before (-q option, decoration==true)
+    const vector <double> &maxAngles= output->getMaxAngles();
+    if (maxAngles.size()>0) {
+        fprintf(f,"\n\nSCALARS maxAngle int 1");
+        fprintf(f,"\nLOOKUP_TABLE max");
+        for (unsigned int i=0; i<maxAngles.size(); i++) {
+            int angle;
+            if (i%30==0) {fprintf(f,"\n");}
+            if (elements[i].size()==3) { //triangle
+                fprintf(f," %d", (int) (maxAngles[i]-60.));
+                maxAngleTri=max(maxAngleTri,maxAngles[i]);
+            }
+            else { //quad
+                fprintf(f," %d", (int) (maxAngles[i]-90.));
+                maxAngleQuad=max(maxAngleQuad,maxAngles[i]);
+            }
+        }
+        cout << "    max Tri and Quad angles "
+        << maxAngleTri << " " << maxAngleQuad << endl;
+    }
+
     //write debugging state if computed before (-q option, decoration==true)
     const vector <unsigned short> &debugging= output->getDebugging();
     if (debugging.size()>0) {
-        fprintf(f,"\nSCALARS debugging int 1");
+        fprintf(f,"\n\nSCALARS debugging int 1");
         fprintf(f,"\nLOOKUP_TABLE default");
         for (unsigned int i=0; i<surfele.size(); i++) {
             if (i%30==0) {fprintf(f,"\n");}
@@ -946,7 +978,7 @@ bool Services::WriteOFF(std::string name, const shared_ptr<FEMesh> &output){
     const vector<unsigned int> &colored = output->getColoredCells();
 
     if (elements.empty()) {
-        std::cout << "no output elements\n";
+        std::cerr << "no output elements\n";
         return false;
     }
 
@@ -1166,7 +1198,7 @@ bool Services::WriteMixedVolumeMesh(std::string name, const shared_ptr<FEMesh> &
     const vector<vector<unsigned int> > &elements = output->getElements();
 
     if (elements.empty()) {
-        std::cout << "no output elements\n";
+        std::cerr << "no output elements\n";
         return false;
     }
 
@@ -1216,7 +1248,7 @@ bool Services::WriteOutputMesh(std::string name, const shared_ptr<FEMesh> &outpu
     vector<vector<unsigned int> > elements = output->getElements();
 
     if (elements.empty()) {
-        std::cout << "no output elements\n";
+        std::cerr << "no output elements\n";
         return false;
     }
 
@@ -1276,7 +1308,7 @@ bool Services::WriteMeshGetfem(std::string name, const std::shared_ptr<FEMesh> &
     vector<vector<unsigned int> > elements = output->getElements();
 
     if (elements.empty()) {
-        std::cout << "no output elements\n";
+        std::cerr << "no output elements\n";
         return false;
     }
 
@@ -1335,5 +1367,95 @@ bool Services::WriteMeshGetfem(std::string name, const std::shared_ptr<FEMesh> &
 
     return true;
 }
-}
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+// printing "Triangle like" angle Histogram
+// see https://www.cs.cmu.edu/~quake/triangle.V.html
+bool Services::WriteHistogram(std::string name, const shared_ptr<FEMesh> &output){
+
+    vector<Point3D> points = output->getPoints();
+    vector<vector<unsigned int> > elements = output->getElements();
+
+    if (elements.empty()) {
+        std::cerr << "no output elements\n";
+        return false;
+    }
+
+    string hist_name = name+"_histo.txt";
+    string hist_name2 = name+"_hplot.txt";
+
+    //write the histo data
+    FILE *f = fopen(hist_name.c_str(),"wt");
+    FILE *f2 = fopen(hist_name2.c_str(),"wt");
+
+    // printing "Triangle like" angle Histogram
+    const vector <double> &minAngles= output->getMinAngles();
+    const vector <double> &maxAngles= output->getMaxAngles();
+    const array <unsigned int,180> &anglesTriHistogram= output->getAnglesTriHistogram();
+    const array <unsigned int,180> &anglesQuadHistogram= output->getAnglesQuadHistogram();
+    double minAngleTri=std::numeric_limits<int>::max();
+    double minAngleQuad=std::numeric_limits<int>::max();
+    double maxAngleTri=std::numeric_limits<int>::min();
+    double maxAngleQuad=std::numeric_limits<int>::min();
+
+    // computing min and max angles
+    for (unsigned int i=0; i<minAngles.size(); i++) {
+        int angle;
+        if (elements[i].size()==3) { //triangle
+            minAngleTri=min(minAngleTri,minAngles[i]);
+            maxAngleTri=max(maxAngleTri,maxAngles[i]);
+        }
+        else { //quad
+            minAngleQuad=min(minAngleQuad,minAngles[i]);
+            maxAngleQuad=max(maxAngleQuad,maxAngles[i]);
+        }
+    }
+
+    // printing "Triangle like" angle Histogram
+    fprintf(f,"For Triangles:\n");
+    fprintf(f,"Smallest angle:          %g", minAngleTri);
+    fprintf(f,"   |  Largest angle:           %g", maxAngleTri);
+    fprintf(f,"\nAngle histogram:\n");
+
+    // case interval 10
+//    for (unsigned int i=0; i<9; ++i) {
+//        fprintf(f,"%3d - %3d degrees:\t %6d | ", i*10, (i+1)*10,anglesTriHistogram[i]);
+//        fprintf(f,"%3d - %3d degrees:\t %6d\n", (i+9)*10, (i+10)*10, anglesTriHistogram[i+9]) ;
+//    }
+    // case interval 1
+    for (unsigned int i=0; i<90; ++i) {
+        fprintf(f,"%3d - %3d degrees:\t %6d | ", i, (i+1),anglesTriHistogram[i]);
+        fprintf(f,"%3d - %3d degrees:\t %6d\n", (i+90), (i+91), anglesTriHistogram[i+90]) ;
+    }
+    fprintf(f,"For Quads:\n");
+    fprintf(f,"Smallest angle:          %g", minAngleQuad);
+    fprintf(f,"   |  Largest angle:           %g", maxAngleQuad);
+    fprintf(f,"\nAngle histogram:\n");
+    // case interval 10
+//    for (unsigned int i=0; i<9; ++i) {
+//        fprintf(f,"%3d - %3d degrees:\t %6d | ", i*10, (i+1)*10,anglesQuadHistogram[i]);
+//        fprintf(f,"%3d - %3d degrees:\t %6d\n", (i+9)*10, (i+10)*10, anglesQuadHistogram[i+9]) ;
+//    }
+    // case interval 1
+    for (unsigned int i=0; i<90; ++i) {
+        fprintf(f,"%3d - %3d degrees:\t %6d | ", i, (i+1),anglesQuadHistogram[i]);
+        fprintf(f,"%3d - %3d degrees:\t %6d\n", (i+90), (i+91), anglesQuadHistogram[i+90]) ;
+    }
+
+    // printing data for Gnuplot
+    fprintf(f2,"Angle  Triangles  Quadrangles\n");
+    for (unsigned int i=0; i<180; ++i) {
+//        fprintf(f2," %d-%d",i*10,(i+1)*10);
+// case interval 10        fprintf(f2," %d %3d %3d\n",i*10,anglesTriHistogram[i],anglesQuadHistogram[i]);
+        fprintf(f2," %d %3d %3d\n",i,anglesTriHistogram[i],anglesQuadHistogram[i]);
+    }
+    fprintf(f2," %d %3d %3d\n",180,0,0);
+
+    // closing
+    fclose(f);
+    fclose(f2);
+
+    return true;
+}
+}

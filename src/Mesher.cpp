@@ -1,7 +1,7 @@
 /*
  <Mix-mesher: region type. This program generates a mixed-elements 2D mesh>
  
- Copyright (C) <2013,2018>  <Claudio Lobos> All rights reserved.
+ Copyright (C) <2013,2020>  <Claudio Lobos> All rights reserved.
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -25,6 +25,7 @@
 
 #include "Mesher.h"
 #include <math.h>
+#include <iomanip>
 
 namespace Clobscode
 {
@@ -59,7 +60,7 @@ namespace Clobscode
             gt.rotatePolyline(input);
         }
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> grid_octree=make_shared<FEMesh>();
@@ -67,7 +68,8 @@ namespace Clobscode
             string tmp_name = name + "_grid";
             Services::WriteVTK(tmp_name,grid_octree);
         }
-        
+#endif
+
         //split Quadrants until the refinement level (rl) is achieved.
         //The output will be a one-irregular mesh.
         splitQuadrants(rl,input,roctli,all_reg,name,minrl,omaxrl);
@@ -84,7 +86,7 @@ namespace Clobscode
         Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
         
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
@@ -92,10 +94,11 @@ namespace Clobscode
             string tmp_name = name + "_quads";
             Services::WriteVTK(tmp_name,pure_octree);
         }
-        
+#endif
+
         projectCloseToBoundaryNodes(input);
-        
-        //CL Debbuging
+
+#if (VTKOUT==true) //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> closeto_octree=make_shared<FEMesh>();
@@ -103,13 +106,14 @@ namespace Clobscode
             string tmp_name = name + "_closeto";
             Services::WriteVTK(tmp_name,closeto_octree);
         }
+#endif
         
         removeOnSurfaceSafe(input);
         
         //update element and node info.
         linkElementsToNodes();
         
-        //CL Debbuging
+#if (VTKOUT==true)        //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
@@ -117,11 +121,12 @@ namespace Clobscode
             string tmp_name = name + "_remSur";
             Services::WriteVTK(tmp_name,pure_octree);
         }
-        
+#endif
+
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
         
-        //CL Debbuging
+#if (VTKOUT==true)        //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> shrink_octree=make_shared<FEMesh>();
@@ -129,7 +134,8 @@ namespace Clobscode
             string tmp_name = name + "_shrink";
             Services::WriteVTK(tmp_name,shrink_octree);
         }
-        
+#endif
+
         //apply the surface Patterns
         applySurfacePatterns(input);
         //removeOnSurface(input);
@@ -176,7 +182,7 @@ namespace Clobscode
         //generate root Quadrants
         generateGridMesh(input);
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> grid_octree=make_shared<FEMesh>();
@@ -184,11 +190,18 @@ namespace Clobscode
             string tmp_name = name + "_grid";
             Services::WriteVTK(tmp_name,grid_octree);
         }
+#endif
         
         //split Quadrants until the refinement level (rl) is achieved.
         //The output will be a one-irregular mesh.
         generateQuadtreeMesh(rl,input,all_reg,name);
-        
+
+        //Now that we have all the elements, we can save the Quadrant mesh.
+        //Note (FJa): was after computeNodeMax(), but preferably placed here
+        //to avoid later alterations of the elements!
+        unsigned int nels = Quadrants.size();
+        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
+
         //link element and node info for code optimization, also
         //detect Quadrants with features.
         detectFeatureQuadrants(input);
@@ -196,55 +209,59 @@ namespace Clobscode
         detectInsideNodes(input);
         computeNodeMaxDist();
         
-        //Now that we have all the elements, we can save the Quadrant mesh.
-        unsigned int nels = Quadrants.size();
-        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
+//        //Now that we have all the elements, we can save the Quadrant mesh.
+//        unsigned int nels = Quadrants.size();
+//        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
-            std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
+            std::shared_ptr<FEMesh> pure_octree = make_shared<FEMesh>();
             saveOutputMesh(pure_octree,points,Quadrants);
             string tmp_name = name + "_quads";
             Services::WriteVTK(tmp_name,pure_octree);
         }
-        
+#endif
+
         projectCloseToBoundaryNodes(input);
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
-            std::shared_ptr<FEMesh> closeto_octree=make_shared<FEMesh>();
+            std::shared_ptr<FEMesh> closeto_octree = make_shared<FEMesh>();
             saveOutputMesh(closeto_octree,points,Quadrants);
             string tmp_name = name + "_closeto";
             Services::WriteVTK(tmp_name,closeto_octree);
         }
-        
+#endif
+
         removeOnSurfaceSafe(input);
         
         //update element and node info.
         linkElementsToNodes();
         
-        //CL Debbuging
+#if (VTKOUT==true)        //CL Debbuging
         {
             //save pure octree mesh
-            std::shared_ptr<FEMesh> pure_octree=make_shared<FEMesh>();
+            std::shared_ptr<FEMesh> pure_octree = make_shared<FEMesh>();
             saveOutputMesh(pure_octree,points,Quadrants);
             string tmp_name = name + "_remSur";
             Services::WriteVTK(tmp_name,pure_octree);
         }
-        
+#endif
+
         //shrink outside nodes to the input domain boundary
         shrinkToBoundary(input);
         
-        //CL Debbuging
+#if (VTKOUT==true)        //CL Debbuging
         {
             //save pure octree mesh
-            std::shared_ptr<FEMesh> shrink_octree=make_shared<FEMesh>();
+            std::shared_ptr<FEMesh> shrink_octree = make_shared<FEMesh>();
             saveOutputMesh(shrink_octree,points,Quadrants);
             string tmp_name = name + "_shrink";
             Services::WriteVTK(tmp_name,shrink_octree);
         }
+#endif
         
         //update element and node info.
         //linkElementsToNodes();
@@ -622,7 +639,7 @@ namespace Clobscode
             cout << " ms"<< endl;
         }
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> refined_octree=make_shared<FEMesh>();
@@ -630,7 +647,8 @@ namespace Clobscode
             string tmp_name = name + "_refined";
             Services::WriteVTK(tmp_name,refined_octree);
         }
-        
+#endif
+
         auto end_refine_quad_time = chrono::high_resolution_clock::now();
         cout << "       * Refine Quad in "
         << std::chrono::duration_cast<chrono::milliseconds>(end_refine_quad_time-start_refine_quad_time).count();
@@ -724,7 +742,7 @@ namespace Clobscode
             points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> balanced_octree=make_shared<FEMesh>();
@@ -732,7 +750,8 @@ namespace Clobscode
             string tmp_name = name + "_balanced";
             Services::WriteVTK(tmp_name,balanced_octree);
         }
-        
+#endif
+
         auto end_balanced_time = chrono::high_resolution_clock::now();
         cout << "       * Balanced mesh in "
         << std::chrono::duration_cast<chrono::milliseconds>(end_balanced_time-end_refine_quad_time).count();
@@ -757,7 +776,7 @@ namespace Clobscode
             }
         }
         
-        //CL Debbuging
+#if (VTKOUT==true)            //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> transition_octree=make_shared<FEMesh>();
@@ -765,6 +784,7 @@ namespace Clobscode
             string tmp_name = name + "_transition";
             Services::WriteVTK(tmp_name,transition_octree);
         }
+#endif
         
         //Debbuging
         /*{
@@ -922,7 +942,7 @@ namespace Clobscode
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
             if (new_pts.empty()) {
-                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                cerr << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
                 break;
             }
             //add the new points to the vector
@@ -933,7 +953,7 @@ namespace Clobscode
             ++i;
         } while (!new_pts.empty());
         
-        //CL Debbuging
+        #if (VTKOUT==true) //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> bound_octree=make_shared<FEMesh>();
@@ -941,7 +961,8 @@ namespace Clobscode
             string tmp_name = name + "_bound";
             Services::WriteVTK(tmp_name,bound_octree);
         }
-        
+         #endif */
+       
         unsigned short max_rl=i;
         
         auto end_refine_rl_time = chrono::high_resolution_clock::now();
@@ -1067,7 +1088,7 @@ namespace Clobscode
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
             if (new_pts.empty()) {
-                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                cerr << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
                 break;
             }
             
@@ -1081,7 +1102,7 @@ namespace Clobscode
             cout << " ms"<< endl;
         }
         
-        //CL Debbuging
+#if (VTKOUT==true)        //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> refined_octree=make_shared<FEMesh>();
@@ -1089,7 +1110,8 @@ namespace Clobscode
             string tmp_name = name + "_refined";
             Services::WriteVTK(tmp_name,refined_octree);
         }
-        
+#endif
+
         auto end_refine_quad_time = chrono::high_resolution_clock::now();
         cout << "       * Refine Quad in "
         << std::chrono::duration_cast<chrono::milliseconds>(end_refine_quad_time-start_refine_quad_time).count();
@@ -1191,7 +1213,7 @@ namespace Clobscode
             points.insert(points.end(),new_pts.begin(),new_pts.end());
         }
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> balanced_octree=make_shared<FEMesh>();
@@ -1199,7 +1221,8 @@ namespace Clobscode
             string tmp_name = name + "_balanced";
             Services::WriteVTK(tmp_name,balanced_octree);
         }
-        
+#endif
+
         auto end_balanced_time = chrono::high_resolution_clock::now();
         cout << "       * Balanced mesh in "
         << std::chrono::duration_cast<chrono::milliseconds>(end_balanced_time-end_refine_quad_time).count();
@@ -1224,7 +1247,7 @@ namespace Clobscode
             }
         }
         
-        //CL Debbuging
+#if (VTKOUT==true)         //CL Debbuging
         {
             //save pure octree mesh
             std::shared_ptr<FEMesh> transition_octree=make_shared<FEMesh>();
@@ -1232,7 +1255,8 @@ namespace Clobscode
             string tmp_name = name + "_transition";
             Services::WriteVTK(tmp_name,transition_octree);
         }
-        
+#endif
+
         //Debbuging
         /*{
          //save pure octree mesh
@@ -1293,11 +1317,14 @@ namespace Clobscode
         
         vector<vector<unsigned int> > out_els;
         vector<unsigned short > out_els_ref_level, out_els_surf, out_els_deb;
-        vector<double > out_els_min_angle;
-        
+        vector<double > out_els_min_angle, out_els_max_angle;
+        array <unsigned int,180> out_els_angle_tri_histogram = {0},
+                out_els_angle_quad_histogram = {0};
+
         //even if we don't know the quantity of elements, it will be at least the
         //number of quadrants, so we reserve for the vectors of VTK decoration.
         out_els_min_angle.reserve(Quadrants.size());
+        out_els_max_angle.reserve(Quadrants.size());
         out_els_ref_level.reserve(Quadrants.size());
         out_els_surf.reserve(Quadrants.size());
         
@@ -1356,7 +1383,7 @@ namespace Clobscode
                     }
                 }
                 if (decoration) {
-                    //surface regardring quad
+                    //surface regarding quad
                     if (Quadrants[i].isSurface()) {
                         out_els_surf.push_back(1);
                     }
@@ -1373,18 +1400,30 @@ namespace Clobscode
                     
                     //refinment level herited from quad
                     out_els_ref_level.push_back(Quadrants[i].getRefinementLevel());
-                    //compute minAngle
+
+
+                    //compute minAngle and maxAngle (only for elements on the surface)
                     unsigned int np=sub_ele_new_idxs.size(); //nb points of the element
-                    double minAngle=std::numeric_limits<double>::infinity();
-                    for (unsigned int k=0; k<np; ++k) {
-                        
-                        const Point3D &P0 = out_pts[sub_ele_new_idxs[(k-1+np)%np]];
-                        const Point3D &P1 = out_pts[sub_ele_new_idxs[k]];
-                        const Point3D &P2 = out_pts[sub_ele_new_idxs[(k+1)%np]];
-                        
-                        minAngle=std::min(minAngle, P1.angle3Points(P0,P2));
+                    double minAngle=std::numeric_limits<double>::max();
+                    double maxAngle=std::numeric_limits<double>::min();
+                    if (Quadrants[i].isSurface()) {
+                        for (unsigned int k=0; k<np; ++k) {
+
+                            const Point3D &P0 = out_pts[sub_ele_new_idxs[(k-1+np)%np]];
+                            const Point3D &P1 = out_pts[sub_ele_new_idxs[k]];
+                            const Point3D &P2 = out_pts[sub_ele_new_idxs[(k+1)%np]];
+
+                            double angle=P1.angle3Points(P0,P2);
+                            minAngle=std::min(minAngle, angle);
+                            maxAngle=std::max(maxAngle, angle);
+                            if (np==3)
+                                out_els_angle_tri_histogram[ min(179,((int)( round(angle)/*/10.*/)) %180) ]++;
+                            else if (angle<89.5 || angle>91.5)
+                                out_els_angle_quad_histogram[ min(179,((int)(round(angle)/*/10.*/)) %180) ]++;
+                        }
                     }
                     out_els_min_angle.push_back(minAngle);
+                    out_els_max_angle.push_back(maxAngle);
                 }
                 out_els.push_back(sub_ele_new_idxs);
             }
@@ -1394,6 +1433,9 @@ namespace Clobscode
         mesh->setElements(out_els);
         mesh->setRefLevels(out_els_ref_level);
         mesh->setMinAngles(out_els_min_angle);
+        mesh->setMaxAngles(out_els_max_angle);
+        mesh->setAnglesTriHistogram(out_els_angle_tri_histogram);
+        mesh->setAnglesQuadHistogram(out_els_angle_quad_histogram);
         mesh->setSurfState(out_els_surf);
         mesh->setDebugging(out_els_deb);
         
@@ -1937,13 +1979,13 @@ namespace Clobscode
             p_qInterEdges.unique();
             
             if (p_qInterEdges.empty()) {
-                cout << "\nWarning at Mesher::shrinkToBoundary";
-                cout << " no faces to project an outside node\n";
-                cout << p << " n_els " << points.at(p).getElements().size() << ":";
+                cerr << "\nWarning at Mesher::shrinkToBoundary";
+                cerr << " no faces to project an outside node\n";
+                cerr << p << " n_els " << points.at(p).getElements().size() << ":";
                 for (auto pe:points.at(p).getElements()) {
-                    cout << " " << pe;
+                    cerr << " " << pe;
                 }
-                cout << "\n";
+                cerr << "\n";
                 continue;
             }
             
