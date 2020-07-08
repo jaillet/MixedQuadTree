@@ -74,6 +74,12 @@ namespace Clobscode
         //The output will be a one-irregular mesh.
         splitQuadrants(rl,input,roctli,all_reg,name,minrl,omaxrl);
         
+        //Now that we have all the elements, we can save the Quadrant mesh.
+        //Note (FJa): was after computeNodeMax(), but preferably placed here
+        //to avoid later alterations of the elements!
+        unsigned int nels = Quadrants.size();
+        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
+
         //link element and node info for code optimization, also
         //detect Quadrants with features.
         detectFeatureQuadrants(input);
@@ -81,9 +87,9 @@ namespace Clobscode
         detectInsideNodes(input);
         computeNodeMaxDist();
         
-        //Now that we have all the elements, we can save the Quadrant mesh.
-        unsigned int nels = Quadrants.size();
-        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
+//        //Now that we have all the elements, we can save the Quadrant mesh.
+//        unsigned int nels = Quadrants.size();
+//        Services::WriteQuadtreeMesh(name,points,Quadrants,QuadEdges,nels,gt);        //Debbuging
         
         
 #if (VTKOUT==true)         //CL Debbuging
