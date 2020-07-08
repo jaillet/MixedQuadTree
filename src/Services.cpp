@@ -123,7 +123,9 @@ bool Services::readSurfaceRefinementRegion(string name,
     vector<Polyline> tmp;
     tmp.reserve(1);
     if (!ReadMdlMesh(name,tmp)) {
-        return false;
+        if (!ReadPolyFile(name,tmp)) {
+            return false;
+        }
     }
     RefinementRegion *rr = new RefinementSurfaceRegion(tmp[0],rrl);
     regions.push_back(rr);
