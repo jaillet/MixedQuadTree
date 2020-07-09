@@ -1805,6 +1805,10 @@ namespace Clobscode
         }
         
         if (removed.empty()) {
+            auto end_time = chrono::high_resolution_clock::now();
+            cout << "    * RemoveOnSurfaceSafe in "
+            << std::chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count();
+            cout << " ms"<< endl;
             return;
         }
         
