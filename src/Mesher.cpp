@@ -1196,7 +1196,11 @@ namespace Clobscode
             //if no points were added at this iteration, it is no longer
             //necessary to continue the refinement.
             if (new_pts.empty()) {
-                cout << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                cerr << "warning at Mesher::generateQuadtreeMesh no new points!!!\n";
+                auto end_balanced_time = chrono::high_resolution_clock::now();
+                cout << " - Balanced in "
+                << std::chrono::duration_cast<chrono::milliseconds>(end_balanced_time-end_refine_rl_time).count();
+                cout << " ms"<< endl;
                 break;
             }
             
