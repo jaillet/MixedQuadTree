@@ -1,1 +1,4 @@
 Mix-mesher: region type. This program generates a mixed-elements 2D mesh
+
+This branch is the result of a pull-request from forked project, that contains more branches with different versions and results:
+https://github.com/OlAntoine/MixedQuadTree
