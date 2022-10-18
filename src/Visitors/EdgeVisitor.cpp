@@ -74,7 +74,7 @@ namespace Clobscode
         auto e3 = MapEdges.find(QuadEdge (qpts[2], qpts[3]));
         e3->second[2] = std::numeric_limits<unsigned int>::max();
         auto e4 = MapEdges.find(QuadEdge (qpts[3], qpts[0]));
-        e4->second[1] = std::numeric_limits<unsigned int>::max();
+        e4->second[2] = std::numeric_limits<unsigned int>::max();
     }
     
     void EdgeVisitor::getEdge(const Quadrant *q, unsigned int idx, QuadEdge &e) {
