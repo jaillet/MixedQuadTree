@@ -1,3 +1,6 @@
 Mix-mesher: region type. This program generates a mixed-elements 2D mesh
 
 This work has been partially supported by the ECOS-C16E05 project.
+
+To cite this work:
+Fabrice Jaillet & Claudio Lobos (2021). « Fast Quadtree/Octree adaptive meshing and re-meshing with linear mixed elements ». Engineering with Computers. doi : 10.1007/s00366-021-01330-w. HAL : hal-03161623.
