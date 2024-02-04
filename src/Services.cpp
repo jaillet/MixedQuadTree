@@ -188,6 +188,10 @@ bool Services::ReadOffMesh(string name,
 
     //read number of points
     fscanf(file,"%i",&np);
+    while (np==0) { // skipping # COMMENT lines
+        fscanf(file, "%*[^\n]");
+        fscanf(file,"%u",&np);
+    }
     //read number of faces
     fscanf(file,"%i",&nf);
 
@@ -346,7 +350,7 @@ bool Services::ReadMdlMesh(std::string name,
 bool Services::ReadPolyFile(std::string name,
                             vector<Clobscode::Polyline> &clobs_inputs){
 
-    char word [256];
+    char word [2001];
     int cant;
     int shift=-1; //trick for determining shift from first point indice (0 or 1)
     double x,y,z;
