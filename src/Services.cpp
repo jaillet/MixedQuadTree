@@ -714,7 +714,7 @@ bool Services::WriteQuadtreeMesh(std::string name, const vector<MeshPoint> &poin
     fprintf(f,"\n");
 
     //write edges
-    for (const auto qe: edges) {
+    for (const auto &qe: edges) {
         //index of both nodes defining the edge, as well as its mid-node
         fprintf(f,"%u %u %u\n",qe.first[0],qe.first[1],(qe.second)[0]);
         //the two quad neighbor index must be recomputed at reading procees,
