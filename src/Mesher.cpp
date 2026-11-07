@@ -1420,7 +1420,9 @@ namespace Clobscode
         mesh->setAnglesTriHistogram(out_els_angle_tri_histogram);
         mesh->setAnglesQuadHistogram(out_els_angle_quad_histogram);
         mesh->setSurfState(out_els_surf);
-        mesh->setDebugging(out_els_deb);
+        // if not all zeros
+        if (! std::all_of(out_els_deb.cbegin(), out_els_deb.cend(), [](short int x) { return x == 0; }))
+            mesh->setDebugging(out_els_deb);
         
         auto end_time = chrono::high_resolution_clock::now();
         cout << "    * SaveOutputMesh in "

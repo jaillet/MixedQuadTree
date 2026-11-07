@@ -122,7 +122,7 @@ namespace Clobscode
         
         
         /***** BEGIN Debugging methods *******/
-        virtual void setDebugging();
+        virtual void setDebugging(bool db);
         
         virtual bool isDebugging() const;
         
@@ -155,8 +155,8 @@ namespace Clobscode
 	};
 	
     /***** BEGIN Debugging methods *******/
-    inline void Quadrant::setDebugging() {
-        debugging = true;
+    inline void Quadrant::setDebugging(bool db) {
+        debugging = db;
     }
     
     inline bool Quadrant::isDebugging() const {
