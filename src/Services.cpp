@@ -951,11 +951,11 @@ bool Services::WriteVTK(std::string name, const shared_ptr<FEMesh> &output){
     }
 
     fprintf(f,"\nCELL_DATA %i\n",(int)elements.size());
-    fprintf(f,"SCALARS elemType int 1\n");
+    fprintf(f,"SCALARS elemType float 1\n");
     fprintf(f,"LOOKUP_TABLE my_color");
     for (unsigned int i=0; i<elements.size(); i++) {
         if (i%30==0) {fprintf(f,"\n");}
-        fprintf(f," %lu",elements[i].size()-3);
+        fprintf(f," %lu",elements[i].size()-3); // in the [0,1] interval
     }
     fprintf(f,"\nLOOKUP_TABLE my_color 2\n");
     fprintf(f,"1.0 0.0 1.0 1.0\n");
