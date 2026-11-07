@@ -991,7 +991,7 @@ bool Services::WriteVTK(std::string name, const shared_ptr<FEMesh> &output){
     double maxAngleQuad=std::numeric_limits<int>::min();
     if (minAngles.size()>0) {
         fprintf(f,"\n\nSCALARS minAngle int 1");
-        fprintf(f,"\nLOOKUP_TABLE min");
+        fprintf(f,"\nLOOKUP_TABLE angles");
         for (unsigned int i=0; i<minAngles.size(); i++) {
             int angle;
             if (i%30==0) {fprintf(f,"\n");}
@@ -1012,7 +1012,7 @@ bool Services::WriteVTK(std::string name, const shared_ptr<FEMesh> &output){
     const vector <double> &maxAngles= output->getMaxAngles();
     if (maxAngles.size()>0) {
         fprintf(f,"\n\nSCALARS maxAngle int 1");
-        fprintf(f,"\nLOOKUP_TABLE max");
+        fprintf(f,"\nLOOKUP_TABLE angles");
         for (unsigned int i=0; i<maxAngles.size(); i++) {
             int angle;
             if (i%30==0) {fprintf(f,"\n");}

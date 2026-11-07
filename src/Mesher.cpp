@@ -1387,8 +1387,8 @@ namespace Clobscode
 
                     //compute minAngle and maxAngle (only for elements on the surface)
                     unsigned int np=sub_ele_new_idxs.size(); //nb points of the element
-                    double minAngle=std::numeric_limits<double>::max();
-                    double maxAngle=std::numeric_limits<double>::min();
+                    double minAngle=180; //std::numeric_limits<double>::max();
+                    double maxAngle=0; //std::numeric_limits<double>::min();
                     if (Quadrants[i].isSurface()) {
                         for (unsigned int k=0; k<np; ++k) {
 
