@@ -121,7 +121,7 @@ namespace Clobscode
         virtual void rotateTranslate(const Point3D &t, double xangle,
                                      double yangle, double zangle);
 
-        virtual double angle3Points(const Point3D &P0, const Point3D &P2) const;
+        virtual double angle3Points(const Point3D &prev, const Point3D &next) const;
 		
         virtual string print() const;
         friend std::ostream& operator<<(std::ostream& o,const Point3D &p);
