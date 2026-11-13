@@ -32,6 +32,7 @@
 #include "RefinementRegion.h"
 #include "Polyline.h"
 #include "Quadrant.h"
+#include "PolyEdge.h"
 
 using Clobscode::Point3D;
 using std::vector;

@@ -76,10 +76,10 @@ namespace PolyMesh
 		
         virtual Point3D getSemiNormalizedNormal() const;
 		
-		virtual unsigned int &operator[](unsigned int pos);
-		
-		virtual unsigned int operator[](unsigned int pos) const;
-		
+        virtual unsigned int &operator[](unsigned int pos);
+
+        virtual unsigned int operator[](unsigned int pos) const;
+
         //FJA transform triangle/edge intersection into what?
         virtual bool segmentIntersection(const vector<Clobscode::Point3D> &pts,
                                          const Point3D &ep1,
@@ -122,6 +122,16 @@ namespace PolyMesh
         std::cerr << "warning at PolyEdge::getSemiNormalizedNormal(), returns Normal divided by 10000.!\n";
         Point3D normal = mEdgeNormal/10000.;
 		return normal;
+    }
+
+    inline unsigned int &PolyEdge::operator[](unsigned int pos){
+        //return inodes.at(pos);
+        return inodes[pos];
+    }
+
+    inline unsigned int PolyEdge::operator[](unsigned int pos) const{
+        //return inodes.at(pos);
+        return inodes[pos];
     }
 
     inline unsigned int PolyEdge::getKey() const{

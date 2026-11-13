@@ -51,21 +51,6 @@ namespace PolyMesh
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
-    inline unsigned int &PolyEdge::operator[](unsigned int pos){
-        //return inodes.at(pos);
-        return inodes[pos];
-    }
-
-    //--------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------
-    inline unsigned int PolyEdge::operator[](unsigned int pos) const{
-        //return inodes.at(pos);
-        return inodes[pos];
-    }
-
-    //--------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------
-
     bool PolyEdge::segmentIntersection(const vector<Point3D> &pts,
                                            const Point3D &ep1,
                                            const Point3D &ep2) const{
